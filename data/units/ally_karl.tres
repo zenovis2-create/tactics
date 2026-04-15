@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/classes/cls_knight.tres" id="3_class"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"ally_karl"
+display_name = "Karl"
+faction = "ally"
+max_hp = 15
+attack = 5
+defense = 3
+movement = 4
+attack_range = 1
+default_skill = ExtResource("2_skill")
+class_data = ExtResource("3_class")
+weapon_types_allowed = PackedStringArray("Sword", "Lance")
+armor_types_allowed = PackedStringArray("heavy")

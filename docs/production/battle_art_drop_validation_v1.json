@@ -1,0 +1,297 @@
+{
+  "root": "/Volumes/AI/tactics",
+  "groups": [
+    {
+      "group": "button_icons",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/button_icons",
+      "expected_size": [
+        32,
+        32
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "bag.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "back.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "wait.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "enemy.png"
+        }
+      ]
+    },
+    {
+      "group": "object_icons",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/object_icons",
+      "expected_size": [
+        40,
+        40
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "chest.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "lever.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "altar.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "gate.png"
+        }
+      ]
+    },
+    {
+      "group": "unit_role_icons",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/unit_role_icons",
+      "expected_size": [
+        28,
+        28
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "knight.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "ranger.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "mystic.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "vanguard.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "medic.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "boss.png"
+        }
+      ]
+    },
+    {
+      "group": "unit_token_art",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/unit_token_art",
+      "expected_size": [
+        48,
+        48
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "knight.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "ranger.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "mystic.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "vanguard.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "medic.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "boss.png"
+        }
+      ]
+    },
+    {
+      "group": "tile_icons",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/tile_icons",
+      "expected_size": [
+        24,
+        24
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "forest.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "wall.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "bridge.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "highground.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "battery.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "cathedral.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "bell.png"
+        }
+      ]
+    },
+    {
+      "group": "tile_cards",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/tile_cards",
+      "expected_size": [
+        48,
+        48
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "plain.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "forest.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "wall.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "bridge.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "highground.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "battery.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "bell.png"
+        }
+      ]
+    },
+    {
+      "group": "fx",
+      "dir": "/Volumes/AI/tactics/assets/ui/production/fx",
+      "expected_size": [
+        64,
+        64
+      ],
+      "files": [
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "hit_spark.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "mark_ring.png"
+        },
+        {
+          "exists": false,
+          "size_ok": false,
+          "actual_size": null,
+          "file": "objective_burst.png"
+        }
+      ]
+    }
+  ]
+}

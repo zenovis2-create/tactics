@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09b_02_east_revision_shelf"
+display_name = "East Revision Shelf"
+object_type = "altar"
+grid_position = Vector2i(6, 3)
+interaction_range = 1
+reward_text = "East revision shelf seized: the revised filing path no longer hides its edits."
+interaction_text = "East revision shelf seized."

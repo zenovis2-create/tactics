@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AccessoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/accessory_data.gd" id="1_accessory"]
+
+[resource]
+script = ExtResource("1_accessory")
+accessory_id = &"acc_nameless_watch_badge"
+display_name = "Nameless Watch Badge"
+summary = "Oath-hall accessory. Holds the line when procedure starts erasing people."
+defense_bonus = 1

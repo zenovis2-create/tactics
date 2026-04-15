@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"ally_scout"
+display_name = "Scout"
+faction = "ally"
+max_hp = 11
+attack = 4
+defense = 2
+movement = 4
+attack_range = 1
+default_skill = ExtResource("2_skill")

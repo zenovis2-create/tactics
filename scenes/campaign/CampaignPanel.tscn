@@ -1,0 +1,492 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/campaign/campaign_panel.gd" id="1_panel"]
+
+[node name="CampaignPanel" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_panel")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -240.0
+offset_right = 340.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="VBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ModeLabel" type="Label" parent="Panel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+autowrap_mode = 2
+
+[node name="AlertLabel" type="Label" parent="Panel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+
+[node name="FlowLabel" type="Label" parent="Panel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "Battle cleared -> Camp review -> Next sortie"
+
+[node name="RecommendationCard" type="PanelContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="Padding" type="MarginContainer" parent="Panel/Margin/Content/RecommendationCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="RecommendationStack" type="VBoxContainer" parent="Panel/Margin/Content/RecommendationCard/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RecommendationEyebrow" type="Label" parent="Panel/Margin/Content/RecommendationCard/Padding/RecommendationStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Next Step"
+
+[node name="RecommendationLabel" type="Label" parent="Panel/Margin/Content/RecommendationCard/Padding/RecommendationStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="OverviewStrip" type="HBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PartyOverviewCard" type="PanelContainer" parent="Panel/Margin/Content/OverviewStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Panel/Margin/Content/OverviewStrip/PartyOverviewCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/OverviewStrip/PartyOverviewCard/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Heading" type="Label" parent="Panel/Margin/Content/OverviewStrip/PartyOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Party"
+
+[node name="Value" type="Label" parent="Panel/Margin/Content/OverviewStrip/PartyOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "0 ready"
+
+[node name="InventoryOverviewCard" type="PanelContainer" parent="Panel/Margin/Content/OverviewStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Panel/Margin/Content/OverviewStrip/InventoryOverviewCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/OverviewStrip/InventoryOverviewCard/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Heading" type="Label" parent="Panel/Margin/Content/OverviewStrip/InventoryOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Loot"
+
+[node name="Value" type="Label" parent="Panel/Margin/Content/OverviewStrip/InventoryOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "0 updates"
+
+[node name="RecordsOverviewCard" type="PanelContainer" parent="Panel/Margin/Content/OverviewStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Panel/Margin/Content/OverviewStrip/RecordsOverviewCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/OverviewStrip/RecordsOverviewCard/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Heading" type="Label" parent="Panel/Margin/Content/OverviewStrip/RecordsOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Records"
+
+[node name="Value" type="Label" parent="Panel/Margin/Content/OverviewStrip/RecordsOverviewCard/Padding/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "0 new"
+
+[node name="SectionTabs" type="GridContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+columns = 4
+theme_override_constants/separation = 10
+
+[node name="SummaryButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Summary"
+
+[node name="PartyButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Party"
+
+[node name="InventoryButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inventory"
+
+[node name="RecordsButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Records"
+
+[node name="SectionHintLabel" type="Label" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "Review the latest changes first, then open details only if needed."
+
+[node name="BodyStack" type="VBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SummarySection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+layout_mode = 2
+
+[node name="BodyLabel" type="Label" parent="Panel/Margin/Content/BodyStack/SummarySection"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="PresentationHeading" type="Label" parent="Panel/Margin/Content/BodyStack/SummarySection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Handoff"
+
+[node name="PresentationCards" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/SummarySection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DialogueList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/SummarySection"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="PartySection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PartyHeading" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Party / Loadout"
+
+[node name="PartyContent" type="BoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="RosterColumn" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="RosterHeading" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Roster"
+
+[node name="RosterScroll" type="ScrollContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RosterButtons" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/RosterScroll"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="DetailCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="DetailStack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectedUnitLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "No party member selected."
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="StatsLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="SlotCards" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="WeaponCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Preview" type="TextureRect" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+stretch_mode = 5
+expand_mode = 1
+
+[node name="HeadingLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Weapon Slot"
+
+[node name="ItemLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+autowrap_mode = 2
+text = "No weapon equipped."
+
+[node name="HintLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "No alternate weapons unlocked."
+
+[node name="WeaponButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Cycle Weapon"
+
+[node name="ArmorCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Preview" type="TextureRect" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+stretch_mode = 5
+expand_mode = 1
+
+[node name="HeadingLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Armor Slot"
+
+[node name="ItemLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+autowrap_mode = 2
+text = "No armor equipped."
+
+[node name="HintLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "No alternate armor unlocked."
+
+[node name="ArmorButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Cycle Armor"
+
+[node name="AccessoryCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Preview" type="TextureRect" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+stretch_mode = 5
+expand_mode = 1
+
+[node name="HeadingLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Accessory Slot"
+
+[node name="ItemLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+autowrap_mode = 2
+text = "No accessory equipped."
+
+[node name="HintLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "No accessories unlocked."
+
+[node name="AccessoryButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Cycle Accessory"
+
+[node name="AssignmentButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Assign to Sortie"
+
+[node name="InventorySection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+
+[node name="InventoryHeading" type="Label" parent="Panel/Margin/Content/BodyStack/InventorySection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Inventory Updates"
+
+[node name="InventoryList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/InventorySection"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="RecordsSection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+
+[node name="RecordsStack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/RecordsSection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MemoryHeading" type="Label" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Memory"
+
+[node name="MemoryList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="EvidenceHeading" type="Label" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Evidence"
+
+[node name="EvidenceList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="LetterHeading" type="Label" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Letters"
+
+[node name="LetterList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="AdvanceButton" type="Button" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "Continue"

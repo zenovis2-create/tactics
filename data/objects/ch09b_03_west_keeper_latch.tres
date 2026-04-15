@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09b_03_west_keeper_latch"
+display_name = "West Keeper Latch"
+object_type = "lever"
+grid_position = Vector2i(2, 6)
+interaction_range = 1
+reward_text = "West keeper latch released: the final keeper route starts to align."
+interaction_text = "West keeper latch released."

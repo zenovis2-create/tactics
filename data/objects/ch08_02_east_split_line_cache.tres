@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch08_02_east_split_line_cache"
+display_name = "East Split-Line Cache"
+object_type = "chest"
+grid_position = Vector2i(5, 5)
+interaction_range = 1
+reward_text = "East split-line cache seized: the ambush relay notes expose the remaining black-hound route pressure."
+interaction_text = "East split-line cache seized."

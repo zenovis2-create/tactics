@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch04_04_south_reliquary_seal"
+display_name = "South Reliquary Seal"
+object_type = "altar"
+grid_position = Vector2i(5, 6)
+interaction_range = 1
+reward_text = "South reliquary seal restored: the final ward clears the way to Basil's drowned sanctuary."
+interaction_text = "South reliquary seal restored."

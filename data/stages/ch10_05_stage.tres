@@ -1,0 +1,97 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_karon.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"CH10_05"
+stage_title = "Last Name"
+grid_size = Vector2i(16, 13)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(2, 11), Vector2i(4, 11)]
+enemy_spawns = [Vector2i(12, 2), Vector2i(13, 3)]
+blocked_cells = [Vector2i(5, 3), Vector2i(6, 3), Vector2i(7, 3), Vector2i(8, 3), Vector2i(9, 3), Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5), Vector2i(9, 5), Vector2i(5, 7), Vector2i(6, 7), Vector2i(9, 7), Vector2i(10, 7), Vector2i(4, 8), Vector2i(7, 9), Vector2i(8, 9), Vector2i(9, 9), Vector2i(11, 4)]
+terrain_move_costs = {
+Vector2i(2, 2): 2,
+Vector2i(4, 2): 2,
+Vector2i(3, 4): 2,
+Vector2i(4, 6): 2,
+Vector2i(8, 2): 2,
+Vector2i(9, 2): 2,
+Vector2i(7, 4): 2,
+Vector2i(8, 4): 2,
+Vector2i(9, 4): 2,
+Vector2i(7, 6): 2,
+Vector2i(8, 6): 2,
+Vector2i(9, 6): 2,
+Vector2i(10, 3): 2,
+Vector2i(11, 3): 2,
+Vector2i(12, 3): 2,
+Vector2i(11, 8): 2,
+Vector2i(12, 8): 2,
+Vector2i(13, 8): 2,
+Vector2i(3, 9): 2,
+Vector2i(8, 9): 2,
+Vector2i(8, 10): 2,
+Vector2i(11, 10): 2
+}
+terrain_types = {
+Vector2i(2, 2): &"bell",
+Vector2i(4, 2): &"bell",
+Vector2i(3, 4): &"bell",
+Vector2i(4, 6): &"bell",
+Vector2i(8, 2): &"keep",
+Vector2i(9, 2): &"keep",
+Vector2i(7, 4): &"keep",
+Vector2i(8, 4): &"keep",
+Vector2i(9, 4): &"keep",
+Vector2i(7, 6): &"corridor",
+Vector2i(8, 6): &"corridor",
+Vector2i(9, 6): &"corridor",
+Vector2i(10, 3): &"highground",
+Vector2i(11, 3): &"highground",
+Vector2i(12, 3): &"highground",
+Vector2i(11, 8): &"bridge",
+Vector2i(12, 8): &"bridge",
+Vector2i(13, 8): &"bridge",
+Vector2i(3, 9): &"bell",
+Vector2i(8, 9): &"keep",
+Vector2i(8, 10): &"bell",
+Vector2i(11, 10): &"bell"
+}
+terrain_defense_bonuses = {
+Vector2i(2, 2): 1,
+Vector2i(4, 2): 1,
+Vector2i(3, 4): 1,
+Vector2i(4, 6): 1,
+Vector2i(8, 2): 1,
+Vector2i(9, 2): 1,
+Vector2i(7, 4): 1,
+Vector2i(8, 4): 1,
+Vector2i(9, 4): 1,
+Vector2i(7, 6): 1,
+Vector2i(8, 6): 1,
+Vector2i(9, 6): 1,
+Vector2i(10, 3): 2,
+Vector2i(11, 3): 2,
+Vector2i(12, 3): 2,
+Vector2i(11, 8): 1,
+Vector2i(12, 8): 1,
+Vector2i(13, 8): 1,
+Vector2i(3, 9): 1,
+Vector2i(8, 9): 1,
+Vector2i(8, 10): 1,
+Vector2i(11, 10): 1
+}
+interactive_objects = []
+win_condition = &"defeat_all_enemies"
+loss_condition = &"all_allies_defeated"
+start_cutscene_id = &"ch10_05_intro"
+clear_cutscene_id = &"ch10_05_outro"
+next_destination_summary = "The bell stops, the names remain, and the campaign resolves around what survives remembering."

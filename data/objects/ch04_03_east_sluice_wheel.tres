@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch04_03_east_sluice_wheel"
+display_name = "East Sluice Wheel"
+object_type = "lever"
+grid_position = Vector2i(7, 5)
+interaction_range = 1
+reward_text = "East sluice wheel aligned: the eastern channel drains and the cloister route stops surging."
+interaction_text = "East sluice wheel aligned."

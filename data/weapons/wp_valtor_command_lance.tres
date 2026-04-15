@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = &"wp_valtor_command_lance"
+weapon_type = &"Lance"
+display_name = "Valtor Command Lance"
+summary = "Fortress command weapon. Turns line pressure into direct striking power."
+attack_bonus = 1

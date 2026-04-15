@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = &"wp_zero_trace_staff"
+weapon_type = &"Staff"
+display_name = "Zero Trace Staff"
+summary = "Edited-record weapon. Pushes offense forward while keeping the route legible."
+attack_bonus = 1
+movement_bonus = 1

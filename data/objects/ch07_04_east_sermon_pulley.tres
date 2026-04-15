@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch07_04_east_sermon_pulley"
+display_name = "East Sermon Pulley"
+object_type = "lever"
+grid_position = Vector2i(8, 5)
+interaction_range = 1
+reward_text = "East sermon pulley broken: the final hymn lock slips and Saria's hall is exposed."
+interaction_text = "East sermon pulley broken."

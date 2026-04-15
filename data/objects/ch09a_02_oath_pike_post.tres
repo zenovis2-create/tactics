@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09a_02_oath_pike_post"
+display_name = "Oath Pike Post"
+object_type = "lever"
+grid_position = Vector2i(8, 5)
+interaction_range = 1
+reward_text = "Oath pike post broken: the bridge of banners stops feeding the next officer line."
+interaction_text = "Oath pike post broken."

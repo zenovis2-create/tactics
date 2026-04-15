@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AccessoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/accessory_data.gd" id="1_accessory"]
+
+[resource]
+script = ExtResource("1_accessory")
+accessory_id = &"acc_ruin_holdfast_charm"
+display_name = "Ruin Holdfast Charm"
+summary = "Holding-cell accessory. Helps the wearer resist collapse in the lower ruins."
+defense_bonus = 1

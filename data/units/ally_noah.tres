@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/classes/cls_mystic.tres" id="3_class"]
+[ext_resource type="Resource" path="res://data/jobs/job_field_medic.tres" id="4_job"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"ally_noah"
+display_name = "Noah"
+faction = "ally"
+max_hp = 10
+attack = 3
+defense = 2
+movement = 3
+attack_range = 1
+default_skill = ExtResource("2_skill")
+class_data = ExtResource("3_class")
+job_data = ExtResource("4_job")
+weapon_types_allowed = PackedStringArray("Staff")
+armor_types_allowed = PackedStringArray("robe")

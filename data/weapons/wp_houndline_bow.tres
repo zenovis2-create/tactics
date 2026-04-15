@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = &"wp_houndline_bow"
+weapon_type = &"Bow"
+display_name = "Houndline Bow"
+summary = "Black-hound weapon. Turns pursuit pressure into cleaner strikes."
+attack_bonus = 1
+movement_bonus = 1

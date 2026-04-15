@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch05_03_upper_stack_seal"
+display_name = "Upper Stack Seal"
+object_type = "altar"
+grid_position = Vector2i(8, 2)
+interaction_range = 1
+reward_text = "Upper stack seal released: the burning stair pressure breaks and the reading hall opens."
+interaction_text = "Upper stack seal released."

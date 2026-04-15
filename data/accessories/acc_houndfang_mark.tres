@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AccessoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/accessory_data.gd" id="1_accessory"]
+
+[resource]
+script = ExtResource("1_accessory")
+accessory_id = &"acc_houndfang_mark"
+display_name = "Houndfang Mark"
+summary = "Ruin-control accessory. Turns the hunt brand back into striking pressure."
+attack_bonus = 1

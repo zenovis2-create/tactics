@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"CH02_02"
+stage_title = "Broken Outer Wall"
+grid_size = Vector2i(8, 8)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(1, 6), Vector2i(2, 6)]
+enemy_spawns = [Vector2i(5, 1), Vector2i(6, 1)]
+blocked_cells = [Vector2i(3, 3), Vector2i(4, 3), Vector2i(4, 4)]
+terrain_move_costs = {
+Vector2i(2, 4): 2,
+Vector2i(6, 5): 2
+}
+terrain_types = {
+Vector2i(2, 4): &"rubble",
+Vector2i(6, 5): &"rampart"
+}
+terrain_defense_bonuses = {
+Vector2i(2, 4): 1,
+Vector2i(6, 5): 1
+}
+interactive_objects = [ExtResource("6_object_a")]
+win_condition = &"defeat_all_enemies"
+loss_condition = &"all_allies_defeated"
+start_cutscene_id = &"ch02_02_intro"
+clear_cutscene_id = &"ch02_02_outro"
+next_destination_summary = "The wall breach reveals stranded knights deeper inside Hardren."

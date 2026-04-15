@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ArmorData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/armor_data.gd" id="1_armor"]
+
+[resource]
+script = ExtResource("1_armor")
+armor_id = &"ar_greenwood_cloak"
+armor_type = &"light"
+display_name = "Greenwood Cloak"
+summary = "Forest-route armor. Keeps movement clean through snares and ash."
+movement_bonus = 1

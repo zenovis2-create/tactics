@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="JobData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/job_data.gd" id="1_job"]
+[ext_resource type="Resource" path="res://data/classes/cls_mystic.tres" id="2_class"]
+
+[resource]
+script = ExtResource("1_job")
+job_id = &"job_field_medic"
+display_name = "Field Medic"
+class_data = ExtResource("2_class")
+weapon_types_allowed_override = PackedStringArray("Staff")
+armor_types_allowed_override = PackedStringArray("robe")
+

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = &"wp_standard_breaker_blade"
+weapon_type = &"Sword"
+display_name = "Standard Breaker Blade"
+summary = "Capital-line weapon. Breaks formation discipline at the exact seam."
+attack_bonus = 1

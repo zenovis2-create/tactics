@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch03_03_refugee_route_cache.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch03_03_wildfire_residue.tres" id="7_object_b"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"CH03_03"
+stage_title = "Refugee Column"
+grid_size = Vector2i(8, 8)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(1, 6), Vector2i(2, 6)]
+enemy_spawns = [Vector2i(5, 1), Vector2i(6, 1)]
+blocked_cells = [Vector2i(3, 2), Vector2i(3, 3), Vector2i(4, 3)]
+terrain_move_costs = {
+Vector2i(2, 5): 2,
+Vector2i(5, 2): 2
+}
+terrain_types = {
+Vector2i(2, 5): &"mud",
+Vector2i(5, 2): &"mud"
+}
+terrain_defense_bonuses = {
+Vector2i(2, 5): 1,
+Vector2i(5, 2): 1
+}
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
+win_condition = &"resolve_all_interactions"
+loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("Open the route cache and inspect the wildfire residue to guide the refugee column. (0/2)", "One refugee-column clue is secured. Find the remaining clue. (1/2)", "Both refugee-column clues are secured. The basin route is confirmed. (2/2)")
+interaction_objective_state_ids = [&"refugee_column_unread", &"refugee_column_partial", &"refugee_column_confirmed"]
+start_cutscene_id = &"ch03_03_intro"
+clear_cutscene_id = &"ch03_03_outro"
+next_destination_summary = "The refugee route and wildfire residue align, exposing the basin path deeper in Greenwood."

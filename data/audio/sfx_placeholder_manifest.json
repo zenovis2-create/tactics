@@ -1,0 +1,142 @@
+{
+  "battle_boss_charge_impact_01": {
+    "asset_path": "res://audio/sfx/battle_boss_charge_impact_01.wav",
+    "duration_ms": 400,
+    "lane": "battle_boss",
+    "notes": "forward thrust into compact impact",
+    "priority": "critical"
+  },
+  "battle_boss_command_warn_01": {
+    "asset_path": "res://audio/sfx/battle_boss_command_warn_01.wav",
+    "duration_ms": 340,
+    "lane": "battle_boss",
+    "notes": "clipped pulse in barred rhythm",
+    "priority": "critical"
+  },
+  "battle_boss_mark_warn_01": {
+    "asset_path": "res://audio/sfx/battle_boss_mark_warn_01.wav",
+    "duration_ms": 360,
+    "lane": "battle_boss",
+    "notes": "seal stamp plus ember rise",
+    "priority": "critical"
+  },
+  "battle_counter_hit_01": {
+    "asset_path": "res://audio/sfx/battle_counter_hit_01.wav",
+    "duration_ms": 160,
+    "lane": "battle_counter",
+    "notes": "sting-forward impact with less body",
+    "priority": "high"
+  },
+  "battle_hit_confirm_01": {
+    "asset_path": "res://audio/sfx/battle_hit_confirm_01.wav",
+    "duration_ms": 150,
+    "lane": "battle_hit",
+    "notes": "compact impact with tiny bright edge",
+    "priority": "high"
+  },
+  "battle_miss_01": {
+    "asset_path": "res://audio/sfx/battle_miss_01.wav",
+    "duration_ms": 140,
+    "lane": "battle_miss",
+    "notes": "thin whoosh or scrape-through",
+    "priority": "medium"
+  },
+  "battle_state_enemy_phase_01": {
+    "asset_path": "res://audio/sfx/battle_state_enemy_phase_01.wav",
+    "duration_ms": 280,
+    "lane": "battle_state",
+    "notes": "hostile control handoff pulse",
+    "priority": "high"
+  },
+  "battle_state_player_phase_01": {
+    "asset_path": "res://audio/sfx/battle_state_player_phase_01.wav",
+    "duration_ms": 260,
+    "lane": "battle_state",
+    "notes": "restrained upward brace",
+    "priority": "high"
+  },
+  "camp_loadout_accessory_cycle_01": {
+    "asset_path": "res://audio/sfx/camp_loadout_accessory_cycle_01.wav",
+    "duration_ms": 180,
+    "lane": "camp_party",
+    "notes": "charm ring plus soft click",
+    "priority": "medium"
+  },
+  "camp_loadout_armor_cycle_01": {
+    "asset_path": "res://audio/sfx/camp_loadout_armor_cycle_01.wav",
+    "duration_ms": 190,
+    "lane": "camp_party",
+    "notes": "leather or cloth move plus clasp",
+    "priority": "medium"
+  },
+  "camp_loadout_weapon_cycle_01": {
+    "asset_path": "res://audio/sfx/camp_loadout_weapon_cycle_01.wav",
+    "duration_ms": 180,
+    "lane": "camp_party",
+    "notes": "metal slide plus latch",
+    "priority": "medium"
+  },
+  "camp_next_battle_confirm_01": {
+    "asset_path": "res://audio/sfx/camp_next_battle_confirm_01.wav",
+    "duration_ms": 240,
+    "lane": "camp_recommit",
+    "notes": "confirm plus low pulse",
+    "priority": "medium"
+  },
+  "camp_party_assign_01": {
+    "asset_path": "res://audio/sfx/camp_party_assign_01.wav",
+    "duration_ms": 220,
+    "lane": "camp_party",
+    "notes": "confirm variant plus cloth or gear settle",
+    "priority": "medium"
+  },
+  "camp_party_select_01": {
+    "asset_path": "res://audio/sfx/camp_party_select_01.wav",
+    "duration_ms": 170,
+    "lane": "camp_party",
+    "notes": "soft emblem tick",
+    "priority": "medium"
+  },
+  "camp_recommend_focus_01": {
+    "asset_path": "res://audio/sfx/camp_recommend_focus_01.wav",
+    "duration_ms": 210,
+    "lane": "camp_recommend",
+    "notes": "gentle upward glint, low heat",
+    "priority": "medium"
+  },
+  "ui_common_cancel_01": {
+    "asset_path": "res://audio/sfx/ui_common_cancel_01.wav",
+    "duration_ms": 130,
+    "lane": "ui_common",
+    "notes": "soft downward tick",
+    "priority": "low"
+  },
+  "ui_common_confirm_01": {
+    "asset_path": "res://audio/sfx/ui_common_confirm_01.wav",
+    "duration_ms": 140,
+    "lane": "ui_common",
+    "notes": "restrained forward confirm",
+    "priority": "low"
+  },
+  "ui_inventory_close_01": {
+    "asset_path": "res://audio/sfx/ui_inventory_close_01.wav",
+    "duration_ms": 150,
+    "lane": "ui_panel",
+    "notes": "short fold-away release",
+    "priority": "low"
+  },
+  "ui_inventory_open_01": {
+    "asset_path": "res://audio/sfx/ui_inventory_open_01.wav",
+    "duration_ms": 170,
+    "lane": "ui_panel",
+    "notes": "dry panel reveal, low urgency",
+    "priority": "low"
+  },
+  "ui_panel_tab_shift_01": {
+    "asset_path": "res://audio/sfx/ui_panel_tab_shift_01.wav",
+    "duration_ms": 180,
+    "lane": "ui_panel",
+    "notes": "brushed tick plus soft slide",
+    "priority": "low"
+  }
+}

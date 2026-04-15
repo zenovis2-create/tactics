@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09b_04_center_red_annotation_pillar"
+display_name = "Red Annotation Pillar"
+object_type = "altar"
+grid_position = Vector2i(4, 4)
+interaction_range = 1
+reward_text = "Red annotation pillar erased: one major rewrite rule loses its anchor."
+interaction_text = "Red annotation pillar erased."

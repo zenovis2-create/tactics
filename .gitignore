@@ -1,0 +1,42 @@
+# Godot 4
+.godot/
+*.translation
+export_credentials.cfg
+
+# Build output
+build/
+*.apk
+*.aab
+*.ipa
+*.exe
+*.dmg
+*.zip
+
+# Logs
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Generated art (tracked separately or by artists)
+assets/ui/unit_token_art_generated/
+assets/ui/unit_role_icons_generated/
+assets/ui/object_icons_generated/
+assets/ui/fx_generated/
+assets/ui/tile_icons_generated/
+assets/ui/tile_cards_generated/
+assets/ui/icons_generated/
+
+# Representative snapshots (large PNGs, regenerate with runner)
+.codex-representative-snaps/
+artifacts/
+
+# Codex session frames and audio
+.codex-*.png
+.codex-*.wav

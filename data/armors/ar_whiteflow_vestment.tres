@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ArmorData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/armor_data.gd" id="1_armor"]
+
+[resource]
+script = ExtResource("1_armor")
+armor_id = &"ar_whiteflow_vestment"
+armor_type = &"robe"
+display_name = "Whiteflow Vestment"
+summary = "Monastery armor. Holds the line while the cloister shifts under water and prayer."
+defense_bonus = 1

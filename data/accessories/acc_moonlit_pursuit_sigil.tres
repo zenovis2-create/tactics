@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AccessoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/accessory_data.gd" id="1_accessory"]
+
+[resource]
+script = ExtResource("1_accessory")
+accessory_id = &"acc_moonlit_pursuit_sigil"
+display_name = "Moonlit Pursuit Sigil"
+summary = "Black-hound accessory. Keeps pursuit routes tight under split pressure."
+movement_bonus = 1

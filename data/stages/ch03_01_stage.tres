@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch03_01_west_trail_marker.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch03_01_east_trail_marker.tres" id="7_object_b"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"CH03_01"
+stage_title = "Lost Forest"
+grid_size = Vector2i(12, 10)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(1, 8), Vector2i(3, 8)]
+enemy_spawns = [Vector2i(9, 1), Vector2i(10, 2)]
+blocked_cells = [Vector2i(4, 4), Vector2i(5, 4), Vector2i(6, 5), Vector2i(7, 5), Vector2i(5, 6), Vector2i(8, 6)]
+terrain_move_costs = {
+Vector2i(2, 6): 2,
+Vector2i(3, 6): 2,
+Vector2i(2, 5): 2,
+Vector2i(3, 5): 2,
+Vector2i(4, 3): 2,
+Vector2i(5, 3): 2,
+Vector2i(6, 3): 2,
+Vector2i(8, 3): 2,
+Vector2i(9, 5): 2,
+Vector2i(10, 5): 2,
+Vector2i(8, 7): 2,
+Vector2i(9, 7): 2,
+Vector2i(10, 7): 2
+}
+terrain_types = {
+Vector2i(2, 6): &"forest",
+Vector2i(3, 6): &"forest",
+Vector2i(2, 5): &"forest",
+Vector2i(3, 5): &"forest",
+Vector2i(4, 3): &"forest",
+Vector2i(5, 3): &"forest",
+Vector2i(6, 3): &"forest",
+Vector2i(4, 4): &"wall",
+Vector2i(5, 4): &"wall",
+Vector2i(6, 5): &"wall",
+Vector2i(7, 5): &"wall",
+Vector2i(5, 6): &"wall",
+Vector2i(8, 6): &"wall",
+Vector2i(8, 3): &"forest",
+Vector2i(9, 5): &"forest",
+Vector2i(10, 5): &"forest",
+Vector2i(8, 7): &"forest",
+Vector2i(9, 7): &"forest",
+Vector2i(10, 7): &"forest"
+}
+terrain_defense_bonuses = {
+Vector2i(2, 6): 1,
+Vector2i(3, 6): 1,
+Vector2i(2, 5): 1,
+Vector2i(3, 5): 1,
+Vector2i(4, 3): 1,
+Vector2i(5, 3): 1,
+Vector2i(6, 3): 1,
+Vector2i(8, 3): 1,
+Vector2i(9, 5): 1,
+Vector2i(10, 5): 1,
+Vector2i(8, 7): 1,
+Vector2i(9, 7): 1,
+Vector2i(10, 7): 1
+}
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
+win_condition = &"resolve_all_interactions"
+loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("Survey both forest trail markers to map a safe Greenwood route. (0/2)", "One forest trail marker is surveyed. Check the remaining marker. (1/2)", "Both forest trail markers are surveyed. The Lost Forest route is mapped. (2/2)")
+interaction_objective_state_ids = [&"greenwood_route_unmapped", &"greenwood_route_partial", &"greenwood_route_mapped"]
+start_cutscene_id = &"ch03_01_intro"
+clear_cutscene_id = &"ch03_01_outro"
+next_destination_summary = "Both forest markers are read, and the mapped route leads directly into the snare line."

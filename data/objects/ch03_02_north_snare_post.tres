@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch03_02_north_snare_post"
+display_name = "North Snare Post"
+object_type = "lever"
+grid_position = Vector2i(8, 4)
+interaction_range = 1
+reward_text = "North snare post cut: the ambush pattern is broken and the refugee route can be read cleanly."
+interaction_text = "North snare post cut."

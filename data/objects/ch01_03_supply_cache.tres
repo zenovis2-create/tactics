@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch01_03_supply_cache"
+display_name = "Supply Cache"
+object_type = "chest"
+grid_position = Vector2i(2, 5)
+interaction_range = 1
+reward_text = "Supply Cache surveyed: ration bundles marked for the survivor line."
+interaction_text = "Supply Cache surveyed."

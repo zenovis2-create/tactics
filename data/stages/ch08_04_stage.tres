@@ -1,0 +1,62 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch08_04_west_control_brand.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch08_04_east_control_brand.tres" id="7_object_b"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"CH08_04"
+stage_title = "Black Mark"
+grid_size = Vector2i(10, 9)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(1, 7), Vector2i(2, 7)]
+enemy_spawns = [Vector2i(7, 2), Vector2i(2, 4)]
+blocked_cells = [Vector2i(4, 2), Vector2i(4, 3), Vector2i(5, 3), Vector2i(6, 3), Vector2i(6, 5), Vector2i(7, 5)]
+terrain_move_costs = {
+Vector2i(2, 6): 2,
+Vector2i(3, 6): 2,
+Vector2i(2, 4): 2,
+Vector2i(3, 4): 2,
+Vector2i(6, 2): 2,
+Vector2i(7, 2): 2,
+Vector2i(8, 2): 2,
+Vector2i(8, 4): 2,
+Vector2i(8, 5): 2
+}
+terrain_types = {
+Vector2i(2, 6): &"marked",
+Vector2i(3, 6): &"marked",
+Vector2i(2, 4): &"corridor",
+Vector2i(3, 4): &"corridor",
+Vector2i(6, 2): &"marked",
+Vector2i(7, 2): &"marked",
+Vector2i(8, 2): &"highground",
+Vector2i(8, 4): &"bridge",
+Vector2i(8, 5): &"bridge"
+}
+terrain_defense_bonuses = {
+Vector2i(2, 6): 1,
+Vector2i(3, 6): 1,
+Vector2i(2, 4): 1,
+Vector2i(3, 4): 1,
+Vector2i(6, 2): 1,
+Vector2i(7, 2): 1,
+Vector2i(8, 2): 2,
+Vector2i(8, 4): 1,
+Vector2i(8, 5): 1
+}
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
+win_condition = &"resolve_all_interactions"
+loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("Erase both black-mark control brands to open Lete's hunting route. (0/2)", "One black-mark control is erased. Break the remaining brand. (1/2)", "The black-mark controls are erased. Lete's signal route is open. (2/2)")
+interaction_objective_state_ids = [&"black_mark_control_locked", &"black_mark_control_partial", &"black_mark_control_open"]
+start_cutscene_id = &"ch08_04_intro"
+clear_cutscene_id = &"ch08_04_outro"
+next_destination_summary = "The control marks break, exposing the last route into Lete's signal nest."

@@ -1,0 +1,60 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/ch08_01_representative_battle_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/battle/turn_manager.gd" id="2_turn"]
+[ext_resource type="Script" path="res://scripts/battle/path_service.gd" id="3_path"]
+[ext_resource type="Script" path="res://scripts/battle/range_service.gd" id="4_range"]
+[ext_resource type="Script" path="res://scripts/battle/combat_service.gd" id="5_combat"]
+[ext_resource type="Script" path="res://scripts/battle/ai_service.gd" id="6_ai"]
+[ext_resource type="Script" path="res://scripts/battle/input_controller.gd" id="7_input"]
+[ext_resource type="PackedScene" path="res://scenes/battle/GridCursor.tscn" id="8_cursor"]
+[ext_resource type="PackedScene" path="res://scenes/battle/BattleHUD.tscn" id="9_hud"]
+[ext_resource type="Resource" path="res://data/stages/ch08_01_stage.tres" id="10_stage"]
+[ext_resource type="Script" path="res://scripts/battle/battle_board.gd" id="11_board"]
+
+[node name="BattleScene" type="Node2D"]
+script = ExtResource("1_controller")
+stage_data = ExtResource("10_stage")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.117647, 0.133333, 0.168627, 1)
+
+[node name="BattleBoard" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("11_board")
+
+[node name="MapLayer" type="TileMapLayer" parent="."]
+
+[node name="Units" type="Node2D" parent="."]
+
+[node name="Objects" type="Node2D" parent="."]
+
+[node name="GridCursor" parent="." instance=ExtResource("8_cursor")]
+
+[node name="TurnManager" type="Node" parent="."]
+script = ExtResource("2_turn")
+
+[node name="PathService" type="Node" parent="."]
+script = ExtResource("3_path")
+
+[node name="RangeService" type="Node" parent="."]
+script = ExtResource("4_range")
+
+[node name="CombatService" type="Node" parent="."]
+script = ExtResource("5_combat")
+
+[node name="AIService" type="Node" parent="."]
+script = ExtResource("6_ai")
+
+[node name="InputController" type="Node" parent="."]
+script = ExtResource("7_input")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="BattleHUD" parent="CanvasLayer" instance=ExtResource("9_hud")]

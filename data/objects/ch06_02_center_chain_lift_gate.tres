@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch06_02_center_chain_lift_gate"
+display_name = "Center Chain-Lift Gate"
+object_type = "gate"
+grid_position = Vector2i(4, 4)
+interaction_range = 1
+blocks_movement_while_active = true
+reward_text = "Center chain-lift released: the main battery line is broken open."
+interaction_text = "Center chain-lift released."

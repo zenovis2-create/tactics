@@ -1,0 +1,22 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/battle/BattleScene.tscn" id="2_battle"]
+[ext_resource type="Script" path="res://scripts/campaign/campaign_controller.gd" id="3_campaign_controller"]
+[ext_resource type="PackedScene" path="res://scenes/campaign/CampaignPanel.tscn" id="4_campaign_panel"]
+[ext_resource type="Script" path="res://scripts/audio/audio_event_router.gd" id="5_audio_router"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="BattleScene" parent="." instance=ExtResource("2_battle")]
+
+[node name="CampaignController" type="Node" parent="."]
+script = ExtResource("3_campaign_controller")
+
+[node name="AudioEventRouter" type="Node" parent="."]
+script = ExtResource("5_audio_router")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CampaignPanel" parent="CanvasLayer" instance=ExtResource("4_campaign_panel")]

@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/battle/grid_cursor.gd" id="1_cursor"]
+
+[node name="GridCursor" type="Node2D"]
+visible = false
+script = ExtResource("1_cursor")
+
+[node name="Highlight" type="ColorRect" parent="."]
+offset_right = 64.0
+offset_bottom = 64.0
+color = Color(0.988235, 0.819608, 0.341176, 0.341176)

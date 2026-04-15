@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch08_01_west_hound_sign"
+display_name = "West Hound Sign"
+object_type = "altar"
+grid_position = Vector2i(2, 4)
+interaction_range = 1
+reward_text = "West hound sign traced: one false route is stripped from the night trail."
+interaction_text = "West hound sign traced."

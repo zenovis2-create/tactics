@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = &"wp_eclipse_resonance_blade"
+weapon_type = &"Sword"
+display_name = "Eclipse Resonance Blade"
+summary = "Final-tower weapon. Rewards holding the line through eclipse pressure."
+attack_bonus = 1
+defense_bonus = 1

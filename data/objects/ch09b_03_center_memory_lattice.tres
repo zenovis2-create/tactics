@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09b_03_center_memory_lattice"
+display_name = "Center Memory Lattice"
+object_type = "altar"
+grid_position = Vector2i(5, 5)
+interaction_range = 1
+reward_text = "Center memory lattice stabilized: the keeper route stops slipping between revisions."
+interaction_text = "Center memory lattice stabilized."

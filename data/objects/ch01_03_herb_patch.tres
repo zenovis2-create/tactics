@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch01_03_herb_patch"
+display_name = "Herb Patch"
+object_type = "altar"
+grid_position = Vector2i(6, 5)
+interaction_range = 1
+reward_text = "Herb Patch surveyed: medicinal roots were tagged for the next route."
+interaction_text = "Herb Patch surveyed."

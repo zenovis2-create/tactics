@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AccessoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/accessory_data.gd" id="1_accessory"]
+
+[resource]
+script = ExtResource("1_accessory")
+accessory_id = &"acc_zero_trace_codex"
+display_name = "Zero Trace Codex"
+summary = "Edited-record accessory. Reinforces offense and route reading once the archive marks the squad."
+attack_bonus = 1
+movement_bonus = 1

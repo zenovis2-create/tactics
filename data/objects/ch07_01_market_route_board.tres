@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch07_01_market_route_board"
+display_name = "Market Route Board"
+object_type = "altar"
+grid_position = Vector2i(2, 4)
+interaction_range = 1
+reward_text = "Market route board checked: one safe lane through the abandoned stalls is mapped."
+interaction_text = "Market route board checked."
