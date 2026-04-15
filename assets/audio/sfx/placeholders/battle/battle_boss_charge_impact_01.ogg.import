@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://4m3wdfuoh6n8"
-path="res://.godot/imported/battle_boss_charge_impact_01.ogg-9be655b198c1351e4f50820e7cee9124.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/battle/battle_boss_charge_impact_01.ogg"
-dest_files=["res://.godot/imported/battle_boss_charge_impact_01.ogg-9be655b198c1351e4f50820e7cee9124.oggvorbisstr"]
 
 [params]
 

@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://i4j77w0npl4x"
-path="res://.godot/imported/ui_common_cancel_01.ogg-016f1c13713cf152b5ca41a82e3a384f.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/ui/ui_common_cancel_01.ogg"
-dest_files=["res://.godot/imported/ui_common_cancel_01.ogg-016f1c13713cf152b5ca41a82e3a384f.oggvorbisstr"]
 
 [params]
 

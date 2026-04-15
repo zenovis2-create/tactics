@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://ddbyo5qircgd1"
-path="res://.godot/imported/camp_loadout_armor_cycle_01.ogg-b18d56a97fb59253274059cfe9093706.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/camp/camp_loadout_armor_cycle_01.ogg"
-dest_files=["res://.godot/imported/camp_loadout_armor_cycle_01.ogg-b18d56a97fb59253274059cfe9093706.oggvorbisstr"]
 
 [params]
 

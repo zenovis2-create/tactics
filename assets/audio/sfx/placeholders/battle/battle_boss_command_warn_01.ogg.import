@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cly74f8pywth2"
-path="res://.godot/imported/battle_boss_command_warn_01.ogg-367ee29fda3f28ac9dab4738319887b0.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/battle/battle_boss_command_warn_01.ogg"
-dest_files=["res://.godot/imported/battle_boss_command_warn_01.ogg-367ee29fda3f28ac9dab4738319887b0.oggvorbisstr"]
 
 [params]
 

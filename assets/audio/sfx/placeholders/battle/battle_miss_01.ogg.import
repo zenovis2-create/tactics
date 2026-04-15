@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://00caeb27kbow"
-path="res://.godot/imported/battle_miss_01.ogg-5bbb933ef3aea05c9247d697b7bd8482.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/battle/battle_miss_01.ogg"
-dest_files=["res://.godot/imported/battle_miss_01.ogg-5bbb933ef3aea05c9247d697b7bd8482.oggvorbisstr"]
 
 [params]
 

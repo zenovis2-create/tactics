@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://dmrhtw1uokalm"
-path="res://.godot/imported/battle_counter_hit_01.ogg-03735c05464eb6ae38b3434398d40ad5.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/battle/battle_counter_hit_01.ogg"
-dest_files=["res://.godot/imported/battle_counter_hit_01.ogg-03735c05464eb6ae38b3434398d40ad5.oggvorbisstr"]
 
 [params]
 

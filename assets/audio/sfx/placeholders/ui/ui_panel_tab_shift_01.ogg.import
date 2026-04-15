@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://caika0htrv3q4"
-path="res://.godot/imported/ui_panel_tab_shift_01.ogg-17ca8ecc7f7b0e8cb22832db1cbcad27.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/ui/ui_panel_tab_shift_01.ogg"
-dest_files=["res://.godot/imported/ui_panel_tab_shift_01.ogg-17ca8ecc7f7b0e8cb22832db1cbcad27.oggvorbisstr"]
 
 [params]
 

@@ -3,12 +3,11 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://dem4esvwdbk0v"
-path="res://.godot/imported/camp_party_select_01.ogg-e530d345a2a3234ab9ddcab73978fd81.oggvorbisstr"
+valid=false
 
 [deps]
 
 source_file="res://assets/audio/sfx/placeholders/camp/camp_party_select_01.ogg"
-dest_files=["res://.godot/imported/camp_party_select_01.ogg-e530d345a2a3234ab9ddcab73978fd81.oggvorbisstr"]
 
 [params]
 
