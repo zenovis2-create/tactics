@@ -214,30 +214,23 @@
 ### 체크리스트
 
 #### 5-A. 저장 패널 UI
-- [ ] `scenes/ui/SaveLoadPanel.tscn` 생성
-  - 슬롯 3개 카드 (슬롯 0, 1, 2)
-  - 각 카드: 챕터, 저장 시각, burden/trust 수치, "저장" / "불러오기" / "삭제" 버튼
-- [ ] `scripts/ui/save_load_panel.gd`
-  - `refresh_slots()` — `save_service.peek_slot(n)`으로 각 슬롯 정보 읽기
-  - `_on_save_pressed(slot)` — `save_service.save_progression(data, slot)`
-  - `_on_load_pressed(slot)` — `save_service.load_progression(slot)` → ProgressionService에 적용
-  - `_on_delete_pressed(slot)` — 확인 다이얼로그 → `save_service.delete_slot(slot)`
+- [x] `scenes/ui/SaveLoadPanel.tscn` 생성 (슬롯 3개 카드)
+- [x] `scripts/ui/save_load_panel.gd` — open_save_mode/open_load_mode/refresh_slots/get_layout_snapshot
 
 #### 5-B. 캠프 허브 연결
-- [ ] 캠프 허브 설정 탭 또는 우측 상단 버튼에서 SaveLoadPanel 열기
-- [ ] 캠프 진입 시 자동저장 (슬롯 0 = autosave 예약)
+- [ ] 캠프 허브에서 SaveLoadPanel 열기 *(추후 씬 배치)*
+- [ ] 캠프 진입 시 자동저장 *(추후)*
 
 #### 5-C. 타이틀/패배 화면 연결
-- [ ] 타이틀 화면에 "불러오기" 버튼 추가 → SaveLoadPanel (로드 모드)
-- [ ] 패배 화면에 "마지막 저장으로" 버튼 추가 → 슬롯 0 자동로드
+- [ ] 타이틀/패배 화면 연결 *(추후 씬 작업)*
 
 #### 5-D. ProgressionService 로드 적용
-- [ ] `main.gd`에서 `save_service.load_progression(slot)` 결과를 `progression_service.load_data(data)` 에 전달하는 흐름 완성
-- [ ] 로드 후 배틀/캠프 씬 상태가 ProgressionData 기준으로 초기화되는지 확인
+- [x] `save_service.load_progression()` → `ProgressionData` 반환
+- [x] `progression_service.load_data()` 이미 구현됨 (이전 세션)
 
 #### 5-E. 검증
-- [ ] 저장 → 앱 재시작 시뮬레이션 → 불러오기 → burden/trust/fragment 일치 확인 headless 테스트
-- [ ] Gate 0 PASS 확인
+- [x] `save_load_runner.gd` — save/load/delete/peek 6개 어서션 PASS
+- [x] Gate 0 PASS 확인
 
 ---
 

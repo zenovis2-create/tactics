@@ -65,9 +65,9 @@ func peek_slot(slot: int = 0) -> Dictionary:
 		return {}
 	var text := file.get_as_text()
 	file.close()
-	var parsed := JSON.parse_string(text)
+	var parsed: Variant = JSON.parse_string(text)
 	if parsed is Dictionary:
-		return parsed
+		return parsed as Dictionary
 	return {}
 
 # --- Internal ---
