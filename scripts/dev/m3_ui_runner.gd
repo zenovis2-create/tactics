@@ -19,6 +19,12 @@ func _run() -> void:
         _fail("Main is missing battle_controller reference.")
         return
 
+    # 타이틀 화면을 건너뛰고 즉시 배틀 시작 (테스트 전용)
+    if main.has_method("start_game_direct"):
+        main.start_game_direct()
+        await process_frame
+        await process_frame
+
     if not await _assert_mobile_layout_contract(main):
         return
     if not await _assert_battle_hud_inventory_and_input_block(battle):

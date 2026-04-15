@@ -1160,13 +1160,8 @@ func _enter_stage(stage_index: int) -> void:
 
 func _on_battle_finished(result: StringName, stage_id: StringName) -> void:
     if result != &"victory":
+        # 패배 처리는 main.gd의 DefeatScreen이 담당 (이중 표시 방지)
         _active_mode = CampaignState.MODE_BATTLE
-        _set_panel_state(
-            CampaignState.MODE_BATTLE,
-            "Battle Failed",
-            "Retry the current stage to continue the Chapter 1 campaign shell.",
-            "Retry"
-        )
         return
 
     if _current_stage == null or stage_id != _current_stage.stage_id:
