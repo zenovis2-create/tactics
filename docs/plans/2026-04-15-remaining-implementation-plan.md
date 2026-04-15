@@ -141,7 +141,7 @@
 #### 3-D. 배틀/캠프 흐름 연결
 - [x] `_on_battle_victory()`에서 `stage_data.clear_cutscene_id` → CutsceneCatalog.get_cutscene() → play()
 - [x] BattleController에 cutscene_player 서비스 추가 (_init_meta_services)
-- [ ] `start_cutscene_id` 전투 전 재생 *(추후)*
+- [x] `bootstrap_battle()`에서 `start_cutscene_id` 전투 전 재생
 
 #### 3-E. 검증
 - [x] `cutscene_runner.gd` 8개 어서션 PASS
@@ -218,11 +218,12 @@
 - [x] `scripts/ui/save_load_panel.gd` — open_save_mode/open_load_mode/refresh_slots/get_layout_snapshot
 
 #### 5-B. 캠프 허브 연결
-- [ ] 캠프 허브에서 SaveLoadPanel 열기 *(추후 씬 배치)*
-- [ ] 캠프 진입 시 자동저장 *(추후)*
+- [x] 캠프 진입 시 자동저장 — CampaignController._autosave_progression() → 슬롯 0
+- [ ] 캠프 허브에서 SaveLoadPanel 열기 *(씬 배치 단계)*
 
 #### 5-C. 타이틀/패배 화면 연결
-- [ ] 타이틀/패배 화면 연결 *(추후 씬 작업)*
+- [x] TitleScreen.tscn + title_screen.gd — 새 게임/이어하기 버튼, save_service 연동
+- [x] DefeatScreen.tscn + defeat_screen.gd — 재시도/마지막저장으로/타이틀로
 
 #### 5-D. ProgressionService 로드 적용
 - [x] `save_service.load_progression()` → `ProgressionData` 반환

@@ -176,6 +176,12 @@ func bootstrap_battle() -> void:
     if reward_service != null and stage_data != null:
         reward_service.record_stage_entry(stage_data.stage_id)
 
+    # 전투 시작 전 컷씬 재생 (있는 경우)
+    if cutscene_player != null and stage_data != null and stage_data.start_cutscene_id != &"":
+        var start_data = CutsceneCatalog.get_cutscene(stage_data.start_cutscene_id)
+        if start_data != null:
+            cutscene_player.play(start_data)
+
     _begin_player_phase("battle_initialized")
 
 func set_stage(new_stage_data: StageData) -> void:

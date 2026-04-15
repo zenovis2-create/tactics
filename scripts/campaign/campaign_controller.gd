@@ -12,6 +12,8 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const CampController = preload("res://scripts/camp/camp_controller.gd")
+const SaveService = preload("res://scripts/battle/save_service.gd")
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
 
 const CHAPTER_CH01: StringName = CampaignChapterRegistry.CHAPTER_CH01
 const CHAPTER_CH02: StringName = CampaignChapterRegistry.CHAPTER_CH02
@@ -981,6 +983,7 @@ const CH10_RESOLUTION_DIALOGUE: Array[String] = [
 var _battle_controller: BattleController
 var _campaign_panel: CampaignPanel
 var _camp_controller: CampController
+var _save_service: SaveService
 var _active_mode: String = CampaignState.MODE_BATTLE
 var _active_chapter_id: StringName = CHAPTER_CH01
 var _active_stage_index: int = 0
@@ -1004,6 +1007,8 @@ func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -
     _campaign_panel = campaign_panel
     _camp_controller = CampController.new()
     add_child(_camp_controller)
+    _save_service = SaveService.new()
+    add_child(_save_service)
 
     if _battle_controller != null and not _battle_controller.battle_finished.is_connected(_on_battle_finished):
         _battle_controller.battle_finished.connect(_on_battle_finished)
@@ -1216,12 +1221,23 @@ func _enter_camp_state() -> void:
                 "letter_entries": _variant_to_string_array(CH01_STAGE_LETTER_LOG.get(_current_stage.stage_id, []))
             }
         _camp_controller.enter_camp(&"ch01", stage_result)
+    _autosave_progression()
     _set_panel_state(
         CampaignState.MODE_CAMP,
         "CH01 Interlude Camp",
         _build_camp_summary(),
         "Next Battle"
     )
+
+func _autosave_progression() -> void:
+    if _save_service == null or _battle_controller == null:
+        return
+    var prog_svc = _battle_controller.progression_service
+    if prog_svc == null:
+        return
+    var data: ProgressionData = prog_svc.get_data()
+    if data != null:
+        _save_service.save_progression(data, 0)  # 슬롯 0 = 자동저장
 
 func _build_cutscene_summary(stage: StageData, next_stage: StageData) -> String:
     var lines: Array[String] = []
