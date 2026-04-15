@@ -20,6 +20,10 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const BattleBoard = preload("res://scripts/battle/battle_board.gd")
+const ProgressionService = preload("res://scripts/battle/progression_service.gd")
+const StatusService = preload("res://scripts/battle/status_service.gd")
+const TelemetryService = preload("res://scripts/battle/telemetry_service.gd")
+const RewardService = preload("res://scripts/battle/reward_service.gd")
 
 enum BattlePhase {
     BATTLE_INIT,
@@ -115,14 +119,31 @@ var board_scale: float = 1.0
 var _battle_flash_tween: Tween
 var _fx_cache: Dictionary = {}
 
+# M4/M5/M6 services — instantiated at runtime, not scene nodes.
+var progression_service: ProgressionService
+var status_service: StatusService
+var telemetry_service: TelemetryService
+var reward_service: RewardService
+
 func _ready() -> void:
     _wire_signals()
     get_viewport().size_changed.connect(_on_viewport_size_changed)
     if stage_data == null:
         stage_data = DEFAULT_STAGE
 
+    _init_meta_services()
     _sync_hud_phase("controller_ready", {"stage_loaded": stage_data != null})
     bootstrap_battle()
+
+func _init_meta_services() -> void:
+    progression_service = ProgressionService.new()
+    add_child(progression_service)
+    status_service = StatusService.new()
+    add_child(status_service)
+    telemetry_service = TelemetryService.new()
+    add_child(telemetry_service)
+    reward_service = RewardService.new()
+    add_child(reward_service)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -138,6 +159,13 @@ func bootstrap_battle() -> void:
     _spawn_from_stage()
     path_service.configure_from_stage(stage_data)
     _layout_battlefield()
+
+    if telemetry_service != null:
+        telemetry_service.record_battle_start(stage_data.stage_id if stage_data != null else &"unknown")
+    if status_service != null:
+        status_service.reset()
+    if reward_service != null and stage_data != null:
+        reward_service.record_stage_entry(stage_data.stage_id)
 
     _begin_player_phase("battle_initialized")
 
@@ -530,6 +558,8 @@ func _run_enemy_phase() -> void:
     })
 
     _transition_to(BattlePhase.ROUND_END, "round_completed", {"round": round_index})
+    if telemetry_service != null:
+        telemetry_service.record_round_complete(round_index)
     round_index += 1
 
     _begin_player_phase("next_round_started")
@@ -603,12 +633,29 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
     }
     for key in extra_context.keys():
         attack_context[key] = extra_context[key]
+
+    # Apply Burden band penalty to attacker if ally (Rian's coherence cost).
+    if attacker.faction == "ally" and progression_service != null:
+        var burden_fx := progression_service.get_burden_effect()
+        var atk_bonus: int = int(attack_context.get("attack_bonus", 0))
+        atk_bonus += int(burden_fx.get("damage_mod", 0))
+        attack_context["attack_bonus"] = atk_bonus
+
+    # Apply 망각 stack effects to attacker.
+    if status_service != null:
+        var status_fx: Dictionary = status_service.get_effects(attacker)
+        attack_context["oblivion_accuracy_mod"] = int(status_fx.get("accuracy_mod", 0))
+        attack_context["oblivion_evasion_mod"] = int(status_fx.get("evasion_mod", 0))
+        attack_context["oblivion_skills_sealed"] = bool(status_fx.get("skills_sealed", false))
+
     var result: Dictionary = combat_service.resolve_attack(attacker, defender, attacker.get_default_skill(), {
         "defense_bonus": attack_context.get("defense_bonus", 0),
         "terrain_type": attack_context.get("terrain_type", "plain"),
         "allow_counterattack": attack_context.get("allow_counterattack", true),
         "attack_bonus": attack_context.get("attack_bonus", 0),
-        "counter_context": attack_context.get("counter_context", {})
+        "counter_context": attack_context.get("counter_context", {}),
+        "oblivion_accuracy_mod": attack_context.get("oblivion_accuracy_mod", 0),
+        "oblivion_skills_sealed": attack_context.get("oblivion_skills_sealed", false)
     })
     var reason: String = String(result.get("transition_reason", "attack_resolved"))
     _play_attack_feedback(reason)
@@ -750,28 +797,49 @@ func _check_battle_end() -> bool:
             if _are_all_interactive_objects_resolved():
                 _transition_to(BattlePhase.VICTORY, "interaction_objectives_completed", {"round": round_index})
                 hud.show_result("Victory!\nAll objective points were secured.")
+                _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
         "resolve_all_interactions_and_defeat_all_enemies":
             if _are_all_interactive_objects_resolved() and enemy_units.is_empty():
                 _transition_to(BattlePhase.VICTORY, "interaction_and_enemy_objectives_completed", {"round": round_index})
                 hud.show_result("Victory!\nObjective points were secured and all enemies were defeated.")
+                _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
         _:
             if enemy_units.is_empty():
                 _transition_to(BattlePhase.VICTORY, "enemy_team_eliminated", {"round": round_index})
                 hud.show_result("Victory!\nAll enemy units are defeated.")
+                _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
 
     if ally_units.is_empty():
         _transition_to(BattlePhase.DEFEAT, "ally_team_eliminated", {"round": round_index})
         hud.show_result("Defeat...\nAll ally units are defeated.")
+        _on_battle_defeat()
         battle_finished.emit(&"defeat", stage_data.stage_id)
         return true
 
     return false
+
+func _on_battle_victory() -> void:
+    if telemetry_service != null:
+        telemetry_service.record_battle_end(&"victory", round_index)
+    if progression_service != null and stage_data != null:
+        var fragment_id := StringName(String(stage_data.stage_id) + "_fragment")
+        var unlock_result := progression_service.recover_fragment(fragment_id)
+        if not bool(unlock_result.get("already_known", true)):
+            var cmd = unlock_result.get("command_unlocked", null)
+            if cmd != null:
+                print("[BattleController] Fragment recovered: %s → command unlocked: %s" % [fragment_id, cmd])
+
+func _on_battle_defeat() -> void:
+    if telemetry_service != null:
+        telemetry_service.record_battle_end(&"defeat", round_index)
+    if progression_service != null:
+        progression_service.apply_burden_delta(1, "battle_defeat")
 
 func _on_wait_requested() -> void:
     if selected_unit == null or not _is_player_input_phase() or not turn_manager.can_unit_act(selected_unit):
@@ -818,6 +886,13 @@ func _on_hud_menu_visibility_changed(is_open: bool) -> void:
 func _on_unit_defeated(unit: UnitActor) -> void:
     pending_move_origins.erase(unit.get_instance_id())
     turn_manager.mark_downed(unit, "unit_defeated", {"round": round_index})
+    if status_service != null:
+        status_service.remove_unit(unit)
+    if telemetry_service != null:
+        if unit.faction == "ally":
+            telemetry_service.record_ally_death("unit_hp_zero")
+        else:
+            telemetry_service.record_enemy_death()
     _remove_unit_from_roster(unit)
     _sync_hud_phase("unit_defeated", {"round": round_index})
 
