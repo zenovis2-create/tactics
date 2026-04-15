@@ -55,6 +55,7 @@ const REGULAR_TOPBAR_MAX_WIDTH := 440.0
 @onready var dismiss_hint_label: Label = $InventoryPanel/Margin/Content/Footer/DismissHintLabel
 @onready var close_inventory_button: Button = $InventoryPanel/Margin/Content/Footer/CloseButton
 @onready var result_popup: AcceptDialog = $ResultPopup
+var result_screen: Node  ## BattleResultScreen — 전투 결과 전용 화면 (동적 로드)
 
 var _compact_layout: bool = false
 var _last_focus_owner: Control
@@ -73,6 +74,12 @@ func _ready() -> void:
     overlay_scrim.gui_input.connect(_on_overlay_scrim_gui_input)
     overlay_scrim.hide()
     inventory_panel.hide()
+    # BattleResultScreen 동적 로드
+    var ResultScreenScene = load("res://scenes/battle/BattleResultScreen.tscn")
+    if ResultScreenScene != null:
+        result_screen = ResultScreenScene.instantiate()
+        add_child(result_screen)
+        result_screen.result_confirmed.connect(_on_result_screen_confirmed)
     clear_selection()
     set_action_hint("Tap a ready ally to act.")
     set_buttons_state(false, false, true)
@@ -238,6 +245,15 @@ func get_result_snapshot() -> Dictionary:
         "body": _last_result_body,
         "visible": result_popup.visible,
     }
+
+func show_result_screen(result: Dictionary) -> void:
+    ## 전투 결과 전용 화면 표시 (구조화된 보상/기록/Burden-Trust).
+    if result_screen != null:
+        result_screen.show_result(result)
+
+func _on_result_screen_confirmed() -> void:
+    if result_screen != null:
+        result_screen.hide_result()
 
 func _unhandled_input(event: InputEvent) -> void:
     if not inventory_panel.visible:

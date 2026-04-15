@@ -29,21 +29,21 @@ const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BondService = preload("res://scripts/battle/bond_service.gd")
 
 const CH01_STAGE_MEMORY_LOG: Dictionary = {
-	&"CH01_05": [
-		"mem_frag_ch01_first_order — First Order: a cut command echoes over the burning field, but the speaker and intent stay unclear."
-	]
+    &"CH01_05": [
+        "mem_frag_ch01_first_order — First Order: a cut command echoes over the burning field, but the speaker and intent stay unclear."
+    ]
 }
 
 const CH01_STAGE_EVIDENCE_LOG: Dictionary = {
-	&"CH01_05": [
-		"flag_evidence_hardren_seal_obtained — Hardren seal recovered; the ash-field command chain can be traced north toward the border evidence trail."
-	]
+    &"CH01_05": [
+        "flag_evidence_hardren_seal_obtained — Hardren seal recovered; the ash-field command chain can be traced north toward the border evidence trail."
+    ]
 }
 
 const CH01_STAGE_LETTER_LOG: Dictionary = {
-	&"CH01_05": [
-		"Letter from Serin — \"The name on your scabbard is enough for now. We move north together and keep the survivors behind us safe.\""
-	]
+    &"CH01_05": [
+        "Letter from Serin — \"The name on your scabbard is enough for now. We move north together and keep the survivors behind us safe.\""
+    ]
 }
 
 enum BattlePhase {
@@ -690,6 +690,20 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         atk_bonus += int(burden_fx.get("damage_mod", 0))
         attack_context["attack_bonus"] = atk_bonus
 
+    # Bond adjacency bonus: 인접 아군과 bond >= 2이면 공격력 +1
+    if attacker.faction == "ally" and bond_service != null:
+        var bond_atk_bonus: int = 0
+        for unit: UnitActor in ally_units:
+            if unit == attacker or not is_instance_valid(unit) or unit.is_defeated():
+                   continue
+            if bond_service.get_bond(unit.unit_data.unit_id) >= 2:
+                var dist: int = abs(attacker.grid_position.x - unit.grid_position.x) + abs(attacker.grid_position.y - unit.grid_position.y)
+                if dist <= 1:
+                    bond_atk_bonus += 1
+                    break  # 최대 1명의 본드 보너스만 적용
+        if bond_atk_bonus > 0:
+            attack_context["bond_attack_bonus"] = bond_atk_bonus
+
     # Apply 망각 stack effects to attacker.
     if status_service != null:
         var status_fx: Dictionary = status_service.get_effects(attacker)
@@ -997,6 +1011,8 @@ func _on_battle_victory() -> void:
             "round": round_index
         })
     hud.show_result(_build_result_summary_text(last_result_summary))
+    # 전투 결과 전용 화면도 함께 표시
+    hud.show_result_screen(last_result_summary)
 
 func _on_battle_defeat() -> void:
     if telemetry_service != null:

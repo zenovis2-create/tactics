@@ -137,6 +137,8 @@ func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData
     if skill != null:
         attack_value += skill.power_modifier
     attack_value += int(context.get("attack_bonus", 0))
+    # Bond adjacency bonus: 공격자가 아군과 인접하면 명중 보너스
+    attack_value += int(context.get("bond_attack_bonus", 0))
 
     var terrain_defense_bonus := int(context.get("defense_bonus", 0))
     var defense_value: int = defender.get_defense() + terrain_defense_bonus
