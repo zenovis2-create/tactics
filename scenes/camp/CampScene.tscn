@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/camp/camp_controller.gd" id="1_campctrl"]
+[ext_resource type="PackedScene" path="res://scenes/camp/CampHUD.tscn" id="2_camphud"]
+
+[node name="CampScene" type="Node"]
+
+[node name="CampController" type="Node" parent="."]
+script = ExtResource("1_campctrl")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CampHUD" parent="CanvasLayer" instance=ExtResource("2_camphud")]

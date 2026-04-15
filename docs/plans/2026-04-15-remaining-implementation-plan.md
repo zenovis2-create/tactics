@@ -73,34 +73,34 @@
 ### 체크리스트
 
 #### 2-A. 데이터 레이어
-- [ ] `scripts/data/camp_data.gd` — 캠프 상태 리소스 (해금된 기능, 현재 챕터, 보류 중인 알림)
-- [ ] `scripts/camp/camp_controller.gd` — 캠프 진입 흐름 오케스트레이터
+- [x] `scripts/data/camp_data.gd` — 캠프 상태 리소스 (해금된 기능, 현재 챕터, 보류 중인 알림)
+- [x] `scripts/camp/camp_controller.gd` — 캠프 진입 흐름 오케스트레이터
   - `enter_camp(stage_clear_result: Dictionary)` — 보상/기억 시퀀스 → 허브
   - `get_camp_summary()` — 편성/장비/기록 상태 스냅샷 반환
 
 #### 2-B. 씬 구조
-- [ ] `scenes/camp/CampScene.tscn` 생성 — 최소 구조: 배경, CampHUD, 씬 루트
-- [ ] `scenes/camp/CampHUD.tscn` 생성 — 7개 탭 버튼 + 선택된 패널 영역
-- [ ] `scripts/camp/camp_hud.gd` — 탭 전환, 활성 패널 표시/숨김
+- [x] `scenes/camp/CampScene.tscn` 생성 — 최소 구조: 배경, CampHUD, 씬 루트
+- [x] `scenes/camp/CampHUD.tscn` 생성 — 7개 탭 버튼 + 선택된 패널 영역
+- [x] `scripts/camp/camp_hud.gd` — 탭 전환, 활성 패널 표시/숨김
 
 #### 2-C. 편성 패널 (Sortie)
-- [ ] 현재 출격 가능한 동료 목록 표시 (unit_data 참조)
-- [ ] 동료 선택/해제 UI (최대 출격 인원 표시)
-- [ ] 편성 확정 → 다음 스테이지에 반영되는 저장 흐름
+- [x] 현재 출격 가능한 동료 목록 표시 (CampaignPanel Party 섹션과 연동)
+- [ ] 동료 선택/해제 UI (최대 출격 인원 표시) *(CampaignPanel에서 처리, 추가 UI 추후)*
+- [x] 편성 확정 → 다음 스테이지에 반영되는 저장 흐름 (CampaignController 기존 구조)
 
 #### 2-D. 기록 패널 (Records)
-- [ ] 기억(memory) 목록 — ProgressionData.recovered_fragments 참조
-- [ ] 물증(evidence) 목록 — 별도 evidence_log Dictionary
-- [ ] 편지(letters) 목록 — 별도 letter_log Array
-- [ ] 각 항목 탭 시 상세 텍스트 바텀시트 표시
+- [x] 기억(memory) 목록 — CampData.pending_memory_entries (ProgressionData 연동)
+- [x] 물증(evidence) 목록 — CampData.pending_evidence_entries
+- [x] 편지(letters) 목록 — CampData.pending_letter_entries
+- [ ] 각 항목 탭 시 상세 텍스트 바텀시트 표시 *(미래 UI 작업)*
 
 #### 2-E. 씬 전환 연결
-- [ ] `scripts/main.gd`에서 `battle_finished` 시그널 수신 → 캠프 씬 전환
-- [ ] 캠프 `start_next_battle` 신호 → 배틀 씬으로 복귀
+- [x] CampaignController._enter_camp_state()에서 CampController.enter_camp() 호출
+- [ ] main.gd 씬 전환 (현재 오버레이 방식으로 동작 중; 별도 씬 전환은 추후)
 
 #### 2-F. 검증
-- [ ] `m3_ui_runner.gd`에 캠프 진입/탭 전환 어서션 추가 (또는 별도 camp_runner.gd)
-- [ ] Gate 0 PASS 확인
+- [x] `camp_runner.gd` 8개 어서션 PASS
+- [x] Gate 0 PASS 확인
 
 ---
 

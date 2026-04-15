@@ -11,6 +11,7 @@ const UnitData = preload("res://scripts/data/unit_data.gd")
 const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
+const CampController = preload("res://scripts/camp/camp_controller.gd")
 
 const CHAPTER_CH01: StringName = CampaignChapterRegistry.CHAPTER_CH01
 const CHAPTER_CH02: StringName = CampaignChapterRegistry.CHAPTER_CH02
@@ -979,6 +980,7 @@ const CH10_RESOLUTION_DIALOGUE: Array[String] = [
 
 var _battle_controller: BattleController
 var _campaign_panel: CampaignPanel
+var _camp_controller: CampController
 var _active_mode: String = CampaignState.MODE_BATTLE
 var _active_chapter_id: StringName = CHAPTER_CH01
 var _active_stage_index: int = 0
@@ -1000,6 +1002,8 @@ var _equipped_accessory_by_unit_id: Dictionary = {}
 func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -> void:
     _battle_controller = battle_controller
     _campaign_panel = campaign_panel
+    _camp_controller = CampController.new()
+    add_child(_camp_controller)
 
     if _battle_controller != null and not _battle_controller.battle_finished.is_connected(_on_battle_finished):
         _battle_controller.battle_finished.connect(_on_battle_finished)
@@ -1203,6 +1207,15 @@ func _on_battle_finished(result: StringName, stage_id: StringName) -> void:
 
 func _enter_camp_state() -> void:
     _active_mode = CampaignState.MODE_CAMP
+    if _camp_controller != null:
+        var stage_result: Dictionary = {}
+        if _current_stage != null:
+            stage_result = {
+                "memory_entries": _variant_to_string_array(CH01_STAGE_MEMORY_LOG.get(_current_stage.stage_id, [])),
+                "evidence_entries": _variant_to_string_array(CH01_STAGE_EVIDENCE_LOG.get(_current_stage.stage_id, [])),
+                "letter_entries": _variant_to_string_array(CH01_STAGE_LETTER_LOG.get(_current_stage.stage_id, []))
+            }
+        _camp_controller.enter_camp(&"ch01", stage_result)
     _set_panel_state(
         CampaignState.MODE_CAMP,
         "CH01 Interlude Camp",
