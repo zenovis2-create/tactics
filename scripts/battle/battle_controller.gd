@@ -28,6 +28,24 @@ const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BondService = preload("res://scripts/battle/bond_service.gd")
 
+const CH01_STAGE_MEMORY_LOG: Dictionary = {
+	&"CH01_05": [
+		"mem_frag_ch01_first_order — First Order: a cut command echoes over the burning field, but the speaker and intent stay unclear."
+	]
+}
+
+const CH01_STAGE_EVIDENCE_LOG: Dictionary = {
+	&"CH01_05": [
+		"flag_evidence_hardren_seal_obtained — Hardren seal recovered; the ash-field command chain can be traced north toward the border evidence trail."
+	]
+}
+
+const CH01_STAGE_LETTER_LOG: Dictionary = {
+	&"CH01_05": [
+		"Letter from Serin — \"The name on your scabbard is enough for now. We move north together and keep the survivors behind us safe.\""
+	]
+}
+
 enum BattlePhase {
     BATTLE_INIT,
     PLAYER_PHASE_START,
@@ -106,6 +124,7 @@ var selected_unit: UnitActor
 var reachable_cells: Array = []
 var pending_move_origins: Dictionary = {}
 var battle_reward_log: Array[String] = []
+var last_result_summary: Dictionary = {}
 var equipped_accessory_by_unit_id: Dictionary = {}
 var equipped_weapon_by_unit_id: Dictionary = {}
 var equipped_armor_by_unit_id: Dictionary = {}
@@ -159,6 +178,7 @@ func bootstrap_battle() -> void:
     current_phase = BattlePhase.BATTLE_INIT
     phase_transition_history.clear()
     battle_reward_log.clear()
+    last_result_summary.clear()
     boss_marked_target_id = -1
     boss_charge_pending = false
     enemy_attack_bonus_by_unit.clear()
@@ -712,22 +732,24 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
             _remove_unit_from_roster(attacker)
 
     # 지원 공격: 공격자가 아군이고 인접 동료 중 bond 3+ 있으면 발동
+    var support_attack_triggered := false
     if attacker.faction == "ally" and bond_service != null and not bool(result.get("defender_defeated", false)):
-        _try_resolve_support_attack(attacker, defender)
+        support_attack_triggered = _try_resolve_support_attack(attacker, defender)
 
-    _sync_hud_phase(reason, {
+    _sync_hud_phase("support_attack_resolved" if support_attack_triggered else reason, {
         "attacker": attacker.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,
         "round": round_index
     })
 
-func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> void:
+func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bool:
     for unit: UnitActor in ally_units:
         if unit == attacker or not is_instance_valid(unit) or unit.is_defeated():
             continue
         if bond_service.can_support_attack(attacker, unit):
             _resolve_support_attack(unit, defender)
-            break  # 첫 번째 지원자만
+            return true  # 첫 번째 지원자만
+    return false
 
 func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
     var support_result: Dictionary = combat_service.resolve_attack(supporter, defender, supporter.get_default_skill(), {
@@ -882,24 +904,52 @@ func _check_battle_end() -> bool:
     return false
 
 func _on_battle_victory() -> void:
+    var result_summary := {
+        "outcome": "victory",
+        "stage_id": String(stage_data.stage_id) if stage_data != null else "",
+        "objective": _get_objective_text(),
+        "reward_entries": battle_reward_log.duplicate(),
+        "memory_entries": _get_stage_memory_entries(),
+        "evidence_entries": _get_stage_evidence_entries(),
+        "letter_entries": _get_stage_letter_entries(),
+        "fragment_id": "",
+        "command_unlocked": "",
+        "recovered_fragment_ids": [],
+        "unlocked_command_ids": [],
+        "support_attack_count": 0,
+        "burden_delta": 0,
+        "trust_delta": 0,
+    }
+    var burden_before := 0
+    var trust_before := 0
+    if progression_service != null:
+        var before_data = progression_service.get_data()
+        if before_data != null:
+            burden_before = before_data.burden
+            trust_before = before_data.trust
     if telemetry_service != null:
         telemetry_service.record_battle_end(&"victory", round_index)
     if progression_service != null and stage_data != null:
-        var fragment_id := StringName(String(stage_data.stage_id) + "_fragment")
-        var unlock_result := progression_service.recover_fragment(fragment_id)
+        var fragment_id := progression_service.get_fragment_id_for_stage(stage_data.stage_id)
+        var unlock_result := progression_service.recover_stage_fragment(stage_data.stage_id)
+        result_summary["fragment_id"] = String(fragment_id)
         if not bool(unlock_result.get("already_known", true)):
             var cmd = unlock_result.get("command_unlocked", null)
             if cmd != null:
+                result_summary["command_unlocked"] = String(cmd)
                 print("[BattleController] Fragment recovered: %s → command unlocked: %s" % [fragment_id, cmd])
             # 기억 조각 획득 연출 트리거
             if cutscene_player != null:
-                var flash_id: StringName = StringName(String(stage_data.stage_id) + "_fragment_flash")
+                var flash_id := progression_service.get_fragment_flash_cutscene_id_for_stage(stage_data.stage_id)
                 var flash_data = CutsceneCatalog.get_cutscene(flash_id)
                 if flash_data != null:
                     cutscene_player.play(flash_data)
     # 클리어 컷씬 재생
     if cutscene_player != null and stage_data != null and stage_data.clear_cutscene_id != &"":
         var clear_data = CutsceneCatalog.get_cutscene(stage_data.clear_cutscene_id)
+        if clear_data == null:
+            var fallback_clear_id := progression_service.get_clear_cutscene_id_for_stage(stage_data.stage_id)
+            clear_data = CutsceneCatalog.get_cutscene(fallback_clear_id)
         if clear_data != null:
             cutscene_player.play(clear_data)
     # bond → trust 연동: 팀 평균 bond 기반 소량 trust 상승
@@ -907,6 +957,24 @@ func _on_battle_victory() -> void:
         var avg: float = bond_service.get_squad_trust_average()
         if avg >= 1.0:
             progression_service.apply_trust_delta(1, "bond_victory_trust")
+    if progression_service != null:
+        var after_data = progression_service.get_data()
+        if after_data != null:
+            result_summary["burden_delta"] = after_data.burden - burden_before
+            result_summary["trust_delta"] = after_data.trust - trust_before
+            result_summary["recovered_fragment_ids"] = after_data.get_recovered_fragment_ids()
+            result_summary["unlocked_command_ids"] = after_data.get_unlocked_command_ids()
+    if telemetry_service != null:
+        var session_snapshot: Dictionary = telemetry_service.get_session_snapshot()
+        var command_usage: Dictionary = session_snapshot.get(TelemetryService.KEY_COMMAND_USAGE, {})
+        result_summary["support_attack_count"] = int(command_usage.get("support_attack", 0))
+    last_result_summary = result_summary
+    if int(last_result_summary.get("support_attack_count", 0)) > 0:
+        hud.set_transition_reason("support_attack_resolved", {
+            "count": int(last_result_summary.get("support_attack_count", 0)),
+            "round": round_index
+        })
+    hud.show_result(_build_result_summary_text(last_result_summary))
 
 func _on_battle_defeat() -> void:
     if telemetry_service != null:
@@ -1413,6 +1481,69 @@ func _record_reward_entry(entry_text: String) -> void:
 
     if not battle_reward_log.has(normalized_entry):
         battle_reward_log.append(normalized_entry)
+
+func get_last_result_summary() -> Dictionary:
+    return last_result_summary.duplicate(true)
+
+func _get_stage_memory_entries() -> Array[String]:
+    if stage_data == null:
+        return []
+    return _variant_to_string_array(CH01_STAGE_MEMORY_LOG.get(stage_data.stage_id, []))
+
+func _get_stage_evidence_entries() -> Array[String]:
+    if stage_data == null:
+        return []
+    return _variant_to_string_array(CH01_STAGE_EVIDENCE_LOG.get(stage_data.stage_id, []))
+
+func _get_stage_letter_entries() -> Array[String]:
+    if stage_data == null:
+        return []
+    return _variant_to_string_array(CH01_STAGE_LETTER_LOG.get(stage_data.stage_id, []))
+
+func _build_result_summary_text(summary: Dictionary) -> String:
+    var lines: Array[String] = []
+    lines.append("Victory")
+    lines.append("Objective: %s" % String(summary.get("objective", "")))
+    var fragment_id := String(summary.get("fragment_id", ""))
+    if not fragment_id.is_empty():
+        lines.append("Memory Fragment: %s" % fragment_id)
+    var fragment_ids := _variant_to_string_array(summary.get("recovered_fragment_ids", []))
+    if not fragment_ids.is_empty():
+        lines.append("Recovered Fragments: %s" % ", ".join(fragment_ids))
+    var command_unlocked := String(summary.get("command_unlocked", ""))
+    if not command_unlocked.is_empty():
+        lines.append("Command Unlocked: %s" % command_unlocked)
+    var command_ids := _variant_to_string_array(summary.get("unlocked_command_ids", []))
+    if not command_ids.is_empty():
+        lines.append("Unlocked Commands: %s" % ", ".join(command_ids))
+    var support_attack_count := int(summary.get("support_attack_count", 0))
+    if support_attack_count > 0:
+        lines.append("Support Follow-Ups: %d" % support_attack_count)
+    lines.append("Burden Delta: %+d" % int(summary.get("burden_delta", 0)))
+    lines.append("Trust Delta: %+d" % int(summary.get("trust_delta", 0)))
+    _append_result_section(lines, "Rewards", _variant_to_string_array(summary.get("reward_entries", [])))
+    _append_result_section(lines, "Memory", _variant_to_string_array(summary.get("memory_entries", [])))
+    _append_result_section(lines, "Evidence", _variant_to_string_array(summary.get("evidence_entries", [])))
+    _append_result_section(lines, "Letters", _variant_to_string_array(summary.get("letter_entries", [])))
+    return "\n".join(lines)
+
+func _append_result_section(lines: Array[String], heading: String, entries: Array[String]) -> void:
+    lines.append("%s:" % heading)
+    if entries.is_empty():
+        lines.append("- None")
+        return
+    for entry in entries:
+        lines.append("- %s" % entry)
+
+func _variant_to_string_array(value: Variant) -> Array[String]:
+    if value is Array[String]:
+        return (value as Array[String]).duplicate()
+    if value is Array:
+        var result: Array[String] = []
+        for item in value:
+            result.append(String(item))
+        return result
+    return []
 
 func _get_inventory_panel_title() -> String:
     if stage_data == null:

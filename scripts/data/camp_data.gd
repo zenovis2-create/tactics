@@ -7,6 +7,11 @@ extends Resource
 @export var current_chapter: StringName = &""
 @export var burden: int = 0
 @export var trust: int = 0
+@export var ending_tendency: StringName = &"undetermined"
+@export var recovered_fragment_count: int = 0
+@export var unlocked_command_count: int = 0
+@export var recovered_fragment_ids: Array[String] = []
+@export var unlocked_command_ids: Array[String] = []
 
 ## 해금된 허브 축 (sortie/equipment/records/storage/dismantle/forge/recall)
 @export var unlocked_axes: Array[StringName] = []
@@ -38,6 +43,11 @@ func to_debug_dict() -> Dictionary:
         "chapter": current_chapter,
         "burden": burden,
         "trust": trust,
+        "ending_tendency": ending_tendency,
+        "recovered_fragments": recovered_fragment_count,
+        "unlocked_commands": unlocked_command_count,
+        "recovered_fragment_ids": recovered_fragment_ids.duplicate(),
+        "unlocked_command_ids": unlocked_command_ids.duplicate(),
         "unlocked_axes": unlocked_axes,
         "pending_memory": pending_memory_entries.size(),
         "pending_evidence": pending_evidence_entries.size(),

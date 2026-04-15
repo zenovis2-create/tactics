@@ -1219,7 +1219,10 @@ func _enter_camp_state() -> void:
                 "evidence_entries": _variant_to_string_array(CH01_STAGE_EVIDENCE_LOG.get(_current_stage.stage_id, [])),
                 "letter_entries": _variant_to_string_array(CH01_STAGE_LETTER_LOG.get(_current_stage.stage_id, []))
             }
-        _camp_controller.enter_camp(&"ch01", stage_result)
+        var progression_data: ProgressionData = null
+        if _battle_controller != null and _battle_controller.progression_service != null:
+            progression_data = _battle_controller.progression_service.get_data()
+        _camp_controller.enter_camp(&"ch01", stage_result, progression_data)
     _autosave_progression()
     _set_panel_state(
         CampaignState.MODE_CAMP,
@@ -1267,6 +1270,17 @@ func _build_camp_summary() -> String:
         "Hardren seal evidence confirms the first border trail north.",
         "Next destination: move north toward the first campaign evidence trail."
     ]
+
+    var progression_data: ProgressionData = null
+    if _battle_controller != null and _battle_controller.progression_service != null:
+        progression_data = _battle_controller.progression_service.get_data()
+    if progression_data != null:
+        lines.append("Burden / Trust: %d / %d" % [progression_data.burden, progression_data.trust])
+        lines.append("Ending tendency: %s" % String(progression_data.ending_tendency))
+        lines.append("Recovered fragments: %d" % progression_data.recovered_fragments.size())
+        lines.append("Recovered fragment ids: %s" % ", ".join(progression_data.get_recovered_fragment_ids()))
+        lines.append("Unlocked commands: %d" % progression_data.unlocked_commands.size())
+        lines.append("Unlocked command ids: %s" % ", ".join(progression_data.get_unlocked_command_ids()))
 
     if _current_stage != null and not _current_stage.next_destination_summary.is_empty():
         lines.append(_current_stage.next_destination_summary)
@@ -1723,6 +1737,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
     var letter_entries: Array[String] = []
     var dialogue_entries: Array[String] = []
     var presentation_cards: Array[Dictionary] = []
+    var camp_progression_alerts: Array[String] = []
     if _battle_controller != null:
         party_entries = _battle_controller.get_party_summary_lines()
         party_details = _battle_controller.get_party_detail_entries()
@@ -1761,6 +1776,13 @@ func _build_panel_payload(mode: String) -> Dictionary:
         else:
             dialogue_entries = CH10_RESOLUTION_DIALOGUE.duplicate()
         presentation_cards = _build_camp_presentation_cards()
+        if _camp_controller != null:
+            var camp_summary := _camp_controller.get_camp_summary()
+            if not camp_summary.is_empty():
+                camp_progression_alerts = _merge_unique_lines(camp_progression_alerts, [
+                    "Burden %d / Trust %d" % [int(camp_summary.get("burden", 0)), int(camp_summary.get("trust", 0))],
+                    "Fragments %d / Commands %d" % [int(camp_summary.get("recovered_fragments", 0)), int(camp_summary.get("unlocked_commands", 0))]
+                ])
     elif mode == CampaignState.MODE_COMPLETE and _active_chapter_id == CHAPTER_CH10:
         dialogue_entries = CH10_RESOLUTION_DIALOGUE.duplicate()
         presentation_cards = _build_resolution_presentation_cards()
@@ -1777,6 +1799,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
             recommendation = "Read the handoff, check party readiness, then continue to the next stage."
         CampaignState.MODE_CAMP:
             alerts = _build_camp_alerts(memory_entries, evidence_entries, letter_entries, inventory_entries)
+            alerts = _merge_unique_lines(alerts, camp_progression_alerts)
             recommendation = _build_camp_recommendation(memory_entries, evidence_entries, letter_entries, inventory_entries)
             active_section = CampaignPanel.SECTION_RECORDS
             section_badges = _build_camp_section_badges(party_entries, inventory_entries, memory_entries, evidence_entries, letter_entries)
@@ -2276,6 +2299,7 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             armor_name = equipped_armor.display_name
         if equipped_accessory != null:
             accessory_name = equipped_accessory.display_name
+        var accessory_summary: String = equipped_accessory.summary if equipped_accessory != null else ""
         var allowed_weapon_types: PackedStringArray = unit_data.get_allowed_weapon_types()
         var allowed_armor_types: PackedStringArray = unit_data.get_allowed_armor_types()
         var eligible_weapon_ids: Array[StringName] = _get_available_weapon_ids_for_unit(unit_data.unit_id)
@@ -2293,6 +2317,7 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             "weapon_slot": weapon_name,
             "armor_slot": armor_name,
             "accessory_slot": accessory_name,
+            "accessory_summary": accessory_summary,
             "weapon_preview_path": _get_weapon_preview_path(equipped_weapon_id),
             "armor_preview_path": _get_armor_preview_path(equipped_armor_id),
             "accessory_preview_path": _get_accessory_preview_path(equipped_accessory_id),

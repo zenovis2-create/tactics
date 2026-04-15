@@ -46,6 +46,11 @@ func enter_camp(
     _camp_data.stage_clear_result = stage_clear_result
     _camp_data.burden = progression.burden if progression != null else 0
     _camp_data.trust = progression.trust if progression != null else 0
+    _camp_data.ending_tendency = progression.ending_tendency if progression != null else &"undetermined"
+    _camp_data.recovered_fragment_count = progression.recovered_fragments.size() if progression != null else 0
+    _camp_data.unlocked_command_count = progression.unlocked_commands.size() if progression != null else 0
+    _camp_data.recovered_fragment_ids = progression.get_recovered_fragment_ids() if progression != null else []
+    _camp_data.unlocked_command_ids = progression.get_unlocked_command_ids() if progression != null else []
     _camp_data.unlocked_axes = _compute_unlocked_axes(chapter)
     _build_pending_notifications(stage_clear_result)
     _event_log.append({"event": "camp_entered", "chapter": chapter})
@@ -65,6 +70,11 @@ func get_camp_summary() -> Dictionary:
         "chapter": _camp_data.current_chapter,
         "burden": _camp_data.burden,
         "trust": _camp_data.trust,
+        "ending_tendency": _camp_data.ending_tendency,
+        "recovered_fragments": _camp_data.recovered_fragment_count,
+        "unlocked_commands": _camp_data.unlocked_command_count,
+        "recovered_fragment_ids": _camp_data.recovered_fragment_ids.duplicate(),
+        "unlocked_command_ids": _camp_data.unlocked_command_ids.duplicate(),
         "unlocked_axes": _camp_data.unlocked_axes.duplicate(),
         "pending_notifications": _camp_data.get_notification_count(),
         "has_new_records": _camp_data.has_pending_notifications(),

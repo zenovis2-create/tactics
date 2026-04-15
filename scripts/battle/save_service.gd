@@ -11,6 +11,8 @@ const SLOT_PREFIX := "slot_"
 const SLOT_EXT := ".tres"
 const SIDECAR_EXT := ".json"
 
+const DEFAULT_ENDING_TENDENCY := "undetermined"
+
 func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 
@@ -57,18 +59,21 @@ func slot_exists(slot: int = 0) -> bool:
 
 ## Returns the burden/trust/tendency from a slot without full load (reads sidecar JSON).
 func peek_slot(slot: int = 0) -> Dictionary:
+	var slot_has_save := slot_exists(slot)
+	var metadata := _build_slot_metadata(slot_has_save)
 	var sidecar := _sidecar_path(slot)
 	if not FileAccess.file_exists(sidecar):
-		return {}
+		return metadata
 	var file := FileAccess.open(sidecar, FileAccess.READ)
 	if file == null:
-		return {}
+		return metadata
 	var text := file.get_as_text()
 	file.close()
 	var parsed: Variant = JSON.parse_string(text)
 	if parsed is Dictionary:
-		return parsed as Dictionary
-	return {}
+		for key: String in (parsed as Dictionary).keys():
+			metadata[key] = parsed[key]
+	return metadata
 
 # --- Internal ---
 
@@ -84,6 +89,18 @@ func _write_sidecar(data: ProgressionData, slot: int) -> void:
 	if file == null:
 		return
 	var snapshot := data.to_debug_dict()
+	snapshot["exists"] = true
+	snapshot["chapter"] = ""
 	snapshot["saved_at"] = Time.get_datetime_string_from_system()
 	file.store_string(JSON.stringify(snapshot, "\t"))
 	file.close()
+
+func _build_slot_metadata(exists: bool) -> Dictionary:
+	return {
+		"exists": exists,
+		"chapter": "",
+		"burden": 0,
+		"trust": 0,
+		"ending_tendency": DEFAULT_ENDING_TENDENCY,
+		"saved_at": ""
+	}

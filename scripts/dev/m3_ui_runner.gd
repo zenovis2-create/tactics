@@ -29,9 +29,15 @@ func _run() -> void:
         return
     if not await _assert_battle_hud_inventory_and_input_block(battle):
         return
+    if not _assert_battle_result_surface(battle):
+        return
     if not await _advance_campaign_to_camp(main):
         return
     if not _assert_campaign_panel_snapshot(main.campaign_panel):
+        return
+    if not _assert_campaign_save_entry(main):
+        return
+    if not _assert_result_to_record_handoff(main):
         return
     if not await _assert_campaign_panel_selection_persistence(main):
         return
@@ -212,6 +218,48 @@ func _assert_hud_state_after_move(battle) -> void:
         _fail("Cancel button should remain enabled after moving.")
         return
 
+func _assert_battle_result_surface(battle) -> bool:
+    if not battle.hud.has_method("get_result_snapshot"):
+        return _fail("BattleHUD is missing get_result_snapshot() for result readability verification.")
+
+    battle.hud.show_result("Victory\nObjective: Demo objective\nMemory:\n- Demo entry")
+    var result_snapshot: Dictionary = battle.hud.get_result_snapshot()
+    if String(result_snapshot.get("title", "")) != "Victory":
+        return _fail("BattleHUD result surface should promote the first line into the dialog title.")
+    if String(result_snapshot.get("body", "")).find("Objective: Demo objective") == -1:
+        return _fail("BattleHUD result body should keep the structured objective copy.")
+    if String(result_snapshot.get("body", "")).find("Memory:") == -1:
+        return _fail("BattleHUD result body should preserve section headings for readability.")
+    if not bool(result_snapshot.get("visible", false)):
+        return _fail("BattleHUD result popup should be visible after show_result().")
+    battle.hud.result_popup.hide()
+    return true
+
+func _assert_campaign_save_entry(main) -> bool:
+    var save_button: Button = main.campaign_panel.get_node_or_null("Panel/Margin/Content/FooterRow/SaveButton")
+    if save_button == null:
+        return _fail("CampaignPanel is missing SaveButton for camp save flow.")
+    if not save_button.visible or save_button.disabled:
+        return _fail("CampaignPanel save entry should be visible and enabled in camp mode.")
+    save_button.pressed.emit()
+    if main.save_load_panel == null or not main.save_load_panel.visible:
+        return _fail("Camp save entry should open the shared SaveLoadPanel.")
+    var panel_snapshot: Dictionary = main.save_load_panel.get_layout_snapshot()
+    if String(panel_snapshot.get("mode", "")) != "save":
+        return _fail("Camp save entry should open SaveLoadPanel in save mode.")
+    main.save_load_panel.close()
+    return true
+
+func _assert_result_to_record_handoff(main) -> bool:
+    var result_summary: Dictionary = main.battle_controller.get_last_result_summary()
+    var panel_snapshot: Dictionary = main.campaign_panel.get_snapshot()
+    for key: String in ["memory_entries", "evidence_entries", "letter_entries"]:
+        var result_entries: Array = result_summary.get(key, [])
+        var panel_entries: Array = panel_snapshot.get(key, [])
+        if result_entries != panel_entries:
+            return _fail("Battle result and camp panel should expose the same %s after handoff." % key)
+    return true
+
 func _advance_campaign_to_camp(main) -> bool:
     var safety: int = 0
     while safety < 12:
@@ -284,6 +332,14 @@ func _assert_campaign_panel_snapshot(campaign_panel) -> bool:
     if recommendation.is_empty():
         return _fail("CampaignPanel recommendation was empty in camp mode.")
 
+    var body_text: String = String(snapshot.get("body", ""))
+    if body_text.find("Burden / Trust:") == -1:
+        return _fail("CampaignPanel camp body should surface the current Burden / Trust bands.")
+    if body_text.find("Recovered fragments:") == -1:
+        return _fail("CampaignPanel camp body should expose recovered fragment count.")
+    if body_text.find("Unlocked commands:") == -1:
+        return _fail("CampaignPanel camp body should expose unlocked command count.")
+
     var flow_text: String = String(snapshot.get("flow_text", ""))
     if flow_text.is_empty():
         return _fail("CampaignPanel flow_text was empty in camp mode.")
@@ -343,6 +399,11 @@ func _assert_campaign_panel_snapshot(campaign_panel) -> bool:
     if String(section_badges.get("party", "")).is_empty():
         return _fail("CampaignPanel party badge should not be empty in camp mode.")
 
+    var alerts: Array = snapshot.get("alerts", [])
+    var joined_alerts := "\n".join(alerts)
+    if joined_alerts.find("Burden") == -1 or joined_alerts.find("Fragments") == -1:
+        return _fail("CampaignPanel alerts should surface burden/trust and fragment/command progression summary.")
+
     var records_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/SectionTabs/RecordsButton")
     if records_button == null or records_button.text.find("NEW") == -1:
         return _fail("CampaignPanel records button should surface a NEW badge.")
@@ -395,7 +456,7 @@ func _assert_campaign_panel_snapshot(campaign_panel) -> bool:
     if letter_heading == null or letter_heading.text.find("(") == -1:
         return _fail("CampaignPanel letter heading should expose the unlocked letter count.")
 
-    var advance_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/AdvanceButton")
+    var advance_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/FooterRow/AdvanceButton")
     if advance_button == null:
         return _fail("CampaignPanel is missing AdvanceButton.")
 

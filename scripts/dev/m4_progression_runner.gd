@@ -78,6 +78,13 @@ func _assert_fragment_command_unlock(svc: ProgressionService) -> bool:
 		return _fail("ch01_fragment should unlock tactical_shift, got: %s" % str(result.get("command_unlocked")))
 	if not fresh.get_data().has_command(&"tactical_shift"):
 		return _fail("tactical_shift should be present in unlocked_commands after fragment recovery")
+	var debug_snapshot := fresh.get_data().to_debug_dict()
+	var fragment_ids: Array = debug_snapshot.get("recovered_fragments", [])
+	if fragment_ids.is_empty() or String(fragment_ids[0]) != "ch01_fragment":
+		return _fail("Progression debug snapshot should expose recovered fragment ids after unlock")
+	var command_ids: Array = debug_snapshot.get("unlocked_commands", [])
+	if command_ids.is_empty() or String(command_ids[0]) != "tactical_shift":
+		return _fail("Progression debug snapshot should expose unlocked command ids after unlock")
 	fresh.queue_free()
 	return true
 

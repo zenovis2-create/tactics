@@ -4,6 +4,7 @@ extends Control
 const CampaignState = preload("res://scripts/campaign/campaign_state.gd")
 
 signal advance_requested
+signal save_panel_requested
 signal deployment_assignment_requested(unit_id: StringName)
 signal weapon_cycle_requested(unit_id: StringName)
 signal armor_cycle_requested(unit_id: StringName)
@@ -98,7 +99,8 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var evidence_list: RichTextLabel = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/EvidenceList
 @onready var letter_heading_label: Label = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/LetterHeading
 @onready var letter_list: RichTextLabel = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/LetterList
-@onready var advance_button: Button = $Panel/Margin/Content/AdvanceButton
+@onready var advance_button: Button = $Panel/Margin/Content/FooterRow/AdvanceButton
+@onready var save_button: Button = $Panel/Margin/Content/FooterRow/SaveButton
 @onready var panel: PanelContainer = $Panel
 
 var _compact_layout: bool = false
@@ -128,6 +130,7 @@ var _available_accessory_entries: Array[String] = []
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
     advance_button.pressed.connect(_on_advance_pressed)
+    save_button.pressed.connect(_on_save_pressed)
     summary_button.pressed.connect(func() -> void: _select_section(SECTION_SUMMARY))
     party_button.pressed.connect(func() -> void: _select_section(SECTION_PARTY))
     inventory_button.pressed.connect(func() -> void: _select_section(SECTION_INVENTORY))
@@ -184,6 +187,8 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     letter_list.text = _format_lines_for_panel(_letter_entries, "No letters received yet.")
     advance_button.text = button_text
     advance_button.custom_minimum_size = Vector2(0.0, PRIMARY_CTA_HEIGHT)
+    save_button.visible = mode == CampaignState.MODE_CAMP
+    save_button.disabled = mode != CampaignState.MODE_CAMP
     _sync_section_button_text()
     _rebuild_presentation_cards()
 
@@ -255,6 +260,8 @@ func hide_panel() -> void:
     party_accessory_button.text = "Equip Accessory"
     party_accessory_button.disabled = true
     party_accessory_button.tooltip_text = "Unlock or recover accessories before equipping one."
+    save_button.visible = false
+    save_button.disabled = true
     inventory_heading_label.text = "Inventory Updates"
     inventory_list.text = ""
     memory_heading_label.text = "Memory"
@@ -660,12 +667,13 @@ func _render_selected_party(entry: Dictionary) -> void:
         party_accessory_button.text = "No Accessories"
         party_accessory_button.disabled = true
         party_accessory_button.tooltip_text = "No accessories are unlocked for this camp state."
-        accessory_hint_label.text = _build_accessory_eligibility_text(0)
+        accessory_hint_label.text = _build_accessory_hint_text("", 0)
     else:
         party_accessory_button.text = "Cycle Accessory"
         party_accessory_button.disabled = false
         party_accessory_button.tooltip_text = "Swap to the next unlocked accessory for this unit."
-        accessory_hint_label.text = _build_accessory_eligibility_text(
+        accessory_hint_label.text = _build_accessory_hint_text(
+            str(entry.get("accessory_summary", "")),
             int(entry.get("eligible_accessory_count", _available_accessory_entries.size()))
         )
 
@@ -701,6 +709,13 @@ func _build_equipment_eligibility_text(slot_kind: String, allowed_types: Array[S
 
 func _build_accessory_eligibility_text(eligible_count: int) -> String:
     return "All recruits may equip accessories. Eligible: %d unlocked." % eligible_count
+
+func _build_accessory_hint_text(summary_text: String, eligible_count: int) -> String:
+    var summary := summary_text.strip_edges()
+    var eligibility := _build_accessory_eligibility_text(eligible_count)
+    if summary.is_empty():
+        return eligibility
+    return "%s\n%s" % [summary, eligibility]
 
 func _set_slot_preview(texture_rect: TextureRect, resource_path: String) -> void:
     if texture_rect == null:
@@ -771,6 +786,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_advance_pressed() -> void:
     ui_cue_requested.emit("camp_next_battle_confirm_01" if _current_mode == CampaignState.MODE_CAMP else "ui_common_confirm_01")
     advance_requested.emit()
+
+func _on_save_pressed() -> void:
+    ui_cue_requested.emit("ui_inventory_open_01")
+    save_panel_requested.emit()
 
 func _select_relative_section(offset: int) -> bool:
     var current_index := SECTION_ORDER.find(_active_section)

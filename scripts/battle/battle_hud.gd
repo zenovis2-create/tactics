@@ -60,6 +60,8 @@ var _compact_layout: bool = false
 var _last_focus_owner: Control
 var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
+var _last_result_title: String = "Battle Result"
+var _last_result_body: String = ""
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -216,8 +218,26 @@ func get_input_blocking_rects() -> Array[Rect2]:
     return rects
 
 func show_result(result_text: String) -> void:
-    result_popup.dialog_text = result_text
+    var normalized_text := result_text.strip_edges()
+    var lines := normalized_text.split("\n", false)
+    _last_result_title = "Battle Result"
+    _last_result_body = normalized_text
+    if not lines.is_empty():
+        var heading := String(lines[0]).strip_edges()
+        if not heading.is_empty():
+            _last_result_title = heading
+            if lines.size() > 1:
+                _last_result_body = "\n".join(lines.slice(1))
+    result_popup.title = _last_result_title
+    result_popup.dialog_text = _last_result_body
     result_popup.popup_centered()
+
+func get_result_snapshot() -> Dictionary:
+    return {
+        "title": _last_result_title,
+        "body": _last_result_body,
+        "visible": result_popup.visible,
+    }
 
 func _unhandled_input(event: InputEvent) -> void:
     if not inventory_panel.visible:
@@ -508,6 +528,8 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("danger", "Danger", "Enemy pressure is active. Recheck exposed lanes.")
         "interaction_resolved":
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
+        "support_attack_resolved":
+            _show_telegraph_surface("danger", "Support Follow-Up", "An allied bond trigger added a follow-up strike.")
         _:
             _clear_telegraph_surface()
 
@@ -543,6 +565,8 @@ func _emit_battle_cue_for_reason(reason: String) -> void:
             ui_cue_requested.emit("battle_state_player_phase_01")
         "interaction_resolved":
             ui_cue_requested.emit("camp_recommend_focus_01")
+        "support_attack_resolved":
+            ui_cue_requested.emit("battle_hit_confirm_01")
         _:
             pass
 

@@ -17,6 +17,7 @@ signal panel_closed
 ## 외부에서 주입 (main.gd에서 연결)
 var save_service: SaveService = null
 var _mode: String = "save"  # "save" or "load"
+var _pending_delete_slot: int = -1
 
 @onready var slot_cards: VBoxContainer = $Panel/Margin/Content/SlotCards if has_node("Panel/Margin/Content/SlotCards") else null
 @onready var close_button: Button = $Panel/Margin/Content/CloseButton if has_node("Panel/Margin/Content/CloseButton") else null
@@ -25,6 +26,7 @@ var _mode: String = "save"  # "save" or "load"
 ## 패널 열기
 func open_save_mode() -> void:
     _mode = "save"
+    _pending_delete_slot = -1
     if title_label != null:
         title_label.text = "저장"
     refresh_slots()
@@ -32,12 +34,14 @@ func open_save_mode() -> void:
 
 func open_load_mode() -> void:
     _mode = "load"
+    _pending_delete_slot = -1
     if title_label != null:
         title_label.text = "불러오기"
     refresh_slots()
     visible = true
 
 func close() -> void:
+    _pending_delete_slot = -1
     visible = false
     panel_closed.emit()
 
@@ -62,7 +66,8 @@ func get_layout_snapshot() -> Dictionary:
         "mode": _mode,
         "visible": visible,
         "slot_count": SLOT_COUNT,
-        "save_service_connected": save_service != null
+        "save_service_connected": save_service != null,
+        "pending_delete_slot": _pending_delete_slot
     }
 
 # --- Private ---
@@ -81,11 +86,12 @@ func _build_slot_card(slot: int) -> Control:
     if info.is_empty() or not bool(info.get("exists", false)):
         lbl.text = "슬롯 %d — 비어 있음" % slot
     else:
-        lbl.text = "슬롯 %d | CH: %s | 부담:%d 신뢰:%d | %s" % [
+        lbl.text = "슬롯 %d | CH: %s | 부담:%d 신뢰:%d | 엔딩:%s | %s" % [
             slot,
             String(info.get("chapter", &"")),
             int(info.get("burden", 0)),
             int(info.get("trust", 0)),
+            String(info.get("ending_tendency", "undetermined")),
             String(info.get("saved_at", ""))
         ]
     card.add_child(lbl)
@@ -107,23 +113,30 @@ func _build_slot_card(slot: int) -> Control:
 
     if bool(info.get("exists", false)):
         var del_btn: Button = Button.new()
-        del_btn.text = "삭제"
+        del_btn.text = "삭제 확인" if _pending_delete_slot == slot else "삭제"
         del_btn.pressed.connect(func() -> void: _on_delete_pressed(slot))
         btn_row.add_child(del_btn)
 
     return card
 
 func _on_save_pressed(slot: int) -> void:
+    _pending_delete_slot = -1
     save_requested.emit(slot)
 
 func _on_load_pressed(slot: int) -> void:
+    _pending_delete_slot = -1
     var data: ProgressionData = null
     if save_service != null:
         data = save_service.load_progression(slot)
     load_requested.emit(slot, data)
 
 func _on_delete_pressed(slot: int) -> void:
+    if _pending_delete_slot != slot:
+        _pending_delete_slot = slot
+        refresh_slots()
+        return
     if save_service != null:
         save_service.delete_slot(slot)
+    _pending_delete_slot = -1
     delete_requested.emit(slot)
     refresh_slots()

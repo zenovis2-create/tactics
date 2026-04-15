@@ -61,6 +61,32 @@ var _log: Array[Dictionary] = []
 
 # --- Public API ---
 
+static func get_fragment_id_for_stage(stage_id: StringName) -> StringName:
+	var stage_text := String(stage_id).to_lower()
+	if stage_text.is_empty():
+		return &""
+	if stage_text.ends_with("_fragment"):
+		return StringName(stage_text)
+
+	var chapter_prefix := _extract_chapter_prefix(stage_text)
+	if not chapter_prefix.is_empty():
+		return StringName("%s_fragment" % chapter_prefix)
+
+	return StringName("%s_fragment" % stage_text)
+
+static func get_fragment_flash_cutscene_id_for_stage(stage_id: StringName) -> StringName:
+	var fragment_id := get_fragment_id_for_stage(stage_id)
+	if fragment_id == &"":
+		return &""
+	return StringName("%s_flash" % String(fragment_id))
+
+static func get_clear_cutscene_id_for_stage(stage_id: StringName) -> StringName:
+	var stage_text := String(stage_id).to_lower()
+	var chapter_prefix := _extract_chapter_prefix(stage_text)
+	if chapter_prefix.is_empty():
+		return &""
+	return StringName("%s_clear" % chapter_prefix)
+
 func get_data() -> ProgressionData:
 	return _data
 
@@ -89,6 +115,12 @@ func apply_trust_delta(delta: int, reason: String) -> void:
 		"reason": reason
 	})
 	_evaluate_ending_tendency()
+
+func recover_stage_fragment(stage_id: StringName) -> Dictionary:
+	var fragment_id := get_fragment_id_for_stage(stage_id)
+	if fragment_id == &"":
+		return {"fragment_id": "", "already_known": true, "command_unlocked": null}
+	return recover_fragment(fragment_id)
 
 func recover_fragment(fragment_id: StringName) -> Dictionary:
 	if _data.has_fragment(fragment_id):
@@ -151,3 +183,21 @@ func _emit_log(event: String, payload: Dictionary) -> void:
 	entry.merge(payload)
 	_log.append(entry)
 	print("[ProgressionService] ", event, " | ", payload)
+
+static func _extract_chapter_prefix(stage_text: String) -> String:
+	if not stage_text.begins_with("ch"):
+		return ""
+
+	var digits := ""
+	for index in range(2, stage_text.length()):
+		var char := stage_text[index]
+		if char >= "0" and char <= "9":
+			digits += char
+		else:
+			break
+
+	if digits.is_empty():
+		return ""
+	if digits.length() == 1:
+		digits = "0%s" % digits
+	return "ch%s" % digits

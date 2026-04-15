@@ -30,6 +30,20 @@ func has_fragment(fragment_id: StringName) -> bool:
 func has_command(command_id: StringName) -> bool:
 	return unlocked_commands.has(command_id)
 
+func get_recovered_fragment_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for fragment_id in recovered_fragments.keys():
+		ids.append(String(fragment_id))
+	ids.sort()
+	return ids
+
+func get_unlocked_command_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for command_id in unlocked_commands.keys():
+		ids.append(String(command_id))
+	ids.sort()
+	return ids
+
 func get_burden_band() -> int:
 	return clampi(burden, 0, 9)
 
@@ -41,6 +55,6 @@ func to_debug_dict() -> Dictionary:
 		"burden": burden,
 		"trust": trust,
 		"ending_tendency": String(ending_tendency),
-		"recovered_fragments": recovered_fragments.keys(),
-		"unlocked_commands": unlocked_commands.keys()
+		"recovered_fragments": get_recovered_fragment_ids(),
+		"unlocked_commands": get_unlocked_command_ids()
 	}

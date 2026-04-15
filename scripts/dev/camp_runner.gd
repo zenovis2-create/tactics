@@ -60,7 +60,7 @@ func _assert_enter_camp_returns_data(ctrl: CampController) -> bool:
 
 func _assert_summary_keys(ctrl: CampController) -> bool:
     var summary: Dictionary = ctrl.get_camp_summary()
-    for key: String in ["chapter", "burden", "trust", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries"]:
+    for key: String in ["chapter", "burden", "trust", "ending_tendency", "recovered_fragments", "unlocked_commands", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries"]:
         if not summary.has(key):
             return _fail("get_camp_summary() missing key: %s" % key)
     return true

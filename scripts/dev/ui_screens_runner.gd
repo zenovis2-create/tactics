@@ -11,8 +11,18 @@ extends SceneTree
 
 const TitleScreen = preload("res://scripts/ui/title_screen.gd")
 const DefeatScreen = preload("res://scripts/ui/defeat_screen.gd")
+const SaveLoadPanel = preload("res://scripts/ui/save_load_panel.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+
+const REQUIRED_SLOT_METADATA_KEYS := [
+    "exists",
+    "chapter",
+    "burden",
+    "trust",
+    "ending_tendency",
+    "saved_at"
+]
 
 var _failed: bool = false
 
@@ -22,11 +32,16 @@ func _initialize() -> void:
 func _run() -> void:
     var title: TitleScreen = TitleScreen.new()
     var defeat: DefeatScreen = DefeatScreen.new()
+    var panel: SaveLoadPanel = SaveLoadPanel.new()
     var svc: SaveService = SaveService.new()
     root.add_child(title)
     root.add_child(defeat)
+    root.add_child(panel)
     root.add_child(svc)
     await process_frame
+
+    panel.save_service = svc
+    title.setup_load_panel(panel)
 
     if not _assert_title_snapshot(title): return
     if not _assert_title_no_save(title, svc): return
@@ -34,7 +49,7 @@ func _run() -> void:
     if not _assert_defeat_snapshot(defeat): return
     if not _assert_defeat_no_autosave(defeat, svc): return
     if not _assert_defeat_with_autosave(defeat, svc): return
-    if not _assert_load_signal_title(title, svc): return
+    if not _assert_load_signal_title(title, panel, svc): return
 
     print("[PASS] ui_screens_runner: all assertions passed.")
     quit(0)
@@ -61,7 +76,10 @@ func _assert_title_no_save(title: TitleScreen, svc: SaveService) -> bool:
 func _assert_title_with_save(title: TitleScreen, svc: SaveService) -> bool:
     var data: ProgressionData = ProgressionData.new()
     data.burden = 1
+    data.ending_tendency = &"undetermined"
     svc.save_progression(data, 0)
+    if not _assert_slot_metadata_contract(svc.peek_slot(0), 1, 0, "undetermined"):
+        return false
     title.setup_save_service(svc)
     var snap: Dictionary = title.get_layout_snapshot()
     if not bool(snap.get("load_button_enabled", false)):
@@ -89,7 +107,10 @@ func _assert_defeat_no_autosave(defeat: DefeatScreen, svc: SaveService) -> bool:
 func _assert_defeat_with_autosave(defeat: DefeatScreen, svc: SaveService) -> bool:
     var data: ProgressionData = ProgressionData.new()
     data.burden = 2
+    data.ending_tendency = &"bad_ending"
     svc.save_progression(data, 0)
+    if not _assert_slot_metadata_contract(svc.peek_slot(0), 2, 0, "bad_ending"):
+        return false
     defeat.setup_save_service(svc)
     defeat.show_defeat(3)
     var snap: Dictionary = defeat.get_layout_snapshot()
@@ -99,23 +120,45 @@ func _assert_defeat_with_autosave(defeat: DefeatScreen, svc: SaveService) -> boo
     svc.delete_slot(0)
     return true
 
-func _assert_load_signal_title(title: TitleScreen, svc: SaveService) -> bool:
+func _assert_load_signal_title(title: TitleScreen, panel: SaveLoadPanel, svc: SaveService) -> bool:
     var data: ProgressionData = ProgressionData.new()
     data.trust = 3
+    data.ending_tendency = &"true_ending"
     svc.save_progression(data, 0)
+    if not _assert_slot_metadata_contract(svc.peek_slot(0), 0, 3, "true_ending"):
+        return false
     title.setup_save_service(svc)
 
-    # load_available이 true인 상태에서 _on_load_pressed()가 크래시 없이 동작하는지 확인
-    # 시그널 수신은 headless 람다 캡처 한계로 생략 — slot_exists 로직으로 대체 검증
+    # load_available이 true인 상태에서 _on_load_pressed()가 실제 load panel을 열어야 함
     var snap: Dictionary = title.get_layout_snapshot()
     if not bool(snap.get("load_button_enabled", false)):
         return _fail("load_button should be enabled before calling _on_load_pressed")
-    # _on_load_pressed() 직접 호출 → 크래시 없이 시그널 발화 (수신 검증 불필요)
     title._on_load_pressed()
-    # slot 0이 존재하는지 재확인 (삭제 안 됨 = 정상)
-    if not svc.slot_exists(0):
-        return _fail("slot 0 should still exist after _on_load_pressed")
+    if not panel.visible:
+        return _fail("TitleScreen load flow should open the SaveLoadPanel.")
+    var panel_snapshot: Dictionary = panel.get_layout_snapshot()
+    if String(panel_snapshot.get("mode", "")) != "load":
+        return _fail("TitleScreen load flow should open SaveLoadPanel in load mode.")
+    panel.close()
     svc.delete_slot(0)
+    return true
+
+func _assert_slot_metadata_contract(info: Dictionary, burden: int, trust: int, ending_tendency: String) -> bool:
+    for key: String in REQUIRED_SLOT_METADATA_KEYS:
+        if not info.has(key):
+            return _fail("slot metadata missing key: %s" % key)
+    if not bool(info.get("exists", false)):
+        return _fail("slot metadata exists should be true for saved slots")
+    if String(info.get("chapter", "")) != "":
+        return _fail("slot metadata chapter should default to empty string when chapter is unavailable")
+    if int(info.get("burden", -1)) != burden:
+        return _fail("slot metadata burden should be %d, got %d" % [burden, int(info.get("burden", -1))])
+    if int(info.get("trust", -1)) != trust:
+        return _fail("slot metadata trust should be %d, got %d" % [trust, int(info.get("trust", -1))])
+    if String(info.get("ending_tendency", "")) != ending_tendency:
+        return _fail("slot metadata ending_tendency should be '%s', got '%s'" % [ending_tendency, String(info.get("ending_tendency", ""))])
+    if String(info.get("saved_at", "")).is_empty():
+        return _fail("slot metadata saved_at should be non-empty for saved slots")
     return true
 
 func _fail(msg: String) -> bool:

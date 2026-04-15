@@ -38,6 +38,7 @@ func _ready() -> void:
         save_load_panel.save_service = _save_service
     if title_screen != null:
         title_screen.setup_save_service(_save_service)
+        title_screen.setup_load_panel(save_load_panel)
     if defeat_screen != null:
         defeat_screen.setup_save_service(_save_service)
 
@@ -70,6 +71,8 @@ func _ready() -> void:
     if save_load_panel != null:
         save_load_panel.save_requested.connect(_on_save_requested)
         save_load_panel.load_requested.connect(_on_save_load_requested)
+    if campaign_panel != null:
+        campaign_panel.save_panel_requested.connect(open_save_panel)
 
     # 타이틀 화면으로 시작
     _show_title()
@@ -103,6 +106,7 @@ func open_load_panel() -> void:
 func _show_title() -> void:
     if title_screen != null:
         title_screen.setup_save_service(_save_service)
+        title_screen.setup_load_panel(save_load_panel)
         title_screen.visible = true
     if battle_controller != null:
         battle_controller.visible = false

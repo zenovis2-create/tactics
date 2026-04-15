@@ -65,6 +65,20 @@ func _run() -> void:
         push_error("Lategame accessory runner expected Enoch to equip a late-game accessory.")
         quit(1)
         return
+    if String(enoch_detail.get("accessory_summary", "")).is_empty():
+        push_error("Lategame accessory runner expected equipped accessory flavor summary in party details.")
+        quit(1)
+        return
+
+    var accessory_hint = main.campaign_panel.get_node_or_null("Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack/HintLabel")
+    if accessory_hint == null:
+        push_error("Lategame accessory runner could not resolve accessory hint label.")
+        quit(1)
+        return
+    if String(accessory_hint.text).find("Eligible:") == -1 or String(accessory_hint.text).find(String(enoch_detail.get("accessory_summary", ""))) == -1:
+        push_error("Lategame accessory runner expected accessory hint label to show both flavor summary and eligibility.")
+        quit(1)
+        return
 
     main.advance_campaign_step()
     await process_frame

@@ -10,6 +10,7 @@ const SaveService = preload("res://scripts/battle/save_service.gd")
 
 signal new_game_requested
 signal load_game_requested(slot: int)
+signal load_panel_requested
 
 var save_service: SaveService = null
 var _save_panel: SaveLoadPanel = null
@@ -29,6 +30,9 @@ func _ready() -> void:
 func setup_save_service(svc: SaveService) -> void:
     save_service = svc
     _check_load_available()
+
+func setup_load_panel(panel: SaveLoadPanel) -> void:
+    _save_panel = panel
 
 func get_layout_snapshot() -> Dictionary:
     return {
@@ -53,7 +57,12 @@ func _on_new_game_pressed() -> void:
     new_game_requested.emit()
 
 func _on_load_pressed() -> void:
-    # 가장 최근 슬롯 자동 선택 (슬롯 0 = 자동저장 우선)
+    if _load_available and _save_panel != null:
+        _save_panel.open_load_mode()
+        load_panel_requested.emit()
+        return
+
+    # fallback: save panel 미연결 시 가장 최근 슬롯 자동 선택 (슬롯 0 = 자동저장 우선)
     if save_service != null:
         for i in 3:
             if save_service.slot_exists(i):

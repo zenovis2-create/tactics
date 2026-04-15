@@ -486,7 +486,19 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="AdvanceButton" type="Button" parent="Panel/Margin/Content"]
+[node name="FooterRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SaveButton" type="Button" parent="Panel/Margin/Content/FooterRow"]
+visible = false
+custom_minimum_size = Vector2(180, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Save"
+
+[node name="AdvanceButton" type="Button" parent="Panel/Margin/Content/FooterRow"]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Continue"
