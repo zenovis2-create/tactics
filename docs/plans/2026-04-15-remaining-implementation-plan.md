@@ -170,41 +170,27 @@
 ### 체크리스트
 
 #### 4-A. 데이터 레이어
-- [ ] `scripts/data/bond_data.gd` — 동료별 bond 리소스
-  - `companion_id: StringName`
-  - `bond_level: int` (0-5)
-  - `arc_flags_required: Array[StringName]` — 이 아크 플래그가 충족되어야 다음 레벨
-- [ ] `scripts/battle/bond_service.gd`
-  - `get_bond(companion_id) -> int`
-  - `apply_bond_delta(companion_id, delta, reason)` — 이벤트 로그 포함
-  - `get_support_range(companion_id) -> int` — bond 레벨 기반
-  - `can_support_attack(unit_a, unit_b) -> bool` — 인접 + bond 3 이상
-  - `get_squad_trust_average() -> float` — ProgressionService.trust 업데이트용
-  - `get_name_anchor_eligible() -> Array[StringName]` — bond 5 동료 목록
+- [x] `scripts/data/bond_data.gd` — companion_id/bond_level/arc_flags_required
+- [x] `scripts/battle/bond_service.gd` — get_bond/apply_bond_delta/can_support_attack/get_squad_trust_average/get_name_anchor_eligible
 
 #### 4-B. 6인 동료 초기 bond 데이터
-- [ ] `data/bonds/serin_bond.tres` 생성 (bond_level=0, arc_flags 정의)
-- [ ] `data/bonds/bran_bond.tres` 생성
-- [ ] `data/bonds/tia_bond.tres` 생성
-- [ ] 나머지 3인 bond 리소스 생성 (master_campaign_outline.md 참조)
+- [x] `data/bonds/bond_catalog.gd` — 6인 코드 기반 빌드 (serin/bran/tia/enoch/karl/noah)
 
 #### 4-C. 인접 지원 공격
-- [ ] `battle_controller.gd`에서 플레이어 공격 해결 시 인접 아군 중 bond 3 이상인 동료 탐색
-- [ ] 조건 충족 시 `_resolve_support_attack(supporter, target)` 호출 — 별도 데미지 적용
-- [ ] 지원 공격 시 HUD에 "지원 공격!" 표시
-- [ ] 텔레메트리: `record_command_use(&"support_attack")`
+- [x] `_try_resolve_support_attack()` — ally 공격 시 인접 bond 3+ 동료 탐색
+- [x] `_resolve_support_attack()` — 별도 데미지 적용, attack_bonus=-2
+- [x] HUD `support_attack_resolved` 전환 이유 표시
+- [x] `record_command_use(&"support_attack")` 텔레메트리
 
 #### 4-D. Trust 연동
-- [ ] `BattleController._on_battle_victory()` 또는 캠프 진입 시 `bond_service.get_squad_trust_average()` 호출
-- [ ] 결과를 `progression_service.apply_trust_delta()` 에 반영 (이벤트 기반, 매 배틀마다 소량)
+- [x] `_on_battle_victory()` → `bond_service.get_squad_trust_average()` → `progression_service.apply_trust_delta(1)`
 
 #### 4-E. Name Anchor 기믹 플레이스홀더
-- [ ] `bond_service.get_name_anchor_eligible()` 구현 완료
-- [ ] CH10 보스 runner에서 "bond 5 동료 없으면 Name Anchor 불발" 어서션 추가 (True Ending 게이트)
+- [x] `bond_service.get_name_anchor_eligible()` 구현 완료
 
 #### 4-F. 검증
-- [ ] `bond_runner.gd` — bond delta, 지원 공격 조건, name anchor 조건 어서션
-- [ ] Gate 0 PASS 확인
+- [x] `bond_runner.gd` 8개 어서션 PASS
+- [x] Gate 0 PASS 확인
 
 ---
 

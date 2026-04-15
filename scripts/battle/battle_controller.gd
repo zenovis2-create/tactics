@@ -26,6 +26,7 @@ const TelemetryService = preload("res://scripts/battle/telemetry_service.gd")
 const RewardService = preload("res://scripts/battle/reward_service.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
+const BondService = preload("res://scripts/battle/bond_service.gd")
 
 enum BattlePhase {
     BATTLE_INIT,
@@ -127,6 +128,7 @@ var status_service: StatusService
 var telemetry_service: TelemetryService
 var reward_service: RewardService
 var cutscene_player: CutscenePlayer
+var bond_service: BondService
 
 func _ready() -> void:
     _wire_signals()
@@ -149,6 +151,8 @@ func _init_meta_services() -> void:
     add_child(reward_service)
     cutscene_player = CutscenePlayer.new()
     add_child(cutscene_player)
+    bond_service = BondService.new()
+    add_child(bond_service)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -701,11 +705,39 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         if bool(counterattack.get("target_defeated", false)):
             _remove_unit_from_roster(attacker)
 
+    # 지원 공격: 공격자가 아군이고 인접 동료 중 bond 3+ 있으면 발동
+    if attacker.faction == "ally" and bond_service != null and not bool(result.get("defender_defeated", false)):
+        _try_resolve_support_attack(attacker, defender)
+
     _sync_hud_phase(reason, {
         "attacker": attacker.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,
         "round": round_index
     })
+
+func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> void:
+    for unit: UnitActor in ally_units:
+        if unit == attacker or not is_instance_valid(unit) or unit.is_defeated():
+            continue
+        if bond_service.can_support_attack(attacker, unit):
+            _resolve_support_attack(unit, defender)
+            break  # 첫 번째 지원자만
+
+func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
+    var support_result: Dictionary = combat_service.resolve_attack(supporter, defender, supporter.get_default_skill(), {
+        "allow_counterattack": false,
+        "attack_bonus": -2  # 지원 공격은 약간 감소
+    })
+    if telemetry_service != null:
+        telemetry_service.record_command_use(&"support_attack")
+    hud.set_transition_reason("support_attack_resolved", {
+        "supporter": supporter.unit_data.unit_id,
+        "defender": defender.unit_data.unit_id,
+        "damage": support_result.get("damage", 0),
+        "round": round_index
+    })
+    if bool(support_result.get("defender_defeated", false)):
+        _remove_unit_from_roster(defender)
 
 func _resolve_interaction(unit: UnitActor, object_actor: InteractiveObjectActor) -> void:
     var result: Dictionary = object_actor.resolve_interaction(unit)
@@ -864,6 +896,11 @@ func _on_battle_victory() -> void:
         var clear_data = CutsceneCatalog.get_cutscene(stage_data.clear_cutscene_id)
         if clear_data != null:
             cutscene_player.play(clear_data)
+    # bond → trust 연동: 팀 평균 bond 기반 소량 trust 상승
+    if bond_service != null and progression_service != null:
+        var avg: float = bond_service.get_squad_trust_average()
+        if avg >= 1.0:
+            progression_service.apply_trust_delta(1, "bond_victory_trust")
 
 func _on_battle_defeat() -> void:
     if telemetry_service != null:
