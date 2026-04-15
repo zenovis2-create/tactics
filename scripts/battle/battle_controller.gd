@@ -709,6 +709,22 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
     var reason: String = String(result.get("transition_reason", "attack_resolved"))
     _play_attack_feedback(reason)
 
+    # 데미지 타입에 따른 팝업 표시 (MISS/GUARD는 apply_damage에서 자동 표시되지 않으므로)
+    if reason == "attack_missed" or reason == "attack_missed_counter_resolved":
+        defender.show_damage(0, &"miss")
+    elif bool(result.get("guard", false)):
+        defender.show_damage(int(result.get("damage", 0)), &"guard")
+    elif reason == "attack_resolved_deterministic" or reason == "attack_resolved":
+        var dmg: int = int(result.get("damage", 0))
+        var hp_before: int = int(result.get("defender_hp_before", defender.current_hp + dmg))
+        if dmg >= hp_before * 2 and dmg > 0:
+            defender.show_damage(dmg, &"critical")
+        # 일반 데미지 팝업은 apply_damage()에서 자동 표시됨
+
+    # 공격 애니메이션: 공격자가 타겟 방향으로 전진 후 복귀
+    if attacker != null and is_instance_valid(attacker) and not attacker.is_defeated():
+        attacker.play_attack_animation(defender.grid_position, stage_data.cell_size.x)
+
     hud.set_transition_reason(reason, {
         "attacker": attacker.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,
@@ -758,6 +774,12 @@ func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
     })
     if telemetry_service != null:
         telemetry_service.record_command_use(&"support_attack")
+    # 지원 공격 데미지 팝업
+    var support_dmg: int = int(support_result.get("damage", 0))
+    if support_dmg > 0:
+        defender.show_damage(support_dmg, &"damage")
+    else:
+        defender.show_damage(0, &"miss")
     hud.set_transition_reason("support_attack_resolved", {
         "supporter": supporter.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,

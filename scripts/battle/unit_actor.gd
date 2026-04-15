@@ -9,6 +9,7 @@ const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const TelegraphTextureLibrary = preload("res://scripts/battle/telegraph_texture_library.gd")
 signal defeated(unit: UnitActor)
+signal attack_anim_hit  ## 공격 애니메이션 타격 시점 방출
 
 @export var unit_data: UnitData
 @export var faction: String = "ally"
@@ -27,6 +28,9 @@ var _equipped_weapon: WeaponData
 var _equipped_armor: ArmorData
 var _mark_pulse_tween: Tween
 var _damage_flash_tween: Tween
+var _animating_attack: bool = false
+
+const DamageLabel = preload("res://scripts/battle/damage_label.gd")
 
 @onready var marker: ColorRect = $Marker
 @onready var shadow: ColorRect = $Shadow
@@ -108,10 +112,46 @@ func apply_damage(amount: int) -> void:
     current_hp = max(0, current_hp - amount)
     _refresh_visuals()
     _play_damage_flash()
+    show_damage(amount, &"damage")
 
     if current_hp <= 0:
         defeated.emit(self)
         queue_free()
+
+
+func apply_heal(amount: int) -> void:
+    current_hp = mini(unit_data.max_hp, current_hp + amount)
+    _refresh_visuals()
+    show_damage(amount, &"heal")
+
+
+func show_damage(amount: int, type: StringName = &"damage") -> void:
+    ## 유닛 위에 데미지/MISS/GUARD/CRITICAL 팝업 표시.
+    var label: DamageLabel = DamageLabel.new()
+    add_child(label)
+    label.global_position = global_position
+    label.setup(amount, type)
+
+
+func play_attack_animation(target_pos: Vector2i, cell_size: float) -> void:
+    ## 전진(0.12s) → 타격 콜백 → 복귀(0.10s) 애니메이션.
+    if _animating_attack:
+        return
+    _animating_attack = true
+    var original_pos: Vector2 = position
+    var direction: Vector2 = (Vector2(target_pos) * cell_size - original_pos).normalized()
+    var lunge_distance: float = cell_size * 0.4
+    var target_offset: Vector2 = direction * lunge_distance
+
+    var tw := create_tween().set_trans(Tween.TRANS_SINE)
+    tw.tween_property(self, "position", original_pos + target_offset, 0.12)
+    tw.tween_callback(attack_anim_hit.emit)
+    tw.tween_property(self, "position", original_pos, 0.10)
+    tw.tween_callback(func(): _animating_attack = false)
+
+
+func is_animating_attack() -> bool:
+    return _animating_attack
 
 func is_defeated() -> bool:
     return current_hp <= 0
