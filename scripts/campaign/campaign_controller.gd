@@ -1623,84 +1623,48 @@ func _start_chapter_ten_flow() -> void:
 
 func _enter_chapter_two_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH02 Hardren Interlude",
-        _build_ch02_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH02 Hardren Interlude", _build_ch02_camp_summary(), "Next Battle")
 
 func _enter_chapter_three_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH03 Greenwood Interlude",
-        _build_ch03_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH03 Greenwood Interlude", _build_ch03_camp_summary(), "Next Battle")
 
 func _enter_chapter_four_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH04 Monastery Interlude",
-        _build_ch04_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH04 Monastery Interlude", _build_ch04_camp_summary(), "Next Battle")
 
 func _enter_chapter_five_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH05 Archive Interlude",
-        _build_ch05_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH05 Archive Interlude", _build_ch05_camp_summary(), "Next Battle")
 
 func _enter_chapter_six_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH06 Valtor Interlude",
-        _build_ch06_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH06 Valtor Interlude", _build_ch06_camp_summary(), "Next Battle")
 
 func _enter_chapter_seven_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH07 Ellyor Interlude",
-        _build_ch07_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH07 Ellyor Interlude", _build_ch07_camp_summary(), "Next Battle")
 
 func _enter_chapter_eight_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH08 Black Hound Interlude",
-        _build_ch08_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH08 Black Hound Interlude", _build_ch08_camp_summary(), "Next Battle")
 
 func _enter_chapter_nine_a_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH09A Broken Standard Interlude",
-        _build_ch09a_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH09A Broken Standard Interlude", _build_ch09a_camp_summary(), "Next Battle")
 
 func _enter_chapter_nine_b_camp() -> void:
     _active_mode = CampaignState.MODE_CAMP
-    _set_panel_state(
-        CampaignState.MODE_CAMP,
-        "CH09B Record Abyss Interlude",
-        _build_ch09b_camp_summary(),
-        "Next Battle"
-    )
+    _autosave_progression()
+    _set_panel_state(CampaignState.MODE_CAMP, "CH09B Record Abyss Interlude", _build_ch09b_camp_summary(), "Next Battle")
 
 func _enter_chapter_ten_resolution() -> void:
     _active_mode = CampaignState.MODE_COMPLETE
