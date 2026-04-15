@@ -21,6 +21,24 @@ const JobData = preload("res://scripts/data/job_data.gd")
 @export var is_boss: bool = false
 @export var boss_pattern: StringName = &""
 @export var applies_oblivion: bool = false  ## 이 적이 공격 대신 망각 스택을 적용할 수 있는지
+@export var boss_phase_thresholds: Dictionary = {}  ## HP% → phase name, e.g. {50: &"enrage", 25: &"despair"}
+
+func get_boss_phase_for_hp(hp_percent: float) -> StringName:
+    ## Returns the current boss phase name for the given HP percentage.
+    ## Phases are ordered by ascending threshold; the lowest threshold
+    ## that HP% is at or below determines the active phase.
+    ## E.g. thresholds {50: "enrage", 25: "despair"}:
+    ##   - 51%+ → "" (normal)
+    ##   - 25..50% → "enrage"
+    ##   - 0..25% → "despair"
+    if boss_phase_thresholds.is_empty():
+        return &""
+    var sorted_thresholds: Array = boss_phase_thresholds.keys()
+    sorted_thresholds.sort()  # ascending: 25, 50
+    for threshold in sorted_thresholds:
+        if hp_percent <= float(threshold):
+            return boss_phase_thresholds[threshold]
+    return &""
 
 func get_class_data() -> ClassData:
     if job_data != null and job_data.class_data != null:

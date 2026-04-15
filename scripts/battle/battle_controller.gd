@@ -131,7 +131,9 @@ var equipped_armor_by_unit_id: Dictionary = {}
 var boss_marked_target_id: int = -1
 var boss_charge_pending: bool = false
 var enemy_attack_bonus_by_unit: Dictionary = {}
+var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuses
 var boss_event_history: Array[String] = []
+var boss_phase_by_unit: Dictionary = {}  ## unit instance_id → current phase StringName
 
 var current_phase: int = BattlePhase.BATTLE_INIT
 var round_index: int = 1
@@ -182,7 +184,9 @@ func bootstrap_battle() -> void:
     boss_marked_target_id = -1
     boss_charge_pending = false
     enemy_attack_bonus_by_unit.clear()
+    enemy_movement_bonus_by_unit.clear()
     boss_event_history.clear()
+    boss_phase_by_unit.clear()
 
     _clear_battle_state()
     _spawn_from_stage()
@@ -541,7 +545,9 @@ func _begin_enemy_phase(reason: String) -> void:
     _transition_to(BattlePhase.ENEMY_PHASE_START, reason, {"round": round_index})
 
     turn_manager.begin_phase("enemy", ally_units + enemy_units, reason)
+    # Clear per-round bonuses; boss phase bonuses are re-applied in _check_boss_phase_transitions
     enemy_attack_bonus_by_unit.clear()
+    enemy_movement_bonus_by_unit.clear()
     _refresh_unit_visual_state()
     _clear_selection()
 
@@ -560,6 +566,9 @@ func _focus_first_ready_unit_if_any() -> void:
 
 func _run_enemy_phase() -> void:
     var acted_count: int = 0
+
+    # Check boss phase transitions at the start of enemy phase
+    _check_boss_phase_transitions()
 
     for enemy in enemy_units.duplicate():
         if not is_instance_valid(enemy) or enemy.is_defeated() or not turn_manager.can_unit_act(enemy):
@@ -1693,11 +1702,12 @@ func _find_oblivion_target(enemy: UnitActor) -> UnitActor:
 
 func _pick_roderic_action(enemy: UnitActor) -> Dictionary:
     var marked_target: UnitActor = _get_marked_target()
+    var boss_movement: int = _get_effective_movement(enemy)
     if boss_charge_pending and marked_target != null and is_instance_valid(marked_target) and not marked_target.is_defeated():
         var dynamic_blocked: Dictionary = _get_dynamic_blocked_cells(enemy)
         var approach_plan: Dictionary = ai_service._find_best_approach_plan(enemy, marked_target, path_service, range_service, dynamic_blocked)
         if not approach_plan.is_empty():
-            var move_to: Vector2i = ai_service._truncate_path_to_movement(approach_plan.get("path", []), enemy.get_movement(), path_service)
+            var move_to: Vector2i = ai_service._truncate_path_to_movement(approach_plan.get("path", []), boss_movement, path_service)
             return {
                 "type": "boss_charge",
                 "move_to": move_to,
@@ -1746,3 +1756,94 @@ func _apply_boss_command_buff(boss_unit: UnitActor) -> void:
 
 func _record_boss_event(event_name: String) -> void:
     boss_event_history.append(event_name)
+
+func _check_boss_phase_transitions() -> void:
+    ## Check all boss units for HP-threshold phase transitions.
+    ## Applies phase bonuses for the current phase (re-applied each enemy phase start).
+    for enemy in enemy_units:
+        if not is_instance_valid(enemy) or enemy.is_defeated() or enemy.unit_data == null:
+            continue
+        if not enemy.unit_data.is_boss:
+            continue
+        if enemy.unit_data.boss_phase_thresholds.is_empty():
+            continue
+
+        var hp_percent: float = (float(enemy.current_hp) / float(enemy.unit_data.max_hp)) * 100.0
+        var new_phase: StringName = enemy.unit_data.get_boss_phase_for_hp(hp_percent)
+        var unit_id: int = enemy.get_instance_id()
+        var old_phase: StringName = boss_phase_by_unit.get(unit_id, &"")
+
+        # Detect phase transition (change or first entry into a phase)
+        if new_phase != old_phase:
+            if new_phase != &"":
+                boss_phase_by_unit[unit_id] = new_phase
+                _record_boss_event("boss_phase_%s" % String(new_phase))
+                hud.set_transition_reason("boss_phase_transition", {
+                    "unit": enemy.unit_data.unit_id,
+                    "phase": String(new_phase),
+                    "hp_percent": hp_percent,
+                    "round": round_index
+                })
+                # Phase transition visual feedback
+                _apply_boss_phase_effects(enemy, new_phase, old_phase)
+            elif old_phase != &"":
+                # HP recovered above all thresholds — reset to normal
+                boss_phase_by_unit.erase(unit_id)
+                hud.set_transition_reason("boss_phase_ended", {
+                    "unit": enemy.unit_data.unit_id,
+                    "previous_phase": String(old_phase),
+                    "round": round_index
+                })
+        elif new_phase != &"":
+            # Same phase as before — re-apply bonuses for this phase
+            _apply_boss_phase_bonuses(enemy, new_phase)
+
+        _refresh_unit_visual_state()
+
+func _apply_boss_phase_effects(boss: UnitActor, new_phase: StringName, old_phase: StringName) -> void:
+    ## Visual and game-feel feedback for a boss phase transition.
+    var phase_name: String = String(new_phase)
+    if phase_name == "enrage":
+        _play_battle_flash(Color(1.0, 0.4, 0.2, 0.22), 0.24)
+        _play_world_fx("hit_spark.png", boss.grid_position, Color(1.0, 0.55, 0.3, 0.96), 0.38, 1.2)
+    elif phase_name == "despair":
+        _play_battle_flash(Color(0.8, 0.1, 0.2, 0.28), 0.30)
+        _play_world_fx("hit_spark.png", boss.grid_position, Color(1.0, 0.2, 0.15, 0.98), 0.45, 1.5)
+    # Apply stat bonuses for this phase
+    _apply_boss_phase_bonuses(boss, new_phase)
+
+func _apply_boss_phase_bonuses(boss: UnitActor, phase: StringName) -> void:
+    ## Re-apply stat bonuses for the current boss phase (called each enemy phase start).
+    var phase_name: String = String(phase)
+    if phase_name == "enrage":
+        # Enrage: boss +1 ATK, nearby enemies +1 ATK
+        enemy_attack_bonus_by_unit[boss.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(boss.get_instance_id(), 0)) + 1
+        for enemy in enemy_units:
+            if not is_instance_valid(enemy) or enemy.is_defeated() or enemy == boss:
+                continue
+            var dist: int = abs(enemy.grid_position.x - boss.grid_position.x) + abs(enemy.grid_position.y - boss.grid_position.y)
+            if dist <= 2:
+                enemy_attack_bonus_by_unit[enemy.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(enemy.get_instance_id(), 0)) + 1
+    elif phase_name == "despair":
+        # Despair: boss +2 ATK +1 MOV, nearby enemies +2 ATK (within 3 tiles)
+        enemy_attack_bonus_by_unit[boss.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(boss.get_instance_id(), 0)) + 2
+        enemy_movement_bonus_by_unit[boss.get_instance_id()] = int(enemy_movement_bonus_by_unit.get(boss.get_instance_id(), 0)) + 1
+        for enemy in enemy_units:
+            if not is_instance_valid(enemy) or enemy.is_defeated() or enemy == boss:
+                continue
+            var dist: int = abs(enemy.grid_position.x - boss.grid_position.x) + abs(enemy.grid_position.y - boss.grid_position.y)
+            if dist <= 3:
+                enemy_attack_bonus_by_unit[enemy.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(enemy.get_instance_id(), 0)) + 2
+
+func get_boss_phase_for_unit(unit: UnitActor) -> StringName:
+    ## Public accessor for runner tests — returns the current boss phase for a unit.
+    if unit == null or not is_instance_valid(unit):
+        return &""
+    return boss_phase_by_unit.get(unit.get_instance_id(), &"")
+
+func _get_effective_movement(unit: UnitActor) -> int:
+    ## Returns movement stat plus any boss phase movement bonus.
+    var base_movement: int = unit.get_movement()
+    if unit.unit_data != null and unit.unit_data.is_boss:
+        base_movement += int(enemy_movement_bonus_by_unit.get(unit.get_instance_id(), 0))
+    return base_movement
