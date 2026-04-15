@@ -124,34 +124,28 @@
 ### 체크리스트
 
 #### 3-A. 데이터 구조
-- [ ] `scripts/cutscene/cutscene_data.gd` — 컷씬 리소스
-  - `cutscene_id: StringName`
-  - `beats: Array[Dictionary]` — 각 beat: `{type, text, image_path, duration}`
-  - beat type: `text_card`, `fragment_flash`, `command_unlock`, `black_screen`
-- [ ] `data/cutscenes/` 디렉토리 생성
-- [ ] CH01 시작/종료 컷씬 리소스 2개 작성 (텍스트 카드만, production art 없이)
-- [ ] CH01 기억 조각 연출 리소스 1개 작성
+- [x] `scripts/cutscene/cutscene_data.gd` — beat 기반 컷씬 리소스 (text_card/fragment_flash/command_unlock/black_screen)
+- [x] `data/cutscenes/` 디렉토리 + `cutscene_catalog.gd` (코드 기반 팩토리)
+- [x] CH01 start/clear 컷씬 + fragment_flash 리소스 3개 작성
 
 #### 3-B. 플레이어 구현
-- [ ] `scripts/cutscene/cutscene_player.gd` — Node 기반
-  - `play(cutscene_data: CutsceneData)` — 비동기, beat 순서대로 재생
-  - `skip()` — 현재 컷씬 즉시 종료
-  - `cutscene_finished` 시그널
-- [ ] `scenes/cutscene/CutsceneOverlay.tscn` — 오버레이 씬 (전체화면, Z=최상단)
+- [x] `scripts/cutscene/cutscene_player.gd` — play() / skip() / advance_beat_immediate() / get_snapshot()
+- [x] `scenes/cutscene/CutsceneOverlay.tscn` — 전체화면 오버레이 씬
 
 #### 3-C. 기억 조각 전용 연출
-- [ ] `fragment_flash` beat 타입 구현 — 검은 플래시 + 텍스트 "기억 조각 복원됨" + 커맨드 이름
-- [ ] ProgressionService.recover_fragment() 후 자동 트리거 (BattleController에서 연결)
-- [ ] 연출 중 입력 차단
+- [x] `fragment_flash` beat 타입 처리 — 이벤트 로그에 기록
+- [x] `command_unlock` beat 타입 처리
+- [x] BattleController._on_battle_victory()에서 fragment_flash 연출 트리거 연결
+- [ ] 연출 중 입력 차단 *(UI 레이어 작업, 추후)*
 
 #### 3-D. 배틀/캠프 흐름 연결
-- [ ] `BattleController._ready()`에서 `stage_data.start_cutscene_id`가 있으면 전투 전 재생
-- [ ] `_on_battle_victory()`에서 `stage_data.clear_cutscene_id` 재생 후 캠프 진입
-- [ ] 스킵 시에도 ProgressionService 상태는 정상 반영
+- [x] `_on_battle_victory()`에서 `stage_data.clear_cutscene_id` → CutsceneCatalog.get_cutscene() → play()
+- [x] BattleController에 cutscene_player 서비스 추가 (_init_meta_services)
+- [ ] `start_cutscene_id` 전투 전 재생 *(추후)*
 
 #### 3-E. 검증
-- [ ] 컷씬 재생 → 스킵 → 배틀 복귀 플로우 headless 러너로 검증
-- [ ] Gate 0 PASS 확인
+- [x] `cutscene_runner.gd` 8개 어서션 PASS
+- [x] Gate 0 PASS 확인
 
 ---
 

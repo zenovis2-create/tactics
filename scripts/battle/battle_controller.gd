@@ -24,6 +24,8 @@ const ProgressionService = preload("res://scripts/battle/progression_service.gd"
 const StatusService = preload("res://scripts/battle/status_service.gd")
 const TelemetryService = preload("res://scripts/battle/telemetry_service.gd")
 const RewardService = preload("res://scripts/battle/reward_service.gd")
+const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
+const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 
 enum BattlePhase {
     BATTLE_INIT,
@@ -124,6 +126,7 @@ var progression_service: ProgressionService
 var status_service: StatusService
 var telemetry_service: TelemetryService
 var reward_service: RewardService
+var cutscene_player: CutscenePlayer
 
 func _ready() -> void:
     _wire_signals()
@@ -144,6 +147,8 @@ func _init_meta_services() -> void:
     add_child(telemetry_service)
     reward_service = RewardService.new()
     add_child(reward_service)
+    cutscene_player = CutscenePlayer.new()
+    add_child(cutscene_player)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -848,6 +853,17 @@ func _on_battle_victory() -> void:
             var cmd = unlock_result.get("command_unlocked", null)
             if cmd != null:
                 print("[BattleController] Fragment recovered: %s → command unlocked: %s" % [fragment_id, cmd])
+            # 기억 조각 획득 연출 트리거
+            if cutscene_player != null:
+                var flash_id: StringName = StringName(String(stage_data.stage_id) + "_fragment_flash")
+                var flash_data = CutsceneCatalog.get_cutscene(flash_id)
+                if flash_data != null:
+                    cutscene_player.play(flash_data)
+    # 클리어 컷씬 재생
+    if cutscene_player != null and stage_data != null and stage_data.clear_cutscene_id != &"":
+        var clear_data = CutsceneCatalog.get_cutscene(stage_data.clear_cutscene_id)
+        if clear_data != null:
+            cutscene_player.play(clear_data)
 
 func _on_battle_defeat() -> void:
     if telemetry_service != null:
