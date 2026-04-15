@@ -34,6 +34,7 @@ var _camp_data: CampData = null
 @onready var tab_bar: HBoxContainer = $TabBar if has_node("TabBar") else null
 @onready var panel_area: Control = $PanelArea if has_node("PanelArea") else null
 @onready var next_battle_button: Button = $NextBattleButton if has_node("NextBattleButton") else null
+@onready var _records_panel = $PanelArea/records if has_node("PanelArea/records") else null
 
 func _ready() -> void:
     if next_battle_button != null:
@@ -67,6 +68,8 @@ func get_layout_snapshot() -> Dictionary:
 func _select_tab(tab_id: StringName) -> void:
     _active_tab = tab_id
     _sync_panel_visibility()
+    if tab_id == TAB_RECORDS and _records_panel != null and _camp_data != null:
+        _records_panel.load_records(_camp_data)
     tab_changed.emit(tab_id)
 
 func _rebuild_tabs() -> void:

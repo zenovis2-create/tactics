@@ -10,27 +10,39 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            32,
+            32
+          ],
           "file": "bag.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            32,
+            32
+          ],
           "file": "back.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            32,
+            32
+          ],
           "file": "wait.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            32,
+            32
+          ],
           "file": "enemy.png"
         }
       ]
@@ -44,27 +56,39 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            40,
+            40
+          ],
           "file": "chest.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            40,
+            40
+          ],
           "file": "lever.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            40,
+            40
+          ],
           "file": "altar.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            40,
+            40
+          ],
           "file": "gate.png"
         }
       ]
@@ -78,39 +102,57 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "knight.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "ranger.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "mystic.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "vanguard.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "medic.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            28,
+            28
+          ],
           "file": "boss.png"
         }
       ]
@@ -124,39 +166,57 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "knight.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "ranger.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "mystic.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "vanguard.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "medic.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "boss.png"
         }
       ]
@@ -170,45 +230,66 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "forest.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "wall.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "bridge.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "highground.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "battery.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "cathedral.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            24,
+            24
+          ],
           "file": "bell.png"
         }
       ]
@@ -222,45 +303,66 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "plain.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "forest.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "wall.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "bridge.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "highground.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "battery.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            48,
+            48
+          ],
           "file": "bell.png"
         }
       ]
@@ -274,21 +376,30 @@
       ],
       "files": [
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            64,
+            64
+          ],
           "file": "hit_spark.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            64,
+            64
+          ],
           "file": "mark_ring.png"
         },
         {
-          "exists": false,
-          "size_ok": false,
-          "actual_size": null,
+          "exists": true,
+          "size_ok": true,
+          "actual_size": [
+            64,
+            64
+          ],
           "file": "objective_burst.png"
         }
       ]

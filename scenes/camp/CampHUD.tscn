@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/camp/camp_hud.gd" id="1_camphud"]
+[ext_resource type="Script" path="res://scripts/camp/records_panel.gd" id="2_records"]
 
 [node name="CampHUD" type="Control"]
 layout_mode = 3
@@ -26,6 +27,58 @@ custom_minimum_size = Vector2(0, 48)
 [node name="PanelArea" type="Control" parent="VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="records" type="Control" parent="VBox/PanelArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+script = ExtResource("2_records")
+
+[node name="EmptyLabel" type="Label" parent="VBox/PanelArea/records"]
+layout_mode = 2
+text = "기록 없음"
+visible = false
+
+[node name="ListPanel" type="VBoxContainer" parent="VBox/PanelArea/records"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.6
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailPanel" type="PanelContainer" parent="VBox/PanelArea/records"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.6
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="VBox/PanelArea/records/DetailPanel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox/PanelArea/records/DetailPanel/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="Body" type="RichTextLabel" parent="VBox/PanelArea/records/DetailPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = ""
+
+[node name="CloseButton" type="Button" parent="VBox/PanelArea/records/DetailPanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+text = "닫기"
 
 [node name="NextBattleButton" type="Button" parent="VBox"]
 layout_mode = 2

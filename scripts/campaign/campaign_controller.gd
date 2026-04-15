@@ -2113,7 +2113,7 @@ func _variant_to_string_array(value: Variant) -> Array[String]:
     if typeof(value) != TYPE_ARRAY:
         return lines
     for entry in value:
-        lines.append(String(entry))
+        lines.append(str(entry))
     return lines
 
 func _format_record_entries(entries: Variant) -> Array[String]:

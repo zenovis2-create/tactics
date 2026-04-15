@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/cutscene/cutscene_player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/cutscene/cutscene_overlay.gd" id="2_overlay"]
 
 [node name="CutsceneOverlay" type="CanvasLayer"]
 layer = 128
+script = ExtResource("2_overlay")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1

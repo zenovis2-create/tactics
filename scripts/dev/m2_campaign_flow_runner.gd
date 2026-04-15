@@ -20,6 +20,11 @@ func _run() -> void:
     await process_frame
     await process_frame
 
+    if main.has_method("start_game_direct"):
+        main.start_game_direct()
+        await process_frame
+        await process_frame
+
     if not main.has_method("get_campaign_state_snapshot"):
         push_error("Main is missing campaign shell snapshot API.")
         quit(1)
