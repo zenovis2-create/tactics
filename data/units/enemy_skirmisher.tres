@@ -14,3 +14,4 @@ defense = 1
 movement = 4
 attack_range = 1
 default_skill = ExtResource("2_skill")
+applies_oblivion = true

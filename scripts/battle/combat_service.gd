@@ -21,7 +21,7 @@ func resolve_attack(attacker: UnitActor, defender: UnitActor, skill: SkillData =
     }
     var transition_reason := "attack_resolved_deterministic"
 
-    var hit_event := _step_hit_check(attacker, defender, skill)
+    var hit_event := _step_hit_check(attacker, defender, skill, context)
     trace.append(hit_event)
     if bool(hit_event.get("hit", true)):
         primary_result = _resolve_strike(attacker, defender, skill, context, trace)
@@ -107,11 +107,29 @@ func _resolve_counterattack(original_attacker: UnitActor, defender: UnitActor, c
     counter_result["reason"] = "counterattack_resolved"
     return counter_result
 
-func _step_hit_check(_attacker: UnitActor, _defender: UnitActor, _skill: SkillData) -> Dictionary:
+func _step_hit_check(_attacker: UnitActor, _defender: UnitActor, _skill: SkillData, context: Dictionary = {}) -> Dictionary:
+    # 망각 accuracy penalty: oblivion_accuracy_mod is negative (e.g. -5, -10, -15).
+    # Threshold: if effective hit chance <= 0, guaranteed miss.
+    # Base hit chance = 100. Stack 3 = -15 → 85 (still hits).
+    # Skill-sealed (stack 3) is handled separately in BattleController context.
+    var oblivion_mod: int = int(context.get("oblivion_accuracy_mod", 0))
+    var hit_chance: int = 100 + oblivion_mod  # oblivion_mod is negative
+
+    # Deterministic miss: only when hit_chance <= 0 (requires very high stacking, future tuning).
+    if hit_chance <= 0:
+        return {
+            "step": STEP_HIT_CHECK,
+            "hit": false,
+            "reason": "oblivion_accuracy_zero",
+            "hit_chance": hit_chance
+        }
+
     return {
         "step": STEP_HIT_CHECK,
         "hit": true,
-        "reason": "deterministic_no_rng"
+        "reason": "deterministic_no_rng",
+        "hit_chance": hit_chance,
+        "oblivion_mod": oblivion_mod
     }
 
 func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData, context: Dictionary) -> Dictionary:

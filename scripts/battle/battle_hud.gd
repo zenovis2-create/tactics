@@ -104,9 +104,12 @@ func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     _update_telegraph_surface(reason)
     _emit_battle_cue_for_reason(reason)
 
-func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "") -> void:
+func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0) -> void:
     selection_card.visible = true
-    selection_label.text = unit_name
+    var display_name: String = unit_name
+    if oblivion_stack > 0:
+        display_name += "  [망각 ×%d]" % oblivion_stack
+    selection_label.text = display_name
     detail_label.text = "HP:%s  Move:%d  Range:%d  Re:%d  T:%d  I:%d" % [
         hp_text,
         movement,
@@ -179,7 +182,8 @@ func get_layout_snapshot() -> Dictionary:
         "action_columns": actions_grid.columns,
         "action_button_min_height": inventory_button.custom_minimum_size.y,
         "inventory_body_orientation": "vertical" if inventory_body.vertical else "horizontal",
-        "inventory_panel_size": inventory_panel.size
+        "inventory_panel_size": inventory_panel.size,
+        "oblivion_badge_visible": selection_label.text.contains("[망각")
     }
 
 func apply_layout_for_viewport_size(viewport_size: Vector2) -> void:

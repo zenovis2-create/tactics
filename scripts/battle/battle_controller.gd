@@ -566,6 +566,20 @@ func _run_enemy_phase() -> void:
 
 func _apply_enemy_action(enemy: UnitActor, action: Dictionary) -> void:
     var action_type: String = String(action.get("type", ""))
+    if action_type == "apply_oblivion":
+        var target: UnitActor = action.get("target", null)
+        if target != null and is_instance_valid(target) and not target.is_defeated():
+            var result: Dictionary = status_service.apply_stack(target, 1, "enemy_erosion")
+            var new_stack: int = int(result.get("after", 0))
+            telemetry_service.record_oblivion_applied(1)
+            hud.set_transition_reason("oblivion_stack_applied", {
+                "unit": enemy.unit_data.unit_id,
+                "target": target.unit_data.unit_id,
+                "stack_level": new_stack
+            })
+            _play_battle_flash(Color(0.4, 0.2, 0.6, 0.14), 0.16)
+            _sync_hud_phase("oblivion_applied", {"target": target.unit_data.unit_id, "stack": new_stack})
+        return
     if action_type == "boss_mark":
         var marked_target = action.get("target", null)
         if marked_target != null and is_instance_valid(marked_target) and not marked_target.is_defeated():
@@ -1143,6 +1157,7 @@ func _sync_selection_hud() -> void:
     var interactable_count: int = _get_interactable_object_count(selected_unit)
     var hp_text: String = "%d/%d" % [selected_unit.current_hp, selected_unit.unit_data.max_hp]
     var terrain_text: String = _get_tile_summary_text(selected_unit.grid_position)
+    var oblivion_stack: int = status_service.get_oblivion_stack(selected_unit) if status_service != null else 0
     hud.set_selection_summary(
         selected_unit.unit_data.display_name,
         hp_text,
@@ -1151,7 +1166,8 @@ func _sync_selection_hud() -> void:
         reachable_cells.size(),
         attackable_count,
         interactable_count,
-        terrain_text
+        terrain_text,
+        oblivion_stack
     )
 
     var can_wait: bool = turn_manager.can_unit_act(selected_unit)
@@ -1414,6 +1430,13 @@ func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
         if not boss_action.is_empty():
             return boss_action
 
+    # Eroder-type enemies apply 망각 instead of attacking when valid target is in range
+    # and the target has not yet reached max stack.
+    if enemy.unit_data != null and enemy.unit_data.applies_oblivion and status_service != null:
+        var oblivion_target: UnitActor = _find_oblivion_target(enemy)
+        if oblivion_target != null:
+            return {"type": "apply_oblivion", "target": oblivion_target}
+
     return ai_service.pick_action(
         enemy,
         ally_units,
@@ -1421,6 +1444,24 @@ func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
         range_service,
         _get_dynamic_blocked_cells(enemy)
     )
+
+func _find_oblivion_target(enemy: UnitActor) -> UnitActor:
+    ## Returns the nearest ally in attack range whose 망각 stack is below max.
+    var attack_cells: Array = range_service.get_attack_cells(enemy.grid_position, enemy.get_attack_range())
+    var best: UnitActor = null
+    var best_stack: int = StatusService.MAX_STACK  # Only pick targets below max
+
+    for unit in ally_units:
+        if not is_instance_valid(unit) or unit.is_defeated():
+            continue
+        if not (unit.grid_position in attack_cells):
+            continue
+        var stack: int = status_service.get_oblivion_stack(unit)
+        if stack < best_stack:
+            best_stack = stack
+            best = unit
+
+    return best
 
 func _pick_roderic_action(enemy: UnitActor) -> Dictionary:
     var marked_target: UnitActor = _get_marked_target()

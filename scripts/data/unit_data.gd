@@ -20,6 +20,7 @@ const JobData = preload("res://scripts/data/job_data.gd")
 @export var armor_types_allowed: PackedStringArray = PackedStringArray(["light", "heavy", "robe"])
 @export var is_boss: bool = false
 @export var boss_pattern: StringName = &""
+@export var applies_oblivion: bool = false  ## 이 적이 공격 대신 망각 스택을 적용할 수 있는지
 
 func get_class_data() -> ClassData:
     if job_data != null and job_data.class_data != null:

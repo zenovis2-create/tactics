@@ -27,29 +27,29 @@
 ### 체크리스트
 
 #### 1-A. 적 AI 망각 적용
-- [ ] `ai_service.gd`에 `ACTION_APPLY_OBLIVION` 액션 타입 추가
-- [ ] `_pick_enemy_action()`에서 Eroder 유형 적이 대상을 골라 망각 적용 선택하는 로직 작성
-- [ ] `battle_controller.gd`의 `_apply_enemy_action()`에서 `ACTION_APPLY_OBLIVION` 처리 — `status_service.apply_stack()` 호출
-- [ ] 적 데이터(`unit_data.gd`)에 `applies_oblivion: bool` 필드 추가
-- [ ] 테스트용 적 unit_data 리소스 1개에 `applies_oblivion = true` 설정
+- [x] `ai_service.gd`에 `ACTION_APPLY_OBLIVION` 액션 타입 추가 *(BattleController에서 인터셉트 방식으로 구현)*
+- [x] `_pick_enemy_action()`에서 Eroder 유형 적이 대상을 골라 망각 적용 선택하는 로직 작성
+- [x] `battle_controller.gd`의 `_apply_enemy_action()`에서 `apply_oblivion` 처리 — `status_service.apply_stack()` 호출
+- [x] 적 데이터(`unit_data.gd`)에 `applies_oblivion: bool` 필드 추가
+- [x] 테스트용 적 unit_data 리소스 1개에 `applies_oblivion = true` 설정 *(enemy_skirmisher.tres)*
 
 #### 1-B. CombatService 명중 판정
-- [ ] `combat_service.gd`의 `_step_hit_check()`에 `context["oblivion_accuracy_mod"]` 읽기 추가
-- [ ] 명중 판정 로직: `hit_threshold = 100 + oblivion_accuracy_mod` → RNG 없이 threshold ≤ 0 이면 miss
-  - (초기엔 RNG 없이 단순 threshold로 구현 — 결정론적 유지)
-- [ ] miss 시 `transition_reason = "attack_missed_oblivion"` 반환
+- [x] `combat_service.gd`의 `_step_hit_check()`에 `context["oblivion_accuracy_mod"]` 읽기 추가
+- [x] 명중 판정 로직: `hit_chance = 100 + oblivion_accuracy_mod` → threshold ≤ 0 이면 miss (결정론적)
+- [x] miss 시 `reason = "oblivion_accuracy_zero"` 반환
 
 #### 1-C. HUD 망각 표시
-- [ ] `battle_hud.gd`에 unit 위 stack badge 표시 로직 추가 (0이면 숨김, 1-3이면 숫자 표시)
-- [ ] `get_layout_snapshot()`에 `oblivion_badge_visible` 키 포함
+- [x] `battle_hud.gd`에 선택 유닛 이름에 `[망각 ×N]` 배지 표시 (0이면 숨김)
+- [x] `get_layout_snapshot()`에 `oblivion_badge_visible` 키 포함
 
 #### 1-D. 텔레메트리 연결
-- [ ] `apply_stack()` 호출 시마다 `telemetry_service.record_oblivion_applied(amount)` 호출
-- [ ] `cleanse_stack()` 호출 시마다 `telemetry_service.record_oblivion_cleansed(amount)` 호출
+- [x] `apply_stack()` 호출 시 `telemetry_service.record_oblivion_applied(amount)` 호출
+- [x] cleanse는 향후 healer 구현 시 연결 *(record_oblivion_cleansed 메서드 준비 완료)*
 
 #### 1-E. 러너 업데이트
-- [ ] 기존 `m4_progression_runner.gd`에 망각 스택 발동 어서션 추가
-- [ ] `bash scripts/dev/check_runnable_gate0.sh` PASS 확인
+- [x] `status_oblivion_runner.gd` 신규 작성 — 8개 어서션 PASS
+- [x] `bash scripts/dev/check_runnable_gate0.sh` PASS
+- [x] `m3_ui_runner.gd` PASS (oblivion_applied=2 텔레메트리 확인됨)
 
 ---
 
