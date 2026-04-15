@@ -19,6 +19,9 @@ func _ready() -> void:
 	_load_manifest()
 	_ensure_players()
 
+func _exit_tree() -> void:
+	_release_audio_resources()
+
 func attach_battle_hud(hud) -> void:
 	if hud == null or not hud.has_signal("ui_cue_requested"):
 		return
@@ -78,8 +81,14 @@ func _play_cue(cue_id: String) -> void:
 		return
 	if _players.is_empty():
 		return
+	# Headless 모드에서는 Dummy 드라이버가 오디오 프레임을 실시간 처리하지 않아
+	# AudioStreamPlaybackWAV가 종료 시까지 해제되지 않는다. 재생 자체를 건너뛴다.
+	if DisplayServer.get_name() == "headless":
+		return
 	var player: AudioStreamPlayer = _players[_next_player_index]
 	_next_player_index = (_next_player_index + 1) % _players.size()
+	player.stop()
+	player.stream = null   # 이전 AudioStreamPlayback 명시적 해제
 	player.stream = stream
 	player.play()
 
@@ -114,3 +123,14 @@ func _register_missing_cue(cue_id: String) -> void:
 	if missing_cues.has(cue_id):
 		return
 	missing_cues.append(cue_id)
+
+func _release_audio_resources() -> void:
+	for player in _players:
+		if player == null or not is_instance_valid(player):
+			continue
+		player.stop()
+		player.stream = null
+		player.free()
+	_players.clear()
+	_stream_cache.clear()
+	_last_asset_path = ""

@@ -1,0 +1,42 @@
+{
+  "bgm_battle_default": {
+    "asset_path": "res://audio/bgm/bgm_battle_default.wav",
+    "duration_ms": 32000,
+    "lane": "bgm",
+    "notes": "General battle cue for standard encounters. E minor 80bpm, strings+brass ostinato, snare pattern.",
+    "backend": "numpy-synth",
+    "source_duration_sec": 32
+  },
+  "bgm_battle_boss": {
+    "asset_path": "res://audio/bgm/bgm_battle_boss.wav",
+    "duration_ms": 32000,
+    "lane": "bgm",
+    "notes": "Boss battle cue. D minor 92bpm, brass ostinato, heavy percussion, oppressive low bass.",
+    "backend": "numpy-synth",
+    "source_duration_sec": 32
+  },
+  "bgm_camp": {
+    "asset_path": "res://audio/bgm/bgm_camp.wav",
+    "duration_ms": 32000,
+    "lane": "bgm",
+    "notes": "Camp and recovery cue. G major 72bpm, piano melody, harp arpeggios, warm strings pad.",
+    "backend": "numpy-synth",
+    "source_duration_sec": 32
+  },
+  "bgm_title": {
+    "asset_path": "res://audio/bgm/bgm_title.wav",
+    "duration_ms": 32000,
+    "lane": "bgm",
+    "notes": "Title screen cue. A minor 68bpm, bittersweet strings melody, choir pad.",
+    "backend": "numpy-synth",
+    "source_duration_sec": 32
+  },
+  "bgm_cutscene_ch01": {
+    "asset_path": "res://audio/bgm/bgm_cutscene_ch01.wav",
+    "duration_ms": 32000,
+    "lane": "bgm",
+    "notes": "Chapter one cutscene cue. A minor 64bpm, piano lead with strings doubling, chord pad.",
+    "backend": "numpy-synth",
+    "source_duration_sec": 32
+  }
+}

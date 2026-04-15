@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/battle/BattleScene.tscn" id="2_battle"]
 [ext_resource type="Script" path="res://scripts/campaign/campaign_controller.gd" id="3_campaign_controller"]
 [ext_resource type="PackedScene" path="res://scenes/campaign/CampaignPanel.tscn" id="4_campaign_panel"]
 [ext_resource type="Script" path="res://scripts/audio/audio_event_router.gd" id="5_audio_router"]
+[ext_resource type="Script" path="res://scripts/audio/bgm_router.gd" id="9_bgm_router"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TitleScreen.tscn" id="6_title"]
 [ext_resource type="PackedScene" path="res://scenes/ui/DefeatScreen.tscn" id="7_defeat"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadPanel.tscn" id="8_saveload"]
@@ -19,6 +20,9 @@ script = ExtResource("3_campaign_controller")
 
 [node name="AudioEventRouter" type="Node" parent="."]
 script = ExtResource("5_audio_router")
+
+[node name="BgmRouter" type="Node" parent="."]
+script = ExtResource("9_bgm_router")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

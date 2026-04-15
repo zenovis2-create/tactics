@@ -6,15 +6,18 @@ const BattleController = preload("res://scripts/battle/battle_controller.gd")
 const CampaignController = preload("res://scripts/campaign/campaign_controller.gd")
 const CampaignPanel = preload("res://scripts/campaign/campaign_panel.gd")
 const AudioEventRouter = preload("res://scripts/audio/audio_event_router.gd")
+const BgmRouter = preload("res://scripts/audio/bgm_router.gd")
 const TitleScreen = preload("res://scripts/ui/title_screen.gd")
 const DefeatScreen = preload("res://scripts/ui/defeat_screen.gd")
 const SaveLoadPanel = preload("res://scripts/ui/save_load_panel.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const UnitData = preload("res://scripts/data/unit_data.gd")
 
 @onready var battle_controller: BattleController = $BattleScene
 @onready var campaign_controller: CampaignController = $CampaignController
 @onready var audio_event_router: AudioEventRouter = $AudioEventRouter
+@onready var bgm_router: BgmRouter = $BgmRouter
 @onready var campaign_panel: CampaignPanel = $CanvasLayer/CampaignPanel
 @onready var title_screen: TitleScreen = $UILayer/TitleScreen
 @onready var defeat_screen: DefeatScreen = $UILayer/DefeatScreen
@@ -40,6 +43,8 @@ func _ready() -> void:
 
     # CampaignController 셋업
     campaign_controller.setup(battle_controller, campaign_panel)
+    if not campaign_controller.mode_changed.is_connected(_on_campaign_mode_changed):
+        campaign_controller.mode_changed.connect(_on_campaign_mode_changed)
 
     # 오디오 연결
     if audio_event_router != null:
@@ -101,6 +106,8 @@ func _show_title() -> void:
         title_screen.visible = true
     if battle_controller != null:
         battle_controller.visible = false
+    if bgm_router != null:
+        bgm_router.play_cue("bgm_title")
 
 func _start_new_game() -> void:
     if title_screen != null:
@@ -126,6 +133,8 @@ func _start_loaded_game(data: ProgressionData) -> void:
 
 func _on_battle_finished_main(result: StringName, _stage_id: StringName) -> void:
     if result != &"victory" and defeat_screen != null:
+        if bgm_router != null:
+            bgm_router.play_cue("bgm_cutscene_ch01", true)
         var rounds: int = battle_controller.round_index if battle_controller != null else 0
         defeat_screen.show_defeat(rounds)
 
@@ -142,12 +151,46 @@ func _on_retry_requested() -> void:
         battle_controller.bootstrap_battle()
     if battle_controller != null:
         battle_controller.visible = true
+    if bgm_router != null:
+        _play_battle_bgm(true)
 
 func _on_load_last_save_requested(data: ProgressionData) -> void:
     _start_loaded_game(data)
 
 func _on_title_requested() -> void:
     _show_title()
+
+func _on_campaign_mode_changed(mode: String) -> void:
+    if bgm_router == null:
+        return
+    match mode:
+        "battle":
+            _play_battle_bgm()
+        "camp":
+            bgm_router.play_cue("bgm_camp")
+        "cutscene":
+            bgm_router.play_cue("bgm_cutscene_ch01")
+        "chapter_intro":
+            bgm_router.play_cue("bgm_title")
+        _:
+            pass
+
+func _play_battle_bgm(restart: bool = false) -> void:
+    if bgm_router == null:
+        return
+    var cue_id := "bgm_battle_default"
+    if _current_stage_has_boss():
+        cue_id = "bgm_battle_boss"
+    bgm_router.play_cue(cue_id, restart)
+
+func _current_stage_has_boss() -> bool:
+    if battle_controller == null or battle_controller.stage_data == null:
+        return false
+    for enemy_variant in battle_controller.stage_data.enemy_units:
+        var enemy_data := enemy_variant as UnitData
+        if enemy_data != null and enemy_data.is_boss:
+            return true
+    return false
 
 func _on_save_requested(slot: int) -> void:
     if _save_service == null or battle_controller == null:

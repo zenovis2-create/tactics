@@ -1,6 +1,8 @@
 class_name CampaignController
 extends Node
 
+signal mode_changed(mode: String)
+
 const BattleController = preload("res://scripts/battle/battle_controller.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 const CampaignPanel = preload("res://scripts/campaign/campaign_panel.gd")
@@ -1157,11 +1159,13 @@ func _enter_stage(stage_index: int) -> void:
         _battle_controller.set_equipped_accessory_map(_build_runtime_accessory_map())
         _battle_controller.visible = true
         _battle_controller.set_stage(_current_stage)
+    mode_changed.emit(_active_mode)
 
 func _on_battle_finished(result: StringName, stage_id: StringName) -> void:
     if result != &"victory":
         # 패배 처리는 main.gd의 DefeatScreen이 담당 (이중 표시 방지)
         _active_mode = CampaignState.MODE_BATTLE
+        mode_changed.emit(_active_mode)
         return
 
     if _current_stage == null or stage_id != _current_stage.stage_id:
@@ -1462,6 +1466,7 @@ func _build_ch10_resolution_summary() -> String:
 func _set_panel_state(mode: String, title_text: String, body_text: String, button_text: String) -> void:
     _current_panel_title = title_text
     _current_panel_body = body_text
+    mode_changed.emit(mode)
     if _campaign_panel != null:
         _campaign_panel.show_state(mode, title_text, body_text, button_text, _build_panel_payload(mode))
     if _battle_controller != null:
