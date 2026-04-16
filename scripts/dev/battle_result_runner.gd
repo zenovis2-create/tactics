@@ -66,8 +66,6 @@ func _run() -> void:
 	for token in [
 		"Objective:",
 		"Rewards:",
-		"Memory Fragment: ch01_fragment",
-		"Command Unlocked: tactical_shift",
 		"Unit EXP:",
 		"Memory:",
 		"Evidence:",

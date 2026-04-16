@@ -325,6 +325,8 @@ func _select_section(section_name: String) -> void:
     if not SECTION_ORDER.has(section_name):
         section_name = SECTION_SUMMARY
 
+    var section_changed: bool = _active_section != section_name
+
     _active_section = section_name
     summary_section.visible = section_name == SECTION_SUMMARY
     party_section.visible = section_name == SECTION_PARTY
@@ -336,7 +338,8 @@ func _select_section(section_name: String) -> void:
     party_button.disabled = section_name == SECTION_PARTY
     inventory_button.disabled = section_name == SECTION_INVENTORY
     records_button.disabled = section_name == SECTION_RECORDS
-    ui_cue_requested.emit("ui_panel_tab_shift_01")
+    if section_changed:
+        ui_cue_requested.emit("ui_panel_tab_shift_01")
 
 func _sync_section_button_text() -> void:
     summary_button.text = _compose_section_label(SECTION_SUMMARY)
@@ -595,11 +598,13 @@ func _render_selected_party(entry: Dictionary) -> void:
         str(entry.get("hp_text", "0/0")),
         role_text
     ]
-    party_stats_label.text = "ATK %s   DEF %s   MOVE %s   RNG %s\nSkill %s" % [
+    party_stats_label.text = "ATK %s   DEF %s   MOVE %s   RNG %s\nLv %s   EXP %s   Skill %s" % [
         str(entry.get("attack", 0)),
         str(entry.get("defense", 0)),
         str(entry.get("move", 0)),
         str(entry.get("range", 0)),
+        str(entry.get("level", 1)),
+        str(entry.get("exp", 0)),
         str(entry.get("skill", "No skill"))
     ]
     _set_slot_preview(weapon_preview, str(entry.get("weapon_preview_path", WEAPON_FALLBACK_PREVIEW)))

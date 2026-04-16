@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_watergate_boots"
 display_name = "Watergate Boots"
 summary = "Flooded-cloister accessory. Improves movement through waterlogged routes."
+flavor_text = "Watergate Boots was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

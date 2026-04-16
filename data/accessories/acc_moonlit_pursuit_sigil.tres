@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_moonlit_pursuit_sigil"
 display_name = "Moonlit Pursuit Sigil"
 summary = "Black-hound accessory. Keeps pursuit routes tight under split pressure."
+flavor_text = "Moonlit Pursuit Sigil was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

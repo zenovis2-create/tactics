@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_whiteflow_token"
 display_name = "Whiteflow Token"
 summary = "Late-monastery accessory. Boosts mobility while the field shifts under water and prayer."
+flavor_text = "Whiteflow Token was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

@@ -2277,6 +2277,9 @@ func _build_campaign_party_summary_lines() -> Array[String]:
 
 func _build_campaign_party_detail_entries() -> Array[Dictionary]:
     var details: Array[Dictionary] = []
+    var progression_data: ProgressionData = null
+    if _battle_controller != null and _battle_controller.progression_service != null:
+        progression_data = _battle_controller.progression_service.get_data()
     for unit_data in _get_campaign_party_roster():
         var default_skill_name: String = unit_data.default_skill.display_name if unit_data.default_skill != null else "No skill"
         var deploy_status: String = "Reserve"
@@ -2305,6 +2308,12 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
         var allowed_armor_types: PackedStringArray = unit_data.get_allowed_armor_types()
         var eligible_weapon_ids: Array[StringName] = _get_available_weapon_ids_for_unit(unit_data.unit_id)
         var eligible_armor_ids: Array[StringName] = _get_available_armor_ids_for_unit(unit_data.unit_id)
+        var level: int = 1
+        var exp: int = 0
+        if progression_data != null:
+            var progress: Dictionary = progression_data.get_unit_progress(unit_data.unit_id)
+            level = int(progress.get("level", 1))
+            exp = int(progress.get("exp", 0))
         details.append({
             "unit_id": String(unit_data.unit_id),
             "name": unit_data.display_name,
@@ -2314,6 +2323,8 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             "defense": unit_data.defense,
             "move": unit_data.movement,
             "range": unit_data.attack_range,
+            "level": level,
+            "exp": exp,
             "skill": default_skill_name,
             "weapon_slot": weapon_name,
             "armor_slot": armor_name,

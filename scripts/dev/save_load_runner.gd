@@ -19,7 +19,8 @@ const REQUIRED_SLOT_METADATA_KEYS := [
     "burden",
     "trust",
     "ending_tendency",
-    "saved_at"
+    "saved_at",
+    "unit_progression_summary"
 ]
 
 var _failed: bool = false
@@ -74,6 +75,7 @@ func _assert_save_and_load(svc: SaveService) -> bool:
     data.unlocked_commands[&"tactical_shift"] = true
     data.ending_tendency = &"undetermined"
     data.unit_progression["ally_rian"] = {"level": 2, "exp": 4}
+    data.unit_progression["ally_serin"] = {"level": 3, "exp": 1}
     data.snapshot_unlock_state()
 
     var err: Error = svc.save_progression(data, 1)
@@ -141,6 +143,8 @@ func _assert_peek_structure(svc: SaveService) -> bool:
     info = svc.peek_slot(2)
     if not _assert_slot_metadata(info, true, "", 1, 2, "bad_ending", true):
         return false
+    if String(info.get("unit_progression_summary", "")) != "":
+        return _fail("slot metadata without unit progression should keep progression summary empty")
     var info_again: Dictionary = svc.peek_slot(2)
     if String(info_again.get("saved_at", "")) != String(info.get("saved_at", "")):
         return _fail("peek_slot should return deterministic saved_at between reads")
@@ -183,6 +187,8 @@ func _assert_slot_metadata(
     if String(info.get("ending_tendency", "")) != ending_tendency:
         return _fail("slot metadata ending_tendency should be '%s', got '%s'" % [ending_tendency, String(info.get("ending_tendency", ""))])
     var saved_at := String(info.get("saved_at", ""))
+    if not info.has("unit_progression_summary"):
+        return _fail("slot metadata missing unit_progression_summary")
     if require_saved_at and saved_at.is_empty():
         return _fail("slot metadata saved_at should be non-empty for existing saves")
     if not require_saved_at and not saved_at.is_empty():

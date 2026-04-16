@@ -5,6 +5,7 @@ extends Node
 ## Saves to user://saves/slot_N.tres (ResourceSaver) with JSON sidecar for inspection.
 
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 
 const SAVE_DIR := "user://saves/"
 const SLOT_PREFIX := "slot_"
@@ -92,6 +93,7 @@ func _write_sidecar(data: ProgressionData, slot: int) -> void:
 	snapshot["exists"] = true
 	snapshot["chapter"] = ""
 	snapshot["saved_at"] = Time.get_datetime_string_from_system()
+	snapshot["unit_progression_summary"] = _build_unit_progression_summary(data)
 	file.store_string(JSON.stringify(snapshot, "\t"))
 	file.close()
 
@@ -102,5 +104,25 @@ func _build_slot_metadata(exists: bool) -> Dictionary:
 		"burden": 0,
 		"trust": 0,
 		"ending_tendency": DEFAULT_ENDING_TENDENCY,
-		"saved_at": ""
+		"saved_at": "",
+		"unit_progression_summary": ""
 	}
+
+func _build_unit_progression_summary(data: ProgressionData) -> String:
+	var snapshot: Dictionary = data.get_unit_progress_snapshot()
+	if snapshot.is_empty():
+		return ""
+	var best_unit: String = ""
+	var best_level: int = -1
+	var best_exp: int = -1
+	for unit_id in snapshot.keys():
+		var entry: Dictionary = snapshot.get(unit_id, {})
+		var level: int = int(entry.get("level", 1))
+		var exp: int = int(entry.get("exp", 0))
+		var unit_data = CampaignCatalog.get_unit_data(StringName(unit_id))
+		var display_name: String = unit_data.display_name if unit_data != null else String(unit_id)
+		if level > best_level or (level == best_level and exp > best_exp):
+			best_unit = display_name
+			best_level = level
+			best_exp = exp
+	return "%d units | top %s Lv %d (%d EXP)" % [snapshot.size(), best_unit, best_level, best_exp]

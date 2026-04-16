@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_revision_ward_pin"
 display_name = "Revision Ward Pin"
 summary = "Archive-core accessory. Helps the squad keep its footing while rules shift around it."
+flavor_text = "Revision Ward Pin was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

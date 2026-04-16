@@ -11,6 +11,7 @@ extends SceneTree
 
 const CampData = preload("res://scripts/data/camp_data.gd")
 const CampController = preload("res://scripts/camp/camp_controller.gd")
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
 
 var _failed: bool = false
 
@@ -25,6 +26,7 @@ func _run() -> void:
     if not _assert_camp_data_fields(): return
     if not _assert_enter_camp_returns_data(ctrl): return
     if not _assert_summary_keys(ctrl): return
+    if not _assert_unit_progression_summary(ctrl): return
     if not _assert_notification_count(ctrl): return
     if not _assert_base_axes(ctrl): return
     if not _assert_extended_axes(ctrl): return
@@ -60,9 +62,22 @@ func _assert_enter_camp_returns_data(ctrl: CampController) -> bool:
 
 func _assert_summary_keys(ctrl: CampController) -> bool:
     var summary: Dictionary = ctrl.get_camp_summary()
-    for key: String in ["chapter", "burden", "trust", "ending_tendency", "recovered_fragments", "unlocked_commands", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries"]:
+    for key: String in ["chapter", "burden", "trust", "ending_tendency", "recovered_fragments", "unlocked_commands", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries", "unit_progression_summary"]:
         if not summary.has(key):
             return _fail("get_camp_summary() missing key: %s" % key)
+    return true
+
+func _assert_unit_progression_summary(ctrl: CampController) -> bool:
+    var progression: ProgressionData = ProgressionData.new()
+    progression.set_unit_progress(&"ally_rian", 2, 4)
+    progression.set_unit_progress(&"ally_serin", 3, 1)
+    ctrl.enter_camp(&"ch01", {}, progression)
+    var summary: Dictionary = ctrl.get_camp_summary()
+    var progression_summary: Array = summary.get("unit_progression_summary", [])
+    if progression_summary.size() != 2:
+        return _fail("unit_progression_summary should expose two compact unit entries")
+    if String(progression_summary[0]).find("Lv") == -1 or String(progression_summary[0]).find("EXP") == -1:
+        return _fail("unit_progression_summary entries should expose compact level/exp text")
     return true
 
 func _assert_notification_count(ctrl: CampController) -> bool:
