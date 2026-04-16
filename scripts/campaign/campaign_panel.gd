@@ -667,13 +667,14 @@ func _render_selected_party(entry: Dictionary) -> void:
         party_accessory_button.text = "No Accessories"
         party_accessory_button.disabled = true
         party_accessory_button.tooltip_text = "No accessories are unlocked for this camp state."
-        accessory_hint_label.text = _build_accessory_hint_text("", 0)
+        accessory_hint_label.text = _build_accessory_hint_text("", "", 0)
     else:
         party_accessory_button.text = "Cycle Accessory"
         party_accessory_button.disabled = false
         party_accessory_button.tooltip_text = "Swap to the next unlocked accessory for this unit."
         accessory_hint_label.text = _build_accessory_hint_text(
             str(entry.get("accessory_summary", "")),
+            str(entry.get("accessory_flavor_text", "")),
             int(entry.get("eligible_accessory_count", _available_accessory_entries.size()))
         )
 
@@ -710,12 +711,19 @@ func _build_equipment_eligibility_text(slot_kind: String, allowed_types: Array[S
 func _build_accessory_eligibility_text(eligible_count: int) -> String:
     return "All recruits may equip accessories. Eligible: %d unlocked." % eligible_count
 
-func _build_accessory_hint_text(summary_text: String, eligible_count: int) -> String:
+func _build_accessory_hint_text(summary_text: String, flavor_text: String, eligible_count: int) -> String:
     var summary := summary_text.strip_edges()
+    var flavor := flavor_text.strip_edges()
     var eligibility := _build_accessory_eligibility_text(eligible_count)
-    if summary.is_empty():
+    var lines: Array[String] = []
+    if not summary.is_empty():
+        lines.append(summary)
+    if not flavor.is_empty() and flavor != summary:
+        lines.append(flavor)
+    if lines.is_empty():
         return eligibility
-    return "%s\n%s" % [summary, eligibility]
+    lines.append(eligibility)
+    return "\n".join(lines)
 
 func _set_slot_preview(texture_rect: TextureRect, resource_path: String) -> void:
     if texture_rect == null:
@@ -724,17 +732,18 @@ func _set_slot_preview(texture_rect: TextureRect, resource_path: String) -> void
     if normalized_path.is_empty():
         texture_rect.texture = _build_placeholder_preview_texture("empty")
         return
-    if ResourceLoader.exists(normalized_path):
-        var texture := load(normalized_path) as Texture2D
-        if texture != null:
-            texture_rect.texture = texture
-            return
 
     var absolute_path: String = ProjectSettings.globalize_path(normalized_path)
     if FileAccess.file_exists(absolute_path):
         var image := Image.new()
         if image.load(absolute_path) == OK:
             texture_rect.texture = ImageTexture.create_from_image(image)
+            return
+
+    if ResourceLoader.exists(normalized_path):
+        var texture := load(normalized_path) as Texture2D
+        if texture != null:
+            texture_rect.texture = texture
             return
 
     texture_rect.texture = _build_placeholder_preview_texture(normalized_path)

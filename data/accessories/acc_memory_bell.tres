@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_memory_bell"
 display_name = "Memory Bell"
 summary = "Ellyor accessory. Carries names through the silence line and steadies the march."
+flavor_text = "Even unstruck, the bell feels ready to answer a procession that refuses to let the dead be sorted into silence."
 movement_bonus = 1

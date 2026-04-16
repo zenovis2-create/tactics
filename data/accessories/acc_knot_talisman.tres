@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_knot_talisman"
 display_name = "Knot Talisman"
 summary = "Cathedral-channel accessory. Helps the wearer hold their ground against sermon pressure."
+flavor_text = "Three cords are tied into it: one for fear, one for aim, and one for the companion you refuse to lose in the dark."
 defense_bonus = 1

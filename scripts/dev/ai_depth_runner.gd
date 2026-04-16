@@ -23,6 +23,8 @@ func _run() -> void:
 		return
 	if not _assert_move_attack_ai_prefers_better_damage_target(ai, path_service, range_service):
 		return
+	if not _assert_threat_aware_ai_prefers_finishing_exposed_attacker(ai, path_service, range_service):
+		return
 
 	print("[PASS] ai_depth_runner: AI scoring prefers stronger attack targets without breaking legality.")
 	quit(0)
@@ -59,6 +61,21 @@ func _assert_move_attack_ai_prefers_better_damage_target(ai: AIService, path_ser
 	var target = action.get("target", null)
 	if target != exposed:
 		return _fail("AI should prefer the reachable higher-damage target when choosing a move-attack plan.")
+	return true
+
+func _assert_threat_aware_ai_prefers_finishing_exposed_attacker(ai: AIService, path_service: PathService, range_service: RangeService) -> bool:
+	var enemy := _make_actor(&"enemy_guard", "enemy", 12, 4, 0, 3, 1, Vector2i(2, 2))
+	var bruiser := _make_actor(&"ally_bruiser", "ally", 8, 4, 0, 3, 1, Vector2i(2, 3))
+	var support := _make_actor(&"ally_support", "ally", 6, 1, 0, 3, 1, Vector2i(3, 2))
+	var action := ai.pick_action(enemy, [bruiser, support], path_service, range_service)
+	enemy.queue_free()
+	bruiser.queue_free()
+	support.queue_free()
+	if String(action.get("type", "")) != "attack":
+		return _fail("Threat-aware AI should still take the immediate legal attack in range.")
+	var target = action.get("target", null)
+	if target != bruiser:
+		return _fail("AI should prefer the exposed higher-threat attacker over the lower-threat nonlethal support unit.")
 	return true
 
 func _make_actor(unit_id: StringName, faction: String, hp: int, attack: int, defense: int, movement: int, attack_range: int, grid_position: Vector2i) -> UnitActor:

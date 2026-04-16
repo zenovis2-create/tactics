@@ -2300,6 +2300,7 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
         if equipped_accessory != null:
             accessory_name = equipped_accessory.display_name
         var accessory_summary: String = equipped_accessory.summary if equipped_accessory != null else ""
+        var accessory_flavor_text: String = _get_accessory_flavor_text(equipped_accessory)
         var allowed_weapon_types: PackedStringArray = unit_data.get_allowed_weapon_types()
         var allowed_armor_types: PackedStringArray = unit_data.get_allowed_armor_types()
         var eligible_weapon_ids: Array[StringName] = _get_available_weapon_ids_for_unit(unit_data.unit_id)
@@ -2318,6 +2319,7 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             "armor_slot": armor_name,
             "accessory_slot": accessory_name,
             "accessory_summary": accessory_summary,
+            "accessory_flavor_text": accessory_flavor_text,
             "weapon_preview_path": _get_weapon_preview_path(equipped_weapon_id),
             "armor_preview_path": _get_armor_preview_path(equipped_armor_id),
             "accessory_preview_path": _get_accessory_preview_path(equipped_accessory_id),
@@ -2651,8 +2653,26 @@ func _build_accessory_inventory_lines() -> Array[String]:
             continue
         var equipped_unit: String = _find_equipped_unit_name(accessory.accessory_id)
         var suffix: String = "" if equipped_unit.is_empty() else " [Equipped: %s]" % equipped_unit
-        lines.append("%s — %s%s" % [accessory.display_name, accessory.summary, suffix])
+        var detail_parts: Array[String] = []
+        var summary_text := String(accessory.summary).strip_edges()
+        var flavor_text := _get_accessory_flavor_text(accessory)
+        if not summary_text.is_empty():
+            detail_parts.append(summary_text)
+        if not flavor_text.is_empty() and flavor_text != summary_text:
+            detail_parts.append(flavor_text)
+        var detail_text := " / ".join(detail_parts)
+        if detail_text.is_empty():
+            detail_text = accessory.display_name
+        lines.append("%s — %s%s" % [accessory.display_name, detail_text, suffix])
     return lines
+
+func _get_accessory_flavor_text(accessory: AccessoryData) -> String:
+    if accessory == null:
+        return ""
+    var flavor_text := String(accessory.flavor_text).strip_edges()
+    if not flavor_text.is_empty():
+        return flavor_text
+    return String(accessory.summary).strip_edges()
 
 func _build_runtime_accessory_map() -> Dictionary:
     var result: Dictionary = {}

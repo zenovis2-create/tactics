@@ -71,7 +71,10 @@ func _assert_save_and_load(svc: SaveService) -> bool:
     data.burden = 3
     data.trust = 5
     data.recovered_fragments[&"ch01_fragment"] = true
+    data.unlocked_commands[&"tactical_shift"] = true
     data.ending_tendency = &"undetermined"
+    data.unit_progression["ally_rian"] = {"level": 2, "exp": 4}
+    data.snapshot_unlock_state()
 
     var err: Error = svc.save_progression(data, 1)
     if err != OK:
@@ -89,6 +92,13 @@ func _assert_save_and_load(svc: SaveService) -> bool:
         return _fail("Loaded trust should be 5, got %d" % int(loaded.trust))
     if not bool(loaded.recovered_fragments.get(&"ch01_fragment", false)):
         return _fail("ch01_fragment should be in loaded data")
+    var rian_progress: Dictionary = loaded.get_unit_progress(&"ally_rian")
+    if int(rian_progress.get("level", 0)) != 2 or int(rian_progress.get("exp", -1)) != 4:
+        return _fail("unit progression should survive save/load")
+    if not loaded.get_recently_recovered_fragments().is_empty():
+        return _fail("saved unlock snapshots should prevent loaded fragments from appearing newly recovered")
+    if not loaded.get_newly_unlocked_commands().is_empty():
+        return _fail("saved unlock snapshots should prevent loaded commands from appearing newly unlocked")
     return true
 
 func _assert_delete(svc: SaveService) -> bool:
