@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_officer_rescue_cipher"
 display_name = "Officer Rescue Cipher"
 summary = "Detention-route accessory. Keeps extraction teams moving through collapsing capital lanes."
+flavor_text = "Officer Rescue Cipher was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

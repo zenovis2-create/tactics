@@ -17,8 +17,6 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const StageData = preload("res://scripts/data/stage_data.gd")
 const UnitData = preload("res://scripts/data/unit_data.gd")
 
-var _failed: bool = false
-
 func _initialize() -> void:
     call_deferred("_run")
 
@@ -160,6 +158,9 @@ func _assert_support_attack_feedback() -> bool:
     var supporter_bond := int(summary.get("supporter_bond_level", 0))
     if supporter_bond < 3:
         return _fail("Battle result summary should expose the supporting bond level.")
+    var support_payload: Dictionary = battle.last_support_attack_details
+    if int(support_payload.get("damage", -1)) != 1:
+        return _fail("Support attack tuning should keep the follow-up meaningful but reduced from a full strike.")
     var result_body := String(battle.hud.get_result_snapshot().get("body", ""))
     if result_body.find("Support Attacks: 1") == -1:
         return _fail("Battle result surface should expose the support attack count with aligned wording.")
@@ -204,7 +205,6 @@ func _assert_event_log(svc: BondService) -> bool:
 
 func _fail(msg: String) -> bool:
     print("[FAIL] ", msg)
-    _failed = true
     quit(1)
     return false
 

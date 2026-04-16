@@ -11,8 +11,8 @@ const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const TRUE_ENDING_TRUST_MIN := 7
 const TRUE_ENDING_BURDEN_MAX := 6
 const BAD_ENDING_BURDEN_MIN := 7
-const UNIT_EXP_PER_LEVEL := 10
-const UNIT_EXP_PER_VICTORY := 10
+const UNIT_EXP_PER_LEVEL := 12
+const UNIT_EXP_PER_VICTORY := 8
 
 # Burden band effect table: band -> stat modifier dictionary applied to Rian.
 # Effects are additive on top of base stats; hardcapped at ±30%.

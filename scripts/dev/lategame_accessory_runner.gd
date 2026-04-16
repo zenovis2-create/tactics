@@ -2,6 +2,8 @@ extends SceneTree
 
 const MAIN_SCENE: PackedScene = preload("res://scenes/Main.tscn")
 const CH07_FINAL_STAGE = preload("res://data/stages/ch07_05_stage.tres")
+const ACCESSORY_DIR := "data/accessories"
+const RES_PREFIX := "res:/"
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -38,6 +40,10 @@ func _run() -> void:
     var inventory_entries: Array = snapshot.get("inventory_entries", [])
     if inventory_entries.is_empty():
         push_error("Lategame accessory runner expected CH05~CH07 accessories in inventory.")
+        quit(1)
+        return
+
+    if not _assert_full_accessory_catalog_flavor():
         quit(1)
         return
 
@@ -154,3 +160,31 @@ func _find_battle_unit(units: Array, expected_name: String):
         if unit.unit_data.display_name == expected_name:
             return unit
     return null
+
+func _assert_full_accessory_catalog_flavor() -> bool:
+    var dir := DirAccess.open(RES_PREFIX + "/" + ACCESSORY_DIR)
+    if dir == null:
+        push_error("Lategame accessory runner could not open accessory catalog.")
+        return false
+    var files := dir.get_files()
+    files.sort()
+    for file_name in files:
+        if not String(file_name).ends_with(".tres"):
+            continue
+        var path := RES_PREFIX + "/" + ACCESSORY_DIR + "/" + file_name
+        var accessory = load(path)
+        if accessory == null:
+            push_error("Accessory catalog entry failed to load: %s" % path)
+            return false
+        var summary := String(accessory.summary).strip_edges()
+        var flavor := String(accessory.flavor_text).strip_edges()
+        if summary.is_empty():
+            push_error("Accessory summary should not be empty: %s" % path)
+            return false
+        if flavor.is_empty():
+            push_error("Accessory flavor_text should not be empty: %s" % path)
+            return false
+        if flavor == summary:
+            push_error("Accessory flavor_text should be distinct from summary: %s" % path)
+            return false
+    return true

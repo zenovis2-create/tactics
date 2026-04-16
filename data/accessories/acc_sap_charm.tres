@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_sap_charm"
 display_name = "Sap Charm"
 summary = "Wildfire route accessory. Lets the wearer keep pace through burning resin ground."
+flavor_text = "Sap Charm was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

@@ -47,10 +47,12 @@ func close() -> void:
 
 ## 슬롯 카드 새로고침
 func refresh_slots() -> void:
-    if slot_cards == null or save_service == null:
+    if slot_cards == null:
         return
     for child in slot_cards.get_children():
         child.queue_free()
+    if save_service == null:
+        return
     for i in SLOT_COUNT:
         var card: Control = _build_slot_card(i)
         slot_cards.add_child(card)
@@ -86,6 +88,7 @@ func _build_slot_card(slot: int) -> Control:
     if info.is_empty() or not bool(info.get("exists", false)):
         lbl.text = "슬롯 %d — 비어 있음" % slot
     else:
+        var progression_summary := String(info.get("unit_progression_summary", ""))
         lbl.text = "슬롯 %d | CH: %s | 부담:%d 신뢰:%d | 엔딩:%s | %s" % [
             slot,
             String(info.get("chapter", &"")),
@@ -94,6 +97,8 @@ func _build_slot_card(slot: int) -> Control:
             String(info.get("ending_tendency", "undetermined")),
             String(info.get("saved_at", ""))
         ]
+        if not progression_summary.is_empty():
+            lbl.text += "\n진행도: %s" % progression_summary
     card.add_child(lbl)
 
     var btn_row: HBoxContainer = HBoxContainer.new()

@@ -7,5 +7,6 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_archive_proof_relay"
 display_name = "Archive Proof Relay"
 summary = "Revision-core accessory. Converts proof into forward pressure."
+flavor_text = "Archive Proof Relay was carried long enough to turn that hard-won summary into something personal, not just tactical."
 attack_bonus = 1
 movement_bonus = 1

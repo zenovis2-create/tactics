@@ -4,6 +4,8 @@ extends Node
 const UnitActor = preload("res://scripts/battle/unit_actor.gd")
 const PathService = preload("res://scripts/battle/path_service.gd")
 const RangeService = preload("res://scripts/battle/range_service.gd")
+const THREAT_ATTACK_WEIGHT := 18
+const THREAT_RANGE_WEIGHT := 4
 
 func pick_action(enemy: UnitActor, opponents: Array, path_service: PathService, range_service: RangeService, dynamic_blocked: Dictionary = {}) -> Dictionary:
     var immediate_target: UnitActor = _find_attack_target_in_range(enemy, opponents, range_service)
@@ -107,7 +109,6 @@ func _find_best_attack_plan(actor: UnitActor, candidates: Array, path_service: P
 func _find_best_approach_plan(actor: UnitActor, target: UnitActor, path_service: PathService, range_service: RangeService, dynamic_blocked: Dictionary) -> Dictionary:
     var best_plan: Dictionary = {}
     var best_cost: int = 2147483647
-    var target_score: int = _score_attack_target(actor, target)
 
     for cell in range_service.get_attack_cells(target.grid_position, actor.get_attack_range()):
         if not path_service.is_walkable(cell, dynamic_blocked):
@@ -123,8 +124,7 @@ func _find_best_approach_plan(actor: UnitActor, target: UnitActor, path_service:
             best_plan = {
                 "path": path,
                 "path_cost": path_cost,
-                "move_to": cell,
-                "target_score": target_score
+                "move_to": cell
             }
 
     return best_plan
@@ -171,5 +171,5 @@ func _score_attack_target(actor: UnitActor, target: UnitActor) -> int:
     var estimated_damage: int = max(1, actor.get_attack() - target.get_defense())
     var lethal_bonus: int = 1000 if estimated_damage >= target.current_hp else 0
     var low_hp_bonus: int = max(0, 100 - target.current_hp)
-    var threat_bonus: int = (target.get_attack() * 20) + (target.get_attack_range() * 5)
+    var threat_bonus: int = (target.get_attack() * THREAT_ATTACK_WEIGHT) + (target.get_attack_range() * THREAT_RANGE_WEIGHT)
     return lethal_bonus + (estimated_damage * 10) + low_hp_bonus + threat_bonus

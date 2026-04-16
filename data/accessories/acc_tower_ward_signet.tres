@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_tower_ward_signet"
 display_name = "Tower Ward Signet"
 summary = "Nameless-corridor accessory. Holds the bearer together when the tower starts deleting context."
+flavor_text = "Tower Ward Signet was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

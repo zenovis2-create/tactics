@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_locked_bell_shard"
 display_name = "Locked Bell Shard"
 summary = "Belfry accessory. Steadies the wearer under wave and signal pressure."
+flavor_text = "Locked Bell Shard was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

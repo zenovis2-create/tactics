@@ -63,6 +63,7 @@ var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
 var _last_result_title: String = "Battle Result"
 var _last_result_body: String = ""
+var _last_transition_payload: Dictionary = {}
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -107,10 +108,11 @@ func set_stage_title(title_text: String) -> void:
     stage_chip.visible = not title_text.strip_edges().is_empty()
 
 func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
+    _last_transition_payload = payload.duplicate(true)
     var formatted_reason: String = _format_reason(reason, payload)
     transition_reason_label.text = formatted_reason
     transition_reason_label.visible = not _should_hide_reason(reason)
-    _update_telegraph_surface(reason)
+    _update_telegraph_surface(reason, payload)
     _emit_battle_cue_for_reason(reason)
 
 func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0) -> void:
@@ -302,6 +304,21 @@ func _on_overlay_scrim_gui_input(event: InputEvent) -> void:
             get_viewport().set_input_as_handled()
 
 func _format_reason(reason: String, payload: Dictionary) -> String:
+    if reason == "support_attack_resolved":
+        var bond := int(payload.get("bond", 0))
+        var damage := int(payload.get("damage", payload.get("count", 0)))
+        var parts: Array[String] = []
+        if bond > 0:
+            parts.append("Bond %d" % bond)
+        if damage > 0:
+            parts.append("Damage %d" % damage)
+        return "Support Attack Resolved" if parts.is_empty() else "Support Attack Resolved (%s)" % ", ".join(parts)
+    if reason == "boss_phase_transition":
+        return "Boss Phase: %s (%d%% HP, Round %d)" % [
+            _to_title_words(str(payload.get("phase", ""))),
+            int(payload.get("hp_percent", 0)),
+            int(payload.get("round", 0))
+        ]
     var normalized_reason := _to_title_words(reason)
     if payload.is_empty():
         return normalized_reason
@@ -538,7 +555,7 @@ func _refresh_inventory_dismiss_hint() -> void:
     dismiss_hint_label.text = dismiss_hint
     close_inventory_button.tooltip_text = dismiss_hint
 
-func _update_telegraph_surface(reason: String) -> void:
+func _update_telegraph_surface(reason: String, payload: Dictionary = {}) -> void:
     match reason:
         "boss_mark_telegraphed":
             _show_telegraph_surface("mark", "Mark", "Marked unit will be charged next enemy turn.")
@@ -546,12 +563,14 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("charge", "Charge", "The marked lane is collapsing into a direct strike.")
         "boss_command_buff":
             _show_telegraph_surface("command", "Command", "Nearby hostiles gain pressure from the boss order.")
+        "boss_phase_transition":
+            _show_telegraph_surface("command", "Boss Phase", "%s phase triggered at %d%% HP." % [_to_title_words(str(payload.get("phase", ""))), int(payload.get("hp_percent", 0))])
         "enemy_phase_open", "enemy_decide":
             _show_telegraph_surface("danger", "Danger", "Enemy pressure is active. Recheck exposed lanes.")
         "interaction_resolved":
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
         "support_attack_resolved":
-            _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
+            _show_telegraph_surface("danger", "Support Attack", "Bond %d ally follow-up confirmed for %d damage." % [int(payload.get("bond", 0)), int(payload.get("damage", payload.get("count", 0)))])
         _:
             _clear_telegraph_surface()
 

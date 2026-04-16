@@ -5,8 +5,6 @@ extends Control
 
 signal result_confirmed
 
-const ProgressionService = preload("res://scripts/battle/progression_service.gd")
-
 @onready var background: ColorRect = get_node_or_null("Background") as ColorRect
 @onready var panel: PanelContainer = get_node_or_null("Panel") as PanelContainer
 @onready var title_label: Label = get_node_or_null("Panel/Margin/Content/TitleLabel") as Label
@@ -68,12 +66,13 @@ func show_result(result: Dictionary) -> void:
 	if not unit_exp_results.is_empty():
 		body_lines.append("[b]Unit EXP:[/b]")
 		for entry in unit_exp_results:
+			var level_up_emphasis := " [color=#ffd36b][b]★ LEVEL UP! ★[/b][/color]" if bool(entry.get("leveled_up", false)) else ""
 			body_lines.append("  • %s Lv %d -> %d (+%d EXP)%s" % [
 				str(entry.get("display_name", entry.get("unit_id", "Unit"))),
 				int(entry.get("level_before", 1)),
 				int(entry.get("level_after", 1)),
 				int(entry.get("exp_gain", 0)),
-				" LEVEL UP!" if bool(entry.get("leveled_up", false)) else ""
+				level_up_emphasis
 			])
 
 	# 기억 조각
