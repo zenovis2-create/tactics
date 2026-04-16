@@ -79,22 +79,24 @@ func _assert_notification_count(ctrl: CampController) -> bool:
 
 func _assert_base_axes(ctrl: CampController) -> bool:
     var result: CampData = ctrl.enter_camp(&"ch01", {})
-    # ch01: sortie + equipment + records = 3
-    if result.unlocked_axes.size() != 3:
-        return _fail("ch01 should have 3 base axes, got %d" % result.unlocked_axes.size())
+    # ch01: sortie + equipment + records + save = 4
+    if result.unlocked_axes.size() != 4:
+        return _fail("ch01 should have 4 base axes, got %d" % result.unlocked_axes.size())
     if not result.unlocked_axes.has(&"sortie"):
         return _fail("sortie must be in base axes")
     if not result.unlocked_axes.has(&"equipment"):
         return _fail("equipment must be in base axes")
     if not result.unlocked_axes.has(&"records"):
         return _fail("records must be in base axes")
+    if not result.unlocked_axes.has(&"save"):
+        return _fail("save must be in base axes")
     return true
 
 func _assert_extended_axes(ctrl: CampController) -> bool:
     var result: CampData = ctrl.enter_camp(&"ch06", {})
-    # ch06: base(3) + storage + dismantle + forge = 6
-    if result.unlocked_axes.size() != 6:
-        return _fail("ch06 should have 6 axes, got %d" % result.unlocked_axes.size())
+    # ch06: base(4) + storage + dismantle + forge = 7
+    if result.unlocked_axes.size() != 7:
+        return _fail("ch06 should have 7 axes, got %d" % result.unlocked_axes.size())
     if not result.unlocked_axes.has(&"forge"):
         return _fail("forge must be unlocked at ch06")
     # recall unlocks at ch08

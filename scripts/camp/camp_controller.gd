@@ -7,17 +7,19 @@ extends Node
 
 const CampData = preload("res://scripts/data/camp_data.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const SaveService = preload("res://scripts/battle/save_service.gd")
 
 const AXIS_SORTIE: StringName = &"sortie"
 const AXIS_EQUIPMENT: StringName = &"equipment"
 const AXIS_RECORDS: StringName = &"records"
+const AXIS_SAVE: StringName = &"save"
 const AXIS_STORAGE: StringName = &"storage"
 const AXIS_DISMANTLE: StringName = &"dismantle"
 const AXIS_FORGE: StringName = &"forge"
 const AXIS_RECALL: StringName = &"recall"
 
-## 항상 해금: 편성 / 장비 / 기록
-const BASE_AXES: Array[StringName] = [AXIS_SORTIE, AXIS_EQUIPMENT, AXIS_RECORDS]
+## 항상 해금: 편성 / 장비 / 기록 / 보관
+const BASE_AXES: Array[StringName] = [AXIS_SORTIE, AXIS_EQUIPMENT, AXIS_RECORDS, AXIS_SAVE]
 
 ## ch04+ 이후 추가 해금
 const STORAGE_UNLOCK_CHAPTERS: Array[StringName] = [
@@ -34,7 +36,10 @@ signal camp_entered(camp_data: CampData)
 signal camp_exited
 
 var _camp_data: CampData = null
+var _save_service: SaveService = null
 var _event_log: Array[Dictionary] = []
+var _newly_unlocked_commands: Array[String] = []
+var _recently_recovered_fragments: Array[String] = []
 
 func enter_camp(
     chapter: StringName,
@@ -49,8 +54,18 @@ func enter_camp(
     _camp_data.ending_tendency = progression.ending_tendency if progression != null else &"undetermined"
     _camp_data.recovered_fragment_count = progression.recovered_fragments.size() if progression != null else 0
     _camp_data.unlocked_command_count = progression.unlocked_commands.size() if progression != null else 0
-    _camp_data.recovered_fragment_ids = progression.get_recovered_fragment_ids() if progression != null else []
-    _camp_data.unlocked_command_ids = progression.get_unlocked_command_ids() if progression != null else []
+    if progression != null:
+        _camp_data.recovered_fragment_ids = progression.get_recovered_fragment_ids()
+        _camp_data.unlocked_command_ids = progression.get_unlocked_command_ids()
+        _newly_unlocked_commands = progression.get_newly_unlocked_commands()
+        _recently_recovered_fragments = progression.get_recently_recovered_fragments()
+        progression.snapshot_unlock_state()
+    else:
+        var empty_ids: Array[String] = []
+        _camp_data.recovered_fragment_ids = empty_ids
+        _camp_data.unlocked_command_ids = empty_ids
+        _newly_unlocked_commands = []
+        _recently_recovered_fragments = []
     _camp_data.unlocked_axes = _compute_unlocked_axes(chapter)
     _build_pending_notifications(stage_clear_result)
     _event_log.append({"event": "camp_entered", "chapter": chapter})
@@ -75,6 +90,8 @@ func get_camp_summary() -> Dictionary:
         "unlocked_commands": _camp_data.unlocked_command_count,
         "recovered_fragment_ids": _camp_data.recovered_fragment_ids.duplicate(),
         "unlocked_command_ids": _camp_data.unlocked_command_ids.duplicate(),
+        "newly_unlocked_commands": _newly_unlocked_commands.duplicate(),
+        "recently_recovered_fragments": _recently_recovered_fragments.duplicate(),
         "unlocked_axes": _camp_data.unlocked_axes.duplicate(),
         "pending_notifications": _camp_data.get_notification_count(),
         "has_new_records": _camp_data.has_pending_notifications(),
@@ -85,6 +102,12 @@ func get_camp_summary() -> Dictionary:
 
 func get_camp_data() -> CampData:
     return _camp_data
+
+func set_save_service(service: SaveService) -> void:
+    _save_service = service
+
+func get_save_service() -> SaveService:
+    return _save_service
 
 func get_event_log() -> Array[Dictionary]:
     return _event_log.duplicate()

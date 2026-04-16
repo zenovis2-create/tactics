@@ -7,11 +7,11 @@ signal result_confirmed
 
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
 
-@onready var background: ColorRect = $Background
-@onready var panel: PanelContainer = $Panel
-@onready var title_label: Label = $Panel/Margin/Content/TitleLabel
-@onready var body_label: RichTextLabel = $Panel/Margin/Content/BodyLabel
-@onready var confirm_button: Button = $Panel/Margin/Content/ConfirmButton
+@onready var background: ColorRect = get_node_or_null("Background") as ColorRect
+@onready var panel: PanelContainer = get_node_or_null("Panel") as PanelContainer
+@onready var title_label: Label = get_node_or_null("Panel/Margin/Content/TitleLabel") as Label
+@onready var body_label: RichTextLabel = get_node_or_null("Panel/Margin/Content/BodyLabel") as RichTextLabel
+@onready var confirm_button: Button = get_node_or_null("Panel/Margin/Content/ConfirmButton") as Button
 
 var _last_result: Dictionary = {}
 
@@ -71,12 +71,12 @@ func show_result(result: Dictionary) -> void:
 
 	var recovered_fragments: Array = result.get("recovered_fragment_ids", [])
 	if not recovered_fragments.is_empty():
-		body_lines.append("[b]Recovered Fragments:[/b] %s" % ", ".join(recovered_fragments))
+		body_lines.append("[b]기억 복원:[/b] %s" % ", ".join(recovered_fragments))
 
 	# 커맨드 해금
 	var command_unlocked: String = str(result.get("command_unlocked", ""))
 	if not command_unlocked.is_empty():
-		body_lines.append("[b]Command Unlocked:[/b] %s" % command_unlocked)
+		body_lines.append("[b]해금:[/b] %s" % command_unlocked)
 
 	# 기록 (기억/물증/편지) — 캠프로 전달
 	var memory_entries: Array = result.get("memory_entries", [])

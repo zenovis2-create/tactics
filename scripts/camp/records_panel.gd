@@ -34,23 +34,23 @@ func load_records(data: CampData) -> void:
     for mem in data.pending_memory_entries:
         _entries.append({
             "type": "memory",
-            "label": "[ 기억 ] " + String(mem.get("title", "")),
-            "title": String(mem.get("title", "")),
-            "body":  String(mem.get("text", "")),
+            "label": "[ 기억 ] " + String(mem),
+            "title": String(mem),
+            "body": "",
         })
     for ev in data.pending_evidence_entries:
         _entries.append({
             "type": "evidence",
-            "label": "[ 증거 ] " + String(ev.get("title", "")),
-            "title": String(ev.get("title", "")),
-            "body":  String(ev.get("text", "")),
+            "label": "[ 증거 ] " + String(ev),
+            "title": String(ev),
+            "body": "",
         })
     for letter in data.pending_letter_entries:
         _entries.append({
             "type": "letter",
-            "label": "[ 서한 ] " + String(letter.get("title", "")),
-            "title": String(letter.get("title", "")),
-            "body":  String(letter.get("text", "")),
+            "label": "[ 서한 ] " + String(letter),
+            "title": String(letter),
+            "body": "",
         })
 
     _refresh_list()

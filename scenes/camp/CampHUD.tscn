@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/camp/camp_hud.gd" id="1_camphud"]
 [ext_resource type="Script" path="res://scripts/camp/records_panel.gd" id="2_records"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadPanel.tscn" id="3_saveload"]
 
 [node name="CampHUD" type="Control"]
 layout_mode = 3
@@ -84,3 +85,12 @@ text = "닫기"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
 text = "다음 전투"
+
+[node name="save" parent="VBox/PanelArea" instance=ExtResource("3_saveload")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false

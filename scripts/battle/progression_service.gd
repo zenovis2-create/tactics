@@ -127,14 +127,20 @@ func recover_fragment(fragment_id: StringName) -> Dictionary:
 		return {"fragment_id": String(fragment_id), "already_known": true, "command_unlocked": null}
 
 	_data.recovered_fragments[fragment_id] = true
-	_emit_log("fragment_recovered", {"fragment_id": String(fragment_id)})
+	_emit_log("fragment_recovered", {
+		"fragment_id": String(fragment_id),
+		"recovered_fragment_count": _data.recovered_fragments.size(),
+		"recovered_fragment_ids": _data.get_recovered_fragment_ids()
+	})
 
 	var unlocked_command: StringName = FRAGMENT_COMMAND_UNLOCKS.get(fragment_id, &"")
 	if unlocked_command != &"" and not _data.has_command(unlocked_command):
 		_data.unlocked_commands[unlocked_command] = true
 		_emit_log("command_unlocked", {
 			"command_id": String(unlocked_command),
-			"source_fragment": String(fragment_id)
+			"source_fragment": String(fragment_id),
+			"unlocked_command_count": _data.unlocked_commands.size(),
+			"unlocked_command_ids": _data.get_unlocked_command_ids()
 		})
 
 	_evaluate_ending_tendency()
@@ -155,6 +161,20 @@ func get_trust_effect() -> Dictionary:
 
 func get_event_log() -> Array[Dictionary]:
 	return _log.duplicate()
+
+func get_unlockable_skills(all_skills: Array) -> Array:
+	var unlockable: Array = []
+	for skill in all_skills:
+		if skill != null and skill.has_method("is_unlocked") and skill.is_unlocked(_data):
+			unlockable.append(skill)
+	return unlockable
+
+func get_locked_skills(all_skills: Array) -> Array:
+	var locked: Array = []
+	for skill in all_skills:
+		if skill != null and skill.has_method("is_unlocked") and not skill.is_unlocked(_data):
+			locked.append(skill)
+	return locked
 
 # --- Internal ---
 
