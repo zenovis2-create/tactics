@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_valtor_command_cuirass"
 display_name = "Valtor Command Cuirass"
 summary = "Quartermaster-depths accessory. Hardens the line for one more push."
+flavor_text = "Its inside plate stays warm against the ribs, as if it still remembers the shouted order that held the breach for one more minute."
 defense_bonus = 1

@@ -28,6 +28,7 @@ func _run() -> void:
 	if not _assert_event_log_non_empty(svc): return
 	if not _assert_burden_effect_keys(svc): return
 	if not _assert_trust_effect_keys(svc): return
+	if not _assert_unit_progress_defaults_and_gain(svc): return
 
 	print("[PASS] M4 progression runner: all assertions passed.")
 	quit(0)
@@ -157,6 +158,20 @@ func _assert_trust_effect_keys(svc: ProgressionService) -> bool:
 	var max_effect := fresh.get_trust_effect()
 	if not max_effect.has("support_range_bonus"):
 		return _fail("Band 9 trust effect must include support_range_bonus")
+	fresh.queue_free()
+	return true
+
+func _assert_unit_progress_defaults_and_gain(svc: ProgressionService) -> bool:
+	var fresh := ProgressionService.new()
+	root.add_child(fresh)
+	var initial: Dictionary = fresh.get_unit_progress(&"ally_rian")
+	if int(initial.get("level", 0)) != 1 or int(initial.get("exp", -1)) != 0:
+		return _fail("Unit progression should default to level 1 exp 0")
+	var gain: Dictionary = fresh.grant_unit_exp(&"ally_rian", 10, "test")
+	if int(gain.get("level_after", 0)) != 2:
+		return _fail("grant_unit_exp should level up a unit at the default threshold")
+	if int(fresh.get_data().to_debug_dict().get("unit_progression", {}).get("ally_rian", {}).get("level", 0)) != 2:
+		return _fail("Progression debug snapshot should expose unit progression data")
 	fresh.queue_free()
 	return true
 

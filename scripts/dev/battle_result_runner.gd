@@ -28,6 +28,7 @@ func _run() -> void:
 		"outcome",
 		"objective",
 		"reward_entries",
+		"unit_exp_results",
 		"memory_entries",
 		"evidence_entries",
 		"letter_entries",
@@ -51,6 +52,13 @@ func _run() -> void:
 		return _fail("Result summary should expose at least one evidence entry for CH01_05.")
 	if (summary.get("letter_entries", []) as Array).is_empty():
 		return _fail("Result summary should expose at least one letter entry for CH01_05.")
+	var unit_exp_results: Array = summary.get("unit_exp_results", [])
+	if unit_exp_results.is_empty():
+		return _fail("Result summary should expose unit EXP results after victory.")
+	var first_exp: Dictionary = unit_exp_results[0]
+	for key: String in ["unit_id", "display_name", "level_before", "exp_before", "exp_gain", "level_after", "exp_after", "leveled_up"]:
+		if not first_exp.has(key):
+			return _fail("Unit EXP result is missing key: %s" % key)
 
 	var dialog_text := String(battle.hud.result_popup.dialog_text)
 	if String(battle.hud.result_popup.title) != "Victory":
@@ -60,6 +68,7 @@ func _run() -> void:
 		"Rewards:",
 		"Memory Fragment: ch01_fragment",
 		"Command Unlocked: tactical_shift",
+		"Unit EXP:",
 		"Memory:",
 		"Evidence:",
 		"Letters:"

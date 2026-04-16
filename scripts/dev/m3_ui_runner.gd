@@ -31,6 +31,8 @@ func _run() -> void:
         return
     if not _assert_battle_result_surface(battle):
         return
+    if not _assert_structured_result_and_feedback_surfaces(battle):
+        return
     if not await _advance_campaign_to_camp(main):
         return
     if not _assert_campaign_panel_snapshot(main.campaign_panel):
@@ -233,6 +235,56 @@ func _assert_battle_result_surface(battle) -> bool:
     if not bool(result_snapshot.get("visible", false)):
         return _fail("BattleHUD result popup should be visible after show_result().")
     battle.hud.result_popup.hide()
+    return true
+
+func _assert_structured_result_and_feedback_surfaces(battle) -> bool:
+    battle.hud.set_selection_summary("Rian", "12/12", 4, 1, 6, 2, 1, "Plain", 2)
+    var layout_snapshot: Dictionary = battle.hud.get_layout_snapshot()
+    if not bool(layout_snapshot.get("oblivion_badge_visible", false)):
+        return _fail("BattleHUD layout snapshot should expose the oblivion badge visibility when a unit has stacks.")
+
+    battle.hud.set_transition_reason("support_attack_resolved", {"bond": 3, "count": 1})
+    if battle.hud.transition_reason_label.text.find("Bond 3") == -1:
+        return _fail("BattleHUD support feedback should expose the supporting bond level in readable text.")
+    if battle.hud.telegraph_label.text != "Support Attack":
+        return _fail("BattleHUD telegraph label should promote support attacks with explicit wording.")
+    if battle.hud.telegraph_detail_label.text.find("bond 3+") == -1:
+        return _fail("BattleHUD support telegraph detail should explain the bond trigger clearly.")
+
+    battle.hud.show_result_screen({
+        "title": "Victory",
+        "objective": "Hold the archive line.",
+        "reward_entries": ["Archive proof relay"],
+        "memory_entries": ["Recovered order fragment"],
+        "recovered_fragment_ids": ["ch05_fragment"],
+        "unlocked_command_ids": ["tactical_shift"],
+        "unit_exp_results": [
+            {"display_name": "Rian", "level_before": 1, "exp_before": 0, "exp_gain": 10, "level_after": 2, "exp_after": 0, "leveled_up": true}
+        ],
+        "support_attack_count": 1,
+        "supporter_bond_level": 3,
+        "burden_delta": 1,
+        "trust_delta": 1
+    })
+    var result_screen = battle.hud.result_screen
+    if result_screen == null:
+        return _fail("BattleHUD should instantiate a structured BattleResultScreen.")
+    var structured_snapshot: Dictionary = result_screen.get_result_snapshot()
+    if not bool(structured_snapshot.get("visible", false)):
+        return _fail("BattleResultScreen should become visible when show_result_screen() is called.")
+
+    var body_label: RichTextLabel = result_screen.get_node_or_null("Panel/Margin/Content/BodyLabel")
+    if body_label == null:
+        return _fail("BattleResultScreen body label could not be resolved for UI verification.")
+    var result_body := String(body_label.text)
+    if result_body.find("Support Attacks") == -1 or result_body.find("Support Bond") == -1:
+        return _fail("BattleResultScreen should surface both support attack count and support bond emphasis.")
+    if result_body.find("기억 복원") == -1:
+        return _fail("BattleResultScreen should preserve memory-restoration emphasis in the structured result body.")
+    if result_body.find("Unit EXP") == -1 or result_body.find("Rian") == -1 or result_body.find("Lv 1 -> 2") == -1:
+        return _fail("BattleResultScreen should surface per-unit EXP gain and level-up lines.")
+
+    result_screen.hide_result()
     return true
 
 func _assert_campaign_save_entry(main) -> bool:

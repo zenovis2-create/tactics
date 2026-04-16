@@ -1,6 +1,8 @@
 class_name SkillData
 extends Resource
 
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
+
 @export var skill_id: StringName = &"basic_attack"
 @export var display_name: String = "Basic Attack"
 @export var range: int = 1

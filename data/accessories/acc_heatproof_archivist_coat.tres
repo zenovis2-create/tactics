@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_heatproof_archivist_coat"
 display_name = "Heatproof Archivist Coat"
 summary = "Ash-climb accessory. Keeps the wearer steady while the archive burns around them."
+flavor_text = "The collar still carries the smell of wet ash and lamp oil, like a reader who kept cataloging until the shelves collapsed."
 defense_bonus = 1

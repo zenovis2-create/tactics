@@ -134,6 +134,7 @@ var enemy_attack_bonus_by_unit: Dictionary = {}
 var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuses
 var boss_event_history: Array[String] = []
 var boss_phase_by_unit: Dictionary = {}  ## unit instance_id → current phase StringName
+var last_support_attack_details: Dictionary = {}
 
 var current_phase: int = BattlePhase.BATTLE_INIT
 var round_index: int = 1
@@ -187,6 +188,7 @@ func bootstrap_battle() -> void:
     enemy_movement_bonus_by_unit.clear()
     boss_event_history.clear()
     boss_phase_by_unit.clear()
+    last_support_attack_details.clear()
 
     _clear_battle_state()
     _spawn_from_stage()
@@ -680,45 +682,7 @@ func _apply_enemy_action(enemy: UnitActor, action: Dictionary) -> void:
             })
 
 func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Dictionary = {}) -> void:
-    var attack_context: Dictionary = {
-        "defense_bonus": stage_data.get_defense_bonus(defender.grid_position),
-        "terrain_type": String(stage_data.get_terrain_type(defender.grid_position)),
-        "allow_counterattack": true,
-        "counter_context": {
-            "defense_bonus": stage_data.get_defense_bonus(attacker.grid_position),
-            "terrain_type": String(stage_data.get_terrain_type(attacker.grid_position))
-        }
-    }
-    for key in extra_context.keys():
-        attack_context[key] = extra_context[key]
-
-    # Apply Burden band penalty to attacker if ally (Rian's coherence cost).
-    if attacker.faction == "ally" and progression_service != null:
-        var burden_fx := progression_service.get_burden_effect()
-        var atk_bonus: int = int(attack_context.get("attack_bonus", 0))
-        atk_bonus += int(burden_fx.get("damage_mod", 0))
-        attack_context["attack_bonus"] = atk_bonus
-
-    # Bond adjacency bonus: 인접 아군과 bond >= 2이면 공격력 +1
-    if attacker.faction == "ally" and bond_service != null:
-        var bond_atk_bonus: int = 0
-        for unit: UnitActor in ally_units:
-            if unit == attacker or not is_instance_valid(unit) or unit.is_defeated():
-                   continue
-            if bond_service.get_bond(unit.unit_data.unit_id) >= 2:
-                var dist: int = abs(attacker.grid_position.x - unit.grid_position.x) + abs(attacker.grid_position.y - unit.grid_position.y)
-                if dist <= 1:
-                    bond_atk_bonus += 1
-                    break  # 최대 1명의 본드 보너스만 적용
-        if bond_atk_bonus > 0:
-            attack_context["bond_attack_bonus"] = bond_atk_bonus
-
-    # Apply 망각 stack effects to attacker.
-    if status_service != null:
-        var status_fx: Dictionary = status_service.get_effects(attacker)
-        attack_context["oblivion_accuracy_mod"] = int(status_fx.get("accuracy_mod", 0))
-        attack_context["oblivion_evasion_mod"] = int(status_fx.get("evasion_mod", 0))
-        attack_context["oblivion_skills_sealed"] = bool(status_fx.get("skills_sealed", false))
+    var attack_context: Dictionary = _build_attack_context(attacker, defender, extra_context)
 
     var result: Dictionary = combat_service.resolve_attack(attacker, defender, attacker.get_default_skill(), {
         "defense_bonus": attack_context.get("defense_bonus", 0),
@@ -772,14 +736,18 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
 
     # 지원 공격: 공격자가 아군이고 인접 동료 중 bond 3+ 있으면 발동
     var support_attack_triggered := false
-    if attacker.faction == "ally" and bond_service != null and not bool(result.get("defender_defeated", false)):
+    if attacker.faction == "ally" and bond_service != null and is_instance_valid(attacker) and not attacker.is_defeated() and not bool(result.get("defender_defeated", false)):
         support_attack_triggered = _try_resolve_support_attack(attacker, defender)
 
-    _sync_hud_phase("support_attack_resolved" if support_attack_triggered else reason, {
+    var follow_up_payload := {
         "attacker": attacker.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,
         "round": round_index
-    })
+    }
+    if support_attack_triggered and not last_support_attack_details.is_empty():
+        follow_up_payload = last_support_attack_details.duplicate(true)
+
+    _sync_hud_phase("support_attack_resolved" if support_attack_triggered else reason, follow_up_payload)
 
 func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bool:
     for unit: UnitActor in ally_units:
@@ -791,24 +759,36 @@ func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bo
     return false
 
 func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
+    var support_context := _build_attack_context(supporter, defender, {
+        "attack_bonus": -2,
+        "allow_counterattack": false
+    }, false)
     var support_result: Dictionary = combat_service.resolve_attack(supporter, defender, supporter.get_default_skill(), {
+        "defense_bonus": support_context.get("defense_bonus", 0),
+        "terrain_type": support_context.get("terrain_type", "plain"),
         "allow_counterattack": false,
-        "attack_bonus": -2  # 지원 공격은 약간 감소
+        "attack_bonus": support_context.get("attack_bonus", 0),
+        "counter_context": support_context.get("counter_context", {}),
+        "oblivion_accuracy_mod": support_context.get("oblivion_accuracy_mod", 0),
+        "oblivion_skills_sealed": support_context.get("oblivion_skills_sealed", false)
     })
     if telemetry_service != null:
         telemetry_service.record_command_use(&"support_attack")
     # 지원 공격 데미지 팝업
     var support_dmg: int = int(support_result.get("damage", 0))
+    var support_bond: int = bond_service.get_bond(supporter.unit_data.unit_id) if bond_service != null else 0
     if support_dmg > 0:
         defender.show_damage(support_dmg, &"damage")
     else:
         defender.show_damage(0, &"miss")
-    hud.set_transition_reason("support_attack_resolved", {
+    last_support_attack_details = {
         "supporter": supporter.unit_data.unit_id,
         "defender": defender.unit_data.unit_id,
+        "bond": support_bond,
         "damage": support_result.get("damage", 0),
         "round": round_index
-    })
+    }
+    hud.set_transition_reason("support_attack_resolved", last_support_attack_details)
     if bool(support_result.get("defender_defeated", false)):
         _remove_unit_from_roster(defender)
 
@@ -920,21 +900,21 @@ func _check_battle_end() -> bool:
         "resolve_all_interactions":
             if _are_all_interactive_objects_resolved():
                 _transition_to(BattlePhase.VICTORY, "interaction_objectives_completed", {"round": round_index})
-                hud.show_result("Victory!\nAll objective points were secured.")
+                hud.cache_result_text("Victory\nAll objective points were secured.")
                 _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
         "resolve_all_interactions_and_defeat_all_enemies":
             if _are_all_interactive_objects_resolved() and enemy_units.is_empty():
                 _transition_to(BattlePhase.VICTORY, "interaction_and_enemy_objectives_completed", {"round": round_index})
-                hud.show_result("Victory!\nObjective points were secured and all enemies were defeated.")
+                hud.cache_result_text("Victory\nObjective points were secured and all enemies were defeated.")
                 _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
         _:
             if enemy_units.is_empty():
                 _transition_to(BattlePhase.VICTORY, "enemy_team_eliminated", {"round": round_index})
-                hud.show_result("Victory!\nAll enemy units are defeated.")
+                hud.cache_result_text("Victory\nAll enemy units are defeated.")
                 _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
@@ -951,9 +931,11 @@ func _check_battle_end() -> bool:
 func _on_battle_victory() -> void:
     var result_summary := {
         "outcome": "victory",
+        "title": "Victory",
         "stage_id": String(stage_data.stage_id) if stage_data != null else "",
         "objective": _get_objective_text(),
         "reward_entries": battle_reward_log.duplicate(),
+        "unit_exp_results": [],
         "memory_entries": _get_stage_memory_entries(),
         "evidence_entries": _get_stage_evidence_entries(),
         "letter_entries": _get_stage_letter_entries(),
@@ -962,6 +944,7 @@ func _on_battle_victory() -> void:
         "recovered_fragment_ids": [],
         "unlocked_command_ids": [],
         "support_attack_count": 0,
+        "supporter_bond_level": 0,
         "burden_delta": 0,
         "trust_delta": 0,
     }
@@ -989,6 +972,17 @@ func _on_battle_victory() -> void:
                 var flash_data = CutsceneCatalog.get_cutscene(flash_id)
                 if flash_data != null:
                     cutscene_player.play(flash_data)
+        var participant_ids: Array[StringName] = []
+        for unit in ally_units:
+            if is_instance_valid(unit) and unit.unit_data != null:
+                participant_ids.append(unit.unit_data.unit_id)
+        var unit_exp_results: Array[Dictionary] = progression_service.grant_victory_exp(participant_ids)
+        for index in range(unit_exp_results.size()):
+            var entry: Dictionary = unit_exp_results[index]
+            var unit_id: StringName = StringName(entry.get("unit_id", ""))
+            entry["display_name"] = _get_ally_display_name(unit_id)
+            unit_exp_results[index] = entry
+        result_summary["unit_exp_results"] = unit_exp_results
     # 클리어 컷씬 재생
     if cutscene_player != null and stage_data != null and stage_data.clear_cutscene_id != &"":
         var clear_data = CutsceneCatalog.get_cutscene(stage_data.clear_cutscene_id)
@@ -1013,13 +1007,19 @@ func _on_battle_victory() -> void:
         var session_snapshot: Dictionary = telemetry_service.get_session_snapshot()
         var command_usage: Dictionary = session_snapshot.get(TelemetryService.KEY_COMMAND_USAGE, {})
         result_summary["support_attack_count"] = int(command_usage.get("support_attack", 0))
+    if not last_support_attack_details.is_empty():
+        result_summary["supporter_bond_level"] = int(last_support_attack_details.get("bond", 0))
     last_result_summary = result_summary
     if int(last_result_summary.get("support_attack_count", 0)) > 0:
-        hud.set_transition_reason("support_attack_resolved", {
+        var victory_support_payload := {
             "count": int(last_result_summary.get("support_attack_count", 0)),
             "round": round_index
-        })
-    hud.show_result(_build_result_summary_text(last_result_summary))
+        }
+        if not last_support_attack_details.is_empty():
+            victory_support_payload["bond"] = int(last_support_attack_details.get("bond", 0))
+        hud.set_transition_reason("support_attack_resolved", victory_support_payload)
+    var result_text := _build_result_summary_text(last_result_summary)
+    hud.cache_result_text(result_text)
     # 전투 결과 전용 화면도 함께 표시
     hud.show_result_screen(last_result_summary)
 
@@ -1554,6 +1554,18 @@ func _build_result_summary_text(summary: Dictionary) -> String:
     var fragment_id := String(summary.get("fragment_id", ""))
     if not fragment_id.is_empty():
         lines.append("Memory Fragment: %s" % fragment_id)
+    var unit_exp_results: Array = summary.get("unit_exp_results", [])
+    if not unit_exp_results.is_empty():
+        lines.append("Unit EXP:")
+        for entry in unit_exp_results:
+            var display_name := String(entry.get("display_name", entry.get("unit_id", "Unit")))
+            lines.append("- %s Lv %d -> %d (+%d EXP)%s" % [
+                display_name,
+                int(entry.get("level_before", 1)),
+                int(entry.get("level_after", 1)),
+                int(entry.get("exp_gain", 0)),
+                " LEVEL UP!" if bool(entry.get("leveled_up", false)) else ""
+            ])
     var fragment_ids := _variant_to_string_array(summary.get("recovered_fragment_ids", []))
     if not fragment_ids.is_empty():
         lines.append("Recovered Fragments: %s" % ", ".join(fragment_ids))
@@ -1565,7 +1577,10 @@ func _build_result_summary_text(summary: Dictionary) -> String:
         lines.append("Unlocked Commands: %s" % ", ".join(command_ids))
     var support_attack_count := int(summary.get("support_attack_count", 0))
     if support_attack_count > 0:
-        lines.append("Support Follow-Ups: %d" % support_attack_count)
+        lines.append("Support Attacks: %d" % support_attack_count)
+        var support_bond := int(summary.get("supporter_bond_level", 0))
+        if support_bond > 0:
+            lines.append("Support Bond: %d" % support_bond)
     lines.append("Burden Delta: %+d" % int(summary.get("burden_delta", 0)))
     lines.append("Trust Delta: %+d" % int(summary.get("trust_delta", 0)))
     _append_result_section(lines, "Rewards", _variant_to_string_array(summary.get("reward_entries", [])))
@@ -1582,6 +1597,46 @@ func _append_result_section(lines: Array[String], heading: String, entries: Arra
     for entry in entries:
         lines.append("- %s" % entry)
 
+func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_context: Dictionary = {}, include_bond_bonus: bool = true) -> Dictionary:
+    var attack_context: Dictionary = {
+        "defense_bonus": stage_data.get_defense_bonus(defender.grid_position),
+        "terrain_type": String(stage_data.get_terrain_type(defender.grid_position)),
+        "allow_counterattack": true,
+        "counter_context": {
+            "defense_bonus": stage_data.get_defense_bonus(attacker.grid_position),
+            "terrain_type": String(stage_data.get_terrain_type(attacker.grid_position))
+        }
+    }
+    for key in extra_context.keys():
+        attack_context[key] = extra_context[key]
+
+    if attacker.faction == "ally" and progression_service != null:
+        var burden_fx := progression_service.get_burden_effect()
+        var atk_bonus: int = int(attack_context.get("attack_bonus", 0))
+        atk_bonus += int(burden_fx.get("damage_mod", 0))
+        attack_context["attack_bonus"] = atk_bonus
+
+    if include_bond_bonus and attacker.faction == "ally" and bond_service != null:
+        var bond_atk_bonus: int = 0
+        for unit: UnitActor in ally_units:
+            if unit == attacker or not is_instance_valid(unit) or unit.is_defeated():
+                continue
+            if bond_service.get_bond(unit.unit_data.unit_id) >= 2:
+                var dist: int = abs(attacker.grid_position.x - unit.grid_position.x) + abs(attacker.grid_position.y - unit.grid_position.y)
+                if dist <= 1:
+                    bond_atk_bonus += 1
+                    break
+        if bond_atk_bonus > 0:
+            attack_context["bond_attack_bonus"] = bond_atk_bonus
+
+    if status_service != null:
+        var status_fx: Dictionary = status_service.get_effects(attacker)
+        attack_context["oblivion_accuracy_mod"] = int(status_fx.get("accuracy_mod", 0))
+        attack_context["oblivion_evasion_mod"] = int(status_fx.get("evasion_mod", 0))
+        attack_context["oblivion_skills_sealed"] = bool(status_fx.get("skills_sealed", false))
+
+    return attack_context
+
 func _variant_to_string_array(value: Variant) -> Array[String]:
     if value is Array[String]:
         return (value as Array[String]).duplicate()
@@ -1591,6 +1646,12 @@ func _variant_to_string_array(value: Variant) -> Array[String]:
             result.append(String(item))
         return result
     return []
+
+func _get_ally_display_name(unit_id: StringName) -> String:
+    for unit in ally_units:
+        if is_instance_valid(unit) and unit.unit_data != null and unit.unit_data.unit_id == unit_id:
+            return unit.unit_data.display_name
+    return String(unit_id)
 
 func _get_inventory_panel_title() -> String:
     if stage_data == null:

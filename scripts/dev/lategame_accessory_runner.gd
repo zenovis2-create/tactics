@@ -69,14 +69,28 @@ func _run() -> void:
         push_error("Lategame accessory runner expected equipped accessory flavor summary in party details.")
         quit(1)
         return
+    if String(enoch_detail.get("accessory_flavor_text", "")).is_empty():
+        push_error("Lategame accessory runner expected equipped accessory flavor text in party details.")
+        quit(1)
+        return
+    if String(enoch_detail.get("accessory_flavor_text", "")) == String(enoch_detail.get("accessory_summary", "")):
+        push_error("Lategame accessory runner expected accessory flavor text to be distinct from the summary surface.")
+        quit(1)
+        return
 
     var accessory_hint = main.campaign_panel.get_node_or_null("Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack/HintLabel")
     if accessory_hint == null:
         push_error("Lategame accessory runner could not resolve accessory hint label.")
         quit(1)
         return
-    if String(accessory_hint.text).find("Eligible:") == -1 or String(accessory_hint.text).find(String(enoch_detail.get("accessory_summary", ""))) == -1:
-        push_error("Lategame accessory runner expected accessory hint label to show both flavor summary and eligibility.")
+    if String(accessory_hint.text).find("Eligible:") == -1 or String(accessory_hint.text).find(String(enoch_detail.get("accessory_summary", ""))) == -1 or String(accessory_hint.text).find(String(enoch_detail.get("accessory_flavor_text", ""))) == -1:
+        push_error("Lategame accessory runner expected accessory hint label to show summary, flavor text, and eligibility.")
+        quit(1)
+        return
+
+    var equipped_accessory_entry: String = _find_inventory_entry(updated_snapshot.get("inventory_entries", []), String(enoch_detail.get("accessory_slot", "")))
+    if equipped_accessory_entry.is_empty() or equipped_accessory_entry.find(String(enoch_detail.get("accessory_flavor_text", ""))) == -1:
+        push_error("Lategame accessory runner expected accessory inventory entries to surface flavor text.")
         quit(1)
         return
 
@@ -125,6 +139,13 @@ func _contains_inventory_entry(inventory_entries: Array, expected_text: String) 
         if String(entry).contains(expected_text):
             return true
     return false
+
+func _find_inventory_entry(inventory_entries: Array, expected_text: String) -> String:
+    for entry in inventory_entries:
+        var text := String(entry)
+        if text.contains(expected_text):
+            return text
+    return ""
 
 func _find_battle_unit(units: Array, expected_name: String):
     for unit in units:

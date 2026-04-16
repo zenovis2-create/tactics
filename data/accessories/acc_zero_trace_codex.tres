@@ -7,5 +7,6 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_zero_trace_codex"
 display_name = "Zero Trace Codex"
 summary = "Edited-record accessory. Reinforces offense and route reading once the archive marks the squad."
+flavor_text = "Its scraped margins hide more than they reveal, but the surviving notes still teach how an erased officer once moved through a battlefield."
 attack_bonus = 1
 movement_bonus = 1

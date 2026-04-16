@@ -225,6 +225,13 @@ func get_input_blocking_rects() -> Array[Rect2]:
     return rects
 
 func show_result(result_text: String) -> void:
+    _cache_result_text(result_text)
+    result_popup.popup_centered()
+
+func cache_result_text(result_text: String) -> void:
+    _cache_result_text(result_text)
+
+func _cache_result_text(result_text: String) -> void:
     var normalized_text := result_text.strip_edges()
     var lines := normalized_text.split("\n", false)
     _last_result_title = "Battle Result"
@@ -237,7 +244,6 @@ func show_result(result_text: String) -> void:
                 _last_result_body = "\n".join(lines.slice(1))
     result_popup.title = _last_result_title
     result_popup.dialog_text = _last_result_body
-    result_popup.popup_centered()
 
 func get_result_snapshot() -> Dictionary:
     return {
@@ -545,7 +551,7 @@ func _update_telegraph_surface(reason: String) -> void:
         "interaction_resolved":
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
         "support_attack_resolved":
-            _show_telegraph_surface("danger", "Support Follow-Up", "An allied bond trigger added a follow-up strike.")
+            _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
         _:
             _clear_telegraph_surface()
 

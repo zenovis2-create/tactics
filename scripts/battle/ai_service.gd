@@ -171,4 +171,5 @@ func _score_attack_target(actor: UnitActor, target: UnitActor) -> int:
     var estimated_damage: int = max(1, actor.get_attack() - target.get_defense())
     var lethal_bonus: int = 1000 if estimated_damage >= target.current_hp else 0
     var low_hp_bonus: int = max(0, 100 - target.current_hp)
-    return lethal_bonus + (estimated_damage * 10) + low_hp_bonus
+    var threat_bonus: int = (target.get_attack() * 20) + (target.get_attack_range() * 5)
+    return lethal_bonus + (estimated_damage * 10) + low_hp_bonus + threat_bonus

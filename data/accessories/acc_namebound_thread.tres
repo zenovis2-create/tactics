@@ -7,5 +7,6 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_namebound_thread"
 display_name = "Namebound Thread"
 summary = "Ellyor finale accessory. Binds memory and momentum together under pressure."
+flavor_text = "A red thread looped tight enough to feel less like ornament and more like permission to keep a name intact."
 attack_bonus = 1
 movement_bonus = 1

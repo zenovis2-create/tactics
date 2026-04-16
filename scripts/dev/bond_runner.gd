@@ -151,13 +151,20 @@ func _assert_support_attack_feedback() -> bool:
 
     if battle.hud.transition_reason_label.text.find("Support Attack Resolved") == -1:
         return _fail("Support attack should expose a dedicated battle transition message.")
+    if battle.hud.transition_reason_label.text.find("Bond") == -1:
+        return _fail("Support attack transition message should expose bond context.")
 
     var summary: Dictionary = battle.get_last_result_summary()
     if int(summary.get("support_attack_count", 0)) != 1:
         return _fail("Battle result summary should count one support follow-up.")
+    var supporter_bond := int(summary.get("supporter_bond_level", 0))
+    if supporter_bond < 3:
+        return _fail("Battle result summary should expose the supporting bond level.")
     var result_body := String(battle.hud.get_result_snapshot().get("body", ""))
-    if result_body.find("Support Follow-Ups: 1") == -1:
-        return _fail("Battle result surface should expose the support follow-up count.")
+    if result_body.find("Support Attacks: 1") == -1:
+        return _fail("Battle result surface should expose the support attack count with aligned wording.")
+    if result_body.find("Support Bond: 3") == -1:
+        return _fail("Battle result surface should expose the support bond level.")
 
     battle.queue_free()
     return true

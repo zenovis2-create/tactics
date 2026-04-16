@@ -11,6 +11,8 @@ const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const TRUE_ENDING_TRUST_MIN := 7
 const TRUE_ENDING_BURDEN_MAX := 6
 const BAD_ENDING_BURDEN_MIN := 7
+const UNIT_EXP_PER_LEVEL := 10
+const UNIT_EXP_PER_VICTORY := 10
 
 # Burden band effect table: band -> stat modifier dictionary applied to Rian.
 # Effects are additive on top of base stats; hardcapped at ±30%.
@@ -175,6 +177,52 @@ func get_locked_skills(all_skills: Array) -> Array:
 		if skill != null and skill.has_method("is_unlocked") and not skill.is_unlocked(_data):
 			locked.append(skill)
 	return locked
+
+func get_unit_progress(unit_id: StringName) -> Dictionary:
+	return _data.get_unit_progress(unit_id)
+
+func grant_unit_exp(unit_id: StringName, amount: int, reason: String) -> Dictionary:
+	var progress: Dictionary = _data.get_unit_progress(unit_id)
+	var level_before: int = int(progress.get("level", 1))
+	var exp_before: int = int(progress.get("exp", 0))
+	var exp_gain: int = max(0, amount)
+	var level_after: int = level_before
+	var exp_after: int = exp_before + exp_gain
+	var leveled_up: bool = false
+
+	while exp_after >= UNIT_EXP_PER_LEVEL:
+		exp_after -= UNIT_EXP_PER_LEVEL
+		level_after += 1
+		leveled_up = true
+
+	_data.set_unit_progress(unit_id, level_after, exp_after)
+	_emit_log("unit_exp_gained", {
+		"unit_id": String(unit_id),
+		"reason": reason,
+		"level_before": level_before,
+		"exp_before": exp_before,
+		"exp_gain": exp_gain,
+		"level_after": level_after,
+		"exp_after": exp_after,
+		"leveled_up": leveled_up
+	})
+
+	return {
+		"unit_id": String(unit_id),
+		"level_before": level_before,
+		"exp_before": exp_before,
+		"exp_gain": exp_gain,
+		"level_after": level_after,
+		"exp_after": exp_after,
+		"leveled_up": leveled_up
+	}
+
+func grant_victory_exp(unit_ids: Array) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	for unit_id in unit_ids:
+		var typed_id: StringName = unit_id
+		results.append(grant_unit_exp(typed_id, UNIT_EXP_PER_VICTORY, "battle_victory_exp"))
+	return results
 
 # --- Internal ---
 

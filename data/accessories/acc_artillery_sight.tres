@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_artillery_sight"
 display_name = "Artillery Sight"
 summary = "Fortress-gun accessory. Improves strike accuracy through the Valtor smoke line."
+flavor_text = "The brass ring is nicked where a gunner kept correcting for wind long after the parapet had already begun to fail."
 attack_bonus = 1

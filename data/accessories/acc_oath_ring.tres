@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_oath_ring"
 display_name = "Oath Ring"
 summary = "Inner-hall accessory. Keeps formation moving when the oath line starts to buckle."
+flavor_text = "The metal has been rubbed flat by anxious thumbs, the kind of habit soldiers keep when a promise is all that still holds."
 movement_bonus = 1

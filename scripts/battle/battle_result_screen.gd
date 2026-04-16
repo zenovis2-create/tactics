@@ -64,6 +64,18 @@ func show_result(result: Dictionary) -> void:
 		for entry in reward_entries:
 			body_lines.append("  • %s" % str(entry))
 
+	var unit_exp_results: Array = result.get("unit_exp_results", [])
+	if not unit_exp_results.is_empty():
+		body_lines.append("[b]Unit EXP:[/b]")
+		for entry in unit_exp_results:
+			body_lines.append("  • %s Lv %d -> %d (+%d EXP)%s" % [
+				str(entry.get("display_name", entry.get("unit_id", "Unit"))),
+				int(entry.get("level_before", 1)),
+				int(entry.get("level_after", 1)),
+				int(entry.get("exp_gain", 0)),
+				" LEVEL UP!" if bool(entry.get("leveled_up", false)) else ""
+			])
+
 	# 기억 조각
 	var fragment_id: String = str(result.get("fragment_id", ""))
 	if not fragment_id.is_empty():
@@ -99,6 +111,9 @@ func show_result(result: Dictionary) -> void:
 	var support_count: int = int(result.get("support_attack_count", 0))
 	if support_count > 0:
 		body_lines.append("[b]Support Attacks:[/b] %d" % support_count)
+		var support_bond: int = int(result.get("supporter_bond_level", 0))
+		if support_bond > 0:
+			body_lines.append("[b]Support Bond:[/b] %d" % support_bond)
 
 	if title_label != null:
 		title_label.text = title
