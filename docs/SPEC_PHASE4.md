@@ -75,13 +75,13 @@
 ---
 
 ### SPEC-P4-06: Cross-Faction Music Warfare (세력별 음악)
-- [ ] **P4-06-1** 세势 음악 ID 정의: FARLAND_EMPIRE / LEONICA_RESISTANCE / NEUTRAL_MERCENARIES
-- [ ] **P4-06-2** `scripts/audio/faction_music.gd` —势별 테마 트랙 관리
-- [ ] **P4-06-3** 전투 시작 시势 기반 BGM 선택 (campaign_controller에서 호출)
-- [ ] **P4-06-4**势 교차 전투: 테마 Cross-fade 로직 (2.0s blend)
-- [ ] **P4-06-5** CH10 Final: 세势 테마 동시 재생 → 다중화음
+- [x] **P4-06-1** 세势 음악 ID 정의: FARLAND_EMPIRE / LEONICA_RESISTANCE / NEUTRAL_MERCENARIES
+- [x] **P4-06-2** `scripts/audio/faction_music.gd` —势별 테마 트랙 관리
+- [x] **P4-06-3** 전투 시작 시势 기반 BGM 선택 (campaign_controller에서 호출)
+- [x] **P4-06-4**势 교차 전투: 테마 Cross-fade 로직 (2.0s blend)
+- [x] **P4-06-5** CH10 Final: 세势 테마 동시 재생 → 다중화음
 - [ ] **P4-06-6** 필드 맵势 영역 진입/이탈 시 BGM 전환
-- [ ] **P4-06-7** `scripts/dev/faction_music_runner.gd` 작성
+- [x] **P4-06-7** `scripts/dev/faction_music_runner.gd` 작성
 - [ ] **P4-06-8** Runner 검증 — godot headless 통과
 
 ---

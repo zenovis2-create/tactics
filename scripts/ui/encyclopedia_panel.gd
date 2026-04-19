@@ -14,15 +14,17 @@ const TAB_MEMORIAL := "memorial"
 const TAB_ATLAS := "atlas"
 const TAB_BOND_ENDINGS := "bond_endings"
 const TAB_USER_CREATED := "user_created"
+const TAB_GUILD := "guild"
 const MAX_COMMENT_LENGTH := 280
-const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED]
+const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED, TAB_GUILD]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
 	TAB_TIMELINE: "Timeline",
 	TAB_MEMORIAL: "Memorial",
 	TAB_ATLAS: "Atlas",
 	TAB_BOND_ENDINGS: "Bond Endings",
-	TAB_USER_CREATED: "User Created"
+	TAB_USER_CREATED: "User Created",
+	TAB_GUILD: "Guild"
 }
 const CHAPTER_LOCATION_NAMES := {
 	"CH01": "Hardren Ashfields",
@@ -49,6 +51,10 @@ const CHAPTER_LOCATION_NAMES := {
 var user_created_button: Button
 var _user_created_tab: Control
 var _user_created_list: Control
+var guild_button: Button
+var _guild_tab: Control
+var _guild_list: Control
+var _guild_create_container: Control
 @onready var codex_tab: Control = $Panel/Margin/Content/BodyStack/CodexTab
 @onready var codex_cards: GridContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexScroll/CodexCards
 @onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/DetailLabel
@@ -94,6 +100,12 @@ func _ready() -> void:
 	_user_created_list = _get_node_or_null("Panel/Margin/Content/BodyStack/UserCreatedTab/UserCreatedScroll/UserCreatedList")
 	if user_created_button != null:
 		user_created_button.pressed.connect(func() -> void: select_tab(TAB_USER_CREATED))
+	guild_button = _get_node_or_null("Panel/Margin/Content/TabButtons/GuildButton")
+	_guild_tab = _get_node_or_null("Panel/Margin/Content/BodyStack/GuildTab")
+	_guild_list = _get_node_or_null("Panel/Margin/Content/BodyStack/GuildTab/GuildScroll/GuildList")
+	_guild_create_container = _get_node_or_null("Panel/Margin/Content/BodyStack/GuildTab/GuildCreateContainer")
+	if guild_button != null:
+		guild_button.pressed.connect(func() -> void: select_tab(TAB_GUILD))
 	_ensure_comment_editor_section()
 	_ensure_support_history_section()
 	select_tab(TAB_CODEX)
@@ -116,6 +128,7 @@ func show_encyclopedia(progression_data: ProgressionData, active_chapter_id: Str
 	_rebuild_atlas()
 	_rebuild_bond_endings()
 	_rebuild_user_created_scenarios()
+	_rebuild_guild_tab()
 	visible = true
 	select_tab(TAB_CODEX)
 
@@ -133,11 +146,15 @@ func select_tab(tab_name: String) -> void:
 	bond_endings_tab.visible = tab_name == TAB_BOND_ENDINGS
 	if _user_created_tab != null:
 		_user_created_tab.visible = tab_name == TAB_USER_CREATED
+	if _guild_tab != null:
+		_guild_tab.visible = tab_name == TAB_GUILD
 	codex_button.disabled = tab_name == TAB_CODEX
 	timeline_button.disabled = tab_name == TAB_TIMELINE
 	memorial_button.disabled = tab_name == TAB_MEMORIAL
 	atlas_button.disabled = tab_name == TAB_ATLAS
 	bond_endings_button.disabled = tab_name == TAB_BOND_ENDINGS
+	if guild_button != null:
+		guild_button.disabled = tab_name == TAB_GUILD
 
 func select_codex_entry(unit_key: String) -> void:
 	if not _codex_keys.has(unit_key):
@@ -763,6 +780,103 @@ func _rebuild_user_created_scenarios() -> void:
 	for scenario_info: Dictionary in scenarios:
 		var card := _make_user_scenario_card(scenario_info)
 		_user_created_list.add_child(card)
+
+func _rebuild_guild_tab() -> void:
+	if not _guild_tab or not _guild_list:
+		return
+	_clear_children(_guild_list)
+	var GuildSystem = load("res://scripts/battle/guild_system.gd")
+	var gs: GuildSystem = GuildSystem.new()
+	root.add_child(gs)
+	var in_guild := gs.is_in_guild()
+	var guild: GuildSystem.Guild = gs.get_current_guild()
+	if in_guild and guild != null:
+		var header := Label.new()
+		header.text = "[b]%s[/b]" % guild.name
+		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		header.add_theme_font_size_override("font_size", 22)
+		_guild_list.add_child(header)
+		var meta := Label.new()
+		meta.text = "★%.1f avg grade  |  %d members  |  %s" % [
+			guild.get_average_grade(), guild.members.size(), guild.banner_symbol
+		]
+		meta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_guild_list.add_child(meta)
+		var desc_lbl := Label.new()
+		desc_lbl.text = guild.description if not guild.description.is_empty() else "No description."
+		desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_guild_list.add_child(desc_lbl)
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(0.0, 8.0)
+		_guild_list.add_child(spacer)
+		var members_title := Label.new()
+		members_title.text = "[b]Members[/b]"
+		_guild_list.add_child(members_title)
+		for member: GuildSystem.GuildMember in guild.members:
+			var card := _make_guild_member_card(member, gs)
+			_guild_list.add_child(card)
+		var leave_btn := Button.new()
+		leave_btn.text = "Leave Guild"
+		leave_btn.pressed.connect(func() -> void:
+			gs.leave_guild()
+			_rebuild_guild_tab()
+		)
+		_guild_list.add_child(leave_btn)
+	else:
+		var welcome := Label.new()
+		welcome.text = "Guild Community"
+		welcome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		welcome.add_theme_font_size_override("font_size", 20)
+		_guild_list.add_child(welcome)
+		var no_guild := Label.new()
+		no_guild.text = "You are not in a guild yet.\nCreate one to start your community!"
+		no_guild.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_guild_list.add_child(no_guild)
+		var create_btn := Button.new()
+		create_btn.text = "Create Guild"
+		create_btn.pressed.connect(func() -> void:
+			gs.create_guild("New Guild", "Commander", "A freshly formed guild.", "sword")
+			_rebuild_guild_tab()
+		)
+		_guild_list.add_child(create_btn)
+		var spacer2 := Control.new()
+		spacer2.custom_minimum_size = Vector2(0.0, 16.0)
+		_guild_list.add_child(spacer2)
+		var ranking_title := Label.new()
+		ranking_title.text = "[b]Guild Rankings[/b]"
+		_guild_list.add_child(ranking_title)
+		var board: Array[Dictionary] = gs.get_ranking_board(5)
+		if board.is_empty():
+			var no_ranks := Label.new()
+			no_ranks.text = "No guilds ranked yet."
+			_guild_list.add_child(no_ranks)
+		else:
+			for entry: Dictionary in board:
+				var rank_lbl := Label.new()
+				rank_lbl.text = "⚔ %s [%s] — ★%.1f (%d)" % [
+					entry.get("name", "???"),
+					entry.get("banner_symbol", "sword"),
+					float(entry.get("average_grade", 1.0)),
+					int(entry.get("member_count", 0))
+				]
+				_guild_list.add_child(rank_lbl)
+	gs.free()
+
+func _make_guild_member_card(member: GuildSystem.GuildMember, gs: GuildSystem) -> Control:
+	var container := PanelContainer.new()
+	container.set("theme_override_styles/panel", _get_card_style())
+	var vbox := VBoxContainer.new()
+	container.add_child(vbox)
+	var name_lbl := Label.new()
+	name_lbl.text = member.display_name + (" [Leader]" if member.is_leader else "")
+	name_lbl.size_flags_vertical = SIZE_SHRINK_BEGIN
+	vbox.add_child(name_lbl)
+	var rank_lbl := Label.new()
+	rank_lbl.text = "%s  |  ★%.1f" % [gs.get_member_rank_label(member.rank), member.battle_grade]
+	rank_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	rank_lbl.size_flags_vertical = SIZE_SHRINK_BEGIN
+	vbox.add_child(rank_lbl)
+	return container
 
 func _make_user_scenario_card(info: Dictionary) -> Control:
 	var container := PanelContainer.new()
