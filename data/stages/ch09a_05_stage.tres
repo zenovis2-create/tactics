@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_varten.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_varten_ch09a_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -29,9 +29,39 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(5, 1),
+"radius": 0,
+"effect": "The censor dais gives the spearline a defensive edge."
+}, {
+"type": "destructible",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "Pike posts can be shattered to break the line."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(6, 2),
+"radius": 0,
+"effect": "The root access gate only admits one combatant."
+}]
+optional_objectives = [{
+"id": "karl_testifies",
+"description": "Trigger Kyle's testimony before the line collapses.",
+"condition": "flag:karl_testifies",
+"star_value": 2
+}, {
+"id": "no_ally_casualties",
+"description": "Win the battle without ally casualties.",
+"condition": "no_ally_casualties",
+"star_value": 2
+}]
+turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "Win the spearhead clash and secure the root-route ledger at the far gate."
+landmark_labels = PackedStringArray("South Entry", "Censor Court", "Root Access Gate")
 start_cutscene_id = &"ch09a_05_intro"
 clear_cutscene_id = &"ch09a_05_outro"
-next_destination_summary = "Karl's testimony, access sigil, and root-route ledger open the way to the inner archive."
+next_destination_summary = "Next: Use the captured sigil to enter the inner archive."

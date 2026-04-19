@@ -14,25 +14,32 @@ const COMPACT_WIDTH_THRESHOLD := 720.0
 const COMPACT_PANEL_MARGIN := 16.0
 const COMPACT_PANEL_TOP_MARGIN := 72.0
 const COMPACT_PANEL_BOTTOM_MARGIN := 16.0
+const COMPACT_TOPBAR_HEIGHT := 96.0
+const COMPACT_BOTTOMBAR_TOP := -172.0
 const REGULAR_PANEL_HALF_WIDTH := 312.0
 const REGULAR_PANEL_HALF_HEIGHT := 220.0
 const COMPACT_ACTION_BUTTON_HEIGHT := 72.0
 const REGULAR_ACTION_BUTTON_HEIGHT := 28.0
 const REGULAR_TOPBAR_PADDING := 4.0
+const REGULAR_TOPBAR_HEIGHT := 54.0
 const REGULAR_BOTTOMBAR_PADDING := 8.0
+const REGULAR_BOTTOMBAR_TOP := -64.0
 const REGULAR_TOPBAR_MAX_WIDTH := 440.0
 
 @onready var top_bar: PanelContainer = $TopBar
 @onready var bottom_panel: PanelContainer = $BottomPanel
 @onready var round_label: Label = $TopBar/Margin/TopRow/MetaRow/RoundLabel
 @onready var phase_label: Label = $TopBar/Margin/TopRow/MetaRow/PhaseLabel
+@onready var _status_weather_label: Label = $TopBar/Margin/TopRow/MetaRow/WeatherIcon
 @onready var objective_label: Label = $TopBar/Margin/TopRow/ObjectiveLabel
+@onready var landmark_label: Label = $TopBar/Margin/TopRow/LandmarkLabel
 @onready var stage_chip: PanelContainer = $TopBar/Margin/TopRow/StageChip
 @onready var stage_label: Label = $TopBar/Margin/TopRow/StageChip/Padding/StageLabel
 @onready var selection_card: PanelContainer = $BottomPanel/Margin/Content/SelectionCard
 @onready var selection_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/SelectionLabel
 @onready var detail_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/DetailLabel
 @onready var hint_label: Label = $BottomPanel/Margin/Content/HintLabel
+@onready var objective_hint_label: Label = $BottomPanel/Margin/Content/ObjectiveHintLabel
 @onready var transition_reason_label: Label = $BottomPanel/Margin/Content/TransitionReasonLabel
 @onready var telegraph_card: PanelContainer = $BottomPanel/Margin/Content/TelegraphCard
 @onready var telegraph_preview: TextureRect = $BottomPanel/Margin/Content/TelegraphCard/Padding/Stack/Preview
@@ -63,6 +70,9 @@ var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
 var _last_result_title: String = "Battle Result"
 var _last_result_body: String = ""
+var _current_phase_text: String = "PLAYER SELECT"
+var _current_round_number: int = 1
+var _current_weather_type: String = "clear"
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -85,6 +95,9 @@ func _ready() -> void:
     set_buttons_state(false, false, true)
     set_objective("Defeat all enemies.")
     set_stage_title("Tutorial Skirmish")
+    set_weather_type("clear")
+    set_landmarks(PackedStringArray())
+    set_objective_hint("")
     _clear_telegraph_surface()
     get_viewport().size_changed.connect(_update_responsive_layout)
     _update_responsive_layout()
@@ -94,10 +107,18 @@ func _ready() -> void:
     _refresh_inventory_dismiss_hint()
 
 func set_phase(phase_text: String) -> void:
-    phase_label.text = "Phase: %s" % phase_text
+    _current_phase_text = phase_text
+    _update_status_display()
 
 func set_round(round_number: int) -> void:
-    round_label.text = "Round %d" % round_number
+    _current_round_number = round_number
+    _update_status_display()
+
+func set_weather_type(weather_type: String) -> void:
+    _current_weather_type = weather_type.strip_edges().to_lower()
+    if _current_weather_type.is_empty():
+        _current_weather_type = "clear"
+    _update_status_display()
 
 func set_objective(objective_text: String) -> void:
     objective_label.text = "Objective: %s" % objective_text
@@ -105,6 +126,21 @@ func set_objective(objective_text: String) -> void:
 func set_stage_title(title_text: String) -> void:
     stage_label.text = title_text
     stage_chip.visible = not title_text.strip_edges().is_empty()
+
+func set_landmarks(landmarks: PackedStringArray) -> void:
+    var visible_landmarks: Array[String] = []
+    for raw_label in landmarks:
+        var normalized_label := String(raw_label).strip_edges()
+        if not normalized_label.is_empty():
+            visible_landmarks.append(normalized_label)
+
+    landmark_label.visible = not visible_landmarks.is_empty()
+    landmark_label.text = "Landmarks: %s" % " • ".join(visible_landmarks) if landmark_label.visible else ""
+
+func set_objective_hint(hint_text: String) -> void:
+    var normalized_hint := hint_text.strip_edges()
+    objective_hint_label.visible = not normalized_hint.is_empty()
+    objective_hint_label.text = "Hint: %s" % normalized_hint if objective_hint_label.visible else ""
 
 func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     var formatted_reason: String = _format_reason(reason, payload)
@@ -334,6 +370,19 @@ func _to_title_words(raw_text: String) -> String:
 func _get_global_rect_for(control: Control) -> Rect2:
     return Rect2(control.global_position, control.size)
 
+func _update_status_display() -> void:
+    round_label.text = "Round %d" % _current_round_number
+    phase_label.text = "Phase: %s" % _current_phase_text
+    var weather_icon := ""
+    match _current_weather_type:
+        "rain":
+            weather_icon = "🌧️"
+        "night":
+            weather_icon = "🌙"
+        _:
+            weather_icon = "☀️"
+    _status_weather_label.text = weather_icon
+
 func _update_responsive_layout() -> void:
     _apply_layout_for_viewport_size(get_viewport_rect().size)
 
@@ -357,14 +406,14 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
         top_bar.offset_left = 18.0
         top_bar.offset_right = -18.0
         top_bar.offset_top = 14.0
-        top_bar.offset_bottom = 72.0
+        top_bar.offset_bottom = COMPACT_TOPBAR_HEIGHT
 
         bottom_panel.anchor_left = 0.0
         bottom_panel.anchor_right = 1.0
         bottom_panel.offset_left = 18.0
         bottom_panel.offset_right = -18.0
         bottom_panel.offset_bottom = -18.0
-        bottom_panel.offset_top = -154.0
+        bottom_panel.offset_top = COMPACT_BOTTOMBAR_TOP
 
         inventory_panel.anchor_left = 0.0
         inventory_panel.anchor_top = 0.0
@@ -397,14 +446,14 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
         top_bar.offset_left = top_left
         top_bar.offset_right = top_right
         top_bar.offset_top = 6.0
-        top_bar.offset_bottom = 30.0
+        top_bar.offset_bottom = REGULAR_TOPBAR_HEIGHT
 
         bottom_panel.anchor_left = 0.0
         bottom_panel.anchor_right = 0.0
         bottom_panel.offset_left = frame_left - REGULAR_BOTTOMBAR_PADDING
         bottom_panel.offset_right = frame_right + REGULAR_BOTTOMBAR_PADDING
         bottom_panel.offset_bottom = -14.0
-        bottom_panel.offset_top = -46.0
+        bottom_panel.offset_top = REGULAR_BOTTOMBAR_TOP
 
 func _apply_visual_theme() -> void:
     top_bar.add_theme_stylebox_override("panel", _make_panel_style(Color(0.063, 0.086, 0.114, 0.82), Color(0.224, 0.302, 0.396, 0.9), 18))
@@ -415,12 +464,14 @@ func _apply_visual_theme() -> void:
     ($BottomPanel/Margin/Content/SelectionCard as PanelContainer).add_theme_stylebox_override("panel", selection_style)
     stage_chip.add_theme_stylebox_override("panel", _make_panel_style(Color(0.102, 0.11, 0.153, 0.9), Color(0.482, 0.596, 0.761, 0.85), 14))
 
-    for label in [round_label, phase_label, objective_label, selection_label, detail_label, hint_label, transition_reason_label, telegraph_label, telegraph_detail_label]:
+    for label in [round_label, phase_label, objective_label, landmark_label, selection_label, detail_label, hint_label, objective_hint_label, transition_reason_label, telegraph_label, telegraph_detail_label]:
         label.add_theme_color_override("font_color", Color(0.949, 0.965, 0.984, 1.0))
 
     stage_label.add_theme_color_override("font_color", Color(0.858824, 0.905882, 0.964706, 1.0))
     objective_label.add_theme_color_override("font_color", Color(0.784, 0.843, 0.918, 1.0))
     hint_label.add_theme_color_override("font_color", Color(0.929, 0.824, 0.553, 1.0))
+    objective_hint_label.add_theme_color_override("font_color", Color(0.941176, 0.882353, 0.682353, 0.98))
+    landmark_label.add_theme_color_override("font_color", Color(0.74902, 0.839216, 0.917647, 0.98))
     transition_reason_label.add_theme_color_override("font_color", Color(0.667, 0.753, 0.863, 0.95))
     telegraph_detail_label.add_theme_color_override("font_color", Color(0.914, 0.824, 0.984, 0.98))
 
@@ -546,6 +597,24 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("charge", "Charge", "The marked lane is collapsing into a direct strike.")
         "boss_command_buff":
             _show_telegraph_surface("command", "Command", "Nearby hostiles gain pressure from the boss order.")
+        "lete_phase_two":
+            _show_telegraph_surface("danger", "Phase Shift", "Lete drops the ranged feint and rushes in berserk lines.")
+        "lete_smoke_bomb":
+            _show_telegraph_surface("danger", "Smoke Bomb", "The squad loses the next turn unless the pressure breaks first.")
+        "karl_shield_wall":
+            _show_telegraph_surface("command", "Shield Wall", "Kyle halves incoming damage for the next two player phases.")
+        "karl_formation_call":
+            _show_telegraph_surface("command", "Formation", "Kyle's line hardens; a reinforcement vanguard steps in.")
+        "melkion_truth_rewrite":
+            _show_telegraph_surface("mark", "Rewrite", "Melkion mirrors the last player skill and sends it back.")
+        "melkion_memory_wipe":
+            _show_telegraph_surface("danger", "Memory Wipe", "Player-side advantages are stripped away for the next exchange.")
+        "melkion_archive_mode":
+            _show_telegraph_surface("command", "Archive Mode", "Melkion triples his defense and fights only through specials.")
+        "karon_name_call_anchor":
+            _show_telegraph_surface("danger", "Anchor", "A name-call anchor is on the field, feeding Karuon's pressure.")
+        "karon_phase_two":
+            _show_telegraph_surface("charge", "Final Bell", "Karuon's second phase starts early and the whole field is in range.")
         "enemy_phase_open", "enemy_decide":
             _show_telegraph_surface("danger", "Danger", "Enemy pressure is active. Recheck exposed lanes.")
         "interaction_resolved":
@@ -569,26 +638,36 @@ func _clear_telegraph_surface() -> void:
 
 func _emit_battle_cue_for_reason(reason: String) -> void:
     match reason:
+        "civilian_rescued":
+            ui_cue_requested.emit("civilian_rescued")
         "boss_mark_telegraphed":
             ui_cue_requested.emit("battle_boss_mark_warn_01")
         "boss_command_buff":
             ui_cue_requested.emit("battle_boss_command_warn_01")
         "boss_charge_resolve":
             ui_cue_requested.emit("battle_boss_charge_impact_01")
+        "lete_phase_two", "lete_smoke_bomb", "karl_shield_wall", "karl_formation_call", "melkion_truth_rewrite", "melkion_memory_wipe", "melkion_archive_mode", "karon_name_call_anchor", "karon_phase_two":
+            ui_cue_requested.emit("battle_boss_command_warn_01")
+        "skill_targeting_active", "skill_telegraphed":
+            ui_cue_requested.emit("skill_used")
         "attack_resolved_deterministic":
             ui_cue_requested.emit("battle_hit_confirm_01")
         "attack_missed":
             ui_cue_requested.emit("battle_miss_01")
         "attack_missed_counter_resolved", "counterattack_resolved":
             ui_cue_requested.emit("battle_counter_hit_01")
+        "oblivion_stack_applied", "mind_control_applied", "assassin_mark_applied", "fear_applied", "skill_sealed":
+            ui_cue_requested.emit("status_applied")
         "enemy_phase_open":
             ui_cue_requested.emit("battle_state_enemy_phase_01")
         "player_units_ready":
             ui_cue_requested.emit("battle_state_player_phase_01")
         "interaction_resolved":
-            ui_cue_requested.emit("camp_recommend_focus_01")
+            ui_cue_requested.emit("interaction_resolved")
+        "interaction_rejected":
+            ui_cue_requested.emit("interaction_rejected")
         "support_attack_resolved":
-            ui_cue_requested.emit("battle_hit_confirm_01")
+            ui_cue_requested.emit("support_attack")
         _:
             pass
 

@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1_unit")
 unit_id = &"ally_karl"
-display_name = "Karl"
+display_name = "Kyle"
 faction = "ally"
 max_hp = 15
 attack = 5

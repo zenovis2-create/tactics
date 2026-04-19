@@ -103,8 +103,8 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("Karl") == -1 and panel_body.find("outer line") == -1:
-        push_error("CH08 camp body did not mention Karl's line.")
+    if panel_body.find("Kyle") == -1 and panel_body.find("outer line") == -1:
+        push_error("CH08 camp body did not mention Kyle's line.")
         quit(1)
         return
 
@@ -119,8 +119,8 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(presentation_cards[0].get("title", "")).find("Karl") == -1:
-        push_error("CH08 camp presentation cards did not expose Karl's outer-line handoff.")
+    if String(presentation_cards[0].get("title", "")).find("Kyle") == -1:
+        push_error("CH08 camp presentation cards did not expose Kyle's outer-line handoff.")
         quit(1)
         return
 

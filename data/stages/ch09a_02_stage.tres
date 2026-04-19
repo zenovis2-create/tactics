@@ -55,8 +55,11 @@ Vector2i(8, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Seize the bridge ledger and break the oath pike post to clear Karl's bridge lane. (0/2)", "One bridge control is secured. Resolve the remaining oath-route point. (1/2)", "Both bridge controls are secured. The banner bridge is broken open. (2/2)")
+stage_objective_hint = "Take the bridge ledger and break the oath pike post to keep the banner span open to the barracks."
+interaction_objective_texts = PackedStringArray("Seize the bridge ledger and break the oath pike post to clear Kyle's bridge lane. (0/2)", "One bridge control is secured. Resolve the remaining oath-route point. (1/2)", "Both bridge controls are secured. The banner bridge is broken open. (2/2)")
 interaction_objective_state_ids = [&"bridge_line_locked", &"bridge_line_partial", &"bridge_line_broken"]
+landmark_labels = PackedStringArray("Bridge Ledger", "Banner Span", "Oath Pike Post")
+weather_type = "rain"
 start_cutscene_id = &"ch09a_02_intro"
 clear_cutscene_id = &"ch09a_02_outro"
-next_destination_summary = "The bridge orders break open and point toward the oath-processing barracks."
+next_destination_summary = "Next: Advance across the bridge into the oath-processing barracks."

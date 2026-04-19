@@ -25,7 +25,7 @@ func _run() -> void:
 
     var snapshot: Dictionary = main.campaign_panel.get_snapshot()
     var party_details: Array = snapshot.get("party_details", [])
-    for expected_name in ["Bran", "Tia", "Karl", "Noah"]:
+    for expected_name in ["Bran", "Tia", "Kyle", "Noah"]:
         if _find_party_index(party_details, expected_name) == -1:
             push_error("Five-person sortie runner expected %s in the CH09B camp roster." % expected_name)
             quit(1)
@@ -77,7 +77,7 @@ func _run() -> void:
         quit(1)
         return
 
-    for expected_name in ["Rian", "Bran", "Tia", "Karl", "Noah"]:
+    for expected_name in ["Rian", "Bran", "Tia", "Kyle", "Noah"]:
         if not ally_names.has(expected_name):
             push_error("Five-person sortie runner expected %s in battle, got %s." % [expected_name, ally_names])
             quit(1)

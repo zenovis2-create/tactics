@@ -34,8 +34,10 @@ Vector2i(5, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "Cut both outer-line controls so the road ahead narrows cleanly onto Kyle's bridge sector."
 interaction_objective_texts = PackedStringArray("Recover the defense tablet and cut the signal standard to break the outer line. (0/2)", "One defense-line control is secured. Break the remaining route point. (1/2)", "Both defense-line controls are secured. The outer line is broken. (2/2)")
 interaction_objective_state_ids = [&"outer_line_locked", &"outer_line_partial", &"outer_line_broken"]
+landmark_labels = PackedStringArray("Defense Tablet", "Checkpoint Lane", "Signal Standard")
 start_cutscene_id = &"ch09a_01_intro"
 clear_cutscene_id = &"ch09a_01_outro"
-next_destination_summary = "The outer line breaks, forcing the march onto Karl's bridge sector."
+next_destination_summary = "Next: Cross the broken outer line onto Kyle's bridge sector."

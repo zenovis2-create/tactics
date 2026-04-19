@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_unit")
 unit_id = &"enemy_karon"
-display_name = "Karon"
+display_name = "Karuon"
 faction = "enemy"
 max_hp = 12
 attack = 4

@@ -24,7 +24,7 @@ const STAGE_CASES := [
 		"stage": CH09A_BANNERS,
 		"required_interactions": 2,
 		"objective_texts": [
-			"Seize the bridge ledger and break the oath pike post to clear Karl's bridge lane. (0/2)",
+			"Seize the bridge ledger and break the oath pike post to clear Kyle's bridge lane. (0/2)",
 			"One bridge control is secured. Resolve the remaining oath-route point. (1/2)",
 			"Both bridge controls are secured. The banner bridge is broken open. (2/2)"
 		],

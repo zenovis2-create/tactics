@@ -9,5 +9,5 @@ display_name = "West Root Seal"
 object_type = "gate"
 grid_position = Vector2i(2, 4)
 interaction_range = 1
-reward_text = "West root seal broken: the archive gate begins to answer Karl's pass."
+reward_text = "West root seal broken: the archive gate begins to answer Kyle's pass."
 interaction_text = "West root seal broken."

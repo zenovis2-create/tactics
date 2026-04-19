@@ -90,8 +90,8 @@ func _run() -> void:
         return
 
     var part_a_roster: Array = main.campaign_panel.get_snapshot().get("party_details", [])
-    if not _party_contains_name(part_a_roster, "Karl"):
-        push_error("CH09A camp roster did not include Karl.")
+    if not _party_contains_name(part_a_roster, "Kyle"):
+        push_error("CH09A camp roster did not include Kyle.")
         quit(1)
         return
 
@@ -101,8 +101,8 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(part_a_cards[0].get("title", "")).find("Karl") == -1:
-        push_error("CH09A camp presentation cards did not expose Karl's handoff.")
+    if String(part_a_cards[0].get("title", "")).find("Kyle") == -1:
+        push_error("CH09A camp presentation cards did not expose Kyle's handoff.")
         quit(1)
         return
 

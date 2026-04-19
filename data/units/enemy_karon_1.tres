@@ -5,18 +5,19 @@
 
 [resource]
 script = ExtResource("1_unit")
-unit_id = &"enemy_varten"
-display_name = "Barten"
+unit_id = &"enemy_karon_1"
+display_name = "Karuon"
 faction = "enemy"
-max_hp = 14
-attack = 4
-defense = 2
+max_hp = 15
+attack = 5
+defense = 3
 movement = 3
 attack_range = 1
 default_skill = ExtResource("2_skill")
 is_boss = true
-boss_pattern = &"roderic_ch01_05"
+boss_pattern = &"karon_ch05_01"
 boss_phase_thresholds = {
-50: &"enrage",
-25: &"despair"
+75: &"royal_edict",
+50: &"devastation",
+25: &"name_severance"
 }

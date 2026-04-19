@@ -9,5 +9,5 @@ display_name = "East Censor Mark"
 object_type = "altar"
 grid_position = Vector2i(5, 2)
 interaction_range = 1
-reward_text = "East censor mark checked: the route of Karl's discarded officers is exposed."
+reward_text = "East censor mark checked: the route of Kyle's discarded officers is exposed."
 interaction_text = "East censor mark checked."

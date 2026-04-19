@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_lete.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_lete_ch08_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -29,9 +29,39 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "water",
+"position": Vector2i(1, 1),
+"radius": 1,
+"effect": "Moonlit marsh slows the pursuit line."
+}, {
+"type": "fire",
+"position": Vector2i(5, 1),
+"radius": 0,
+"effect": "Watch pyres burn through the hound yard."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(5, 3),
+"radius": 0,
+"effect": "The transfer gate reduces the fight to a choke point."
+}]
+optional_objectives = [{
+"id": "lete_defects_alive",
+"description": "Let Lete defect and leave the field alive.",
+"condition": "flag:lete_defects_alive",
+"star_value": 2
+}, {
+"id": "no_black_hound_casualties",
+"description": "Keep the black hounds alive through the clash.",
+"condition": "flag:no_black_hound_casualties",
+"star_value": 2
+}]
+turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "Break through the hound yard and hold the north transfer gate to finish the pursuit."
+landmark_labels = PackedStringArray("South Pursuit Lane", "Hound Yard", "North Transfer Gate")
 start_cutscene_id = &"ch08_05_intro"
 clear_cutscene_id = &"ch08_05_outro"
-next_destination_summary = "Special orders, checkpoint plates, and final transfer slips point toward Karl's outer line."
+next_destination_summary = "Next: March from the hound checkpoint to Kyle's outer defense line."

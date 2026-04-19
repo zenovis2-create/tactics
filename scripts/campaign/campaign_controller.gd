@@ -2,11 +2,13 @@ class_name CampaignController
 extends Node
 
 signal mode_changed(mode: String)
+signal return_to_title_requested(show_credits: bool)
 
 const BattleController = preload("res://scripts/battle/battle_controller.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 const CampaignPanel = preload("res://scripts/campaign/campaign_panel.gd")
 const CampaignState = preload("res://scripts/campaign/campaign_state.gd")
+const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const CampaignChapterRegistry = preload("res://scripts/campaign/campaign_chapter_registry.gd")
 const UnitData = preload("res://scripts/data/unit_data.gd")
@@ -14,8 +16,12 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const CampController = preload("res://scripts/camp/camp_controller.gd")
+const ForgeService = preload("res://scripts/battle/forge_service.gd")
+const ReforgeService = preload("res://scripts/battle/reforge_service.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const EndingResolver = preload("res://scripts/battle/ending_resolver.gd")
+const SupportConversations = preload("res://data/support_conversations.gd")
 
 const CHAPTER_CH01: StringName = CampaignChapterRegistry.CHAPTER_CH01
 const CHAPTER_CH02: StringName = CampaignChapterRegistry.CHAPTER_CH02
@@ -289,6 +295,19 @@ const CH10_STAGE_ARMOR_UNLOCKS: Dictionary = {
     &"CH10_03": [&"ar_bellward_plate"]
 }
 
+const CHAPTER_MATERIAL_REWARDS: Dictionary = {
+    &"ch02": [{"material_id": &"iron_frag", "count": 2}, {"material_id": &"coal", "count": 1}],
+    &"ch03": [{"material_id": &"forest_essence", "count": 2}, {"material_id": &"fiber_bundle", "count": 1}],
+    &"ch04": [{"material_id": &"sanctified_shard", "count": 2}, {"material_id": &"forest_essence", "count": 1}],
+    &"ch05": [{"material_id": &"archive_ash", "count": 2}, {"material_id": &"coal", "count": 1}],
+    &"ch06": [{"material_id": &"command_plate", "count": 2}, {"material_id": &"iron_frag", "count": 1}],
+    &"ch07": [{"material_id": &"memory_thread", "count": 2}, {"material_id": &"forest_essence", "count": 1}],
+    &"ch08": [{"material_id": &"memory_thread", "count": 1}, {"material_id": &"sanctified_shard", "count": 1}],
+    &"ch09a": [{"material_id": &"iron_frag", "count": 1}, {"material_id": &"command_plate", "count": 1}],
+    &"ch09b": [{"material_id": &"archive_ash", "count": 1}, {"material_id": &"memory_thread", "count": 1}],
+    &"ch10": [{"material_id": &"sanctified_shard", "count": 1}, {"material_id": &"command_plate", "count": 1}]
+}
+
 const CH02_INTERLUDE_DIALOGUE: Array[String] = [
     "Bran: I will keep watch on you myself until I know why Hardren obeyed your memory.",
     "Rian: Watch all you want. I am going to the forest either way.",
@@ -531,7 +550,7 @@ const CH06_INTRO_DIALOGUE: Array[String] = [
 
 const CH06_STAGE_REWARD_LOG: Dictionary = {
     &"CH06_01": [
-        "Forward gunline cache logged: Valtor approach routes are secured."
+        "Forward gunline cache logged: Valtor approach routes secured."
     ],
     &"CH06_02": [
         "Battery line cache logged: Artillery Sight recovered from the fortress gun crews."
@@ -543,7 +562,7 @@ const CH06_STAGE_REWARD_LOG: Dictionary = {
         "Oath hall controls logged: Oath Ring secured in the inner hall ledger vault."
     ],
     &"CH06_05": [
-        "Valtor handoff logged: Valgar falls, forge later unlocks, and Ellyor relief orders are secured."
+        "Valtor handoff logged: Valgar fell, Ellyor relief orders were secured, and forge access unlocks later."
     ]
 }
 
@@ -557,7 +576,7 @@ const CH06_STAGE_CUTSCENE_NOTES: Dictionary = {
         "Each gunline dismantled opens another road toward the inner keep."
     ],
     &"CH06_03": [
-        "The prison depths reveal surviving knights, quartermaster routes, and the first trail toward Ellyor.",
+        "The prison depths reveal surviving knights, quartermaster routes, and the first clear trail toward Ellyor.",
         "Even the supply rooms feel like a record of people being reduced to pieces of a fortress."
     ],
     &"CH06_04": [
@@ -607,25 +626,25 @@ const CH07_INTRO_DIALOGUE: Array[String] = [
 
 const CH07_STAGE_REWARD_LOG: Dictionary = {
     &"CH07_01": [
-        "Market route logged: the first Ellyor rescue lane is secured."
+        "Market route logged: Ellyor's first rescue lane secured."
     ],
     &"CH07_02": [
         "Silence square cache logged: Memory Bell recovered from the silence-square watchpost."
     ],
     &"CH07_03": [
-        "Procession break logged: Mira and Neri are pulled back from the nameless line, and Elyor Procession Mail is secured."
+        "Procession break logged: Mira and Neri were pulled back from the nameless line, and Ellyor Procession Mail was secured."
     ],
     &"CH07_04": [
         "Cathedral channels logged: Knot Talisman secured in the hymn-channel reliquary."
     ],
     &"CH07_05": [
-        "Ellyor handoff logged: Saria falls, Saria Mercy Staff and Namebound Thread are secured, sigil tuning later unlocks, and the black-hound route is secured."
+        "Ellyor handoff logged: Saria fell, Saria Mercy Staff and Namebound Thread were secured, sigil tuning unlocks later, and the black-hound route was secured."
     ]
 }
 
 const CH07_STAGE_CUTSCENE_NOTES: Dictionary = {
     &"CH07_01": [
-        "The market proves people are walking into forgetting on purpose, not only by force.",
+        "The market proves people are choosing forgetting as often as they are being pushed into it.",
         "Mira and Neri reappear as the first faces that make the doctrine feel real."
     ],
     &"CH07_02": [
@@ -646,7 +665,7 @@ const CH07_STAGE_MEMORY_LOG: Dictionary = {
     &"CH07_05": [
         {
             "title": "mem_frag_ch07_zero_named_by_karon",
-            "summary": "Zero Named by Karon: the child without a name is given one that saves and binds at the same time."
+            "summary": "Zero Named by Karuon: the child without a name is given one that saves and binds at the same time."
         }
     ]
 }
@@ -683,7 +702,7 @@ const CH08_INTRO_DIALOGUE: Array[String] = [
 
 const CH08_STAGE_REWARD_LOG: Dictionary = {
     &"CH08_01": [
-        "Vanished trail cache logged: the first black-hound pursuit route is secured."
+        "Vanished trail cache logged: First black-hound pursuit route secured."
     ],
     &"CH08_02": [
         "Ambush cache logged: Moonlit Pursuit Sigil recovered from the split-line hunt route."
@@ -695,7 +714,7 @@ const CH08_STAGE_REWARD_LOG: Dictionary = {
         "Black mark controls logged: Houndfang Mark and Houndline Bow secured from the ruin control brand."
     ],
     &"CH08_05": [
-        "Black-hound handoff logged: Lete falls, the hidden-ruin truth is exposed, and Karl's outer line becomes the next objective."
+        "Black-hound handoff logged: Lete fell, the hidden-ruin truth was exposed, and the pursuit turns toward Kyle's outer line."
     ]
 }
 
@@ -731,7 +750,7 @@ const CH08_STAGE_EVIDENCE_LOG: Dictionary = {
     &"CH08_05": [
         {
             "title": "flag_evidence_outer_gate_writ_obtained",
-            "summary": "Special orders, checkpoint plates, and transfer slips now point the chase toward Karl's outer defense line."
+            "summary": "Special orders, checkpoint plates, and transfer slips now point the chase toward Kyle's outer defense line."
         }
     ]
 }
@@ -747,22 +766,22 @@ const CH08_STAGE_LETTER_LOG: Dictionary = {
 
 const CH08_INTERLUDE_DIALOGUE: Array[String] = [
     "Tia: I do not forgive you. I am done pretending forgetting would help me breathe.",
-    "Rian: Then we take what the ruin gave us and walk it straight into Karl's line.",
+    "Rian: Then we take what the ruin gave us and walk it straight into Kyle's line.",
     "Serin: Good. We carry the names forward and make the next wall answer for them."
 ]
 
 const CH09A_INTRO_DIALOGUE: Array[String] = [
-    "Karl: The outer line still answers to me, even if the truth behind it has already rotted.",
+    "Kyle: The outer line still answers to me, even if the truth behind it has already rotted.",
     "Rian: Then we cross it and make the line tell us what it was built to hide.",
     "Bran: If the soldiers behind it are still ours, we pull them out before the censors burn them too."
 ]
 
 const CH09A_STAGE_REWARD_LOG: Dictionary = {
     &"CH09A_01": [
-        "Outer-line cache logged: the first capital checkpoint route is secured."
+        "Outer-line cache logged: First capital checkpoint route secured."
     ],
     &"CH09A_02": [
-        "Bridge cache logged: Bannerline Clasp secured from Karl's bridge checkpoint."
+        "Bridge cache logged: Bannerline Clasp secured from Kyle's bridge checkpoint."
     ],
     &"CH09A_03": [
         "Oath-hall cache logged: Nameless Watch Badge secured inside the oath hall."
@@ -771,18 +790,18 @@ const CH09A_STAGE_REWARD_LOG: Dictionary = {
         "Detention cache logged: Officer Rescue Cipher and Capital Witness Plate secured in the detention ledgers."
     ],
     &"CH09A_05": [
-        "Broken standard handoff logged: Karl joins, Standard Breaker Blade is secured, root access seals are secured, and the inner archive route opens."
+        "Broken standard handoff logged: Kyle joined, Standard Breaker Blade and the root-access seals were secured, and the inner archive route opens."
     ]
 }
 
 const CH09A_STAGE_CUTSCENE_NOTES: Dictionary = {
     &"CH09A_01": [
-        "The capital outer line is built to stop testimony before it reaches the city.",
-        "Karl still treats the line as duty, but every order now smells like erasure."
+        "The capital outer line is built to stop testimony before it can reach the city.",
+        "Kyle still treats the line as duty, but every order now smells like erasure."
     ],
     &"CH09A_02": [
-        "The bridge line proves Karl learned formation from someone he still cannot stop recognizing.",
-        "The first break in loyalty comes from seeing that the line protects procedure more than people."
+        "The bridge line proves Kyle learned formation from someone he still cannot stop recognizing.",
+        "The first break in Kyle's loyalty comes from seeing that the line protects procedure more than people."
     ],
     &"CH09A_03": [
         "The nameless oath hall turns exhausted soldiers into evidence to be processed out of history.",
@@ -790,7 +809,7 @@ const CH09A_STAGE_CUTSCENE_NOTES: Dictionary = {
     ],
     &"CH09A_04": [
         "The abandoned officers are no longer comrades to save but witnesses to erase.",
-        "Karl sees his own command reclassified as expendable proof."
+        "Kyle sees his own command reclassified as expendable proof."
     ]
 }
 
@@ -798,7 +817,7 @@ const CH09A_STAGE_MEMORY_LOG: Dictionary = {
     &"CH09A_05": [
         {
             "title": "mem_frag_ch09a_returning_names_seen",
-            "summary": "Returning Names: Karl remembers Zero as the officer who once said victory only mattered if names came home with it."
+            "summary": "Returning Names: Kyle remembers Zero as the officer who once said victory only mattered if names came home with it."
         }
     ]
 }
@@ -807,7 +826,7 @@ const CH09A_STAGE_EVIDENCE_LOG: Dictionary = {
     &"CH09A_05": [
         {
             "title": "flag_evidence_root_archive_pass_obtained",
-            "summary": "Karl's testimony, root-archive pass, and movement ledger now open the path toward the inner archive."
+            "summary": "Kyle's testimony, root-archive pass, and movement ledger now open the path toward the inner archive."
         }
     ]
 }
@@ -815,14 +834,14 @@ const CH09A_STAGE_EVIDENCE_LOG: Dictionary = {
 const CH09A_STAGE_LETTER_LOG: Dictionary = {
     &"CH09A_05": [
         {
-            "title": "Karl's Broken Standard",
+            "title": "Kyle's Broken Standard",
             "summary": "\"I am not changing sides for you. I am stepping across to see the inside with my own eyes.\""
         }
     ]
 }
 
 const CH09A_INTERLUDE_DIALOGUE: Array[String] = [
-    "Karl: I am not done judging you. I am done letting the censors decide what survives us.",
+    "Kyle: I am not done judging you. I am done letting the censors decide what survives us.",
     "Rian: Then walk with us into the archive and judge what remains there.",
     "Bran: Good. Bring your witness, not your banner."
 ]
@@ -835,26 +854,26 @@ const CH09B_INTRO_DIALOGUE: Array[String] = [
 
 const CH09B_STAGE_REWARD_LOG: Dictionary = {
     &"CH09B_01": [
-        "Root gate cache logged: the first archive-core route is secured."
+        "Root gate cache logged: First archive-core route secured."
     ],
     &"CH09B_02": [
         "Erased-shelf cache logged: Revision Ward Pin secured from the first revised shelf."
     ],
     &"CH09B_03": [
-        "Last keeper handoff logged: Noah joins, Keeper Thread Seal is secured, and Noah's root staff is recovered."
+        "Last keeper handoff logged: Noah joined, Keeper Thread Seal was secured, and Noah's root staff was recovered."
     ],
     &"CH09B_04": [
         "Revision core logged: Archive Proof Relay and Revision Guard Cloak secured inside the revision core."
     ],
     &"CH09B_05": [
-        "Abyss handoff logged: Melkion falls, the final memory is restored, and eclipse coordinates are secured."
+        "Abyss handoff logged: Melkion fell, the final memory was restored, and eclipse coordinates were secured."
     ]
 }
 
 const CH09B_STAGE_CUTSCENE_NOTES: Dictionary = {
     &"CH09B_01": [
-        "The root gate admits the squad only because Karl's proof and Noah's route overlap for a moment.",
-        "The archive is not hidden because it is secret; it is hidden because it decides what counts."
+        "The root gate admits the squad only because Kyle's proof and Noah's route overlap for a moment.",
+        "The archive is not hidden because it is secret; it is hidden because it decides what counts as history."
     ],
     &"CH09B_02": [
         "The erased shelves show absence as infrastructure rather than accident.",
@@ -900,7 +919,7 @@ const CH09B_STAGE_LETTER_LOG: Dictionary = {
 const CH09B_INTERLUDE_DIALOGUE: Array[String] = [
     "Noah: The final memory gives context, not forgiveness.",
     "Rian: Good. I need the truth sharp enough to carry into the tower.",
-    "Karl: Then we stop reading the archive and start answering the king who needed it."
+    "Kyle: Then we stop reading the archive and start answering the king who needed it."
 ]
 
 const CH10_INTRO_DIALOGUE: Array[String] = [
@@ -911,7 +930,7 @@ const CH10_INTRO_DIALOGUE: Array[String] = [
 
 const CH10_STAGE_REWARD_LOG: Dictionary = {
     &"CH10_01": [
-        "Eclipse-eve cache logged: the first tower supply route is secured."
+        "Eclipse-eve cache logged: first tower supply route secured."
     ],
     &"CH10_02": [
         "Tower crest cache logged: Resonance Knot secured from the tower crest relay."
@@ -920,10 +939,10 @@ const CH10_STAGE_REWARD_LOG: Dictionary = {
         "Nameless corridor cache logged: Tower Ward Signet and Bellward Plate secured in the nameless corridor."
     ],
     &"CH10_04": [
-        "Royal hall handoff logged: Bell Oath Relic and Eclipse Resonance Blade are secured as the first Karon phase falls and the chamber opens."
+        "Royal hall handoff logged: Bell Oath Relic and Eclipse Resonance Blade were secured, the first Karuon phase fell, and the chamber opens."
     ],
     &"CH10_05": [
-        "Final resolution logged: Karon falls, the bell is silenced, and the ending state is ready."
+        "Final resolution logged: Karuon fell, the bell was silenced, and the ending state is now set."
     ]
 }
 
@@ -938,11 +957,11 @@ const CH10_STAGE_CUTSCENE_NOTES: Dictionary = {
     ],
     &"CH10_03": [
         "The nameless corridors are built like revised pages, not stone hallways.",
-        "Noah's presence is what keeps the route from collapsing into blankness."
+        "Noah's presence is the only thing keeping the route from collapsing into blankness."
     ],
     &"CH10_04": [
-        "Karon still fights like a king before he becomes something larger and emptier than a throne.",
-        "The first phase breaks the decrees, but not yet the bell that made them."
+        "Karuon still fights like a king before he becomes something larger and emptier than a throne.",
+        "Breaking the first phase shatters the decrees, but not yet the bell that made them."
     ]
 }
 
@@ -978,13 +997,14 @@ const CH10_RESOLUTION_DIALOGUE: Array[String] = [
     "Bran: Then the names that survived this tower are the only wall worth rebuilding.",
     "Tia: It still hurts. I am still here.",
     "Enoch: No one gets edited out of this ending.",
-    "Karl: A name survived the march back. That is enough to start from.",
+    "Kyle: A name survived the march back. That is enough to start from.",
     "Noah: This time, memory left people standing."
 ]
 
 var _battle_controller: BattleController
 var _campaign_panel: CampaignPanel
 var _camp_controller: CampController
+var _forge_service: ForgeService
 var _save_service: SaveService
 var _active_mode: String = CampaignState.MODE_BATTLE
 var _active_chapter_id: StringName = CHAPTER_CH01
@@ -1003,12 +1023,19 @@ var _unlocked_armor_ids: Array[StringName] = []
 var _equipped_weapon_by_unit_id: Dictionary = {}
 var _equipped_armor_by_unit_id: Dictionary = {}
 var _equipped_accessory_by_unit_id: Dictionary = {}
+var _ng_plus_enabled: bool = false
+var _support_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _debug_support_rolls: Array[float] = []
+var _briefing_abort_active: bool = false
 
 func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -> void:
     _battle_controller = battle_controller
     _campaign_panel = campaign_panel
+    _support_rng.randomize()
     _camp_controller = CampController.new()
     add_child(_camp_controller)
+    _forge_service = ForgeService.new()
+    add_child(_forge_service)
     _save_service = SaveService.new()
     add_child(_save_service)
 
@@ -1017,6 +1044,8 @@ func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -
 
     if _campaign_panel != null and not _campaign_panel.advance_requested.is_connected(_on_advance_requested):
         _campaign_panel.advance_requested.connect(_on_advance_requested)
+    if _campaign_panel != null and not _campaign_panel.briefing_abort_requested.is_connected(_on_briefing_abort_requested):
+        _campaign_panel.briefing_abort_requested.connect(_on_briefing_abort_requested)
     if _campaign_panel != null and not _campaign_panel.deployment_assignment_requested.is_connected(_on_deployment_assignment_requested):
         _campaign_panel.deployment_assignment_requested.connect(_on_deployment_assignment_requested)
     if _campaign_panel != null and not _campaign_panel.weapon_cycle_requested.is_connected(_on_weapon_cycle_requested):
@@ -1025,6 +1054,10 @@ func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -
         _campaign_panel.armor_cycle_requested.connect(_on_armor_cycle_requested)
     if _campaign_panel != null and not _campaign_panel.accessory_cycle_requested.is_connected(_on_accessory_cycle_requested):
         _campaign_panel.accessory_cycle_requested.connect(_on_accessory_cycle_requested)
+    if _campaign_panel != null and not _campaign_panel.accessory_reforge_requested.is_connected(_on_accessory_reforge_requested):
+        _campaign_panel.accessory_reforge_requested.connect(_on_accessory_reforge_requested)
+    if _campaign_panel != null and not _campaign_panel.forge_craft_requested.is_connected(_on_forge_craft_requested):
+        _campaign_panel.forge_craft_requested.connect(_on_forge_craft_requested)
 
 func start_chapter_one_flow() -> void:
     _active_chapter_id = CHAPTER_CH01
@@ -1041,6 +1074,9 @@ func start_chapter_one_flow() -> void:
     _unlocked_evidence_entries.clear()
     _unlocked_letter_entries.clear()
     _enter_stage(_active_stage_index)
+
+func set_ng_plus_mode(enabled: bool) -> void:
+    _ng_plus_enabled = enabled
 
 func advance_step() -> bool:
     if _active_mode == CampaignState.MODE_CUTSCENE:
@@ -1075,7 +1111,15 @@ func advance_step() -> bool:
         _enter_stage(_active_stage_index)
         return true
 
+    if _active_mode == CampaignState.MODE_BRIEFING:
+        _on_briefing_deploy_pressed()
+        return true
+
     if _active_mode == CampaignState.MODE_CAMP:
+        if _briefing_abort_active and _current_stage != null:
+            _briefing_abort_active = false
+            _enter_briefing_state(_current_stage.stage_id)
+            return true
         if _active_chapter_id == CHAPTER_CH01:
             _enter_chapter_two_intro()
         elif _active_chapter_id == CHAPTER_CH02:
@@ -1150,6 +1194,12 @@ func _enter_stage(stage_index: int) -> void:
     _current_stage = active_flow[stage_index].duplicate(true)
     _current_stage.ally_units = _build_runtime_deployed_party()
     _current_stage.ally_spawns = _build_runtime_ally_spawns(_current_stage)
+
+    if _should_show_briefing(_current_stage.stage_id) and _active_mode != CampaignState.MODE_BRIEFING:
+        _enter_briefing_state(_current_stage.stage_id)
+        return
+
+    _briefing_abort_active = false
     _active_mode = CampaignState.MODE_BATTLE
     _clear_panel_state()
 
@@ -1160,6 +1210,75 @@ func _enter_stage(stage_index: int) -> void:
         _battle_controller.visible = true
         _battle_controller.set_stage(_current_stage)
     mode_changed.emit(_active_mode)
+
+func _should_show_briefing(stage_id: StringName) -> bool:
+    return stage_id == &"CH01_05" or stage_id == &"CH02_05" or stage_id == &"CH03_05" \
+        or stage_id == &"CH04_05" or stage_id == &"CH05_05" or stage_id == &"CH06_05" \
+        or stage_id == &"CH07_05" or stage_id == &"CH08_05" or stage_id == &"CH09A_05" \
+        or stage_id == &"CH09B_05" or stage_id == &"CH10_05"
+
+func _get_briefing_data(stage_id: StringName) -> Dictionary:
+    return CampaignShellDialogueCatalog.get_briefing(stage_id)
+
+func _enter_briefing_state(stage_id: StringName) -> void:
+    var briefing: Dictionary = _get_briefing_data(stage_id)
+    if briefing.is_empty():
+        _briefing_abort_active = false
+        _active_mode = CampaignState.MODE_BATTLE
+        _clear_panel_state()
+        if _battle_controller != null:
+            _battle_controller.set_equipped_weapon_map(_build_runtime_weapon_map())
+            _battle_controller.set_equipped_armor_map(_build_runtime_armor_map())
+            _battle_controller.set_equipped_accessory_map(_build_runtime_accessory_map())
+            _battle_controller.visible = true
+            _battle_controller.set_stage(_current_stage)
+        mode_changed.emit(_active_mode)
+        return
+
+    _briefing_abort_active = false
+    _active_mode = CampaignState.MODE_BRIEFING
+    _set_panel_state(
+        CampaignState.MODE_BRIEFING,
+        String(briefing.get("chapter", "Mission Briefing")),
+        _build_briefing_body(briefing),
+        "Deploy"
+    )
+
+func _build_briefing_body(briefing: Dictionary) -> String:
+    var lines: Array[String] = []
+    var brief_text: String = String(briefing.get("brief_text", "")).strip_edges()
+    if not brief_text.is_empty():
+        lines.append(brief_text)
+    lines.append("Turn Limit: %d" % int(briefing.get("turn_limit", 20)))
+    return "\n".join(lines)
+
+func _build_briefing_payload(briefing: Dictionary) -> Dictionary:
+    return {
+        "enemy_intel": _variant_to_string_array(briefing.get("enemy_intel", [])),
+        "terrain_summary": _variant_to_string_array(briefing.get("terrain_summary", [])),
+        "optional_objectives": _variant_to_string_array(briefing.get("optional_objectives", [])),
+        "turn_limit": int(briefing.get("turn_limit", 20))
+    }
+
+func _build_briefing_abort_body(briefing: Dictionary) -> String:
+    var chapter_label: String = String(briefing.get("chapter", "the target")).strip_edges()
+    return "Deployment aborted. The squad falls back to field camp outside %s. Re-check the roster, gear, and known intel before returning to the mission briefing." % chapter_label
+
+func _on_briefing_deploy_pressed() -> void:
+    _enter_stage(_active_stage_index)
+
+func _on_briefing_abort_requested() -> void:
+    if _current_stage == null:
+        return
+    var briefing: Dictionary = _get_briefing_data(_current_stage.stage_id)
+    _briefing_abort_active = true
+    _active_mode = CampaignState.MODE_CAMP
+    _set_panel_state(
+        CampaignState.MODE_CAMP,
+        "%s Field Camp" % String(briefing.get("chapter", "Mission Briefing")),
+        _build_briefing_abort_body(briefing),
+        "Return to Briefing"
+    )
 
 func _on_battle_finished(result: StringName, stage_id: StringName) -> void:
     if result != &"victory":
@@ -1172,6 +1291,7 @@ func _on_battle_finished(result: StringName, stage_id: StringName) -> void:
         return
 
     _commit_stage_rewards(_current_stage)
+    _process_post_battle_supports(_current_stage)
 
     var active_flow: Array[StageData] = _get_active_stage_flow()
     if _active_stage_index >= active_flow.size() - 1:
@@ -1239,6 +1359,8 @@ func _autosave_progression() -> void:
         return
     var data: ProgressionData = prog_svc.get_data()
     if data != null:
+        if _battle_controller.bond_service != null:
+            _battle_controller.bond_service.export_to_progression(data)
         _save_service.save_progression(data, 0)  # 슬롯 0 = 자동저장
 
 func _build_cutscene_summary(stage: StageData, next_stage: StageData) -> String:
@@ -1376,9 +1498,9 @@ func _build_ch06_intro_summary() -> String:
 func _build_ch06_camp_summary() -> String:
     var lines: Array[String] = [
         "Chapter interlude: ch06_valtor_camp",
-        "Valtor breach context memory recovered.",
-        "Ellyor relief edicts and civilian transfers are now secured.",
-        "The next route points toward the purification rite in Ellyor."
+        "The Valtor breach context is recovered, revealing how the original route was tightened into slaughter after it was drawn.",
+        "With Ellyor relief edicts and civilian transfer rolls secured, the squad finally has a clear next target.",
+        "The march now turns toward Ellyor and the purification rite waiting there."
     ]
     _append_unique_lines(lines, CH06_INTERLUDE_DIALOGUE)
     return "\n".join(lines)
@@ -1395,9 +1517,9 @@ func _build_ch07_intro_summary() -> String:
 func _build_ch07_camp_summary() -> String:
     var lines: Array[String] = [
         "Chapter interlude: ch07_ellyor_camp",
-        "Karon naming memory recovered.",
-        "Black-hound orders and hidden-ruin coordinates secured.",
-        "The next route points toward Lete and the forest ruins."
+        "The memory of Karuon naming Zero is recovered, giving Ellyor's doctrine a personal origin.",
+        "With black-hound orders and hidden-ruin coordinates secured, the squad can finally trace where the next pursuit begins.",
+        "The trail now leaves Ellyor behind and turns toward Lete's forest ruins."
     ]
     _append_unique_lines(lines, CH07_INTERLUDE_DIALOGUE)
     return "\n".join(lines)
@@ -1414,9 +1536,9 @@ func _build_ch08_intro_summary() -> String:
 func _build_ch08_camp_summary() -> String:
     var lines: Array[String] = [
         "Chapter interlude: ch08_black_hound_camp",
-        "North-corridor context memory recovered.",
-        "Karl outer-line orders and transfer slips secured.",
-        "Lete's black-hound route is broken, but the forest pursuit now turns into Karl's defense line around the capital."
+        "The north-corridor context is recovered, revealing how the original route narrowed into capture and purge.",
+        "Kyle's outer-line orders and transfer slips are secured, so the forest trail no longer ends in rumor.",
+        "The pursuit now runs straight from Lete's ruins to Kyle's defense line around the capital."
     ]
     _append_unique_lines(lines, CH08_INTERLUDE_DIALOGUE)
     return "\n".join(lines)
@@ -1425,7 +1547,7 @@ func _build_ch09a_intro_summary() -> String:
     var lines: Array[String] = [
         "Chapter intro: ch09a_broken_standard",
         "The capital outer line has become a filter for testimony, survivors, and anyone still carrying names into the city.",
-        "Karl stands on the wrong side of that line, but not for much longer."
+        "Kyle stands on the wrong side of that line, but not for much longer."
     ]
     _append_unique_lines(lines, CH09A_INTRO_DIALOGUE)
     return "\n".join(lines)
@@ -1433,9 +1555,9 @@ func _build_ch09a_intro_summary() -> String:
 func _build_ch09a_camp_summary() -> String:
     var lines: Array[String] = [
         "Part I interlude: ch09a_broken_standard_camp",
-        "Returning-names memory recovered.",
-        "Karl's testimony and root-archive pass are secured.",
-        "The next route points inward toward the root archive and the last keeper."
+        "The returning-names memory is recovered, and Kyle's testimony now matches what the squad has been uncovering in fragments.",
+        "With Kyle's testimony and root-archive pass secured, the capital is no longer sealed against them.",
+        "The next route leads inward to the root archive, where the last keeper is waiting."
     ]
     _append_unique_lines(lines, CH09A_INTERLUDE_DIALOGUE)
     return "\n".join(lines)
@@ -1452,9 +1574,9 @@ func _build_ch09b_intro_summary() -> String:
 func _build_ch09b_camp_summary() -> String:
     var lines: Array[String] = [
         "Part II interlude: ch09b_record_abyss_camp",
-        "Final restored memory secured.",
-        "Eclipse coordinates and tower lattice are now in hand.",
-        "The next route points directly to the final tower."
+        "The final restored memory is recovered, revealing both Rian's complicity and the path he left behind.",
+        "Eclipse coordinates and the tower lattice are now in hand.",
+        "The route now rises straight to the final tower."
     ]
     _append_unique_lines(lines, CH09B_INTERLUDE_DIALOGUE)
     return "\n".join(lines)
@@ -1468,12 +1590,16 @@ func _build_ch10_intro_summary() -> String:
     _append_unique_lines(lines, CH10_INTRO_DIALOGUE)
     return "\n".join(lines)
 
-func _build_ch10_resolution_summary() -> String:
+func _build_ch10_resolution_summary(ending_type: StringName) -> String:
     var lines: Array[String] = [
         "Final resolution: ch10_last_name",
-        "Karon falls, the bell stops, and the campaign resolves around memory that remained shared instead of erased.",
+        "Karuon falls, the bell stops, and the campaign resolves around memory kept shared instead of erased.",
         "The tower no longer decides what counts; the survivors do."
     ]
+    if ending_type == EndingResolver.ENDING_TRUE:
+        lines.append("True ending reached: every bond held long enough for the final memory to stay shared.")
+    else:
+        lines.append("Normal ending reached: the bell is gone, and the survivors carry the future forward from here.")
     _append_unique_lines(lines, CH10_RESOLUTION_DIALOGUE)
     return "\n".join(lines)
 
@@ -1493,6 +1619,9 @@ func _clear_panel_state() -> void:
         _campaign_panel.hide_panel()
 
 func _on_advance_requested() -> void:
+    if _active_mode == CampaignState.MODE_COMPLETE and _active_chapter_id == CHAPTER_CH10:
+        _return_to_title()
+        return
     advance_step()
 
 func _enter_chapter_two_intro() -> void:
@@ -1681,13 +1810,36 @@ func _enter_chapter_nine_b_camp() -> void:
     _set_panel_state(CampaignState.MODE_CAMP, "CH09B Record Abyss Interlude", _build_ch09b_camp_summary(), "Next Battle")
 
 func _enter_chapter_ten_resolution() -> void:
+    var ending_type: StringName = _resolve_current_ending()
+    _mark_postgame_available(ending_type)
     _active_mode = CampaignState.MODE_COMPLETE
     _set_panel_state(
         CampaignState.MODE_COMPLETE,
         "CH10 Final Resolution",
-        _build_ch10_resolution_summary(),
-        "Complete"
+        _build_ch10_resolution_summary(ending_type),
+        "Return to Title"
     )
+
+func _return_to_title() -> void:
+    return_to_title_requested.emit(_resolve_current_ending() == EndingResolver.ENDING_TRUE)
+
+func _resolve_current_ending() -> StringName:
+    if _battle_controller == null or _battle_controller.progression_service == null:
+        return EndingResolver.ENDING_NORMAL
+    return EndingResolver.resolve_ending(_battle_controller.progression_service.get_data())
+
+func _mark_postgame_available(ending_type: StringName) -> void:
+    if _battle_controller == null or _battle_controller.progression_service == null:
+        return
+    var progression_data: ProgressionData = _battle_controller.progression_service.get_data()
+    if progression_data == null:
+        return
+    if _battle_controller.bond_service != null:
+        _battle_controller.bond_service.export_to_progression(progression_data)
+    progression_data.ng_plus_available = true
+    progression_data.last_completed_ending = ending_type
+    progression_data.ng_plus_run = false
+    _autosave_progression()
 
 func _enter_chapter_complete_state() -> void:
     _active_mode = CampaignState.MODE_COMPLETE
@@ -1713,7 +1865,7 @@ func _enter_chapter_complete_state() -> void:
         body_text = "The Ellyor shell is complete and ready for the black-hound pursuit."
     elif _active_chapter_id == CHAPTER_CH08:
         title_text = "Chapter 8 Shell Complete"
-        body_text = "The black-hound shell is complete and ready for Karl's outer line."
+        body_text = "The black-hound shell is complete and ready for Kyle's outer line."
     elif _active_chapter_id == CHAPTER_CH09A:
         title_text = "Chapter 9A Shell Complete"
         body_text = "The outer-line shell is complete and ready for the root archive."
@@ -1752,45 +1904,100 @@ func _build_panel_payload(mode: String) -> Dictionary:
     memory_entries = _unlocked_memory_entries.duplicate()
     evidence_entries = _unlocked_evidence_entries.duplicate()
     letter_entries = _unlocked_letter_entries.duplicate()
+    if mode == CampaignState.MODE_BRIEFING and _current_stage != null:
+        var briefing_payload := _build_briefing_payload(_get_briefing_data(_current_stage.stage_id))
+        dialogue_entries = []
+        presentation_cards = []
+        memory_entries = []
+        evidence_entries = []
+        letter_entries = []
+        var alerts: Array[String] = ["Boss stage ahead", "Deploy when ready"]
+        var recommendation: String = "Review known enemy types, terrain, and optional objectives before deploying."
+        var active_section: String = CampaignPanel.SECTION_SUMMARY
+        var selected_party_unit_id: String = ""
+        var selected_forge_recipe_id: String = ""
+        if _campaign_panel != null:
+            var briefing_snapshot: Dictionary = _campaign_panel.get_snapshot()
+            if String(briefing_snapshot.get("mode", "")) == mode:
+                active_section = String(briefing_snapshot.get("active_section", active_section))
+                selected_party_unit_id = String(briefing_snapshot.get("selected_party_unit_id", ""))
+                selected_forge_recipe_id = String(briefing_snapshot.get("selected_forge_recipe_id", ""))
+        return {
+            "flow_label": _build_panel_flow_label(mode),
+            "recommendation": recommendation,
+            "party_entries": party_entries,
+            "party_details": party_details,
+            "inventory_entries": inventory_entries,
+            "memory_entries": memory_entries,
+            "evidence_entries": evidence_entries,
+            "letter_entries": letter_entries,
+            "alerts": alerts,
+            "dialogue_entries": dialogue_entries,
+            "presentation_cards": presentation_cards,
+            "active_section": active_section,
+            "selected_party_unit_id": selected_party_unit_id,
+            "selected_forge_recipe_id": selected_forge_recipe_id,
+            "section_badges": {},
+            "deployment_limit": _get_deployment_limit(),
+            "deployed_party_unit_ids": _stringify_unit_ids(_deployed_party_unit_ids),
+            "locked_party_unit_ids": ["ally_rian"],
+            "available_weapon_entries": _build_weapon_inventory_lines(),
+            "available_armor_entries": _build_armor_inventory_lines(),
+            "available_accessory_entries": _build_accessory_inventory_lines(),
+            "material_entries": _build_material_entries(),
+            "forge_recipe_entries": _build_forge_recipe_entries(),
+            "enemy_intel": briefing_payload.get("enemy_intel", []),
+            "terrain_summary": briefing_payload.get("terrain_summary", []),
+            "optional_objectives": briefing_payload.get("optional_objectives", []),
+            "turn_limit": briefing_payload.get("turn_limit", 20)
+        }
     if mode == CampaignState.MODE_CAMP:
-        if _active_chapter_id == CHAPTER_CH01:
-            dialogue_entries = CH01_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH02:
-            dialogue_entries = CH02_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH03:
-            dialogue_entries = CH03_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH04:
-            dialogue_entries = CH04_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH05:
-            dialogue_entries = CH05_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH06:
-            dialogue_entries = CH06_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH07:
-            dialogue_entries = CH07_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH08:
-            dialogue_entries = CH08_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH09A:
-            dialogue_entries = CH09A_INTERLUDE_DIALOGUE.duplicate()
-        elif _active_chapter_id == CHAPTER_CH09B:
-            dialogue_entries = CH09B_INTERLUDE_DIALOGUE.duplicate()
+        if _briefing_abort_active:
+            dialogue_entries = []
+            presentation_cards = []
+            memory_entries = []
+            evidence_entries = []
+            letter_entries = []
         else:
-            dialogue_entries = CH10_RESOLUTION_DIALOGUE.duplicate()
-        presentation_cards = _build_camp_presentation_cards()
-        if _camp_controller != null:
-            var camp_summary := _camp_controller.get_camp_summary()
-            if not camp_summary.is_empty():
-                camp_progression_alerts = _merge_unique_lines(camp_progression_alerts, [
-                    "Burden %d / Trust %d" % [int(camp_summary.get("burden", 0)), int(camp_summary.get("trust", 0))],
-                    "Fragments %d / Commands %d" % [int(camp_summary.get("recovered_fragments", 0)), int(camp_summary.get("unlocked_commands", 0))]
-                ])
+            if _active_chapter_id == CHAPTER_CH01:
+                dialogue_entries = CH01_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH02:
+                dialogue_entries = CH02_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH03:
+                dialogue_entries = CH03_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH04:
+                dialogue_entries = CH04_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH05:
+                dialogue_entries = CH05_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH06:
+                dialogue_entries = CH06_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH07:
+                dialogue_entries = CH07_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH08:
+                dialogue_entries = CH08_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH09A:
+                dialogue_entries = CH09A_INTERLUDE_DIALOGUE.duplicate()
+            elif _active_chapter_id == CHAPTER_CH09B:
+                dialogue_entries = CH09B_INTERLUDE_DIALOGUE.duplicate()
+            else:
+                dialogue_entries = CH10_RESOLUTION_DIALOGUE.duplicate()
+            presentation_cards = _build_camp_presentation_cards()
+            if _camp_controller != null:
+                var camp_summary := _camp_controller.get_camp_summary()
+                if not camp_summary.is_empty():
+                    camp_progression_alerts = _merge_unique_lines(camp_progression_alerts, [
+                        "Burden %d / Trust %d" % [int(camp_summary.get("burden", 0)), int(camp_summary.get("trust", 0))],
+                        "Fragments %d / Commands %d" % [int(camp_summary.get("recovered_fragments", 0)), int(camp_summary.get("unlocked_commands", 0))]
+                    ])
     elif mode == CampaignState.MODE_COMPLETE and _active_chapter_id == CHAPTER_CH10:
         dialogue_entries = CH10_RESOLUTION_DIALOGUE.duplicate()
         presentation_cards = _build_resolution_presentation_cards()
 
     var alerts: Array[String] = []
-    var recommendation := "Review the current state and continue when ready."
-    var active_section := CampaignPanel.SECTION_SUMMARY
-    var selected_party_unit_id := ""
+    var recommendation: String = "Review the current state and continue when ready."
+    var active_section: String = CampaignPanel.SECTION_SUMMARY
+    var selected_party_unit_id: String = ""
+    var selected_forge_recipe_id: String = ""
     var section_badges: Dictionary = {}
 
     match mode:
@@ -1798,11 +2005,16 @@ func _build_panel_payload(mode: String) -> Dictionary:
             alerts = ["Battle clear", "Next stage unlocked"]
             recommendation = "Read the handoff, check party readiness, then continue to the next stage."
         CampaignState.MODE_CAMP:
-            alerts = _build_camp_alerts(memory_entries, evidence_entries, letter_entries, inventory_entries)
-            alerts = _merge_unique_lines(alerts, camp_progression_alerts)
-            recommendation = _build_camp_recommendation(memory_entries, evidence_entries, letter_entries, inventory_entries)
-            active_section = CampaignPanel.SECTION_RECORDS
-            section_badges = _build_camp_section_badges(party_entries, inventory_entries, memory_entries, evidence_entries, letter_entries)
+            if _briefing_abort_active:
+                alerts = ["Deployment aborted", "Field camp standing by"]
+                recommendation = "Adjust party and gear if needed, then return to the mission briefing."
+                active_section = CampaignPanel.SECTION_PARTY
+            else:
+                alerts = _build_camp_alerts(memory_entries, evidence_entries, letter_entries, inventory_entries)
+                alerts = _merge_unique_lines(alerts, camp_progression_alerts)
+                recommendation = _build_camp_recommendation(memory_entries, evidence_entries, letter_entries, inventory_entries)
+                active_section = CampaignPanel.SECTION_RECORDS
+                section_badges = _build_camp_section_badges(party_entries, inventory_entries, memory_entries, evidence_entries, letter_entries)
         CampaignState.MODE_COMPLETE:
             alerts = ["Chapter handoff complete"]
             recommendation = "The Chapter 1 shell is complete and ready for the next destination."
@@ -1811,10 +2023,11 @@ func _build_panel_payload(mode: String) -> Dictionary:
             recommendation = "Complete the battle objective to unlock the next camp or story step."
 
     if _campaign_panel != null:
-        var panel_snapshot := _campaign_panel.get_snapshot()
+        var panel_snapshot: Dictionary = _campaign_panel.get_snapshot()
         if String(panel_snapshot.get("mode", "")) == mode:
             active_section = String(panel_snapshot.get("active_section", active_section))
             selected_party_unit_id = String(panel_snapshot.get("selected_party_unit_id", ""))
+            selected_forge_recipe_id = String(panel_snapshot.get("selected_forge_recipe_id", ""))
 
     return {
         "flow_label": _build_panel_flow_label(mode),
@@ -1830,13 +2043,16 @@ func _build_panel_payload(mode: String) -> Dictionary:
         "presentation_cards": presentation_cards,
         "active_section": active_section,
         "selected_party_unit_id": selected_party_unit_id,
+        "selected_forge_recipe_id": selected_forge_recipe_id,
         "section_badges": section_badges,
         "deployment_limit": _get_deployment_limit(),
         "deployed_party_unit_ids": _stringify_unit_ids(_deployed_party_unit_ids),
         "locked_party_unit_ids": ["ally_rian"],
         "available_weapon_entries": _build_weapon_inventory_lines(),
         "available_armor_entries": _build_armor_inventory_lines(),
-        "available_accessory_entries": _build_accessory_inventory_lines()
+        "available_accessory_entries": _build_accessory_inventory_lines(),
+        "material_entries": _build_material_entries(),
+        "forge_recipe_entries": _build_forge_recipe_entries()
     }
 
 func _build_panel_flow_label(mode: String) -> String:
@@ -1846,7 +2062,11 @@ func _build_panel_flow_label(mode: String) -> String:
         CampaignState.MODE_CUTSCENE:
             return "Battle clear -> Story handoff -> Next stage"
         CampaignState.MODE_CAMP:
+            if _briefing_abort_active:
+                return "Mission briefing -> Field camp -> Return to briefing"
             return "Battle clear -> Camp review -> Next battle"
+        CampaignState.MODE_BRIEFING:
+            return "Mission briefing -> Deploy"
         CampaignState.MODE_CHAPTER_INTRO:
             return "Camp exit -> Mission brief -> Deploy"
         CampaignState.MODE_COMPLETE:
@@ -1956,8 +2176,8 @@ func _build_camp_presentation_cards() -> Array[Dictionary]:
     if _active_chapter_id == CHAPTER_CH08:
         cards.append({
             "eyebrow": "Defense",
-            "title": "Karl's Outer Line Identified",
-            "body": "The black-hound pursuit now hands off into Karl's outer line through a dedicated presentation card, making the strategic pivot visible at a glance."
+            "title": "Kyle's Outer Line Identified",
+            "body": "The black-hound pursuit now hands off into Kyle's outer line through a dedicated presentation card, making the strategic pivot visible at a glance."
         })
         cards.append({
             "eyebrow": "Hunt",
@@ -1969,8 +2189,8 @@ func _build_camp_presentation_cards() -> Array[Dictionary]:
     if _active_chapter_id == CHAPTER_CH09A:
         cards.append({
             "eyebrow": "Ally",
-            "title": "Karl Opens The Root Route",
-            "body": "Karl's testimony and broken-standard handoff now land as a dedicated transition card, making his alliance feel like a structural shift in the campaign."
+            "title": "Kyle Opens The Root Route",
+            "body": "Kyle's testimony and broken-standard handoff now land as a dedicated transition card, making his alliance feel like a structural shift in the campaign."
         })
         cards.append({
             "eyebrow": "Archive",
@@ -2000,7 +2220,7 @@ func _build_resolution_presentation_cards() -> Array[Dictionary]:
         cards.append({
             "eyebrow": "Resolution",
             "title": "The Bell Falls Silent",
-            "body": "The final resolution now reads as a concrete runtime handoff: Karon falls, the bell stops, and the tower loses its right to decide what survives."
+            "body": "The final resolution now reads as a concrete runtime handoff: Karuon falls, the bell stops, and the tower loses its right to decide what survives."
         })
         cards.append({
             "eyebrow": "Memory",
@@ -2011,6 +2231,8 @@ func _build_resolution_presentation_cards() -> Array[Dictionary]:
 
 func _commit_stage_rewards(stage: StageData) -> void:
     _append_unique_lines(_chapter_reward_entries, _battle_controller.get_inventory_entries())
+    _grant_material_rewards_for_stage(stage.stage_id)
+    _commit_stage_star_rewards(stage)
     _unlock_weapons_for_stage(stage.stage_id)
     _unlock_armors_for_stage(stage.stage_id)
     _unlock_accessories_for_stage(stage.stage_id)
@@ -2058,6 +2280,69 @@ func _commit_stage_rewards(stage: StageData) -> void:
     _append_unique_lines(_unlocked_letter_entries, _format_record_entries(CH09A_STAGE_LETTER_LOG.get(stage.stage_id, [])))
     _append_unique_lines(_unlocked_letter_entries, _format_record_entries(CH09B_STAGE_LETTER_LOG.get(stage.stage_id, [])))
     _append_unique_lines(_unlocked_letter_entries, _format_record_entries(CH10_STAGE_LETTER_LOG.get(stage.stage_id, [])))
+
+func _process_post_battle_supports(_stage: StageData) -> void:
+    if _battle_controller == null or _battle_controller.bond_service == null:
+        return
+    var surviving_units: Array = []
+    for unit in _battle_controller.ally_units:
+        if not is_instance_valid(unit) or unit.unit_data == null or unit.is_defeated():
+            continue
+        surviving_units.append(unit)
+    for left_index in range(surviving_units.size()):
+        for right_index in range(left_index + 1, surviving_units.size()):
+            var left_unit = surviving_units[left_index]
+            var right_unit = surviving_units[right_index]
+            var unit_a: StringName = left_unit.unit_data.unit_id
+            var unit_b: StringName = right_unit.unit_data.unit_id
+            var pair_id := SupportConversations.get_pair_id(String(unit_a), String(unit_b))
+            if pair_id.is_empty():
+                continue
+            var previous_rank: int = _battle_controller.bond_service.get_support_rank(unit_a, unit_b)
+            _battle_controller.bond_service.register_shared_battle(unit_a, unit_b)
+            var current_rank: int = _battle_controller.bond_service.get_support_rank(unit_a, unit_b)
+            var shared_battle_count: int = _battle_controller.bond_service.get_shared_battle_count(unit_a, unit_b)
+            if current_rank < 1 or current_rank > 3:
+                continue
+            if current_rank <= previous_rank or shared_battle_count < 3:
+                continue
+            if _roll_support_trigger_chance() >= 0.4:
+                continue
+            _show_support_conversation(pair_id, current_rank)
+
+func _show_support_conversation(pair_id: String, rank: int) -> void:
+    if _battle_controller == null or _battle_controller.hud == null:
+        return
+    var text := CampaignShellDialogueCatalog.get_support_dialogue(pair_id, rank)
+    if text.is_empty():
+        return
+    var result_summary: Dictionary = _battle_controller.last_result_summary.duplicate(true)
+    var conversations: Array = result_summary.get("support_conversations", []).duplicate(true)
+    conversations.append({
+        "pair_id": pair_id,
+        "pair_label": _build_support_pair_label(pair_id),
+        "rank": rank,
+        "rank_label": "%s Rank" % SupportConversations.get_rank_label(rank),
+        "text": text
+    })
+    result_summary["support_conversations"] = conversations
+    _battle_controller.last_result_summary = result_summary
+    _battle_controller.hud.cache_result_text(_battle_controller._build_result_summary_text(result_summary))
+    _battle_controller.hud.show_result_screen(result_summary)
+
+func _roll_support_trigger_chance() -> float:
+    if not _debug_support_rolls.is_empty():
+        return float(_debug_support_rolls.pop_front())
+    return _support_rng.randf()
+
+func _build_support_pair_label(pair_id: String) -> String:
+    var labels: Array[String] = []
+    for token in pair_id.split("_", false):
+        labels.append(String(token).capitalize())
+    return " + ".join(labels)
+
+func debug_queue_support_rolls(rolls: Array[float]) -> void:
+    _debug_support_rolls = rolls.duplicate()
 
 func _unlock_accessories_for_stage(stage_id: StringName) -> void:
     var unlocks: Variant = []
@@ -2171,8 +2456,145 @@ func _merge_unique_lines(base: Array[String], extra: Array[String]) -> Array[Str
     _append_unique_lines(merged, extra)
     return merged
 
+func _get_progression_data() -> ProgressionData:
+    if _battle_controller == null or _battle_controller.progression_service == null:
+        return null
+    return _battle_controller.progression_service.get_data()
+
+func _build_material_entries() -> Array[Dictionary]:
+    return ForgeService.get_material_entries(_get_progression_data())
+
+func _build_forge_recipe_entries() -> Array[Dictionary]:
+    return ForgeService.build_recipe_entries(_get_progression_data(), _get_all_owned_item_ids())
+
+func _get_all_owned_item_ids() -> Array[StringName]:
+    var owned: Array[StringName] = []
+    for weapon_id in _unlocked_weapon_ids:
+        if not owned.has(weapon_id):
+            owned.append(weapon_id)
+    for armor_id in _unlocked_armor_ids:
+        if not owned.has(armor_id):
+            owned.append(armor_id)
+    for accessory_id in _unlocked_accessory_ids:
+        if not owned.has(accessory_id):
+            owned.append(accessory_id)
+    return owned
+
+func _is_item_owned(output_type: StringName, output_id: StringName) -> bool:
+    match output_type:
+        ForgeService.OUTPUT_WEAPON:
+            return _unlocked_weapon_ids.has(output_id)
+        ForgeService.OUTPUT_ARMOR:
+            return _unlocked_armor_ids.has(output_id)
+        ForgeService.OUTPUT_ACCESSORY:
+            return _unlocked_accessory_ids.has(output_id)
+        _:
+            return false
+
+func _unlock_crafted_item(output_type: StringName, output_id: StringName) -> void:
+    match output_type:
+        ForgeService.OUTPUT_WEAPON:
+            if not _unlocked_weapon_ids.has(output_id):
+                _unlocked_weapon_ids.append(output_id)
+        ForgeService.OUTPUT_ARMOR:
+            if not _unlocked_armor_ids.has(output_id):
+                _unlocked_armor_ids.append(output_id)
+        ForgeService.OUTPUT_ACCESSORY:
+            if not _unlocked_accessory_ids.has(output_id):
+                _unlocked_accessory_ids.append(output_id)
+
+func _grant_material_rewards_for_stage(stage_id: StringName) -> void:
+    var progression_data: ProgressionData = _get_progression_data()
+    if progression_data == null:
+        return
+    var chapter_key: StringName = _extract_chapter_material_key(stage_id)
+    if not CHAPTER_MATERIAL_REWARDS.has(chapter_key):
+        return
+    var interaction_bonus: int = max(0, _battle_controller.get_inventory_entries().size() - 1) if _battle_controller != null else 0
+    var reward_lines: Array[String] = []
+    var rewards: Array = CHAPTER_MATERIAL_REWARDS.get(chapter_key, [])
+    for reward in rewards:
+        if typeof(reward) != TYPE_DICTIONARY:
+            continue
+        var material_id: StringName = StringName(reward.get("material_id", &""))
+        var count: int = max(1, int(reward.get("count", 0)))
+        if material_id == &"":
+            continue
+        var total_count: int = count + interaction_bonus
+        progression_data.add_material(material_id, total_count)
+        reward_lines.append("Material: %s x%d" % [ForgeService.get_material_label(material_id), total_count])
+    _append_unique_lines(_chapter_reward_entries, reward_lines)
+
+func _commit_stage_star_rewards(stage: StageData) -> void:
+    if stage == null or _battle_controller == null:
+        return
+    var progression_data: ProgressionData = _get_progression_data()
+    if progression_data == null:
+        return
+    var battle_result: Dictionary = _battle_controller.get_last_result_summary()
+    if not battle_result.has("stars_earned"):
+        return
+    var stars: int = clampi(int(battle_result.get("stars_earned", 1)), 1, 3)
+    var previous_best: int = clampi(int(progression_data.stage_star_ratings.get(stage.stage_id, 0)), 0, 3)
+    if stars > previous_best:
+        progression_data.stage_star_ratings[stage.stage_id] = stars
+        progression_data.total_stars = max(0, progression_data.total_stars - previous_best + stars)
+    elif previous_best <= 0:
+        progression_data.stage_star_ratings[stage.stage_id] = stars
+        progression_data.total_stars += stars
+    if stars >= 3:
+        _grant_bonus_material_rewards(stage.stage_id, 2)
+    elif stars >= 2:
+        _grant_bonus_material_rewards(stage.stage_id, 1)
+
+func _grant_bonus_material_rewards(stage_id: StringName, bonus_count: int) -> void:
+    var progression_data: ProgressionData = _get_progression_data()
+    if progression_data == null or bonus_count <= 0:
+        return
+    var chapter_key: StringName = _extract_chapter_material_key(stage_id)
+    if not CHAPTER_MATERIAL_REWARDS.has(chapter_key):
+        return
+    var rewards: Array = CHAPTER_MATERIAL_REWARDS.get(chapter_key, [])
+    if rewards.is_empty():
+        return
+    var reward_lines: Array[String] = []
+    for index in range(bonus_count):
+        var reward: Variant = rewards[index % rewards.size()]
+        if typeof(reward) != TYPE_DICTIONARY:
+            continue
+        var material_id: StringName = StringName(reward.get("material_id", &""))
+        if material_id == &"":
+            continue
+        progression_data.add_material(material_id, 1)
+        reward_lines.append("Bonus Material: %s x1" % ForgeService.get_material_label(material_id))
+    _append_unique_lines(_chapter_reward_entries, reward_lines)
+
+func _extract_chapter_material_key(stage_id: StringName) -> StringName:
+    var stage_text: String = String(stage_id).to_lower()
+    if stage_text.begins_with("ch09a"):
+        return &"ch09a"
+    if stage_text.begins_with("ch09b"):
+        return &"ch09b"
+    if stage_text.length() >= 4:
+        return StringName(stage_text.left(4))
+    return StringName(stage_text)
+
+func _build_crafted_inventory_line(recipe_id: StringName) -> String:
+    var recipe: Dictionary = ForgeService.get_recipe(recipe_id)
+    if recipe.is_empty():
+        return ""
+    var output_type: String = String(recipe.get("output_type", "item")).capitalize()
+    return "%s forged: %s" % [output_type, String(recipe.get("label", String(recipe_id)))]
+
+func _refresh_camp_panel_state() -> void:
+    if _active_mode != CampaignState.MODE_CAMP:
+        return
+    _set_panel_state(CampaignState.MODE_CAMP, _current_panel_title, _current_panel_body, _campaign_panel.advance_button.text if _campaign_panel != null else "Next Battle")
+
 func _build_camp_alerts(memory_entries: Array[String], evidence_entries: Array[String], letter_entries: Array[String], inventory_entries: Array[String]) -> Array[String]:
     var alerts: Array[String] = ["Camp ready", "Party update available"]
+    if _get_craftable_recipe_count() > 0:
+        alerts.append("Forge recipes ready")
     if not memory_entries.is_empty():
         alerts.append("Memory log updated")
     if not evidence_entries.is_empty():
@@ -2186,6 +2608,8 @@ func _build_camp_alerts(memory_entries: Array[String], evidence_entries: Array[S
 func _build_camp_recommendation(memory_entries: Array[String], evidence_entries: Array[String], letter_entries: Array[String], inventory_entries: Array[String]) -> String:
     if not memory_entries.is_empty() or not evidence_entries.is_empty() or not letter_entries.is_empty():
         return "Start in Records to review the latest memory, evidence, and Serin handoff before checking party readiness."
+    if _get_craftable_recipe_count() > 0:
+        return "Open Forge to spend recovered materials, then return to Party to lock in the next loadout."
     if not inventory_entries.is_empty():
         return "Start in Inventory to review recovered supplies, then confirm the party for the northern route."
     return "Review the current party and continue when ready."
@@ -2199,11 +2623,22 @@ func _build_camp_section_badges(party_entries: Array[String], inventory_entries:
     if inventory_count > 0:
         badges[CampaignPanel.SECTION_INVENTORY] = str(inventory_count)
 
+    var craftable_count: int = _get_craftable_recipe_count()
+    if craftable_count > 0:
+        badges[CampaignPanel.SECTION_FORGE] = "READY %d" % craftable_count
+
     var record_count: int = memory_entries.size() + evidence_entries.size() + letter_entries.size()
     if record_count > 0:
         badges[CampaignPanel.SECTION_RECORDS] = "NEW %d" % record_count
 
     return badges
+
+func _get_craftable_recipe_count() -> int:
+    var count: int = 0
+    for entry in _build_forge_recipe_entries():
+        if bool(entry.get("can_craft", false)):
+            count += 1
+    return count
 
 func _get_deployment_limit() -> int:
     var chapter_rank: int = CampaignChapterRegistry.get_rank(_active_chapter_id)
@@ -2337,6 +2772,11 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
 func _get_campaign_party_roster() -> Array[UnitData]:
     var roster: Array[UnitData] = []
     for unit_id in CampaignCatalog.get_party_roster_order():
+        if _ng_plus_enabled and unit_id != &"ally_rian":
+            var ng_plus_unit: UnitData = CampaignCatalog.get_unit_data(unit_id)
+            if ng_plus_unit != null:
+                roster.append(ng_plus_unit)
+            continue
         if not _is_recruit_unlocked(unit_id):
             continue
         var unit_data: UnitData = CampaignCatalog.get_unit_data(unit_id)
@@ -2357,6 +2797,8 @@ func _get_armor_data_by_id(armor_id: StringName) -> ArmorData:
     return CampaignCatalog.get_armor_data(armor_id)
 
 func _is_recruit_unlocked(unit_id: StringName) -> bool:
+    if _ng_plus_enabled:
+        return true
     match unit_id:
         &"ally_bran":
             return _active_chapter_id == CHAPTER_CH02 and _active_mode == CampaignState.MODE_CAMP \
@@ -2511,7 +2953,7 @@ func cycle_accessory_for_unit(unit_id: StringName) -> void:
     var next_index: int = 0
     if current_id != StringName() and available_ids.has(current_id):
         next_index = (available_ids.find(current_id) + 1) % available_ids.size()
-    var next_id: StringName = available_ids[next_index]
+    var next_id: StringName = StringName(available_ids[next_index])
     _equipped_accessory_by_unit_id[String(unit_id)] = String(next_id)
 
     if _campaign_panel != null:
@@ -2522,6 +2964,33 @@ func cycle_accessory_for_unit(unit_id: StringName) -> void:
             _campaign_panel.advance_button.text,
             _build_panel_payload(_active_mode)
         )
+
+func _correct_accessory_choice_for_unit(unit_id: StringName) -> void:
+    if not _is_recruit_unlocked(unit_id):
+        return
+    var available_ids: Array[StringName] = _get_available_accessory_ids()
+    var current_id: StringName = StringName(_equipped_accessory_by_unit_id.get(String(unit_id), ""))
+    if not ReforgeService.can_correct_accessory_choice(current_id, available_ids):
+        return
+    var next_id: StringName = ReforgeService.get_corrected_accessory_choice(current_id, available_ids)
+    if next_id == StringName() or next_id == current_id:
+        return
+    _equipped_accessory_by_unit_id[String(unit_id)] = String(next_id)
+    _refresh_camp_panel_state()
+
+func _craft_recipe(recipe_id: StringName) -> bool:
+    var progression_data: ProgressionData = _get_progression_data()
+    if _forge_service == null or progression_data == null:
+        return false
+    _forge_service.configure(
+        progression_data,
+        Callable(self, "_is_item_owned"),
+        Callable(self, "_unlock_crafted_item")
+    )
+    var crafted: bool = _forge_service.craft(recipe_id)
+    if crafted:
+        _append_unique_lines(_chapter_reward_entries, [_build_crafted_inventory_line(recipe_id)])
+    return crafted
 
 func cycle_weapon_for_unit(unit_id: StringName) -> void:
     if not _is_recruit_unlocked(unit_id):
@@ -2564,6 +3033,13 @@ func _on_armor_cycle_requested(unit_id: StringName) -> void:
 
 func _on_accessory_cycle_requested(unit_id: StringName) -> void:
     cycle_accessory_for_unit(unit_id)
+
+func _on_accessory_reforge_requested(unit_id: StringName) -> void:
+    _correct_accessory_choice_for_unit(unit_id)
+
+func _on_forge_craft_requested(recipe_id: StringName) -> void:
+    if _craft_recipe(recipe_id):
+        _refresh_camp_panel_state()
 
 func _get_available_weapon_ids() -> Array[StringName]:
     var available: Array[StringName] = []
