@@ -132,17 +132,17 @@
 ---
 
 ### SPEC-P4-10: Destiny System (운명의 선택) ⭐终极
-- [ ] **P4-10-1** NG+ 3회차에서만解锁: "제3의 눈" 클리어 조건
-- [ ] **P4-10-2** `scripts/battle/destiny_manager.gd` — Destiny autoload
-- [ ] **P4-10-3** 이중세계관 데이터 구조: `{current_world: Dict, past_world: Dict}`
+- [x] **P4-10-1** NG+ 3회차에서만解锁: "제3의 눈" 클리어 조건 — `966d69f`
+- [x] **P4-10-2** `scripts/battle/destiny_manager.gd` — Destiny autoload — `966d69f`
+- [x] **P4-10-3** 이중세계관 데이터 구조: `{current_world: Dict, past_world: Dict}` — `966d69f`
 - [ ] **P4-10-4** 과거 결정 변경 UI: Chronicle에서 특정 선택지를 다시 고르기
-- [ ] **P4-10-5** 과거 변경 시 현재 세계 동기화: `resync_world_with_past_change()`
+- [x] **P4-10-5** 과거 변경 시 현재 세계 동기화: `resync_world_with_past_change()` — `966d69f`
 - [ ] **P4-10-6** "역사의 기록자" 스킬 트리: CH10 최종전에서 선택지 확장
-- [ ] **P4-10-7** Encyclopedia에 "역사의 기록자" 탭 (7번째 탭) — 모든 과거 변경 이력
+- [x] **P4-10-7** Encyclopedia에 "역사의 기록자" 탭 (7번째 탭) — 모든 과거 변경 이력 — `966d69f`
 - [ ] **P4-10-8** HeirloomLegacy와 통합: 3회차 가문血脉이 "역사를 바꾼 가문" 배지
 - [ ] **P4-10-9** "운명이 선택한 사람들" True Ending 엔딩 크레딧
-- [ ] **P4-10-10** `scripts/dev/destiny_system_runner.gd` 작성
-- [ ] **P4-10-11** Runner 검증 — godot headless 통과
+- [x] **P4-10-10** `scripts/dev/destiny_system_runner.gd` 작성 — `966d69f`
+- [x] **P4-10-11** Runner 검증 — godot headless 통과 — `966d69f` (21/21 PASS)
 
 ---
 
