@@ -1,308 +1,387 @@
 class_name LayeredMusic
 extends Node
 
-const BGM_MANIFEST_PATH := "res://data/audio/bgm_manifest.json"
-const BUS_SILENCE_DB := -80.0
-
-const BASE_MELODY := "BASE_MELODY"
-const DRUMS_PERCUSSION := "DRUMS_PERCUSSION"
-const STRINGS_EMOTION := "STRINGS_EMOTION"
-const VOCAL_CHORUS := "VOCAL_CHORUS"
-const NATURE_AMBIENCE := "NATURE_AMBIENCE"
-
-const LAYER_ORDER := [
-	BASE_MELODY,
-	DRUMS_PERCUSSION,
-	STRINGS_EMOTION,
-	VOCAL_CHORUS,
-	NATURE_AMBIENCE,
-]
-
-var LAYER_CONFIG := {
-	BASE_MELODY: {
-		"aliases": PackedStringArray(["BASE", "BASE_MELODY"]),
-		"bus_name": &"MusicBase",
-		"player_name": "BaseMelodyPlayer",
-		"default_level": 1.0,
-	},
-	DRUMS_PERCUSSION: {
-		"aliases": PackedStringArray(["DRUMS", "DRUMS_PERCUSSION"]),
-		"bus_name": &"MusicDrums",
-		"player_name": "DrumsPercussionPlayer",
-		"default_level": 1.0,
-	},
-	STRINGS_EMOTION: {
-		"aliases": PackedStringArray(["STRINGS", "STRINGS_EMOTION"]),
-		"bus_name": &"MusicStrings",
-		"player_name": "StringsEmotionPlayer",
-		"default_level": 1.0,
-	},
-	VOCAL_CHORUS: {
-		"aliases": PackedStringArray(["VOCAL", "VOCAL_CHORUS"]),
-		"bus_name": &"MusicVocal",
-		"player_name": "VocalChorusPlayer",
-		"default_level": 1.0,
-	},
-	NATURE_AMBIENCE: {
-		"aliases": PackedStringArray(["AMBIENCE", "NATURE", "NATURE_AMBIENCE"]),
-		"bus_name": &"MusicAmbience",
-		"player_name": "NatureAmbiencePlayer",
-		"default_level": 1.0,
-	},
-}
+const MANIFEST_PATH := "res://data/audio/bgm_manifest.json"
+const STUB_LAYER_ASSET_PATH := "res://audio/bgm/bgm_battle_default.wav"
+const SILENT_VOLUME_DB := -80.0
+const DEFAULT_CUE_ID := "bgm_battle_default"
+const LAYER_IDS: Array[String] = ["base", "drums", "strings", "vocal", "ambience", "spotlight"]
 
 var _cue_manifest: Dictionary = {}
+var _stream_cache: Dictionary = {}
 var _players: Dictionary = {}
 var _layer_levels: Dictionary = {}
-var _layer_base_targets: Dictionary = {}
-var _layer_temporary_bonuses: Dictionary = {}
+var _layer_targets: Dictionary = {}
 var _layer_tweens: Dictionary = {}
-var _spotlight_tokens: Dictionary = {}
-var _current_base_track: String = ""
+var _layer_asset_paths: Dictionary = {}
+var _current_cue_id: String = ""
+var _base_transition_player: AudioStreamPlayer = null
+var _base_crossfade_tween: Tween = null
+var _stop_tween: Tween = null
 
 
 func _ready() -> void:
 	_load_manifest()
-	_ensure_bus_layout()
 	_ensure_players()
-	deactivate_all_layers(0.0)
+	_assign_stub_streams()
+	for layer_name in LAYER_IDS:
+		_layer_levels[layer_name] = 0.0
+		_layer_targets[layer_name] = 0.0
+		_apply_layer_volume(0.0, layer_name)
 
 
-func play_layered_track(base_track: String, layers: Array[String]) -> void:
-	_current_base_track = base_track.strip_edges()
-	_ensure_bus_layout()
+func _exit_tree() -> void:
+	_stop_base_crossfade()
+	if _stop_tween != null and is_instance_valid(_stop_tween):
+		_stop_tween.kill()
+	for player_variant in _players.values():
+		var player := player_variant as AudioStreamPlayer
+		if player == null or not is_instance_valid(player):
+			continue
+		player.stop()
+		player.stream = null
+	if _base_transition_player != null and is_instance_valid(_base_transition_player):
+		_base_transition_player.stop()
+		_base_transition_player.stream = null
+
+
+func play_cue(cue_id: String, restart: bool = false) -> void:
+	var normalized_cue_id := cue_id.strip_edges()
+	if normalized_cue_id.is_empty():
+		return
 	_ensure_players()
-	_clear_spotlight_state()
-	_assign_streams(_current_base_track)
-	_start_players()
-	for layer_id in LAYER_ORDER:
-		_layer_base_targets[layer_id] = 0.0
-		_apply_layer_target(layer_id, 0.0)
-	activate_layer(BASE_MELODY, 0.0)
-	for layer_name in layers:
-		activate_layer(layer_name, 0.0)
+	var base_player := _get_player("base")
+	if not restart and _current_cue_id == normalized_cue_id and base_player != null and base_player.stream != null:
+		_set_layer_target("base", 1.0, 0.0)
+		return
+	var stream := _resolve_stream_for_cue(normalized_cue_id)
+	if stream == null:
+		return
+	_stop_base_crossfade()
+	_current_cue_id = normalized_cue_id
+	_layer_asset_paths["base"] = _resolve_cue_asset_path(normalized_cue_id)
+	if base_player != null:
+		base_player.stop()
+		base_player.stream = null
+		base_player.stream = stream
+		if not _should_skip_playback():
+			base_player.play()
+	_set_layer_target("base", 1.0, 0.0)
 
 
 func activate_layer(layer_name: String, fade_time: float = 1.0) -> void:
-	var layer_id := _normalize_layer_name(layer_name)
-	if layer_id.is_empty():
+	var normalized_layer := _normalize_layer_name(layer_name)
+	if normalized_layer.is_empty():
 		return
-	_set_layer_level_internal(layer_id, float(LAYER_CONFIG.get(layer_id, {}).get("default_level", 1.0)), fade_time)
+	_prepare_layer_for_activation(normalized_layer)
+	_set_layer_target(normalized_layer, 1.0, fade_time)
 
 
 func deactivate_layer(layer_name: String, fade_time: float = 1.0) -> void:
-	var layer_id := _normalize_layer_name(layer_name)
-	if layer_id.is_empty():
+	var normalized_layer := _normalize_layer_name(layer_name)
+	if normalized_layer.is_empty():
 		return
-	_layer_temporary_bonuses[layer_id] = 0.0
-	_set_layer_level_internal(layer_id, 0.0, fade_time)
+	_set_layer_target(normalized_layer, 0.0, fade_time)
 
 
-func deactivate_all_layers(fade_time: float = 1.0) -> void:
-	_clear_spotlight_state()
-	for layer_id in LAYER_ORDER:
-		_layer_temporary_bonuses[layer_id] = 0.0
-		_set_layer_level_internal(layer_id, 0.0, fade_time)
-
-
-func trigger_spotlight_music(spotlight_type: String) -> void:
-	match spotlight_type.strip_edges().to_lower():
-		"triple_kill":
-			activate_layer(DRUMS_PERCUSSION, 0.4)
-			_set_temporary_bonus(DRUMS_PERCUSSION, 0.3, 0.4, 5.0)
-		"last_stand":
-			_set_layer_level_internal(STRINGS_EMOTION, 1.4, 1.0)
+func trigger_spotlight_music(spotlight_type: String, fade_time: float = 2.0) -> void:
+	var normalized_type := spotlight_type.strip_edges().to_lower()
+	if normalized_type.is_empty():
+		return
+	if _current_cue_id.is_empty():
+		play_cue(DEFAULT_CUE_ID)
+	activate_layer("spotlight", fade_time)
+	match normalized_type:
 		"bond_death":
-			_set_layer_level_internal(VOCAL_CHORUS, 0.6, 3.0)
-		"weather_master":
-			_set_layer_level_internal(NATURE_AMBIENCE, 1.0, 1.0)
+			activate_layer("strings", fade_time)
+			activate_layer("vocal", fade_time)
+		"boss":
+			activate_layer("drums", fade_time)
+		"critical":
+			activate_layer("strings", fade_time)
+		"victory":
+			activate_layer("ambience", fade_time)
+		_:
+			return
 
 
-func set_layer_level(layer_name: String, level: float, fade_time: float = 1.0) -> void:
-	var layer_id := _normalize_layer_name(layer_name)
-	if layer_id.is_empty():
+func crossfade_to_cue(cue_id: String, fade_duration: float = 2.0) -> void:
+	var normalized_cue_id := cue_id.strip_edges()
+	if normalized_cue_id.is_empty():
 		return
-	_set_layer_level_internal(layer_id, level, fade_time)
+	_ensure_players()
+	var stream := _resolve_stream_for_cue(normalized_cue_id)
+	if stream == null:
+		return
+	_current_cue_id = normalized_cue_id
+	_layer_asset_paths["base"] = _resolve_cue_asset_path(normalized_cue_id)
+	_stop_base_crossfade()
+	var base_player := _get_player("base")
+	if _base_transition_player == null:
+		_base_transition_player = _create_player("BaseTransitionPlayer")
+		add_child(_base_transition_player)
+	_base_transition_player.stop()
+	_base_transition_player.stream = null
+	_base_transition_player.stream = stream
+	_base_transition_player.volume_db = SILENT_VOLUME_DB
+	if not _should_skip_playback():
+		_base_transition_player.play()
+	if base_player == null or base_player.stream == null or fade_duration <= 0.0:
+		if base_player != null:
+			base_player.stop()
+			base_player.stream = null
+			base_player.stream = stream
+			if not _should_skip_playback():
+				base_player.play()
+		_set_layer_target("base", 1.0, 0.0)
+		return
+	_prepare_layer_for_activation("base")
+	var current_level: float = max(float(_layer_levels.get("base", 0.0)), 0.0001)
+	_base_crossfade_tween = create_tween()
+	_base_crossfade_tween.set_parallel(true)
+	_base_crossfade_tween.tween_method(Callable(self, "_apply_base_crossfade_level"), current_level, 0.0, fade_duration)
+	_base_crossfade_tween.tween_method(Callable(self, "_apply_transition_crossfade_level"), 0.0, 1.0, fade_duration)
+	_base_crossfade_tween.chain().tween_callback(Callable(self, "_complete_base_crossfade"))
 
 
-func has_layer(layer_name: String) -> bool:
-	return not _normalize_layer_name(layer_name).is_empty()
+func stop_all(fade_time: float = 2.0) -> void:
+	_stop_base_crossfade()
+	if _stop_tween != null and is_instance_valid(_stop_tween):
+		_stop_tween.kill()
+	for layer_name in LAYER_IDS:
+		deactivate_layer(layer_name, fade_time)
+	if fade_time <= 0.0:
+		_stop_all_players()
+		return
+	_stop_tween = create_tween()
+	_stop_tween.tween_interval(fade_time)
+	_stop_tween.tween_callback(Callable(self, "_stop_all_players"))
 
 
 func is_layer_active(layer_name: String) -> bool:
-	var layer_id := _normalize_layer_name(layer_name)
-	if layer_id.is_empty():
+	var normalized_layer := _normalize_layer_name(layer_name)
+	if normalized_layer.is_empty():
 		return false
-	return float(_layer_levels.get(layer_id, 0.0)) > 0.01 or float(_layer_base_targets.get(layer_id, 0.0)) > 0.01
+	return float(_layer_targets.get(normalized_layer, 0.0)) > 0.01 or float(_layer_levels.get(normalized_layer, 0.0)) > 0.01
 
 
-func get_layer_level(layer_name: String) -> float:
-	var layer_id := _normalize_layer_name(layer_name)
-	if layer_id.is_empty():
-		return 0.0
-	return float(_layer_levels.get(layer_id, 0.0))
-
-
-func get_active_layer_names() -> Array[String]:
+func get_active_layers() -> Array[String]:
 	var active_layers: Array[String] = []
-	for layer_id in LAYER_ORDER:
-		if is_layer_active(layer_id):
-			active_layers.append(layer_id)
+	for layer_name in LAYER_IDS:
+		if is_layer_active(layer_name):
+			active_layers.append(layer_name)
 	return active_layers
 
 
-func _set_layer_level_internal(layer_id: String, level: float, fade_time: float) -> void:
-	_layer_base_targets[layer_id] = max(level, 0.0)
-	_apply_layer_target(layer_id, fade_time)
-
-
-func _set_temporary_bonus(layer_id: String, bonus: float, fade_time: float, duration: float) -> void:
-	var next_token := int(_spotlight_tokens.get(layer_id, 0)) + 1
-	_spotlight_tokens[layer_id] = next_token
-	_layer_temporary_bonuses[layer_id] = max(bonus, 0.0)
-	_apply_layer_target(layer_id, fade_time)
-	_restore_temporary_bonus(layer_id, next_token, duration, fade_time)
-
-
-func _restore_temporary_bonus(layer_id: String, token: int, duration: float, fade_time: float) -> void:
-	await get_tree().create_timer(duration, false).timeout
-	if int(_spotlight_tokens.get(layer_id, 0)) != token:
-		return
-	_layer_temporary_bonuses[layer_id] = 0.0
-	_apply_layer_target(layer_id, fade_time)
-
-
-func _apply_layer_target(layer_id: String, fade_time: float) -> void:
-	var target := float(_layer_base_targets.get(layer_id, 0.0)) + float(_layer_temporary_bonuses.get(layer_id, 0.0))
-	_fade_layer_to(layer_id, target, fade_time)
-
-
-func _fade_layer_to(layer_id: String, target: float, fade_time: float) -> void:
-	var existing: Tween = _layer_tweens.get(layer_id, null)
-	if existing != null and is_instance_valid(existing):
-		existing.kill()
-	if fade_time <= 0.0:
-		_apply_layer_mix(target, layer_id)
-		return
-	var from_value := float(_layer_levels.get(layer_id, 0.0))
-	var tween := create_tween()
-	_layer_tweens[layer_id] = tween
-	tween.tween_method(Callable(self, "_apply_layer_mix").bind(layer_id), from_value, target, fade_time)
-
-
-func _apply_layer_mix(value: float, layer_id: String) -> void:
-	_layer_levels[layer_id] = max(value, 0.0)
-	var config: Dictionary = LAYER_CONFIG.get(layer_id, {})
-	var bus_name: StringName = config.get("bus_name", &"Master")
-	_set_bus_linear(bus_name, float(_layer_levels.get(layer_id, 0.0)))
-
-
-func _set_bus_linear(bus_name: StringName, linear_value: float) -> void:
-	var bus_index := AudioServer.get_bus_index(bus_name)
-	if bus_index == -1:
-		return
-	if linear_value <= 0.0001:
-		AudioServer.set_bus_volume_db(bus_index, BUS_SILENCE_DB)
-		return
-	AudioServer.set_bus_volume_db(bus_index, linear_to_db(linear_value))
-
-
-func _ensure_bus_layout() -> void:
-	for layer_id in LAYER_ORDER:
-		var config: Dictionary = LAYER_CONFIG.get(layer_id, {})
-		var bus_name: StringName = config.get("bus_name", &"Master")
-		if AudioServer.get_bus_index(bus_name) != -1:
-			continue
-		AudioServer.add_bus(AudioServer.get_bus_count())
-		AudioServer.set_bus_name(AudioServer.get_bus_count() - 1, bus_name)
-
-
-func _ensure_players() -> void:
-	if not _players.is_empty():
-		return
-	for layer_id in LAYER_ORDER:
-		var config: Dictionary = LAYER_CONFIG.get(layer_id, {})
-		var player := AudioStreamPlayer.new()
-		player.name = String(config.get("player_name", "%sPlayer" % layer_id))
-		player.bus = config.get("bus_name", &"Master")
-		add_child(player)
-		_players[layer_id] = player
-		_layer_levels[layer_id] = 0.0
-		_layer_base_targets[layer_id] = 0.0
-		_layer_temporary_bonuses[layer_id] = 0.0
-		_spotlight_tokens[layer_id] = 0
-
-
-func _assign_streams(base_track: String) -> void:
-	var stream := _resolve_stream(base_track)
-	for layer_id in LAYER_ORDER:
-		var player := _players.get(layer_id, null) as AudioStreamPlayer
-		if player == null:
-			continue
-		player.stop()
-		player.stream = stream
-
-
-func _start_players() -> void:
-	if DisplayServer.get_name() == "headless":
-		return
-	for player in _players.values():
-		var typed_player := player as AudioStreamPlayer
-		if typed_player == null or typed_player.stream == null:
-			continue
-		typed_player.play()
-
-
-func _clear_spotlight_state() -> void:
-	for layer_id in LAYER_ORDER:
-		_spotlight_tokens[layer_id] = int(_spotlight_tokens.get(layer_id, 0)) + 1
-		_layer_temporary_bonuses[layer_id] = 0.0
-
-
-func _normalize_layer_name(layer_name: String) -> String:
-	var normalized := layer_name.strip_edges().to_upper()
-	if normalized.is_empty():
-		return ""
-	normalized = normalized.replace(" ", "_")
-	for layer_id in LAYER_ORDER:
-		var aliases: PackedStringArray = LAYER_CONFIG.get(layer_id, {}).get("aliases", PackedStringArray())
-		if normalized == layer_id or aliases.has(normalized):
-			return layer_id
-	return ""
+func _should_skip_playback() -> bool:
+	return OS.has_feature("standalone") or DisplayServer.get_name() == "headless"
 
 
 func _load_manifest() -> void:
 	_cue_manifest.clear()
-	if not FileAccess.file_exists(BGM_MANIFEST_PATH):
+	if not FileAccess.file_exists(MANIFEST_PATH):
 		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(BGM_MANIFEST_PATH))
+	var source := FileAccess.get_file_as_string(MANIFEST_PATH)
+	var parsed: Variant = JSON.parse_string(source)
 	if parsed is Dictionary:
 		_cue_manifest = parsed
 
 
-func _resolve_stream(track_id: String) -> AudioStream:
-	var normalized_track := track_id.strip_edges()
-	if normalized_track.is_empty():
-		return null
-	var asset_path := normalized_track
-	if _cue_manifest.has(normalized_track):
-		var entry_variant: Variant = _cue_manifest.get(normalized_track, {})
-		if entry_variant is Dictionary:
-			asset_path = String((entry_variant as Dictionary).get("asset_path", normalized_track))
+func _ensure_players() -> void:
+	for layer_name in LAYER_IDS:
+		if _players.has(layer_name):
+			continue
+		var player := _create_player("%sLayerPlayer" % layer_name.capitalize())
+		add_child(player)
+		_players[layer_name] = player
+	if _base_transition_player == null:
+		_base_transition_player = _create_player("BaseTransitionPlayer")
+		add_child(_base_transition_player)
+
+
+func _create_player(player_name: String) -> AudioStreamPlayer:
+	var player := AudioStreamPlayer.new()
+	player.name = player_name
+	player.bus = &"Master"
+	player.autoplay = false
+	player.volume_db = SILENT_VOLUME_DB
+	return player
+
+
+func _assign_stub_streams() -> void:
+	var stub_stream := _resolve_stream(STUB_LAYER_ASSET_PATH)
+	if stub_stream == null:
+		return
+	for layer_name in ["drums", "strings", "vocal", "ambience", "spotlight"]:
+		var player := _get_player(layer_name)
+		if player == null:
+			continue
+		player.stream = stub_stream
+		_layer_asset_paths[layer_name] = STUB_LAYER_ASSET_PATH
+
+
+func _prepare_layer_for_activation(layer_name: String) -> void:
+	var player := _get_player(layer_name)
+	if player == null:
+		return
+	if layer_name == "base":
+		if player.stream == null:
+			if _current_cue_id.is_empty():
+				play_cue(DEFAULT_CUE_ID)
+			else:
+				var stream := _resolve_stream_for_cue(_current_cue_id)
+				if stream != null:
+					player.stream = stream
+	else:
+		if player.stream == null:
+			var stub_stream := _resolve_stream(STUB_LAYER_ASSET_PATH)
+			if stub_stream != null:
+				player.stream = stub_stream
+				_layer_asset_paths[layer_name] = STUB_LAYER_ASSET_PATH
+	if not _should_skip_playback() and player.stream != null and not player.playing:
+		player.play()
+
+
+func _set_layer_target(layer_name: String, target: float, fade_time: float) -> void:
+	_layer_targets[layer_name] = clampf(target, 0.0, 1.0)
+	_fade_layer_to(layer_name, float(_layer_targets[layer_name]), fade_time)
+
+
+func _fade_layer_to(layer_name: String, target: float, fade_time: float) -> void:
+	var existing_tween: Tween = _layer_tweens.get(layer_name, null)
+	if existing_tween != null and is_instance_valid(existing_tween):
+		existing_tween.kill()
+	if fade_time <= 0.0:
+		_apply_layer_volume(target, layer_name)
+		if target <= 0.0:
+			_stop_layer_player_if_finished(layer_name)
+		return
+	var start_level := float(_layer_levels.get(layer_name, 0.0))
+	var tween := create_tween()
+	_layer_tweens[layer_name] = tween
+	tween.tween_method(Callable(self, "_apply_layer_volume").bind(layer_name), start_level, target, fade_time)
+	tween.tween_callback(Callable(self, "_stop_layer_player_if_finished").bind(layer_name))
+
+
+func _apply_layer_volume(value: float, layer_name: String) -> void:
+	var clamped_value := clampf(value, 0.0, 1.0)
+	_layer_levels[layer_name] = clamped_value
+	var player := _get_player(layer_name)
+	if player == null:
+		return
+	player.volume_db = SILENT_VOLUME_DB if clamped_value <= 0.0001 else linear_to_db(clamped_value)
+
+
+func _apply_base_crossfade_level(value: float) -> void:
+	_apply_layer_volume(value, "base")
+
+
+func _apply_transition_crossfade_level(value: float) -> void:
+	if _base_transition_player == null:
+		return
+	var clamped_value := clampf(value, 0.0, 1.0)
+	_base_transition_player.volume_db = SILENT_VOLUME_DB if clamped_value <= 0.0001 else linear_to_db(clamped_value)
+
+
+func _complete_base_crossfade() -> void:
+	var base_player := _get_player("base")
+	if base_player == null or _base_transition_player == null:
+		return
+	base_player.stop()
+	base_player.stream = null
+	base_player.stream = _base_transition_player.stream
+	if not _should_skip_playback() and base_player.stream != null:
+		base_player.play()
+	_apply_layer_volume(1.0, "base")
+	_layer_targets["base"] = 1.0
+	_base_transition_player.stop()
+	_base_transition_player.stream = null
+	_base_transition_player.volume_db = SILENT_VOLUME_DB
+	_base_crossfade_tween = null
+
+
+func _stop_base_crossfade() -> void:
+	if _base_crossfade_tween != null and is_instance_valid(_base_crossfade_tween):
+		_base_crossfade_tween.kill()
+	_base_crossfade_tween = null
+	if _base_transition_player != null and is_instance_valid(_base_transition_player):
+		_base_transition_player.stop()
+		_base_transition_player.stream = null
+		_base_transition_player.volume_db = SILENT_VOLUME_DB
+
+
+func _stop_all_players() -> void:
+	for layer_name in LAYER_IDS:
+		_stop_layer_player_if_finished(layer_name)
+	if _base_transition_player != null and is_instance_valid(_base_transition_player):
+		_base_transition_player.stop()
+
+
+func _stop_layer_player_if_finished(layer_name: String) -> void:
+	if float(_layer_targets.get(layer_name, 0.0)) > 0.01 or float(_layer_levels.get(layer_name, 0.0)) > 0.01:
+		return
+	var player := _get_player(layer_name)
+	if player == null:
+		return
+	player.stop()
+
+
+func _get_player(layer_name: String) -> AudioStreamPlayer:
+	return _players.get(layer_name, null) as AudioStreamPlayer
+
+
+func _normalize_layer_name(layer_name: String) -> String:
+	var normalized := layer_name.strip_edges().to_lower()
+	match normalized:
+		"base", "base_melody":
+			return "base"
+		"drums", "drums_percussion":
+			return "drums"
+		"strings", "strings_emotion":
+			return "strings"
+		"vocal", "vocal_chorus":
+			return "vocal"
+		"ambience", "ambience_nature", "nature_ambience":
+			return "ambience"
+		"spotlight":
+			return "spotlight"
+		_:
+			return ""
+
+
+func _resolve_cue_asset_path(cue_id: String) -> String:
+	var entry_variant: Variant = _cue_manifest.get(cue_id, {})
+	if not (entry_variant is Dictionary):
+		return ""
+	var entry: Dictionary = entry_variant
+	return String(entry.get("asset_path", ""))
+
+
+func _resolve_stream_for_cue(cue_id: String) -> AudioStream:
+	var asset_path := _resolve_cue_asset_path(cue_id)
 	if asset_path.is_empty():
 		return null
-	if asset_path.ends_with(".wav"):
-		var absolute_path := ProjectSettings.globalize_path(asset_path)
-		if FileAccess.file_exists(absolute_path):
-			var wav_stream := AudioStreamWAV.load_from_file(absolute_path)
-			if wav_stream != null:
-				wav_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			return wav_stream
-	if asset_path.ends_with(".ogg"):
-		var absolute_ogg_path := ProjectSettings.globalize_path(asset_path)
-		if FileAccess.file_exists(absolute_ogg_path):
-			var ogg_stream := AudioStreamOggVorbis.load_from_file(absolute_ogg_path)
-			if ogg_stream != null:
-				ogg_stream.loop = true
-			return ogg_stream
-	return load(asset_path) as AudioStream
+	return _resolve_stream(asset_path)
+
+
+func _resolve_stream(asset_path: String) -> AudioStream:
+	if asset_path.is_empty():
+		return null
+	if _stream_cache.has(asset_path):
+		return _stream_cache[asset_path] as AudioStream
+	var absolute_path := ProjectSettings.globalize_path(asset_path)
+	var stream: AudioStream = null
+	if asset_path.ends_with(".wav") and FileAccess.file_exists(absolute_path):
+		stream = AudioStreamWAV.load_from_file(absolute_path)
+	elif asset_path.ends_with(".ogg") and FileAccess.file_exists(absolute_path):
+		stream = AudioStreamOggVorbis.load_from_file(absolute_path)
+	else:
+		stream = load(asset_path) as AudioStream
+	if stream == null:
+		return null
+	if stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	elif stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+	_stream_cache[asset_path] = stream
+	return stream

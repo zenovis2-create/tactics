@@ -84,7 +84,7 @@ func _ready() -> void:
         defeat_screen.setup_save_service(_save_service)
 
     # CampaignController 셋업
-    campaign_controller.setup(battle_controller, campaign_panel)
+    campaign_controller.setup(battle_controller, campaign_panel, bgm_router)
     if not campaign_controller.mode_changed.is_connected(_on_campaign_mode_changed):
         campaign_controller.mode_changed.connect(_on_campaign_mode_changed)
 
@@ -244,7 +244,7 @@ func _on_battle_finished_main(result: StringName, _stage_id: StringName) -> void
         if campaign_controller != null and String(campaign_controller.get_state_snapshot().get("mode", "")) == "defeat":
             return
         if bgm_router != null:
-            bgm_router.play_cue("bgm_cutscene_ch01", true)
+            bgm_router.crossfade_to_cue("bgm_cutscene_ch01", 2.0)
         var rounds: int = battle_controller.round_index if battle_controller != null else 0
         defeat_screen.show_defeat(rounds)
 
@@ -280,13 +280,13 @@ func _on_campaign_mode_changed(mode: String) -> void:
         "battle":
             _play_battle_bgm()
         "camp":
-            bgm_router.play_cue("bgm_camp")
+            bgm_router.crossfade_to_cue("bgm_camp", 2.0)
         "defeat":
             bgm_router.play_cue("bgm_cutscene_ch01")
         "cutscene":
-            bgm_router.play_cue("bgm_cutscene_ch01")
+            bgm_router.crossfade_to_cue("bgm_cutscene_ch01", 2.0)
         "chapter_intro":
-            bgm_router.play_cue("bgm_title")
+            bgm_router.crossfade_to_cue("bgm_title", 2.0)
         _:
             pass
 

@@ -10,6 +10,9 @@ const FAIL := "❌ FAIL"
 const ScenarioDataRef = preload("res://scripts/data/scenario.gd")
 const ScenarioEditorRef = preload("res://scripts/editor/scenario_editor.gd")
 const ScenarioLoaderRef = preload("res://scripts/dev/scenario_loader.gd")
+const STAGE_PICKER_PATH := "res://scripts/editor/scenario_stage_picker.gd"
+const DIALOGUE_EDITOR_PATH := "res://scripts/editor/scenario_dialogue_editor.gd"
+const SPAWN_EDITOR_PATH := "res://scripts/editor/scenario_spawn_editor.gd"
 
 var tests_run: int = 0
 var tests_passed: int = 0
@@ -29,6 +32,10 @@ func run_tests() -> void:
 	test_scenario_loader_list()
 	test_scenario_loader_import_export()
 	test_steam_workshop_stub()
+	test_stage_picker_creation()
+	test_stage_picker_signals()
+	test_dialogue_editor_signals()
+	test_spawn_editor_validation()
 
 func verify(condition: bool, test_name: String, detail: String = "") -> void:
 	tests_run += 1
@@ -220,6 +227,135 @@ func test_steam_workshop_stub() -> void:
 	verify(workshop_list is Array, "list_workshop_scenarios() returns Array")
 	verify(workshop_list.is_empty() == true, "list_workshop_senarios() stub returns empty list")
 	print("  └─ Steam Workshop stub methods: OK")
+
+func test_stage_picker_creation() -> void:
+	var picker_script: Script = load(STAGE_PICKER_PATH)
+	verify(picker_script != null, "ScenarioStagePicker script loads")
+	if picker_script == null:
+		return
+
+	var picker = picker_script.new()
+	root.add_child(picker)
+	var stages: Array[ScenarioDataRef.ScenarioStage] = [
+		_make_stage(&"stage_alpha", "Alpha Entry", 12),
+		_make_stage(&"stage_beta", "Beta Clash", 18)
+	]
+	picker.open(stages, 1)
+
+	var stage_items: VBoxContainer = picker.get_node_or_null("Panel/Margin/Content/VBox/StageList/StageItems")
+	var add_button: Button = picker.get_node_or_null("Panel/Margin/Content/VBox/ButtonRow/AddButton")
+	var cancel_button: Button = picker.get_node_or_null("Panel/Margin/Content/VBox/CancelButton")
+	verify(stage_items != null, "ScenarioStagePicker builds stage list container")
+	verify(stage_items.get_child_count() == 2, "ScenarioStagePicker creates one button per stage")
+	verify(add_button != null and add_button.text == "+ Add Stage", "ScenarioStagePicker add button is present")
+	verify(cancel_button != null and cancel_button.text == "Cancel", "ScenarioStagePicker cancel button is present")
+	verify(picker.get_selected_index() == 1, "ScenarioStagePicker tracks selected index")
+	if stage_items != null and stage_items.get_child_count() > 0:
+		var first_button: Button = stage_items.get_child(0)
+		verify(first_button.text.contains("Alpha Entry"), "ScenarioStagePicker button shows stage title")
+		verify(first_button.text.contains("12"), "ScenarioStagePicker button shows turn limit preview")
+	picker.queue_free()
+
+func test_stage_picker_signals() -> void:
+	var picker_script: Script = load(STAGE_PICKER_PATH)
+	verify(picker_script != null, "ScenarioStagePicker script available for signal test")
+	if picker_script == null:
+		return
+
+	var picker = picker_script.new()
+	root.add_child(picker)
+	var stages: Array[ScenarioDataRef.ScenarioStage] = [_make_stage(&"stage_signal", "Signal Stage", 9)]
+	picker.open(stages, -1)
+	var signal_state := {
+		"selected_index": -1,
+		"added_index": -1,
+		"cancelled": false
+	}
+	picker.stage_selected.connect(func(index: int) -> void:
+		signal_state["selected_index"] = index
+	)
+	picker.stage_added.connect(func(index: int) -> void:
+		signal_state["added_index"] = index
+	)
+	picker.cancelled.connect(func() -> void:
+		signal_state["cancelled"] = true
+	)
+	picker._on_stage_pressed(0)
+	picker._on_add_pressed()
+	picker._on_cancel_pressed()
+
+	verify(signal_state["selected_index"] == 0, "ScenarioStagePicker emits stage_selected when a stage is chosen")
+	verify(signal_state["added_index"] == 1, "ScenarioStagePicker emits stage_added with the new stage index")
+	verify(signal_state["cancelled"] == true, "ScenarioStagePicker emits cancelled when cancel is pressed")
+	picker.queue_free()
+
+func test_dialogue_editor_signals() -> void:
+	var dialogue_script: Script = load(DIALOGUE_EDITOR_PATH)
+	verify(dialogue_script != null, "ScenarioDialogueEditor script loads")
+	if dialogue_script == null:
+		return
+
+	var editor = dialogue_script.new()
+	root.add_child(editor)
+	editor.open(&"stage_dialogue", {"briefing": "Initial briefing copy for the stage."})
+	var signal_state := {
+		"saved_catalog": {},
+		"cancelled": false
+	}
+	editor.dialogue_saved.connect(func(catalog: Dictionary) -> void:
+		signal_state["saved_catalog"] = catalog.duplicate(true)
+	)
+	editor.edit_cancelled.connect(func() -> void:
+		signal_state["cancelled"] = true
+	)
+
+	var stage_label: Label = editor.get_node_or_null("Panel/Margin/Content/VBox/HeaderRow/StageLabel")
+	var entries: VBoxContainer = editor.get_node_or_null("Panel/Margin/Content/VBox/DialogueList/DialogueItems")
+	verify(stage_label != null and stage_label.text.contains("stage_dialogue"), "ScenarioDialogueEditor shows the active stage id")
+	verify(entries != null and entries.get_child_count() == 1, "ScenarioDialogueEditor creates an entry for each dialogue key")
+	editor._set_entry_text("briefing", "Updated dialogue text that should be saved.")
+	editor._on_save_pressed()
+	editor._on_cancel_pressed()
+	verify(signal_state["saved_catalog"].get("briefing", "") == "Updated dialogue text that should be saved.", "ScenarioDialogueEditor emits dialogue_saved with the edited catalog")
+	verify(signal_state["cancelled"] == true, "ScenarioDialogueEditor emits edit_cancelled on cancel")
+	editor.queue_free()
+
+func test_spawn_editor_validation() -> void:
+	var spawn_script: Script = load(SPAWN_EDITOR_PATH)
+	verify(spawn_script != null, "ScenarioSpawnEditor script loads")
+	if spawn_script == null:
+		return
+
+	var editor = spawn_script.new()
+	root.add_child(editor)
+	var empty_spawns: Array[Vector2i] = []
+	editor.open(empty_spawns, empty_spawns, empty_spawns, 4, 4)
+	verify(editor.get_ally_spawns().is_empty(), "ScenarioSpawnEditor starts with no ally spawns")
+	verify(editor._try_add_entry("ally", Vector2i(5, 1)) == false, "ScenarioSpawnEditor rejects out-of-bounds spawns")
+	verify(editor.get_ally_spawns().is_empty(), "Rejected out-of-bounds spawn is not stored")
+	verify(editor._try_add_entry("ally", Vector2i(1, 1)) == true, "ScenarioSpawnEditor accepts in-bounds ally spawns")
+	verify(editor._try_add_entry("enemy", Vector2i(2, 2)) == true, "ScenarioSpawnEditor accepts in-bounds enemy spawns")
+	verify(editor._try_add_entry("blocked", Vector2i(3, 3)) == true, "ScenarioSpawnEditor accepts in-bounds blocked cells")
+	var signal_state := {"saved_payload": {}}
+	editor.spawns_saved.connect(func(ally_spawns: Array, enemy_spawns: Array, blocked_cells: Array) -> void:
+		signal_state["saved_payload"] = {
+			"ally": ally_spawns.duplicate(),
+			"enemy": enemy_spawns.duplicate(),
+			"blocked": blocked_cells.duplicate()
+		}
+	)
+	editor._on_save_pressed()
+	verify(signal_state["saved_payload"].get("ally", []).size() == 1, "ScenarioSpawnEditor emits saved ally spawns")
+	verify(signal_state["saved_payload"].get("enemy", []).size() == 1, "ScenarioSpawnEditor emits saved enemy spawns")
+	verify(signal_state["saved_payload"].get("blocked", []).size() == 1, "ScenarioSpawnEditor emits saved blocked cells")
+	editor.queue_free()
+
+func _make_stage(stage_id: StringName, title: String, turn_limit: int) -> ScenarioDataRef.ScenarioStage:
+	var stage := ScenarioDataRef.ScenarioStage.new()
+	stage.stage_id = stage_id
+	stage.stage_title = title
+	stage.turn_limit = turn_limit
+	return stage
 
 func print_results() -> void:
 	print("\n=== Results ===")

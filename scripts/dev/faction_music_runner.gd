@@ -8,6 +8,7 @@ const PASS := "✅ PASS"
 const FAIL := "❌ FAIL"
 
 const FactionMusicRef = preload("res://scripts/audio/faction_music.gd")
+const BgmRouterRef = preload("res://scripts/audio/bgm_router.gd")
 
 var tests_run: int = 0
 var tests_passed: int = 0
@@ -15,7 +16,7 @@ var tests_failed: int = 0
 
 func _initialize() -> void:
 	print("\n=== Faction Music Runner ===\n")
-	run_tests()
+	await run_tests()
 	print_results()
 	quit(0 if tests_failed == 0 else 1)
 
@@ -28,6 +29,10 @@ func run_tests() -> void:
 	test_faction_lookup()
 	test_get_faction_info()
 	test_volume_control()
+	await test_crossfade_to_cue()
+	await test_crossfade_different_cues()
+	await test_crossfade_same_cue_noop()
+	await test_crossfade_zero_duration_hard_switch()
 
 func verify(condition: bool, test_name: String, detail: String = "") -> void:
 	tests_run += 1
@@ -171,6 +176,88 @@ func test_volume_control() -> void:
 
 	fm.free()
 	print("  └─ Volume control: OK")
+
+func _await_frames(count: int = 2) -> void:
+	for _index in count:
+		await process_frame
+
+func _create_bgm_router() -> Node:
+	var router: Node = BgmRouterRef.new()
+	root.add_child(router)
+	await _await_frames()
+	return router
+
+func _free_node_later(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	node.queue_free()
+	await _await_frames()
+
+func test_crossfade_to_cue() -> void:
+	var router: Node = await _create_bgm_router()
+	verify(router != null, "BgmRouter instantiates for crossfade tests")
+	verify(router.has_method("crossfade_to_cue"), "BgmRouter exposes crossfade_to_cue()")
+	if router == null or not router.has_method("crossfade_to_cue"):
+		await _free_node_later(router)
+		return
+	router.crossfade_to_cue("bgm_camp", 2.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_camp", "crossfade_to_cue sets current cue")
+	verify(router.has_method("crossfade_to_cue_immediate"), "BgmRouter exposes crossfade_to_cue_immediate()")
+	router.crossfade_to_cue_immediate("bgm_title", 2.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_title", "crossfade_to_cue_immediate updates current cue")
+	await _free_node_later(router)
+	print("  └─ BgmRouter crossfade API: OK")
+
+func test_crossfade_different_cues() -> void:
+	var router: Node = await _create_bgm_router()
+	if router == null or not router.has_method("crossfade_to_cue"):
+		verify(false, "crossfade_to_cue supports different cue transitions")
+		await _free_node_later(router)
+		return
+	router.play_cue("bgm_camp")
+	await _await_frames()
+	var child_count_before: int = router.get_child_count()
+	router.crossfade_to_cue("bgm_cutscene_ch01", 1.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_cutscene_ch01", "crossfade_to_cue switches to a different cue")
+	verify(router.get_child_count() >= child_count_before, "crossfade transition keeps router stable during cue swap")
+	await _free_node_later(router)
+	print("  └─ BgmRouter different-cue crossfade: OK")
+
+func test_crossfade_same_cue_noop() -> void:
+	var router: Node = await _create_bgm_router()
+	if router == null or not router.has_method("crossfade_to_cue"):
+		verify(false, "crossfade_to_cue no-ops on same cue")
+		await _free_node_later(router)
+		return
+	router.play_cue("bgm_camp")
+	await _await_frames()
+	var child_count_before: int = router.get_child_count()
+	router.crossfade_to_cue("bgm_camp", 2.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_camp", "crossfade_to_cue keeps same cue when already active")
+	verify(router.get_child_count() == child_count_before, "crossfade_to_cue does not duplicate players for same cue")
+	await _free_node_later(router)
+	print("  └─ BgmRouter same-cue crossfade: OK")
+
+func test_crossfade_zero_duration_hard_switch() -> void:
+	var router: Node = await _create_bgm_router()
+	if router == null or not router.has_method("crossfade_to_cue"):
+		verify(false, "crossfade_to_cue falls back to hard switch at zero duration")
+		await _free_node_later(router)
+		return
+	router.play_cue("bgm_camp")
+	await _await_frames()
+	router.crossfade_to_cue("bgm_title", 0.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_title", "crossfade_to_cue(0) uses hard switch semantics")
+	router.crossfade_to_cue_immediate("bgm_battle_default", 0.0)
+	await _await_frames()
+	verify(router.get_current_cue_id() == "bgm_battle_default", "crossfade_to_cue_immediate(0) restarts via hard switch")
+	await _free_node_later(router)
+	print("  └─ BgmRouter zero-duration fallback: OK")
 
 func print_results() -> void:
 	print("\n=== Results ===")

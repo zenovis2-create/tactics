@@ -18,6 +18,7 @@ const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
+const BgmRouter = preload("res://scripts/audio/bgm_router.gd")
 
 const CHAPTER_CH01: StringName = CampaignChapterRegistry.CHAPTER_CH01
 const CHAPTER_CH02: StringName = CampaignChapterRegistry.CHAPTER_CH02
@@ -899,6 +900,7 @@ var _battle_controller: BattleController
 var _campaign_panel: CampaignPanel
 var _camp_controller: CampController
 var _save_service: SaveService
+var _bgm_router: BgmRouter
 var _active_mode: String = CampaignState.MODE_BATTLE
 var _active_chapter_id: StringName = CHAPTER_CH01
 var _active_stage_index: int = 0
@@ -928,9 +930,10 @@ var _last_memorial_scene: Dictionary = {}
 var _suppress_s_rank_memorial: bool = false
 var _active_support_conversation: Dictionary = {}
 
-func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -> void:
+func setup(battle_controller: BattleController, campaign_panel: CampaignPanel, bgm_router: BgmRouter = null) -> void:
     _battle_controller = battle_controller
     _campaign_panel = campaign_panel
+    _bgm_router = bgm_router
     _camp_controller = CampController.new()
     add_child(_camp_controller)
     _save_service = SaveService.new()
@@ -1567,7 +1570,7 @@ func _on_memorial_scene_finished() -> void:
         _enter_camp_state()
 
 func _enter_camp_state() -> void:
-    _active_mode = CampaignState.MODE_CAMP
+    enter_area_with_music(CampaignState.MODE_CAMP, "bgm_camp", 2.0)
     _post_defeat_destination = ""
     if _camp_controller != null:
         var stage_result: Dictionary = {}
@@ -1588,6 +1591,12 @@ func _enter_camp_state() -> void:
         _build_camp_summary(),
         "Next Battle"
     )
+
+func enter_area_with_music(area_name: String, music_cue: String, fade_time: float = 2.0) -> void:
+    _active_mode = area_name
+    if _bgm_router == null:
+        return
+    _bgm_router.crossfade_to_cue(music_cue, fade_time)
 
 func _autosave_progression() -> void:
     if _save_service == null or _battle_controller == null:
