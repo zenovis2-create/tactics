@@ -34,8 +34,8 @@ Vector2i(6, 4): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Break the black-hound route pressure by surveying the moon-scent post and seizing the split-line cache. (0/2)", "One ambush route point is secured. Resolve the remaining black-hound signal. (1/2)", "Black-hound route pressure is broken. The ambush lane is charted. (2/2)")
+interaction_objective_texts = PackedStringArray("Survey the moon-scent post and seize the split-line cache to map the moonlit kill lane. (0/2)", "One ambush control point is secured. Chart the remaining kill-lane route. (1/2)", "The moonlit kill lane is mapped. The descent into the lower ruins is exposed. (2/2)")
 interaction_objective_state_ids = [&"black_hound_route_locked", &"black_hound_route_partial", &"black_hound_route_broken"]
 start_cutscene_id = &"ch08_02_intro"
 clear_cutscene_id = &"ch08_02_outro"
-next_destination_summary = "The ambush line reveals a buried route into the lower ruin."
+next_destination_summary = "The mapped kill lane reveals a buried descent into the lower ruin holding route."

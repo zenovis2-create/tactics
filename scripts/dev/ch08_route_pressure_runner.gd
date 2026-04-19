@@ -10,9 +10,9 @@ const STAGE_CASES := [
 		"stage": CH08_VANISHED_TRAIL,
 		"required_interactions": 2,
 		"objective_texts": [
-			"Trace the hound sign and cut the signal post to collapse the vanished trail forks. (0/2)",
-			"One route-pressure point is resolved. Collapse the remaining fork. (1/2)",
-			"Both route-pressure points are resolved. The vanished trail is narrowed to one lane. (2/2)"
+			"Trace the hound sign and cut the signal post to collapse the false pursuit forks. (0/2)",
+			"One false fork is down. Collapse the remaining pursuit split. (1/2)",
+			"The pursuit forks collapse into one lane. The vanished trail is fixed. (2/2)"
 		],
 		"state_ids": [
 			&"hound_route_split",
@@ -24,28 +24,30 @@ const STAGE_CASES := [
 		"stage": CH08_MOONLIT_AMBUSH,
 		"required_interactions": 2,
 		"objective_texts": [
-			"Read the ambush marker and break the ruin release post to clear the moonlit kill lane. (0/2)",
-			"One route-pressure control is resolved. Clear the remaining ambush control. (1/2)",
-			"Both route-pressure controls are resolved. The moonlit ambush line is broken. (2/2)"
+			"Survey the moon-scent post and seize the split-line cache to map the moonlit kill lane. (0/2)",
+			"One ambush control point is secured. Chart the remaining kill-lane route. (1/2)",
+			"The moonlit kill lane is mapped. The descent into the lower ruins is exposed. (2/2)"
 		],
 		"state_ids": [
-			&"ambush_route_locked",
-			&"ambush_route_partial",
-			&"ambush_route_broken"
+			&"black_hound_route_locked",
+			&"black_hound_route_partial",
+			&"black_hound_route_broken"
 		]
 	},
 	{
 		"stage": CH08_RUIN_VENT,
-		"required_interactions": 2,
+		"required_interactions": 3,
 		"objective_texts": [
-			"Recover the ruin vent map and inspect the holding-cell seal to expose the lower route. (0/2)",
-			"One lower-ruin clue is secured. Find the remaining seal proof. (1/2)",
-			"Both lower-ruin clues are secured. The holding route is confirmed. (2/2)"
+			"Open the vent line, break the holding gate, and seize the cell records to expose the lower-cell route. (0/3)",
+			"One lower-cell control point is secured. Release the remaining ruin controls. (1/3)",
+			"Two lower-cell control points are secured. Seize the last holding record. (2/3)",
+			"The lower cells are exposed. The ruin holding route is charted. (3/3)"
 		],
 		"state_ids": [
-			&"ruin_route_hidden",
-			&"ruin_route_partial",
-			&"ruin_route_confirmed"
+			&"ruin_vent_sealed",
+			&"ruin_vent_partial",
+			&"ruin_vent_pressured",
+			&"ruin_vent_open"
 		]
 	}
 ]

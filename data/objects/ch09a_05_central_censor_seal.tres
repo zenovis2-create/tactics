@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch09a_05_central_censor_seal"
+display_name = "Central Censor Seal"
+object_type = "gate"
+grid_position = Vector2i(4, 2)
+interaction_range = 1
+reward_text = "Central censor seal broken: the purge field loses its anchor over the inner kill lane."
+interaction_text = "Central censor seal broken."

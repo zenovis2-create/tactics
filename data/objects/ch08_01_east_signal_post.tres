@@ -9,5 +9,5 @@ display_name = "East Signal Post"
 object_type = "lever"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
-reward_text = "East signal post cut: the hound route forks collapse into a single tracked lane."
+reward_text = "East signal post cut: the vanished trail collapses into a single pursuit lane."
 interaction_text = "East signal post cut."

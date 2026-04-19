@@ -46,7 +46,7 @@ func _resolve_strike(attacker: UnitActor, defender: UnitActor, skill: SkillData,
     var guard_event := _step_guard_calc(attacker, defender, skill, context)
     trace.append(guard_event)
 
-    var damage_event := _step_damage_apply(defender, guard_event)
+    var damage_event := _step_damage_apply(defender, guard_event, context)
     trace.append(damage_event)
 
     var status_event := _step_status_apply(attacker, defender, skill)
@@ -153,11 +153,17 @@ func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData
         "damage": damage
     }
 
-func _step_damage_apply(defender: UnitActor, guard_event: Dictionary) -> Dictionary:
+func _step_damage_apply(defender: UnitActor, guard_event: Dictionary, context: Dictionary = {}) -> Dictionary:
     var hp_before: int = defender.current_hp
     var damage: int = int(guard_event.get("damage", 0))
-
-    defender.apply_damage(damage)
+    var minimum_remaining_hp: int = max(0, int(context.get("story_retreat_min_hp", 0)))
+    if minimum_remaining_hp > 0 and hp_before - damage <= minimum_remaining_hp:
+        defender.current_hp = max(minimum_remaining_hp, hp_before - damage)
+        defender._refresh_visuals()
+        defender._play_damage_flash()
+        defender.show_damage(damage, &"damage")
+    else:
+        defender.apply_damage(damage)
 
     return {
         "step": STEP_DAMAGE_APPLY,

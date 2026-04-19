@@ -33,6 +33,7 @@ func _run() -> void:
     if not _assert_trust_average(svc): return
     if not _assert_support_attack_bond_gate(svc): return
     if not await _assert_support_attack_feedback(): return
+    if not await _assert_damage_share_feedback(): return
     if not _assert_name_anchor_eligible(svc): return
     if not _assert_snapshot_keys(svc): return
     if not _assert_event_log(svc): return
@@ -166,6 +167,53 @@ func _assert_support_attack_feedback() -> bool:
     if result_body.find("Support Bond: 3") == -1:
         return _fail("Battle result surface should expose the support bond level.")
 
+    battle.queue_free()
+    return true
+
+func _assert_damage_share_feedback() -> bool:
+    var battle = BATTLE_SCENE.instantiate()
+    root.add_child(battle)
+    await process_frame
+    await process_frame
+
+    var stage := StageData.new()
+    stage.stage_id = &"damage_share_contract_stage"
+    stage.stage_title = "Damage Share Contract"
+    stage.grid_size = Vector2i(4, 4)
+    stage.cell_size = Vector2i(64, 64)
+    stage.win_condition = &"defeat_all_enemies"
+    stage.ally_units = [
+        _make_unit_data(&"ally_rian", "Rian", "ally", 10, 2, 0, 3, 1),
+        _make_unit_data(&"ally_serin", "Serin", "ally", 10, 2, 0, 3, 1)
+    ]
+    stage.enemy_units = [
+        _make_unit_data(&"enemy_raider", "Raider", "enemy", 10, 4, 0, 3, 1)
+    ]
+    stage.ally_spawns = [Vector2i(1, 1), Vector2i(1, 2)]
+    stage.enemy_spawns = [Vector2i(2, 1)]
+
+    battle.set_stage(stage)
+    await process_frame
+    await process_frame
+
+    battle.bond_service.reset()
+    battle.bond_service.apply_bond_delta(&"ally_rian", 5, "damage_share_contract")
+    battle.bond_service.apply_bond_delta(&"ally_serin", 5, "damage_share_contract")
+
+    var defender = battle.ally_units[0]
+    var sharer = battle.ally_units[1]
+    var attacker = battle.enemy_units[0]
+    battle._resolve_attack(attacker, defender)
+    await process_frame
+
+    if defender.current_hp != 8:
+        return _fail("Damage share should reduce the target hit from 4 to 2 net damage.")
+    if sharer.current_hp != 8:
+        return _fail("Damage share should redirect 2 damage to the adjacent bond-5 ally.")
+    if battle.hud.transition_reason_label.text.find("Damage Shared") == -1:
+        return _fail("Damage share should expose a dedicated transition message.")
+    if battle.hud.transition_reason_label.text.find("Bond 5") == -1:
+        return _fail("Damage share transition message should expose the bond threshold.")
     battle.queue_free()
     return true
 

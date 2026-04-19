@@ -9,5 +9,5 @@ display_name = "East Control Brand"
 object_type = "altar"
 grid_position = Vector2i(8, 4)
 interaction_range = 1
-reward_text = "East control brand erased: the final black-mark signal route opens toward Lete's ground."
+reward_text = "East control brand erased: the final black-mark route opens straight into Lete's ground."
 interaction_text = "East control brand erased."

@@ -5,7 +5,7 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch09a_04_central_officer_release_point.tres" id="8_object_c"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -30,9 +30,16 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
-interactive_objects = [ExtResource("6_object_a")]
-win_condition = &"defeat_all_enemies"
+interactive_objects = [ExtResource("8_object_c")]
+win_condition = &"rescue_quota"
 loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("Secure the central lift, then hold it through the next round. (0/1)", "The central lift is secured. Hold until the next round begins. (1/2)", "The central lift held through the counterpush. Varten's inner censor line is exposed. (2/2)")
+interaction_objective_state_ids = [&"central_lift_unsecured", &"central_lift_holding", &"central_lift_secured"]
+rescue_objective_id = &"central_lift_access"
+rescue_objective_required_count = 1
+rescue_objective_object_ids = [&"ch09a_04_central_officer_release_point"]
+hold_objective_id = &"central_lift_hold"
+hold_objective_required_turns = 1
 start_cutscene_id = &"ch09a_04_intro"
 clear_cutscene_id = &"ch09a_04_outro"
-next_destination_summary = "The last barrier before the root access line is the censor's spearhead."
+next_destination_summary = "Securing the central lift opens Varten's final censor line at the central citadel approach."

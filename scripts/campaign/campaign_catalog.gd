@@ -17,7 +17,10 @@ const PARTY_ROSTER_ORDER: Array[StringName] = [
     &"ally_tia",
     &"ally_enoch",
     &"ally_karl",
-    &"ally_noah"
+    &"ally_noah",
+    &"ally_lete",
+    &"ally_mira",
+    &"ally_melkion_ally"
 ]
 
 const UNIT_BY_ID := {
@@ -27,7 +30,16 @@ const UNIT_BY_ID := {
     &"ally_tia": preload("res://data/units/ally_tia.tres"),
     &"ally_enoch": preload("res://data/units/ally_enoch.tres"),
     &"ally_karl": preload("res://data/units/ally_karl.tres"),
-    &"ally_noah": preload("res://data/units/ally_noah.tres")
+    &"ally_noah": preload("res://data/units/ally_noah.tres"),
+    &"ally_lete": preload("res://data/units/ally_lete.tres"),
+    &"ally_mira": preload("res://data/units/ally_mira.tres"),
+    &"ally_melkion_ally": preload("res://data/units/ally_melkion_ally.tres")
+}
+
+const UNIT_METADATA_BY_ID := {
+    &"ally_lete": {"is_hidden_recruit": true},
+    &"ally_mira": {"is_hidden_recruit": true},
+    &"ally_melkion_ally": {"is_hidden_recruit": true}
 }
 
 const ACCESSORY_BY_ID := {
@@ -114,6 +126,10 @@ static func get_party_roster_order() -> Array[StringName]:
 
 static func get_unit_data(unit_id: StringName) -> UnitData:
     return UNIT_BY_ID.get(unit_id, null) as UnitData
+
+static func is_hidden_recruit(unit_id: StringName) -> bool:
+    var metadata: Dictionary = UNIT_METADATA_BY_ID.get(unit_id, {})
+    return bool(metadata.get("is_hidden_recruit", false))
 
 static func get_accessory_data(accessory_id: StringName) -> AccessoryData:
     return ACCESSORY_BY_ID.get(accessory_id, null) as AccessoryData

@@ -2,6 +2,7 @@ class_name BattleController
 extends Node2D
 
 signal battle_finished(result: StringName, stage_id: StringName)
+signal battle_defeat(stage_id: StringName, payload: Dictionary)
 
 const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 const UnitActor = preload("res://scripts/battle/unit_actor.gd")
@@ -27,6 +28,8 @@ const RewardService = preload("res://scripts/battle/reward_service.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BondService = preload("res://scripts/battle/bond_service.gd")
+const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
+const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
 const CH01_STAGE_MEMORY_LOG: Dictionary = {
     &"CH01_05": [
@@ -34,6 +37,19 @@ const CH01_STAGE_MEMORY_LOG: Dictionary = {
     ]
 }
 
+const CH07_05_STAGE_ID: StringName = &"CH07_05"
+const CH08_05_STAGE_ID: StringName = &"CH08_05"
+const CH09B_05_STAGE_ID: StringName = &"CH09B_05"
+const LETE_CH08_05_BOSS_PATTERN: StringName = &"lete_ch08_05"
+const MELKION_FLIP_PHASE: StringName = &"enrage"
+const CH10_FINALE_NAME_CALL_IDS: Array[StringName] = [
+    &"ally_serin",
+    &"ally_bran",
+    &"ally_tia",
+    &"ally_enoch",
+    &"ally_karl",
+    &"ally_noah"
+]
 const CH01_STAGE_EVIDENCE_LOG: Dictionary = {
     &"CH01_05": [
         "flag_evidence_hardren_seal_obtained — Hardren seal recovered; the ash-field command chain can be traced north toward the border evidence trail."
@@ -125,6 +141,7 @@ var reachable_cells: Array = []
 var pending_move_origins: Dictionary = {}
 var battle_reward_log: Array[String] = []
 var last_result_summary: Dictionary = {}
+var last_result: String = ""
 var equipped_accessory_by_unit_id: Dictionary = {}
 var equipped_weapon_by_unit_id: Dictionary = {}
 var equipped_armor_by_unit_id: Dictionary = {}
@@ -135,6 +152,15 @@ var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuse
 var boss_event_history: Array[String] = []
 var boss_phase_by_unit: Dictionary = {}  ## unit instance_id → current phase StringName
 var last_support_attack_details: Dictionary = {}
+var hidden_recruit_state: Dictionary = {}
+var hold_objective_armed: bool = false
+var hold_objective_completed: bool = false
+var hold_objective_round_started: int = -1
+var finale_name_anchor_state: Dictionary = {}
+var finale_name_call_state: Dictionary = {}
+var finale_name_call_lines: Dictionary = {}
+var desperate_wave_context: Dictionary = {}
+var _last_defeated_ally_id: StringName = &""
 
 var current_phase: int = BattlePhase.BATTLE_INIT
 var round_index: int = 1
@@ -182,6 +208,7 @@ func bootstrap_battle() -> void:
     phase_transition_history.clear()
     battle_reward_log.clear()
     last_result_summary.clear()
+    last_result = ""
     boss_marked_target_id = -1
     boss_charge_pending = false
     enemy_attack_bonus_by_unit.clear()
@@ -189,6 +216,14 @@ func bootstrap_battle() -> void:
     boss_event_history.clear()
     boss_phase_by_unit.clear()
     last_support_attack_details.clear()
+    hidden_recruit_state.clear()
+    hold_objective_armed = false
+    hold_objective_completed = false
+    hold_objective_round_started = -1
+    _last_defeated_ally_id = &""
+    _reset_finale_contract_state()
+    if bond_service != null and progression_service != null:
+        bond_service.setup_progression(progression_service.get_data())
 
     _clear_battle_state()
     _spawn_from_stage()
@@ -288,6 +323,7 @@ func _spawn_from_stage() -> void:
     _spawn_group(stage_data.ally_units, stage_data.ally_spawns, "ally", ally_units)
     _spawn_group(stage_data.enemy_units, stage_data.enemy_spawns, "enemy", enemy_units)
     _spawn_interactive_objects(stage_data.interactive_objects)
+    _apply_opening_boss_stealth_state()
 
 func _on_viewport_size_changed() -> void:
     if is_inside_tree() and stage_data != null:
@@ -353,6 +389,17 @@ func _spawn_group(unit_defs: Array, spawn_cells: Array, faction: String, sink: A
 
         units_root.add_child(unit)
         sink.append(unit)
+
+func _apply_opening_boss_stealth_state() -> void:
+    if stage_data == null or stage_data.stage_id != CH08_05_STAGE_ID:
+        return
+
+    for enemy in enemy_units:
+        if not is_instance_valid(enemy) or enemy.unit_data == null:
+            continue
+        if StringName(enemy.unit_data.boss_pattern) != LETE_CH08_05_BOSS_PATTERN:
+            continue
+        enemy.set_stealth_hidden(true)
 
 func _spawn_interactive_objects(objects: Array) -> void:
     for object_data in objects:
@@ -480,7 +527,7 @@ func _commit_player_move(destination: Vector2i) -> void:
         "to": destination
     })
 
-    selected_unit.set_grid_position(destination, stage_data.cell_size)
+    selected_unit.move_to_grid(destination, stage_data.cell_size, 0.2)
     turn_manager.mark_moved(selected_unit, "player_move_committed", {"to": destination})
 
     _refresh_selected_action_options()
@@ -504,6 +551,7 @@ func _complete_selected_unit_action(reason: String) -> void:
         pending_move_origins.erase(acting_unit.get_instance_id())
 
     if is_instance_valid(acting_unit) and not acting_unit.is_defeated():
+        _try_record_live_finale_name_call(acting_unit)
         turn_manager.mark_acted(acting_unit, reason, {"round": round_index})
 
     _clear_selection()
@@ -523,6 +571,8 @@ func _complete_selected_unit_action(reason: String) -> void:
 func _begin_player_phase(reason: String) -> void:
     _transition_to(BattlePhase.PLAYER_PHASE_START, reason, {"round": round_index})
 
+    _update_hold_objective_progress(reason)
+
     turn_manager.begin_phase("ally", ally_units + enemy_units, reason)
     pending_move_origins.clear()
     _refresh_unit_visual_state()
@@ -537,6 +587,8 @@ func _begin_player_phase(reason: String) -> void:
         "ready_units": turn_manager.get_ready_unit_count("ally", ally_units)
     })
     _focus_first_ready_unit_if_any()
+    if _check_battle_end():
+        return
 
 func _end_player_phase(reason: String) -> void:
     _clear_selection()
@@ -643,6 +695,24 @@ func _apply_enemy_action(enemy: UnitActor, action: Dictionary) -> void:
             _play_world_fx("mark_ring.png", marked_target.grid_position, Color(1.0, 0.682353, 0.858824, 0.96), 0.34, 0.9)
         return
 
+    if action_type == "valgar_fortify":
+        var pressured_target = action.get("target", null)
+        if pressured_target != null and is_instance_valid(pressured_target) and not pressured_target.is_defeated():
+            boss_marked_target_id = pressured_target.get_instance_id()
+            boss_charge_pending = true
+            _apply_valgar_fortification(enemy)
+            _record_boss_event("valgar_fortify")
+            _refresh_unit_visual_state()
+            hud.set_transition_reason("valgar_fortify_telegraphed", {
+                "unit": enemy.unit_data.unit_id,
+                "target": pressured_target.unit_data.unit_id,
+                "effect": "pressure_then_charge"
+            })
+            _play_battle_flash(Color(0.85098, 0.670588, 0.352941, 0.18), 0.18)
+            _play_world_fx("mark_ring.png", enemy.grid_position, Color(0.94902, 0.807843, 0.454902, 0.96), 0.38, 1.05)
+            _play_world_fx("mark_ring.png", pressured_target.grid_position, Color(1.0, 0.768627, 0.423529, 0.92), 0.30, 0.88)
+        return
+
     var move_succeeded: bool = false
     if action.has("move_to"):
         var move_to: Vector2i = action["move_to"]
@@ -683,6 +753,9 @@ func _apply_enemy_action(enemy: UnitActor, action: Dictionary) -> void:
 
 func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Dictionary = {}) -> void:
     var attack_context: Dictionary = _build_attack_context(attacker, defender, extra_context)
+    if _should_apply_lete_story_retreat(defender):
+        attack_context["story_retreat_min_hp"] = 1
+        attack_context["allow_counterattack"] = false
 
     var result: Dictionary = combat_service.resolve_attack(attacker, defender, attacker.get_default_skill(), {
         "defense_bonus": attack_context.get("defense_bonus", 0),
@@ -720,7 +793,14 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         "terrain_type": String(stage_data.get_terrain_type(defender.grid_position))
     })
 
-    if bool(result.get("defender_defeated", false)):
+    var damage_share_payload: Dictionary = {}
+    if attacker.faction == "enemy" and defender.faction == "ally" and bond_service != null:
+        damage_share_payload = _apply_damage_share(defender, int(result.get("damage", 0)))
+
+    var lete_retreated: bool = _try_trigger_lete_story_retreat(defender)
+    _try_record_mira_unlock(attacker, defender, result)
+
+    if defender.is_defeated():
         _remove_unit_from_roster(defender)
 
     var counterattack: Dictionary = result.get("counterattack", {})
@@ -736,7 +816,7 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
 
     # 지원 공격: 공격자가 아군이고 인접 동료 중 bond 3+ 있으면 발동
     var support_attack_triggered := false
-    if attacker.faction == "ally" and bond_service != null and is_instance_valid(attacker) and not attacker.is_defeated() and not bool(result.get("defender_defeated", false)):
+    if attacker.faction == "ally" and bond_service != null and is_instance_valid(attacker) and not attacker.is_defeated() and not lete_retreated and not bool(result.get("defender_defeated", false)):
         support_attack_triggered = _try_resolve_support_attack(attacker, defender)
 
     var follow_up_payload := {
@@ -746,8 +826,46 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
     }
     if support_attack_triggered and not last_support_attack_details.is_empty():
         follow_up_payload = last_support_attack_details.duplicate(true)
+    elif not damage_share_payload.is_empty():
+        follow_up_payload = damage_share_payload.duplicate(true)
 
-    _sync_hud_phase("support_attack_resolved" if support_attack_triggered else reason, follow_up_payload)
+    var phase_reason := reason
+    if support_attack_triggered:
+        phase_reason = "support_attack_resolved"
+    elif not damage_share_payload.is_empty():
+        phase_reason = "damage_shared"
+    _sync_hud_phase(phase_reason, follow_up_payload)
+
+func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
+    if total_damage <= 0:
+        return {}
+    var share_result: Dictionary = bond_service.resolve_damage_share(defender, total_damage, ally_units)
+    if bool(share_result.get("target_takes_all", true)):
+        return {}
+
+    var redirected_total: int = 0
+    for share in share_result.get("shared_amounts", []):
+        var unit: UnitActor = share.get("unit", null)
+        var shared_damage: int = int(share.get("shared_damage", 0))
+        if unit == null or not is_instance_valid(unit) or shared_damage <= 0:
+            continue
+        unit.apply_damage(shared_damage)
+        redirected_total += shared_damage
+        if unit.is_defeated():
+            _remove_unit_from_roster(unit)
+
+    if redirected_total > 0:
+        defender.current_hp = mini(defender.unit_data.max_hp, defender.current_hp + redirected_total)
+        defender._refresh_visuals()
+
+    var payload := {
+        "target": defender.unit_data.unit_id,
+        "bond": BondService.MAX_BOND,
+        "share": int(share_result.get("share_per_ally", 0)),
+        "shared_units": int((share_result.get("shared_amounts", []) as Array).size())
+    }
+    hud.set_transition_reason("damage_shared", payload)
+    return payload
 
 func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bool:
     for unit: UnitActor in ally_units:
@@ -808,6 +926,7 @@ func _resolve_interaction(unit: UnitActor, object_actor: InteractiveObjectActor)
         return
 
     var reward_detail: String = _format_interaction_detail(result)
+    _handle_story_interaction_result(result, unit, object_actor)
     var objective_state: Dictionary = get_objective_state_snapshot()
     _record_reward_entry(reward_detail)
     _play_battle_flash(Color(1.0, 0.913725, 0.627451, 0.16), 0.16)
@@ -895,6 +1014,7 @@ func _format_interaction_detail(result: Dictionary) -> String:
 
 func _check_battle_end() -> bool:
     _prune_invalid_units()
+    var objective_state := _get_active_objective_progress()
 
     match String(stage_data.win_condition):
         "resolve_all_interactions":
@@ -911,8 +1031,16 @@ func _check_battle_end() -> bool:
                 _on_battle_victory()
                 battle_finished.emit(&"victory", stage_data.stage_id)
                 return true
+        "rescue_quota":
+            if int(objective_state.get("required_count", 0)) > 0 and bool(objective_state.get("completed", false)):
+                _transition_to(BattlePhase.VICTORY, "rescue_objectives_completed", {"round": round_index})
+                hud.cache_result_text("Victory\nThe required objective anchors were secured.")
+                _on_battle_victory()
+                battle_finished.emit(&"victory", stage_data.stage_id)
+                return true
         _:
             if enemy_units.is_empty():
+                last_result = "victory"
                 _transition_to(BattlePhase.VICTORY, "enemy_team_eliminated", {"round": round_index})
                 hud.cache_result_text("Victory\nAll enemy units are defeated.")
                 _on_battle_victory()
@@ -920,15 +1048,18 @@ func _check_battle_end() -> bool:
                 return true
 
     if ally_units.is_empty():
+        last_result = "defeat"
         _transition_to(BattlePhase.DEFEAT, "ally_team_eliminated", {"round": round_index})
         hud.show_result("Defeat...\nAll ally units are defeated.")
         _on_battle_defeat()
+        battle_defeat.emit(stage_data.stage_id if stage_data != null else &"", _build_battle_defeat_payload())
         battle_finished.emit(&"defeat", stage_data.stage_id)
         return true
 
     return false
 
 func _on_battle_victory() -> void:
+    last_result = "victory"
     var result_summary := {
         "outcome": "victory",
         "title": "Victory",
@@ -947,6 +1078,7 @@ func _on_battle_victory() -> void:
         "supporter_bond_level": 0,
         "burden_delta": 0,
         "trust_delta": 0,
+        "hidden_recruit_state": {},
     }
     var burden_before := 0
     var trust_before := 0
@@ -1003,12 +1135,29 @@ func _on_battle_victory() -> void:
             result_summary["trust_delta"] = after_data.trust - trust_before
             result_summary["recovered_fragment_ids"] = after_data.get_recovered_fragment_ids()
             result_summary["unlocked_command_ids"] = after_data.get_unlocked_command_ids()
+            result_summary["progression_data"] = after_data
     if telemetry_service != null:
         var session_snapshot: Dictionary = telemetry_service.get_session_snapshot()
         var command_usage: Dictionary = session_snapshot.get(TelemetryService.KEY_COMMAND_USAGE, {})
         result_summary["support_attack_count"] = int(command_usage.get("support_attack", 0))
     if not last_support_attack_details.is_empty():
         result_summary["supporter_bond_level"] = int(last_support_attack_details.get("bond", 0))
+    var completed_objectives: Array[String] = []
+    if stage_data != null:
+        var objective_text := stage_data.objective_text.strip_edges()
+        if objective_text.is_empty():
+            objective_text = stage_data.get_display_title()
+        completed_objectives.append(objective_text)
+        result_summary["stage_id"] = String(stage_data.stage_id)
+    result_summary["turn_count"] = round_index
+    result_summary["star_rating"] = _calculate_result_star_rating()
+    result_summary["objective_state"] = get_objective_state_snapshot()
+    result_summary["objectives_completed"] = completed_objectives
+    result_summary["notes"] = "Victory archived in the field record."
+    result_summary["hidden_recruit_state"] = get_hidden_recruit_state_snapshot()
+    var finale_result: Dictionary = _build_finale_result_summary()
+    if not finale_result.is_empty():
+        result_summary["finale_result"] = finale_result
     last_result_summary = result_summary
     if int(last_result_summary.get("support_attack_count", 0)) > 0:
         var victory_support_payload := {
@@ -1024,6 +1173,7 @@ func _on_battle_victory() -> void:
     hud.show_result_screen(last_result_summary)
 
 func _on_battle_defeat() -> void:
+    last_result = "defeat"
     if telemetry_service != null:
         telemetry_service.record_battle_end(&"defeat", round_index)
     if progression_service != null:
@@ -1079,6 +1229,9 @@ func _on_unit_defeated(unit: UnitActor) -> void:
     if telemetry_service != null:
         if unit.faction == "ally":
             telemetry_service.record_ally_death("unit_hp_zero")
+            _last_defeated_ally_id = unit.unit_data.unit_id if unit.unit_data != null else &""
+            if bond_service != null and unit.unit_data != null:
+                bond_service.notify_unit_died(unit.unit_data.unit_id, unit.unit_data.display_name)
         else:
             telemetry_service.record_enemy_death()
     _remove_unit_from_roster(unit)
@@ -1114,6 +1267,9 @@ func _find_unit_at(cell: Vector2i, units: Array) -> UnitActor:
         if is_instance_valid(unit) and not unit.is_defeated() and unit.grid_position == cell:
             return unit
     return null
+
+func _is_hidden_enemy_from_player(unit: UnitActor) -> bool:
+    return unit != null and is_instance_valid(unit) and unit.faction == "enemy" and unit.is_stealth_hidden()
 
 func _find_object_at(cell: Vector2i) -> InteractiveObjectActor:
     for object_actor in interactive_objects:
@@ -1159,6 +1315,9 @@ func _can_selected_unit_attack(defender: UnitActor) -> bool:
     if selected_unit == null or defender == null or not turn_manager.can_unit_act(selected_unit):
         return false
 
+    if _is_hidden_enemy_from_player(defender):
+        return false
+
     return _is_in_attack_range(selected_unit, defender)
 
 func _can_selected_unit_interact(object_actor: InteractiveObjectActor) -> bool:
@@ -1170,7 +1329,7 @@ func _can_selected_unit_interact(object_actor: InteractiveObjectActor) -> bool:
 func _get_attackable_enemy_count(unit: UnitActor) -> int:
     var count: int = 0
     for enemy in enemy_units:
-        if is_instance_valid(enemy) and not enemy.is_defeated() and _is_in_attack_range(unit, enemy):
+        if is_instance_valid(enemy) and not enemy.is_defeated() and not _is_hidden_enemy_from_player(enemy) and _is_in_attack_range(unit, enemy):
             count += 1
     return count
 
@@ -1505,16 +1664,14 @@ func get_party_detail_entries() -> Array[Dictionary]:
     return details
 
 func get_objective_state_snapshot() -> Dictionary:
-    var resolved_object_ids: Array[StringName] = []
-    for object_actor in interactive_objects:
-        if not is_instance_valid(object_actor) or object_actor.object_data == null or not object_actor.is_resolved:
-            continue
-        resolved_object_ids.append(object_actor.object_data.object_id)
-
-    var resolved_count: int = resolved_object_ids.size()
-    var required_count: int = interactive_objects.size()
+    var objective_state := _get_active_objective_progress()
+    var resolved_object_ids: Array[StringName] = objective_state.get("resolved_object_ids", [])
+    var resolved_count: int = int(objective_state.get("resolved_count", 0))
+    var required_count: int = int(objective_state.get("required_count", 0))
 
     return {
+        "objective_type": objective_state.get("objective_type", &""),
+        "objective_id": objective_state.get("objective_id", &""),
         "state_id": _get_objective_state_id(resolved_count, required_count),
         "resolved_interactions": resolved_count,
         "required_interactions": required_count,
@@ -1531,6 +1688,154 @@ func _record_reward_entry(entry_text: String) -> void:
 
 func get_last_result_summary() -> Dictionary:
     return last_result_summary.duplicate(true)
+
+func _calculate_result_star_rating() -> int:
+    if round_index <= 4:
+        return 3
+    if round_index <= 7:
+        return 2
+    return 1
+
+func configure_desperate_wave_battle(context: Dictionary) -> void:
+    desperate_wave_context = context.duplicate(true)
+
+func clear_special_battle_context() -> void:
+    desperate_wave_context.clear()
+
+func get_special_battle_snapshot() -> Dictionary:
+    return {
+        "last_result": last_result,
+        "stage_id": String(stage_data.stage_id) if stage_data != null else "",
+        "desperate_wave_battle_triggered": not desperate_wave_context.is_empty(),
+        "desperate_wave_context": desperate_wave_context.duplicate(true)
+    }
+
+func get_hidden_recruit_state_snapshot() -> Dictionary:
+    return hidden_recruit_state.duplicate(true)
+
+func _build_battle_defeat_payload() -> Dictionary:
+    return {
+        "stage_id": String(stage_data.stage_id) if stage_data != null else "",
+        "round": round_index,
+        "deployed_ally_ids": _get_stage_ally_unit_ids(),
+        "final_ally_unit_id": String(_last_defeated_ally_id),
+        "desperate_wave_context": desperate_wave_context.duplicate(true)
+    }
+
+func _get_stage_ally_unit_ids() -> Array[String]:
+    var unit_ids: Array[String] = []
+    if stage_data == null:
+        return unit_ids
+    for unit_variant in stage_data.ally_units:
+        var unit_data := unit_variant as UnitData
+        if unit_data == null:
+            continue
+        unit_ids.append(String(unit_data.unit_id))
+    return unit_ids
+
+func record_finale_name_anchor_destroyed(anchor_id: StringName) -> void:
+    if not finale_name_anchor_state.has(anchor_id):
+        return
+    finale_name_anchor_state[anchor_id] = false
+
+func record_finale_name_call_fired(companion_id: StringName) -> void:
+    if not _get_required_finale_name_call_ids().has(companion_id):
+        return
+    finale_name_call_state[companion_id] = true
+    finale_name_call_lines[String(companion_id)] = _get_finale_name_call_line(companion_id)
+
+func get_finale_result_snapshot() -> Dictionary:
+    return _build_finale_result_summary().duplicate(true)
+
+func _reset_finale_contract_state() -> void:
+    finale_name_anchor_state.clear()
+    finale_name_call_state.clear()
+    finale_name_call_lines.clear()
+    if stage_data == null:
+        return
+    for anchor_id: StringName in stage_data.finale_name_anchor_ids:
+        finale_name_anchor_state[anchor_id] = true
+    if not _is_ch10_finale_stage() or progression_service == null:
+        return
+    var progression_data = progression_service.get_data()
+    if progression_data == null or not progression_data.free_name_call or CH10_FINALE_NAME_CALL_IDS.is_empty():
+        return
+    finale_name_call_state[CH10_FINALE_NAME_CALL_IDS[0]] = true
+
+func _build_finale_result_summary() -> Dictionary:
+    if stage_data == null or stage_data.finale_name_anchor_ids.is_empty():
+        return {}
+
+    var remaining_anchor_ids: Array[String] = []
+    for anchor_id: StringName in stage_data.finale_name_anchor_ids:
+        if bool(finale_name_anchor_state.get(anchor_id, true)):
+            remaining_anchor_ids.append(String(anchor_id))
+
+    var required_name_call_ids: Array[StringName] = _get_required_finale_name_call_ids()
+    var fired_name_call_ids: Array[String] = []
+    for companion_id: StringName in required_name_call_ids:
+        if bool(finale_name_call_state.get(companion_id, false)):
+            fired_name_call_ids.append(String(companion_id))
+
+    var minimum_anchor_count: int = max(stage_data.finale_minimum_name_anchors, 0)
+    return {
+        "name_anchor_total": stage_data.finale_name_anchor_ids.size(),
+        "name_anchors_remaining": remaining_anchor_ids.size(),
+        "name_call_moments_fired": fired_name_call_ids.size(),
+        "required_name_call_count": required_name_call_ids.size(),
+        "minimum_anchor_condition_met": remaining_anchor_ids.size() >= minimum_anchor_count,
+        "minimum_name_anchors_required": minimum_anchor_count,
+        "remaining_name_anchor_ids": remaining_anchor_ids,
+        "fired_name_call_ids": fired_name_call_ids,
+        "fired_name_call_lines": finale_name_call_lines.duplicate(true)
+    }
+
+func _get_required_finale_name_call_ids() -> Array[StringName]:
+    if _is_ch10_finale_stage():
+        return CH10_FINALE_NAME_CALL_IDS.duplicate()
+    return _get_current_finale_name_call_ids()
+
+func _get_current_finale_name_call_ids() -> Array[StringName]:
+    var companion_ids: Array[StringName] = []
+    if stage_data == null:
+        return companion_ids
+    for unit_data in stage_data.ally_units:
+        if unit_data == null:
+            continue
+        companion_ids.append(unit_data.unit_id)
+    return companion_ids
+
+func _is_ch10_finale_stage() -> bool:
+    return stage_data != null and stage_data.stage_id == &"CH10_05"
+
+func _try_record_live_finale_name_call(unit: UnitActor) -> void:
+    if not _is_ch10_finale_stage() or unit == null or not is_instance_valid(unit) or unit.unit_data == null:
+        return
+    if bond_service != null:
+        bond_service.promote_name_call_support(&"ally_rian", unit.unit_data.unit_id)
+    record_finale_name_call_fired(unit.unit_data.unit_id)
+
+func _get_finale_name_call_line(companion_id: StringName) -> String:
+    var support_rank: int = 0
+    if bond_service != null:
+        support_rank = bond_service.get_support_rank(&"ally_rian", companion_id)
+    return SupportConversations.get_name_call_line(String(companion_id), support_rank)
+
+func _break_next_finale_name_anchor() -> void:
+    if not _is_ch10_finale_stage() or stage_data == null:
+        return
+    for anchor_id: StringName in stage_data.finale_name_anchor_ids:
+        if bool(finale_name_anchor_state.get(anchor_id, true)):
+            record_finale_name_anchor_destroyed(anchor_id)
+            hud.set_transition_reason("finale_anchor_broken", {
+                "anchor": anchor_id,
+                "round": round_index
+            })
+            _sync_hud_phase("finale_anchor_broken", {
+                "anchor": anchor_id,
+                "round": round_index
+            })
+            return
 
 func _get_stage_memory_entries() -> Array[String]:
     if stage_data == null:
@@ -1662,7 +1967,8 @@ func _get_objective_text() -> String:
     if stage_data == null:
         return "Defeat all enemies."
 
-    var resolved_count: int = _get_resolved_interaction_count()
+    var objective_state := _get_active_objective_progress()
+    var resolved_count: int = int(objective_state.get("resolved_count", 0))
     var progress_text: String = _get_interaction_objective_text(resolved_count)
     if not progress_text.is_empty():
         return progress_text
@@ -1677,6 +1983,8 @@ func _get_objective_text() -> String:
             return "Secure all marked objective points."
         "resolve_all_interactions_and_defeat_all_enemies":
             return "Secure all objective points and defeat all enemies."
+        "rescue_quota":
+            return "Rescue the required officers."
         _:
             return String(stage_data.win_condition).replace("_", " ")
 
@@ -1698,6 +2006,96 @@ func _get_resolved_interaction_count() -> int:
             resolved_count += 1
     return resolved_count
 
+func _get_active_objective_progress() -> Dictionary:
+    var win_condition: String = String(stage_data.win_condition) if stage_data != null else ""
+    if win_condition == "rescue_quota":
+        var rescue_object_ids: Array[StringName] = _get_rescue_quota_resolved_object_ids()
+        var required_count: int = max(stage_data.rescue_objective_required_count, 0)
+        var hold_required_turns: int = _get_hold_objective_required_turns()
+        var completed: bool = required_count > 0 and rescue_object_ids.size() >= required_count
+        var display_count: int = rescue_object_ids.size()
+        var display_required: int = required_count
+        if hold_required_turns > 0 and rescue_object_ids.size() >= required_count:
+            display_required = required_count + hold_required_turns
+            display_count = required_count + (hold_required_turns if hold_objective_completed else 0)
+            completed = hold_objective_completed
+        return {
+            "objective_type": &"rescue_quota",
+            "objective_id": stage_data.rescue_objective_id,
+            "resolved_object_ids": rescue_object_ids,
+            "resolved_count": display_count,
+            "required_count": display_required,
+            "completed": completed,
+            "hold_armed": hold_objective_armed,
+            "hold_completed": hold_objective_completed
+        }
+
+    var resolved_object_ids: Array[StringName] = []
+    for object_actor in interactive_objects:
+        if not is_instance_valid(object_actor) or object_actor.object_data == null or not object_actor.is_resolved:
+            continue
+        resolved_object_ids.append(object_actor.object_data.object_id)
+
+    return {
+        "objective_type": StringName(win_condition),
+        "objective_id": &"",
+        "resolved_object_ids": resolved_object_ids,
+        "resolved_count": resolved_object_ids.size(),
+        "required_count": interactive_objects.size()
+    }
+
+func _get_rescue_quota_resolved_object_ids() -> Array[StringName]:
+    var resolved_object_ids: Array[StringName] = []
+    if stage_data == null or stage_data.rescue_objective_object_ids.is_empty():
+        return resolved_object_ids
+
+    for target_object_id in stage_data.rescue_objective_object_ids:
+        var object_actor := _find_interactive_object_by_id(target_object_id)
+        if object_actor == null or not object_actor.is_resolved:
+            continue
+        resolved_object_ids.append(target_object_id)
+    return resolved_object_ids
+
+func _get_hold_objective_required_turns() -> int:
+    if stage_data == null:
+        return 0
+    return max(stage_data.hold_objective_required_turns, 0)
+
+func _update_hold_objective_progress(reason: String) -> void:
+    if stage_data == null or String(stage_data.win_condition) != "rescue_quota":
+        return
+
+    var hold_required_turns: int = _get_hold_objective_required_turns()
+    if hold_required_turns <= 0:
+        return
+
+    var required_count: int = max(stage_data.rescue_objective_required_count, 0)
+    var rescue_count: int = _get_rescue_quota_resolved_object_ids().size()
+    if rescue_count < required_count:
+        return
+
+    if not hold_objective_armed:
+        hold_objective_armed = true
+        hold_objective_round_started = round_index
+        return
+
+    if hold_objective_completed:
+        return
+
+    if round_index >= hold_objective_round_started + hold_required_turns:
+        hold_objective_completed = true
+        _sync_hud_phase("hold_objective_secured", {
+            "objective": stage_data.hold_objective_id,
+            "round": round_index,
+            "hold_turns": hold_required_turns
+        })
+
+func _find_interactive_object_by_id(object_id: StringName) -> InteractiveObjectActor:
+    for object_actor in interactive_objects:
+        if object_actor != null and is_instance_valid(object_actor) and object_actor.object_data != null and StringName(object_actor.object_data.object_id) == object_id:
+            return object_actor
+    return null
+
 func _get_interaction_objective_text(resolved_count: int) -> String:
     if stage_data == null or stage_data.interaction_objective_texts.is_empty():
         return ""
@@ -1711,7 +2109,7 @@ func _get_objective_state_id(resolved_count: int, required_count: int) -> String
         return stage_data.interaction_objective_state_ids[clamped_index]
 
     var win_condition: String = String(stage_data.win_condition) if stage_data != null else ""
-    if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
+    if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies" or win_condition == "rescue_quota":
         if required_count <= 0:
             return &"interaction_objectives_missing"
         if resolved_count >= required_count:
@@ -1723,10 +2121,18 @@ func _get_objective_state_id(resolved_count: int, required_count: int) -> String
     return &"battle_objective_default"
 
 func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
+    if enemy.unit_data != null and enemy.unit_data.is_boss and enemy.unit_data.boss_pattern == LETE_CH08_05_BOSS_PATTERN:
+        var lete_action: Dictionary = _pick_lete_action(enemy)
+        if not lete_action.is_empty():
+            return lete_action
     if enemy.unit_data != null and enemy.unit_data.is_boss and enemy.unit_data.boss_pattern == &"roderic_ch01_05":
         var boss_action: Dictionary = _pick_roderic_action(enemy)
         if not boss_action.is_empty():
             return boss_action
+    if enemy.unit_data != null and enemy.unit_data.is_boss and enemy.unit_data.boss_pattern == &"valgar_ch06_05":
+        var valgar_action: Dictionary = _pick_valgar_action(enemy)
+        if not valgar_action.is_empty():
+            return valgar_action
 
     # Eroder-type enemies apply 망각 instead of attacking when valid target is in range
     # and the target has not yet reached max stack.
@@ -1734,6 +2140,18 @@ func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
         var oblivion_target: UnitActor = _find_oblivion_target(enemy)
         if oblivion_target != null:
             return {"type": "apply_oblivion", "target": oblivion_target}
+
+    return ai_service.pick_action(
+        enemy,
+        ally_units,
+        path_service,
+        range_service,
+        _get_dynamic_blocked_cells(enemy)
+    )
+
+func _pick_lete_action(enemy: UnitActor) -> Dictionary:
+    if enemy.is_stealth_hidden():
+        enemy.set_stealth_hidden(false)
 
     return ai_service.pick_action(
         enemy,
@@ -1791,6 +2209,37 @@ func _pick_roderic_action(enemy: UnitActor) -> Dictionary:
         "target": target
     }
 
+func _pick_valgar_action(enemy: UnitActor) -> Dictionary:
+    var pressured_target: UnitActor = _get_marked_target()
+    var boss_movement: int = _get_effective_movement(enemy)
+    if boss_charge_pending:
+        if pressured_target != null and is_instance_valid(pressured_target) and not pressured_target.is_defeated():
+            var dynamic_blocked: Dictionary = _get_dynamic_blocked_cells(enemy)
+            var approach_plan: Dictionary = ai_service._find_best_approach_plan(enemy, pressured_target, path_service, range_service, dynamic_blocked)
+            if not approach_plan.is_empty():
+                var move_to: Vector2i = ai_service._truncate_path_to_movement(approach_plan.get("path", []), boss_movement, path_service)
+                return {
+                    "type": "boss_charge",
+                    "move_to": move_to,
+                    "target": pressured_target
+                }
+            if _is_in_attack_range(enemy, pressured_target):
+                return {
+                    "type": "boss_charge",
+                    "target": pressured_target
+                }
+        boss_charge_pending = false
+        boss_marked_target_id = -1
+
+    var target: UnitActor = ai_service._find_nearest_target(enemy, ally_units)
+    if target == null:
+        return {"type": "wait"}
+
+    return {
+        "type": "valgar_fortify",
+        "target": target
+    }
+
 func _get_marked_target() -> UnitActor:
     if boss_marked_target_id == -1:
         return null
@@ -1815,6 +2264,15 @@ func _apply_boss_command_buff(boss_unit: UnitActor) -> void:
         "bonus": "+1 ATK"
     })
 
+func _apply_valgar_fortification(boss_unit: UnitActor) -> void:
+    enemy_attack_bonus_by_unit[boss_unit.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(boss_unit.get_instance_id(), 0)) + 1
+    for enemy in enemy_units:
+        if not is_instance_valid(enemy) or enemy == boss_unit or enemy.is_defeated():
+            continue
+        var distance: int = abs(enemy.grid_position.x - boss_unit.grid_position.x) + abs(enemy.grid_position.y - boss_unit.grid_position.y)
+        if distance <= 3:
+            enemy_attack_bonus_by_unit[enemy.get_instance_id()] = int(enemy_attack_bonus_by_unit.get(enemy.get_instance_id(), 0)) + 1
+
 func _record_boss_event(event_name: String) -> void:
     boss_event_history.append(event_name)
 
@@ -1837,6 +2295,8 @@ func _check_boss_phase_transitions() -> void:
         # Detect phase transition (change or first entry into a phase)
         if new_phase != old_phase:
             if new_phase != &"":
+                if _try_trigger_melkion_truth_flip(enemy, new_phase):
+                    continue
                 boss_phase_by_unit[unit_id] = new_phase
                 _record_boss_event("boss_phase_%s" % String(new_phase))
                 hud.set_transition_reason("boss_phase_transition", {
@@ -1870,6 +2330,8 @@ func _apply_boss_phase_effects(boss: UnitActor, new_phase: StringName, old_phase
     elif phase_name == "despair":
         _play_battle_flash(Color(0.8, 0.1, 0.2, 0.28), 0.30)
         _play_world_fx("hit_spark.png", boss.grid_position, Color(1.0, 0.2, 0.15, 0.98), 0.45, 1.5)
+    if _is_ch10_finale_stage() and boss.unit_data != null and boss.unit_data.unit_id == &"enemy_karon":
+        _break_next_finale_name_anchor()
     # Apply stat bonuses for this phase
     _apply_boss_phase_bonuses(boss, new_phase)
 
@@ -1908,3 +2370,113 @@ func _get_effective_movement(unit: UnitActor) -> int:
     if unit.unit_data != null and unit.unit_data.is_boss:
         base_movement += int(enemy_movement_bonus_by_unit.get(unit.get_instance_id(), 0))
     return base_movement
+
+func _should_apply_lete_story_retreat(defender: UnitActor) -> bool:
+    return stage_data != null \
+        and stage_data.stage_id == CH08_05_STAGE_ID \
+        and defender != null \
+        and is_instance_valid(defender) \
+        and defender.faction == "enemy" \
+        and defender.unit_data != null \
+        and defender.unit_data.boss_pattern == LETE_CH08_05_BOSS_PATTERN \
+        and not bool(hidden_recruit_state.get("lete_retreated", false))
+
+func _try_trigger_lete_story_retreat(defender: UnitActor) -> bool:
+    if not _should_apply_lete_story_retreat(defender):
+        return false
+    if defender.current_hp > 3:
+        return false
+    hidden_recruit_state["lete_retreated"] = true
+    hidden_recruit_state["lete_remaining_hp"] = defender.current_hp
+    _record_reward_entry("Lete retreats at the edge of defeat. Her black-hound oath is broken, but not her life.")
+    hud.set_transition_reason("lete_retreat_triggered", {
+        "unit": defender.unit_data.unit_id,
+        "hp": defender.current_hp,
+        "round": round_index
+    })
+    _sync_hud_phase("lete_retreat_triggered", {
+        "unit": defender.unit_data.unit_id,
+        "hp": defender.current_hp,
+        "round": round_index
+    })
+    if turn_manager != null:
+        turn_manager.mark_downed(defender, "lete_retreat", {"round": round_index})
+    if status_service != null:
+        status_service.remove_unit(defender)
+    _remove_unit_from_roster(defender)
+    defender.queue_free()
+    return true
+
+func _handle_story_interaction_result(result: Dictionary, unit: UnitActor, object_actor: InteractiveObjectActor) -> void:
+    var story_flag: StringName = StringName(result.get("story_flag", &""))
+    if story_flag == &"mira_shrine_investigated" and stage_data != null and stage_data.stage_id == CH07_05_STAGE_ID:
+        hidden_recruit_state["mira_shrine_investigated"] = true
+        hidden_recruit_state["mira_shrine_object_id"] = String(result.get("object_id", object_actor.object_data.object_id if object_actor != null and object_actor.object_data != null else &""))
+        hidden_recruit_state["mira_shrine_user"] = String(unit.unit_data.unit_id) if unit != null and unit.unit_data != null else ""
+
+func _try_record_mira_unlock(attacker: UnitActor, defender: UnitActor, result: Dictionary) -> bool:
+    if stage_data == null or stage_data.stage_id != CH07_05_STAGE_ID:
+        return false
+    if not bool(hidden_recruit_state.get("mira_shrine_investigated", false)):
+        return false
+    if attacker == null or defender == null or attacker.unit_data == null or defender.unit_data == null:
+        return false
+    if attacker.unit_data.unit_id != &"ally_tia":
+        return false
+    if not defender.unit_data.is_boss:
+        return false
+    if not bool(result.get("defender_defeated", false)):
+        return false
+    hidden_recruit_state["mira_boss_defeated_by_tia"] = true
+    hidden_recruit_state["mira_unlocked"] = true
+    _record_reward_entry("Mira answers the shrine's record and joins after Tia shatters Saria's line.")
+    return true
+
+func _try_trigger_melkion_truth_flip(enemy: UnitActor, new_phase: StringName) -> bool:
+    if stage_data == null or stage_data.stage_id != CH09B_05_STAGE_ID:
+        return false
+    if enemy == null or not is_instance_valid(enemy) or enemy.unit_data == null:
+        return false
+    if enemy.unit_data.unit_id != &"enemy_melkion" or new_phase != MELKION_FLIP_PHASE:
+        return false
+    if bool(hidden_recruit_state.get("melkion_flipped", false)):
+        return false
+    if not _has_live_ally(&"ally_noah"):
+        return false
+    if bond_service == null or bond_service.get_support_rank(&"rian", &"noah") != 4:
+        return false
+    var ally_data: UnitData = CampaignCatalog.get_unit_data(&"ally_melkion_ally")
+    if ally_data == null:
+        return false
+    var destination: Vector2i = enemy.grid_position
+    boss_phase_by_unit.erase(enemy.get_instance_id())
+    enemy_attack_bonus_by_unit.erase(enemy.get_instance_id())
+    enemy_movement_bonus_by_unit.erase(enemy.get_instance_id())
+    enemy_units.erase(enemy)
+    enemy.setup_from_data(ally_data)
+    enemy.faction = "ally"
+    enemy.set_grid_position(destination, stage_data.cell_size)
+    if not ally_units.has(enemy):
+        ally_units.append(enemy)
+    hidden_recruit_state["melkion_flipped"] = true
+    hidden_recruit_state["melkion_support_rank"] = bond_service.get_support_rank(&"rian", &"noah")
+    hidden_recruit_state["melkion_flip_phase"] = String(new_phase)
+    _record_reward_entry("Melkion rewrites his own record, turns on the archive, and stands with the party for one battle.")
+    hud.set_transition_reason("melkion_truth_flip", {
+        "unit": ally_data.unit_id,
+        "phase": String(new_phase),
+        "round": round_index
+    })
+    _sync_hud_phase("melkion_truth_flip", {
+        "unit": ally_data.unit_id,
+        "phase": String(new_phase),
+        "round": round_index
+    })
+    _refresh_unit_visual_state()
+    return true
+
+func _has_live_ally(unit_id: StringName) -> bool:
+    for unit in ally_units:
+        if is_instance_valid(unit) and not unit.is_defeated() and unit.unit_data != null and unit.unit_data.unit_id == unit_id:
+            return true
+    return false

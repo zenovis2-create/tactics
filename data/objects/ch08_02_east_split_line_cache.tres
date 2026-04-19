@@ -9,5 +9,5 @@ display_name = "East Split-Line Cache"
 object_type = "chest"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
-reward_text = "East split-line cache seized: the ambush relay notes expose the remaining black-hound route pressure."
+reward_text = "East split-line cache seized: the relay notes chart the remaining kill-lane pressure."
 interaction_text = "East split-line cache seized."

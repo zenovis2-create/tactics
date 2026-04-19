@@ -2,6 +2,7 @@ extends SceneTree
 
 const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn")
 const CH01_STAGE = preload("res://data/stages/ch01_05_stage.tres")
+const CH10_FINALE_STAGE = preload("res://data/stages/ch10_05_stage.tres")
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -75,6 +76,48 @@ func _run() -> void:
 	]:
 		if dialog_text.find(token) == -1:
 			return _fail("Battle result dialog should include '%s'." % token)
+
+	var finale_battle = BATTLE_SCENE.instantiate()
+	root.add_child(finale_battle)
+	await process_frame
+	await process_frame
+
+	finale_battle.set_stage(CH10_FINALE_STAGE)
+	await process_frame
+	await process_frame
+
+	finale_battle.enemy_units.clear()
+	if not finale_battle._check_battle_end():
+		return _fail("Expected CH10_05 forced victory check to resolve the finale battle.")
+
+	await process_frame
+
+	var finale_summary: Dictionary = finale_battle.get_last_result_summary()
+	if not finale_summary.has("finale_result"):
+		return _fail("CH10_05 result summary should expose finale_result.")
+
+	var finale_result: Dictionary = finale_summary.get("finale_result", {})
+	for key: String in [
+		"name_anchor_total",
+		"name_anchors_remaining",
+		"name_call_moments_fired",
+		"required_name_call_count",
+		"minimum_anchor_condition_met",
+		"minimum_name_anchors_required",
+		"remaining_name_anchor_ids",
+		"fired_name_call_ids"
+	]:
+		if not finale_result.has(key):
+			return _fail("CH10_05 finale_result missing key: %s" % key)
+
+	if int(finale_result.get("name_anchor_total", 0)) != 4:
+		return _fail("CH10_05 finale_result should report four total anchors.")
+	if int(finale_result.get("minimum_name_anchors_required", 0)) != 2:
+		return _fail("CH10_05 finale_result should report a minimum of two anchors.")
+	if int(finale_result.get("required_name_call_count", 0)) != 6:
+		return _fail("CH10_05 finale_result should report six required name-call moments for the true route.")
+	if int(finale_result.get("name_call_moments_fired", -1)) < 0:
+		return _fail("CH10_05 finale_result should expose a non-negative name-call count.")
 
 	print("[PASS] battle_result_runner: battle result summary exposes objective, records, and progression unlocks.")
 	quit(0)

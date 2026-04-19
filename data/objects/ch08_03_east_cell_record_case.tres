@@ -9,5 +9,5 @@ display_name = "East Cell Record Case"
 object_type = "chest"
 grid_position = Vector2i(8, 5)
 interaction_range = 1
-reward_text = "East cell record case seized: the holding-cell roster confirms where the captives were routed next."
+reward_text = "East cell record case seized: the holding roster confirms where the captives were transferred next."
 interaction_text = "East cell record case seized."

@@ -9,5 +9,5 @@ display_name = "West Vent Capstan"
 object_type = "lever"
 grid_position = Vector2i(2, 5)
 interaction_range = 1
-reward_text = "West vent capstan turned: one ruin vent opens and the holding cells stop choking on ash."
+reward_text = "West vent capstan turned: one lower-cell vent opens and the holding line can breathe."
 interaction_text = "West vent capstan turned."

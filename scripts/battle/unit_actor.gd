@@ -21,11 +21,13 @@ var has_acted: bool = false
 var _selected: bool = false
 var _attackable: bool = false
 var _boss_marked: bool = false
+var _stealth_hidden: bool = false
 var _tile_terrain_type: StringName = &"plain"
 var _tile_defense_bonus: int = 0
 var _equipped_accessory: AccessoryData
 var _equipped_weapon: WeaponData
 var _equipped_armor: ArmorData
+var _move_tween: Tween
 var _mark_pulse_tween: Tween
 var _damage_flash_tween: Tween
 var _animating_attack: bool = false
@@ -76,6 +78,22 @@ func set_grid_position(cell: Vector2i, cell_size: Vector2i = Vector2i(64, 64)) -
     grid_position = cell
     position = Vector2(cell.x * cell_size.x, cell.y * cell_size.y)
 
+func move_to_grid(cell: Vector2i, cell_size: Vector2i = Vector2i(64, 64), duration: float = 0.2) -> void:
+    grid_position = cell
+    var target_position := Vector2(cell.x * cell_size.x, cell.y * cell_size.y)
+    if _move_tween != null and _move_tween.is_running():
+        _move_tween.kill()
+    if position.distance_to(target_position) <= 0.1:
+        position = target_position
+        _move_tween = null
+        return
+    _move_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+    _move_tween.tween_property(self, "position", target_position, duration)
+    _move_tween.tween_callback(func():
+        position = target_position
+        _move_tween = null
+    )
+
 func set_selected(value: bool) -> void:
     _selected = value
     _refresh_visuals()
@@ -90,6 +108,15 @@ func set_boss_marked(value: bool) -> void:
     _refresh_visuals()
     if value and not was_marked:
         _play_mark_pulse()
+
+func set_stealth_hidden(value: bool) -> void:
+    if _stealth_hidden == value:
+        return
+    _stealth_hidden = value
+    _refresh_visuals()
+
+func is_stealth_hidden() -> bool:
+    return _stealth_hidden
 
 func set_tile_context(terrain_type: StringName, defense_bonus: int) -> void:
     _tile_terrain_type = terrain_type
@@ -204,41 +231,43 @@ func get_equipped_armor() -> ArmorData:
 func _refresh_visuals() -> void:
     var base_color: Color = _get_base_color()
     if shadow != null:
-        shadow.color = Color(0.0, 0.0, 0.0, 0.18 if has_acted else 0.28)
+        shadow.color = Color(0.0, 0.0, 0.0, 0.34 if _stealth_hidden else 0.18 if has_acted else 0.28)
     if halo != null:
         halo.color = _get_halo_color()
     if terrain_ring != null:
-        terrain_ring.visible = _tile_defense_bonus > 0
+        terrain_ring.visible = _tile_defense_bonus > 0 and not _stealth_hidden
         terrain_ring.color = _get_terrain_ring_color()
     if mark_aura != null:
-        mark_aura.visible = _boss_marked
+        mark_aura.visible = _boss_marked and not _stealth_hidden
         mark_aura.color = _get_mark_aura_color()
     if frame != null:
-        frame.color = _get_frame_color()
+        frame.color = Color(0.090196, 0.098039, 0.121569, 0.94) if _stealth_hidden else _get_frame_color()
     if damage_flash != null:
         damage_flash.color = Color(1.0, 1.0, 1.0, 0.0)
     if marker != null:
-        marker.color = base_color
+        marker.color = Color(0.180392, 0.180392, 0.2, 0.88) if _stealth_hidden else base_color
     if accent != null:
-        accent.color = _get_accent_color()
+        accent.color = Color(0.290196, 0.290196, 0.32549, 0.76) if _stealth_hidden else _get_accent_color()
     if faction_pip != null:
+        faction_pip.visible = not _stealth_hidden
         faction_pip.color = _get_pip_color()
     if glyph_back != null:
+        glyph_back.visible = not _stealth_hidden
         glyph_back.color = _get_glyph_back_color()
     if role_icon != null:
         role_icon.texture = _get_role_icon_texture()
         role_icon.modulate = _get_glyph_color()
-        role_icon.visible = role_icon.texture != null
+        role_icon.visible = role_icon.texture != null and not _stealth_hidden
     if glyph_label != null:
         glyph_label.text = _get_role_glyph()
         glyph_label.add_theme_color_override("font_color", _get_glyph_color())
-        glyph_label.visible = role_icon == null or role_icon.texture == null
+        glyph_label.visible = (role_icon == null or role_icon.texture == null) and not _stealth_hidden
     if inner != null:
-        inner.color = _get_inner_color()
+        inner.color = Color(0.121569, 0.121569, 0.137255, 0.9) if _stealth_hidden else _get_inner_color()
     if token_art != null:
         token_art.texture = _get_token_art_texture()
         token_art.modulate = _get_token_art_color()
-        token_art.visible = token_art.texture != null
+        token_art.visible = token_art.texture != null and not _stealth_hidden
     if name_plate_back != null:
         name_plate_back.color = _get_nameplate_color()
         name_plate_back.visible = _should_show_nameplate()
@@ -249,38 +278,48 @@ func _refresh_visuals() -> void:
         name_label.visible = _should_show_nameplate()
 
     if telegraph_label != null:
-        telegraph_label.text = "MARK" if _boss_marked else ""
-        telegraph_label.modulate = Color(1.0, 0.529412, 0.764706, 0.95)
+        if _stealth_hidden:
+            telegraph_label.text = "HIDDEN"
+            telegraph_label.modulate = Color(0.792157, 0.835294, 0.960784, 0.78)
+            telegraph_label.visible = true
+        else:
+            telegraph_label.text = "MARK" if _boss_marked else ""
+            telegraph_label.modulate = Color(1.0, 0.529412, 0.764706, 0.95)
+            telegraph_label.visible = _boss_marked
 
     if telegraph_icon != null:
         telegraph_icon.texture = TelegraphTextureLibrary.get_texture("mark") if _boss_marked else null
-        telegraph_icon.visible = _boss_marked
+        telegraph_icon.visible = _boss_marked and not _stealth_hidden
     if mark_crosshair_h != null:
-        mark_crosshair_h.visible = _boss_marked
+        mark_crosshair_h.visible = _boss_marked and not _stealth_hidden
         mark_crosshair_h.color = _get_mark_crosshair_color()
     if mark_crosshair_v != null:
-        mark_crosshair_v.visible = _boss_marked
+        mark_crosshair_v.visible = _boss_marked and not _stealth_hidden
         mark_crosshair_v.color = _get_mark_crosshair_color()
 
     if hp_label != null:
         var max_hp: int = unit_data.max_hp if unit_data != null else current_hp
         hp_label.text = "%d/%d" % [current_hp, max_hp]
+        hp_label.visible = not _stealth_hidden
         var hp_ratio: float = 1.0 if max_hp <= 0 else clampf(float(current_hp) / float(max_hp), 0.0, 1.0)
         if hp_bar_fill != null:
             hp_bar_fill.size.x = 48.0 * hp_ratio
             hp_bar_fill.color = _get_hp_bar_color(hp_ratio)
+            hp_bar_fill.visible = not _stealth_hidden
+    if hp_bar_back != null:
+        hp_bar_back.visible = not _stealth_hidden
     if terrain_badge_back != null:
-        terrain_badge_back.visible = _tile_defense_bonus > 0
+        terrain_badge_back.visible = _tile_defense_bonus > 0 and not _stealth_hidden
         terrain_badge_back.color = _get_terrain_badge_back_color()
     if terrain_badge_label != null:
-        terrain_badge_label.visible = _tile_defense_bonus > 0
+        terrain_badge_label.visible = _tile_defense_bonus > 0 and not _stealth_hidden
         terrain_badge_label.text = "+%d" % _tile_defense_bonus if _tile_defense_bonus > 0 else ""
         terrain_badge_label.add_theme_color_override("font_color", _get_terrain_emphasis_color())
     if terrain_chevron_left != null:
-        terrain_chevron_left.visible = _tile_defense_bonus > 0
+        terrain_chevron_left.visible = _tile_defense_bonus > 0 and not _stealth_hidden
         terrain_chevron_left.color = _get_terrain_emphasis_color()
     if terrain_chevron_right != null:
-        terrain_chevron_right.visible = _tile_defense_bonus > 0
+        terrain_chevron_right.visible = _tile_defense_bonus > 0 and not _stealth_hidden
         terrain_chevron_right.color = _get_terrain_emphasis_color()
 
 func _get_inner_color() -> Color:
@@ -318,7 +357,7 @@ func _get_nameplate_color() -> Color:
     return Color(0.211765, 0.0823529, 0.0784314, 0.84)
 
 func _should_show_nameplate() -> bool:
-    return _selected or _attackable or _boss_marked
+    return not _stealth_hidden and (_selected or _attackable or _boss_marked)
 
 func _get_pip_color() -> Color:
     if _selected:
@@ -442,6 +481,8 @@ func _get_token_art_color() -> Color:
     return Color(1.0, 0.854902, 0.823529, 0.8)
 
 func _get_halo_color() -> Color:
+    if _stealth_hidden:
+        return Color(0.141176, 0.141176, 0.160784, 0.22)
     if _boss_marked:
         return Color(0.960784, 0.435294, 0.701961, 0.34)
     if _selected:
@@ -535,6 +576,8 @@ func _get_mark_crosshair_color() -> Color:
     return Color(1.0, 0.760784, 0.898039, 0.9)
 
 func _get_base_color() -> Color:
+    if _stealth_hidden:
+        return Color(0.180392, 0.180392, 0.2, 0.9)
     if _selected:
         return Color(0.964706, 0.776471, 0.27451, 0.95)
 

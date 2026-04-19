@@ -10,5 +10,5 @@ object_type = "gate"
 grid_position = Vector2i(5, 4)
 interaction_range = 1
 blocks_movement_while_active = true
-reward_text = "Center holding gate broken: the lower cells are exposed and the captive route can be read."
+reward_text = "Center holding gate broken: the captive route is exposed inside the lower ruin."
 interaction_text = "Center holding gate broken."

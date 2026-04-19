@@ -34,8 +34,8 @@ Vector2i(5, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Trace the hound sign and cut the signal post to collapse the vanished trail forks. (0/2)", "One route-pressure point is resolved. Collapse the remaining fork. (1/2)", "Both route-pressure points are resolved. The vanished trail is narrowed to one lane. (2/2)")
+interaction_objective_texts = PackedStringArray("Trace the hound sign and cut the signal post to collapse the false pursuit forks. (0/2)", "One false fork is down. Collapse the remaining pursuit split. (1/2)", "The pursuit forks collapse into one lane. The vanished trail is fixed. (2/2)")
 interaction_objective_state_ids = [&"hound_route_split", &"hound_route_partial", &"hound_route_narrowed"]
 start_cutscene_id = &"ch08_01_intro"
 clear_cutscene_id = &"ch08_01_outro"
-next_destination_summary = "The black-hound trail forks collapse into a single lane leading toward the ambush woods."
+next_destination_summary = "The black-hound pursuit forks collapse into a single lane leading toward the moonlit ambush woods."

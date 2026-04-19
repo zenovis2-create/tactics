@@ -9,5 +9,5 @@ display_name = "West Hound Sign"
 object_type = "altar"
 grid_position = Vector2i(2, 4)
 interaction_range = 1
-reward_text = "West hound sign traced: one false route is stripped from the night trail."
+reward_text = "West hound sign traced: one false pursuit fork is stripped from the night trail."
 interaction_text = "West hound sign traced."

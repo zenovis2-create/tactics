@@ -16,6 +16,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
+	var cutscene_log_before: int = battle.cutscene_player.get_event_log().size()
 	battle.set_stage(CH01_STAGE)
 	await process_frame
 	await process_frame
@@ -28,7 +29,10 @@ func _run() -> void:
 		})
 	)
 
-	var cutscene_log_before: int = battle.cutscene_player.get_event_log().size()
+	var cutscene_log_after_stage_boot: Array[Dictionary] = battle.cutscene_player.get_event_log().slice(cutscene_log_before)
+	if not _has_cutscene_start(cutscene_log_after_stage_boot, &"ch01_05_intro"):
+		return _fail("Stage bootstrap should start ch01_05_intro.")
+
 	battle.enemy_units.clear()
 
 	if not battle._check_battle_end():

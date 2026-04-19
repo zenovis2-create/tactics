@@ -9,6 +9,7 @@ signal cancel_requested
 signal end_turn_requested
 signal menu_visibility_changed(is_open: bool)
 signal ui_cue_requested(cue_id: String)
+signal encyclopedia_requested
 
 const COMPACT_WIDTH_THRESHOLD := 720.0
 const COMPACT_PANEL_MARGIN := 16.0
@@ -56,6 +57,10 @@ const REGULAR_TOPBAR_MAX_WIDTH := 440.0
 @onready var close_inventory_button: Button = $InventoryPanel/Margin/Content/Footer/CloseButton
 @onready var result_popup: AcceptDialog = $ResultPopup
 var result_screen: Node  ## BattleResultScreen — 전투 결과 전용 화면 (동적 로드)
+var _party_list_container_compat: VBoxContainer
+var party_list_container: VBoxContainer:
+    get:
+        return _party_list_container_compat
 
 var _compact_layout: bool = false
 var _last_focus_owner: Control
@@ -66,6 +71,7 @@ var _last_result_body: String = ""
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
+    _ensure_party_list_container_compat()
     cancel_button.pressed.connect(_on_cancel_pressed)
     wait_button.pressed.connect(_on_wait_pressed)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -80,6 +86,8 @@ func _ready() -> void:
         result_screen = ResultScreenScene.instantiate()
         add_child(result_screen)
         result_screen.result_confirmed.connect(_on_result_screen_confirmed)
+        if result_screen.has_signal("encyclopedia_requested"):
+            result_screen.encyclopedia_requested.connect(_on_result_screen_encyclopedia_requested)
     clear_selection()
     set_action_hint("Tap a ready ally to act.")
     set_buttons_state(false, false, true)
@@ -155,7 +163,27 @@ func set_inventory_snapshot(title_text: String, objective_text: String, party_li
     party_heading_label.text = "Party (%d)" % party_lines.size()
     inventory_heading_label.text = "Recovered Supplies (%d)" % inventory_lines.size()
     party_list.text = _format_lines_for_panel(party_lines, "No allies deployed.")
+    _sync_party_list_container_compat(party_lines)
     inventory_list.text = _format_lines_for_panel(inventory_lines, "No recovered supplies yet.")
+
+func _ensure_party_list_container_compat() -> void:
+    if _party_list_container_compat != null:
+        return
+    _party_list_container_compat = VBoxContainer.new()
+    _party_list_container_compat.name = "PartyListContainerCompat"
+    _party_list_container_compat.visible = false
+    add_child(_party_list_container_compat)
+
+func _sync_party_list_container_compat(party_lines: Array[String]) -> void:
+    _ensure_party_list_container_compat()
+    for child in _party_list_container_compat.get_children():
+        _party_list_container_compat.remove_child(child)
+        child.queue_free()
+    var lines_to_render := party_lines if not party_lines.is_empty() else ["No allies deployed."]
+    for line in lines_to_render:
+        var row := Label.new()
+        row.text = line
+        _party_list_container_compat.add_child(row)
 
 func open_inventory_panel() -> void:
     if inventory_panel.visible:
@@ -261,6 +289,9 @@ func _on_result_screen_confirmed() -> void:
     if result_screen != null:
         result_screen.hide_result()
 
+func _on_result_screen_encyclopedia_requested() -> void:
+    encyclopedia_requested.emit()
+
 func _unhandled_input(event: InputEvent) -> void:
     if not inventory_panel.visible:
         return
@@ -302,6 +333,12 @@ func _on_overlay_scrim_gui_input(event: InputEvent) -> void:
             get_viewport().set_input_as_handled()
 
 func _format_reason(reason: String, payload: Dictionary) -> String:
+    if reason == "damage_shared":
+        return "Damage Shared (Bond %d, Share %d, Allies %d)" % [
+            int(payload.get("bond", 0)),
+            int(payload.get("share", 0)),
+            int(payload.get("shared_units", 0))
+        ]
     var normalized_reason := _to_title_words(reason)
     if payload.is_empty():
         return normalized_reason
@@ -540,6 +577,8 @@ func _refresh_inventory_dismiss_hint() -> void:
 
 func _update_telegraph_surface(reason: String) -> void:
     match reason:
+        "valgar_fortify_telegraphed":
+            _show_telegraph_surface("command", "Fortify", "Valgar turns the lane into sustained pressure before the next charge.")
         "boss_mark_telegraphed":
             _show_telegraph_surface("mark", "Mark", "Marked unit will be charged next enemy turn.")
         "boss_charge_resolve":
@@ -552,6 +591,8 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
         "support_attack_resolved":
             _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
+        "damage_shared":
+            _show_telegraph_surface("support", "Bond Guard", "A bond 5 ally split the hit across the line.")
         _:
             _clear_telegraph_surface()
 
@@ -569,6 +610,8 @@ func _clear_telegraph_surface() -> void:
 
 func _emit_battle_cue_for_reason(reason: String) -> void:
     match reason:
+        "valgar_fortify_telegraphed":
+            ui_cue_requested.emit("battle_boss_command_warn_01")
         "boss_mark_telegraphed":
             ui_cue_requested.emit("battle_boss_mark_warn_01")
         "boss_command_buff":

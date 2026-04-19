@@ -9,5 +9,5 @@ display_name = "West Control Brand"
 object_type = "altar"
 grid_position = Vector2i(2, 6)
 interaction_range = 1
-reward_text = "West control brand erased: one layer of the black-mark hunt pattern collapses."
+reward_text = "West control brand erased: one layer of the black-mark hunting line collapses."
 interaction_text = "West control brand erased."

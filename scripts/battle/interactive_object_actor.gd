@@ -4,7 +4,6 @@ extends Node2D
 const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 const UnitActor = preload("res://scripts/battle/unit_actor.gd")
 const InteractiveObjectData = preload("res://scripts/data/interactive_object_data.gd")
-const ICON_DIR := "assets/ui/object_icons_generated/"
 const OBJECT_VISUAL_CONTRACTS := {
     "altar": {
         "icon": "altar.png",
@@ -13,6 +12,14 @@ const OBJECT_VISUAL_CONTRACTS := {
         "inner_active": Color(0.352941, 0.282353, 0.121569, 0.95),
         "inner_resolved": Color(0.262745, 0.223529, 0.141176, 0.72),
         "accent": Color(1.0, 0.882353, 0.505882, 0.96)
+    },
+    "shrine": {
+        "icon": "altar.png",
+        "marker_active": Color(0.521569, 0.65098, 0.92549, 0.92),
+        "marker_resolved": Color(0.341176, 0.411765, 0.619608, 0.58),
+        "inner_active": Color(0.192157, 0.231373, 0.392157, 0.96),
+        "inner_resolved": Color(0.14902, 0.180392, 0.286275, 0.74),
+        "accent": Color(0.803922, 0.878431, 1.0, 0.98)
     },
     "chest": {
         "icon": "chest.png",
@@ -109,7 +116,8 @@ func resolve_interaction(by_unit: UnitActor) -> Dictionary:
         "object_id": object_data.object_id,
         "object_type": object_data.object_type,
         "reward_text": object_data.reward_text,
-        "interaction_text": object_data.interaction_text
+        "interaction_text": object_data.interaction_text,
+        "story_flag": _get_story_flag()
     }
 
 func blocks_movement() -> bool:
@@ -220,10 +228,19 @@ func _get_object_visual_family(object_type: String) -> String:
             return "lever"
         "chest":
             return "chest"
+        "shrine":
+            return "shrine"
         "altar":
             return "altar"
         _:
             return DEFAULT_OBJECT_VISUAL_FAMILY
+
+func _get_story_flag() -> StringName:
+    if object_data == null:
+        return &""
+    if object_data.object_type == "shrine":
+        return &"mira_shrine_investigated"
+    return &""
 
 func _play_beacon_pulse() -> void:
     if beacon_ring == null:

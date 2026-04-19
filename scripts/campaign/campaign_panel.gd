@@ -5,10 +5,12 @@ const CampaignState = preload("res://scripts/campaign/campaign_state.gd")
 
 signal advance_requested
 signal save_panel_requested
+signal encyclopedia_requested
 signal deployment_assignment_requested(unit_id: StringName)
 signal weapon_cycle_requested(unit_id: StringName)
 signal armor_cycle_requested(unit_id: StringName)
 signal accessory_cycle_requested(unit_id: StringName)
+signal choice_selected(option_id: String)
 signal ui_cue_requested(cue_id: String)
 
 const COMPACT_WIDTH_THRESHOLD := 760.0
@@ -101,6 +103,7 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var letter_list: RichTextLabel = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/LetterList
 @onready var advance_button: Button = $Panel/Margin/Content/FooterRow/AdvanceButton
 @onready var save_button: Button = $Panel/Margin/Content/FooterRow/SaveButton
+@onready var encyclopedia_button: Button = $Panel/Margin/Content/FooterRow/EncyclopediaButton
 @onready var panel: PanelContainer = $Panel
 
 var _compact_layout: bool = false
@@ -126,11 +129,19 @@ var _locked_party_unit_ids: Array[String] = []
 var _available_weapon_entries: Array[String] = []
 var _available_armor_entries: Array[String] = []
 var _available_accessory_entries: Array[String] = []
+var _choice_stage_id: String = ""
+var _choice_prompt: String = ""
+var _choice_options: Array[Dictionary] = []
+var _choice_container: VBoxContainer
+var _choice_prompt_label: Label
+var _choice_option_buttons: Array[Button] = []
+var _choice_option_hint_labels: Array[Label] = []
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
     advance_button.pressed.connect(_on_advance_pressed)
     save_button.pressed.connect(_on_save_pressed)
+    encyclopedia_button.pressed.connect(_on_encyclopedia_pressed)
     summary_button.pressed.connect(func() -> void: _select_section(SECTION_SUMMARY))
     party_button.pressed.connect(func() -> void: _select_section(SECTION_PARTY))
     inventory_button.pressed.connect(func() -> void: _select_section(SECTION_INVENTORY))
@@ -140,6 +151,7 @@ func _ready() -> void:
     party_armor_button.pressed.connect(_on_party_armor_pressed)
     party_accessory_button.pressed.connect(_on_party_accessory_pressed)
     get_viewport().size_changed.connect(_update_responsive_layout)
+    _build_choice_panel()
     _update_responsive_layout()
     hide_panel()
 
@@ -163,6 +175,11 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     _available_weapon_entries = _variant_to_string_array(payload.get("available_weapon_entries", []))
     _available_armor_entries = _variant_to_string_array(payload.get("available_armor_entries", []))
     _available_accessory_entries = _variant_to_string_array(payload.get("available_accessory_entries", []))
+    _choice_stage_id = String(payload.get("choice_stage_id", ""))
+    _choice_prompt = String(payload.get("choice_prompt", body_text))
+    _choice_options = _variant_to_dictionary_array(payload.get("choice_options", []))
+    var uses_choice_panel := mode == CampaignState.MODE_CHOICE or mode == CampaignState.MODE_DEFEAT
+    var has_choice_options := not _choice_options.is_empty()
 
     mode_label.text = mode.capitalize()
     title_label.text = title_text
@@ -187,10 +204,17 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     letter_list.text = _format_lines_for_panel(_letter_entries, "No letters received yet.")
     advance_button.text = button_text
     advance_button.custom_minimum_size = Vector2(0.0, PRIMARY_CTA_HEIGHT)
+    advance_button.visible = not uses_choice_panel or not has_choice_options
+    advance_button.disabled = uses_choice_panel and has_choice_options
     save_button.visible = mode == CampaignState.MODE_CAMP
     save_button.disabled = mode != CampaignState.MODE_CAMP
+    encyclopedia_button.visible = mode == CampaignState.MODE_CAMP
+    encyclopedia_button.disabled = mode != CampaignState.MODE_CAMP
+    section_tabs.visible = not uses_choice_panel
+    section_hint_label.visible = not uses_choice_panel
     _sync_section_button_text()
     _rebuild_presentation_cards()
+    _render_choice_panel()
 
     _rebuild_party_roster()
     _select_section(String(payload.get("active_section", SECTION_SUMMARY)))
@@ -221,6 +245,9 @@ func hide_panel() -> void:
     _available_weapon_entries.clear()
     _available_armor_entries.clear()
     _available_accessory_entries.clear()
+    _choice_stage_id = ""
+    _choice_prompt = ""
+    _choice_options.clear()
     _active_section = SECTION_SUMMARY
     _selected_party_index = -1
     mode_label.text = ""
@@ -260,8 +287,14 @@ func hide_panel() -> void:
     party_accessory_button.text = "Equip Accessory"
     party_accessory_button.disabled = true
     party_accessory_button.tooltip_text = "Unlock or recover accessories before equipping one."
+    advance_button.visible = true
+    advance_button.disabled = false
     save_button.visible = false
     save_button.disabled = true
+    encyclopedia_button.visible = false
+    encyclopedia_button.disabled = true
+    section_tabs.visible = true
+    section_hint_label.visible = true
     inventory_heading_label.text = "Inventory Updates"
     inventory_list.text = ""
     memory_heading_label.text = "Memory"
@@ -272,6 +305,7 @@ func hide_panel() -> void:
     letter_list.text = ""
     for child in party_roster_buttons.get_children():
         child.queue_free()
+    _render_choice_panel()
     visible = false
 
 func get_snapshot() -> Dictionary:
@@ -292,10 +326,14 @@ func get_snapshot() -> Dictionary:
         "alerts": _alerts.duplicate(),
         "dialogue_entries": _dialogue_entries.duplicate(),
         "presentation_cards": _presentation_cards.duplicate(true),
+        "choice_stage_id": _choice_stage_id,
+        "choice_prompt": _choice_prompt,
+        "choice_options": _choice_options.duplicate(true),
         "active_section": _active_section,
         "selected_party_name": _get_selected_party_name(),
         "selected_party_unit_id": _get_selected_party_unit_id(),
         "section_badges": _section_badges.duplicate(true),
+        "encyclopedia_button_visible": encyclopedia_button.visible if encyclopedia_button != null else false,
         "deployed_party_unit_ids": _deployed_party_unit_ids.duplicate(),
         "locked_party_unit_ids": _locked_party_unit_ids.duplicate(),
         "available_weapon_entries": _available_weapon_entries.duplicate(),
@@ -322,6 +360,19 @@ func select_party_by_unit_id(unit_id: String) -> bool:
     return _select_party_by_unit_id(unit_id)
 
 func _select_section(section_name: String) -> void:
+    if _current_mode == CampaignState.MODE_CHOICE or _current_mode == CampaignState.MODE_DEFEAT:
+        _active_section = SECTION_SUMMARY
+        summary_section.visible = true
+        party_section.visible = false
+        inventory_section.visible = false
+        records_section.visible = false
+        section_hint_label.text = "Resolve the retreat path before the campaign loop continues." if _current_mode == CampaignState.MODE_DEFEAT else "Choose which truth the squad carries forward."
+        summary_button.disabled = true
+        party_button.disabled = true
+        inventory_button.disabled = true
+        records_button.disabled = true
+        return
+
     if not SECTION_ORDER.has(section_name):
         section_name = SECTION_SUMMARY
 
@@ -363,6 +414,10 @@ func _build_default_flow_label(mode: String) -> String:
             return "Battle clear -> Field report -> Next stage"
         CampaignState.MODE_CAMP:
             return "Battle clear -> Camp review -> Next battle"
+        CampaignState.MODE_CHOICE:
+            return "Critical choice -> Consequence locked -> Resume campaign"
+        CampaignState.MODE_DEFEAT:
+            return "Battle loss -> Retreat decision -> Campaign stabilizes"
         CampaignState.MODE_CHAPTER_INTRO:
             return "Camp exit -> Mission brief -> Deploy"
         CampaignState.MODE_COMPLETE:
@@ -376,6 +431,10 @@ func _build_recommendation_eyebrow(mode: String) -> String:
             return "Handoff"
         CampaignState.MODE_CAMP:
             return "Next Step"
+        CampaignState.MODE_CHOICE:
+            return "Decision"
+        CampaignState.MODE_DEFEAT:
+            return "Retreat"
         CampaignState.MODE_CHAPTER_INTRO:
             return "Mission Brief"
         CampaignState.MODE_COMPLETE:
@@ -387,6 +446,10 @@ func _build_presentation_heading(mode: String) -> String:
     match mode:
         CampaignState.MODE_CAMP:
             return "Camp Handoff"
+        CampaignState.MODE_CHOICE:
+            return "Consequences"
+        CampaignState.MODE_DEFEAT:
+            return "Retreat Options"
         CampaignState.MODE_CUTSCENE:
             return "Field Report"
         CampaignState.MODE_CHAPTER_INTRO:
@@ -427,6 +490,100 @@ func _variant_to_dictionary_array(value: Variant) -> Array[Dictionary]:
         if typeof(entry) == TYPE_DICTIONARY:
             details.append(entry)
     return details
+
+func _build_choice_panel() -> void:
+    var summary_stack := body_label.get_parent()
+    if summary_stack == null:
+        return
+
+    _choice_container = VBoxContainer.new()
+    _choice_container.name = "ChoicePanel"
+    _choice_container.visible = false
+    _choice_container.add_theme_constant_override("separation", 12)
+
+    _choice_prompt_label = Label.new()
+    _choice_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _choice_prompt_label.add_theme_font_size_override("font_size", 16)
+    _choice_container.add_child(_choice_prompt_label)
+
+    _ensure_choice_option_capacity(3)
+
+    summary_stack.add_child(_choice_container)
+    summary_stack.move_child(_choice_container, body_label.get_index() + 1)
+
+func _ensure_choice_option_capacity(required_count: int) -> void:
+    if _choice_container == null:
+        return
+
+    while _choice_option_buttons.size() < required_count:
+        var index := _choice_option_buttons.size()
+        var card := PanelContainer.new()
+        var margin := MarginContainer.new()
+        margin.add_theme_constant_override("margin_left", 12)
+        margin.add_theme_constant_override("margin_top", 10)
+        margin.add_theme_constant_override("margin_right", 12)
+        margin.add_theme_constant_override("margin_bottom", 10)
+
+        var stack := VBoxContainer.new()
+        stack.add_theme_constant_override("separation", 6)
+
+        var button := Button.new()
+        button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+        button.custom_minimum_size = Vector2(0.0, PRIMARY_CTA_HEIGHT)
+        var button_index := index
+        button.pressed.connect(func() -> void: _on_choice_button_pressed(button_index))
+
+        var hint := Label.new()
+        hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        hint.add_theme_font_size_override("font_size", 14)
+
+        stack.add_child(button)
+        stack.add_child(hint)
+        margin.add_child(stack)
+        card.add_child(margin)
+        _choice_container.add_child(card)
+        _choice_option_buttons.append(button)
+        _choice_option_hint_labels.append(hint)
+
+func _render_choice_panel() -> void:
+    if _choice_container == null:
+        return
+
+    _ensure_choice_option_capacity(max(3, _choice_options.size()))
+
+    var is_choice_mode := _current_mode == CampaignState.MODE_CHOICE or _current_mode == CampaignState.MODE_DEFEAT
+    body_label.visible = not is_choice_mode
+    _choice_container.visible = is_choice_mode
+    if _choice_prompt_label != null:
+        _choice_prompt_label.text = _choice_prompt
+
+    for index in range(_choice_option_buttons.size()):
+        var button := _choice_option_buttons[index]
+        var hint := _choice_option_hint_labels[index]
+        if index < _choice_options.size():
+            var option: Dictionary = _choice_options[index]
+            button.visible = true
+            button.disabled = bool(option.get("disabled", false))
+            button.text = String(option.get("label", "Choose"))
+            button.tooltip_text = String(option.get("hint", ""))
+            hint.visible = true
+            hint.text = String(option.get("hint", ""))
+        else:
+            button.visible = false
+            button.disabled = true
+            button.text = ""
+            button.tooltip_text = ""
+            hint.visible = false
+            hint.text = ""
+
+func _on_choice_button_pressed(index: int) -> void:
+    if index < 0 or index >= _choice_options.size():
+        return
+    var option_id := String(_choice_options[index].get("id", "")).strip_edges()
+    if option_id.is_empty():
+        return
+    ui_cue_requested.emit("ui_common_confirm_01")
+    choice_selected.emit(option_id)
 
 func _format_lines_for_panel(lines: Array[String], fallback: String) -> String:
     if lines.is_empty():
@@ -523,7 +680,13 @@ func _rebuild_party_roster() -> void:
         var entry: Dictionary = _party_details[index]
         var button := Button.new()
         button.custom_minimum_size = Vector2(0.0, _get_party_button_height())
+        var recovering: bool = bool(entry.get("recovering", false))
+        var recovering_label: String = String(entry.get("recovering_label", "")).strip_edges()
         button.text = String(entry.get("name", "Unit"))
+        if recovering and not recovering_label.is_empty():
+            button.text = "%s  [%s]" % [button.text, recovering_label]
+            button.modulate = Color(0.72, 0.72, 0.72, 0.85)
+            button.tooltip_text = recovering_label
         button.alignment = HORIZONTAL_ALIGNMENT_LEFT
         var button_index := index
         button.pressed.connect(func() -> void: _select_party_index(button_index))
@@ -586,9 +749,13 @@ func _render_selected_party(entry: Dictionary) -> void:
     var unit_id: String = String(entry.get("unit_id", ""))
     var deployed: bool = _deployed_party_unit_ids.has(unit_id)
     var locked: bool = _locked_party_unit_ids.has(unit_id)
+    var recovering: bool = bool(entry.get("recovering", false))
+    var recovering_label: String = String(entry.get("recovering_label", "")).strip_edges()
     var role_text: String = "Deployed" if deployed else "Reserve"
     if locked:
         role_text = "Core"
+    elif recovering and not recovering_label.is_empty():
+        role_text = recovering_label
 
     party_name_label.text = str(entry.get("name", "Unit"))
     party_status_label.text = "HP %s   Status %s" % [
@@ -612,6 +779,10 @@ func _render_selected_party(entry: Dictionary) -> void:
         party_assignment_button.text = "Rian Locked"
         party_assignment_button.disabled = true
         party_assignment_button.tooltip_text = "Rian is locked into the Chapter handoff and cannot be reassigned."
+    elif recovering:
+        party_assignment_button.text = "Recovering"
+        party_assignment_button.disabled = true
+        party_assignment_button.tooltip_text = recovering_label if not recovering_label.is_empty() else "This unit is unavailable while recovering."
     elif deployed:
         party_assignment_button.text = "Assigned to Sortie"
         party_assignment_button.disabled = true
@@ -799,6 +970,10 @@ func _on_advance_pressed() -> void:
 func _on_save_pressed() -> void:
     ui_cue_requested.emit("ui_inventory_open_01")
     save_panel_requested.emit()
+
+func _on_encyclopedia_pressed() -> void:
+    ui_cue_requested.emit("ui_inventory_open_01")
+    encyclopedia_requested.emit()
 
 func _select_relative_section(offset: int) -> bool:
     var current_index := SECTION_ORDER.find(_active_section)

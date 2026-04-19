@@ -4,6 +4,7 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const CH07_MARKET = preload("res://data/stages/ch07_01_stage.tres")
 const CH07_SQUARE = preload("res://data/stages/ch07_02_stage.tres")
 const CH07_PROCESSION = preload("res://data/stages/ch07_03_stage.tres")
+const CH07_SERMON = preload("res://data/stages/ch07_04_stage.tres")
 
 const STAGE_CASES := [
 	{
@@ -46,6 +47,20 @@ const STAGE_CASES := [
 			&"procession_route_unread",
 			&"procession_route_partial",
 			&"procession_route_confirmed"
+		]
+	},
+	{
+		"stage": CH07_SERMON,
+		"required_interactions": 2,
+		"objective_texts": [
+			"Cut the west and east sermon pulleys to break the hymn channels. (0/2)",
+			"One sermon pulley is broken. Break the remaining hymn channel. (1/2)",
+			"Both sermon pulleys are broken. The prayer hall is exposed. (2/2)"
+		],
+		"state_ids": [
+			&"sermon_channels_locked",
+			&"sermon_channels_partial",
+			&"sermon_channels_open"
 		]
 	}
 ]

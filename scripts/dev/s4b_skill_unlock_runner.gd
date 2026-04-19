@@ -16,6 +16,12 @@ extends SceneTree
 const SkillData = preload("res://scripts/data/skill_data.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
+const ALLY_RIAN = preload("res://data/units/ally_rian.tres")
+const ALLY_SERIN = preload("res://data/units/ally_serin.tres")
+const ALLY_BRAN = preload("res://data/units/ally_bran.tres")
+const ALLY_TIA = preload("res://data/units/ally_tia.tres")
+const ALLY_ENOCH = preload("res://data/units/ally_enoch.tres")
+const ALLY_KARL = preload("res://data/units/ally_karl.tres")
 
 var _failed: bool = false
 
@@ -38,6 +44,7 @@ func _run() -> void:
     if not _assert_combined_all_condition(): return
     if not _assert_unlock_description(): return
     if not _assert_progression_service_filtering(): return
+    if not _assert_representative_skill_resources(): return
 
     print("[PASS] s4b_skill_unlock_runner: all assertions passed.")
     quit(0)
@@ -189,6 +196,25 @@ func _assert_progression_service_filtering() -> bool:
         svc.queue_free()
         return _fail("get_locked_skills() should include only non-matching skills")
     svc.queue_free()
+    return true
+
+func _assert_representative_skill_resources() -> bool:
+    var ally_defaults := {
+        "Rian": ALLY_RIAN.default_skill,
+        "Serin": ALLY_SERIN.default_skill,
+        "Bran": ALLY_BRAN.default_skill,
+        "Tia": ALLY_TIA.default_skill,
+        "Enoch": ALLY_ENOCH.default_skill,
+        "Karl": ALLY_KARL.default_skill,
+    }
+    for name in ally_defaults.keys():
+        var skill: SkillData = ally_defaults[name]
+        if skill == null:
+            return _fail("%s should load a real default skill resource" % name)
+        if skill.skill_id == &"basic_attack":
+            return _fail("%s should no longer point at basic_attack as its representative skill resource" % name)
+        if String(skill.display_name).strip_edges().is_empty():
+            return _fail("%s default skill should expose a readable display name" % name)
     return true
 
 func _make_skill(condition: Dictionary) -> SkillData:

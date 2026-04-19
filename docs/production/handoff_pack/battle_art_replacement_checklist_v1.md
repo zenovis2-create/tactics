@@ -18,13 +18,13 @@ Use this to track which generated battle assets have been replaced by production
 ### `object_icons`
 
 - Generated count: `4`
-- Production replaced: `0`
+- Production replaced: `4`
 - Production dir: `/Volumes/AI/tactics/assets/ui/production/object_icons`
 
-- [ ] `altar.png`
-- [ ] `chest.png`
-- [ ] `gate.png`
-- [ ] `lever.png`
+- [x] `altar.png`
+- [x] `chest.png`
+- [x] `gate.png`
+- [x] `lever.png`
 
 ### `unit_role_icons`
 
@@ -96,4 +96,3 @@ Use this to track which generated battle assets have been replaced by production
 - `godot4 --headless --path /Volumes/AI/tactics --script res://scripts/dev/m1_playtest_runner.gd`
 - `godot4 --headless --path /Volumes/AI/tactics --script res://scripts/dev/m3_ui_runner.gd`
 - `scripts/dev/render_representative_snapshots.sh /Volumes/AI/tactics/.codex-representative-snaps`
-

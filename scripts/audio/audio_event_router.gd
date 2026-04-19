@@ -3,7 +3,8 @@ extends Node
 
 signal cue_triggered(cue_id: String)
 
-const MANIFEST_PATH := "res://data/audio/sfx_placeholder_manifest.json"
+const MANIFEST_PATH := "res://data/audio/sfx_manifest.json"
+const FALLBACK_MANIFEST_PATH := "res://data/audio/sfx_placeholder_manifest.json"
 const PLAYER_POOL_SIZE := 4
 
 var cue_history: Array[String] = []
@@ -13,7 +14,9 @@ var _cue_manifest: Dictionary = {}
 var _stream_cache: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _last_asset_path: String = ""
+var _last_manifest_path: String = ""
 var _next_player_index: int = 0
+var _cue_manifest_sources: Dictionary = {}
 
 func _ready() -> void:
 	_load_manifest()
@@ -39,6 +42,7 @@ func get_snapshot() -> Dictionary:
 		"last_cue": cue_history[-1] if not cue_history.is_empty() else "",
 		"cue_history": cue_history.duplicate(),
 		"last_asset_path": _last_asset_path,
+		"last_manifest_path": _last_manifest_path,
 		"manifest_count": _cue_manifest.size(),
 		"missing_cues": missing_cues.duplicate()
 	}
@@ -53,15 +57,27 @@ func _on_ui_cue_requested(cue_id: String) -> void:
 	cue_triggered.emit(cue_id)
 
 func _load_manifest() -> void:
-	if not FileAccess.file_exists(MANIFEST_PATH):
-		push_warning("Audio cue manifest is missing at %s." % MANIFEST_PATH)
+	_cue_manifest.clear()
+	_cue_manifest_sources.clear()
+	_load_manifest_file(FALLBACK_MANIFEST_PATH, false)
+	_load_manifest_file(MANIFEST_PATH, true)
+	if _cue_manifest.is_empty():
+		push_warning("Audio cue manifests are missing or empty: %s, %s." % [MANIFEST_PATH, FALLBACK_MANIFEST_PATH])
+
+func _load_manifest_file(path: String, override_existing: bool) -> void:
+	if not FileAccess.file_exists(path):
 		return
-	var source: String = FileAccess.get_file_as_string(MANIFEST_PATH)
+	var source: String = FileAccess.get_file_as_string(path)
 	var parsed: Variant = JSON.parse_string(source)
 	if not (parsed is Dictionary):
-		push_warning("Audio cue manifest could not be parsed from %s." % MANIFEST_PATH)
+		push_warning("Audio cue manifest could not be parsed from %s." % path)
 		return
-	_cue_manifest = parsed
+	for cue_id_variant in parsed.keys():
+		var cue_id: String = String(cue_id_variant)
+		if not override_existing and _cue_manifest.has(cue_id):
+			continue
+		_cue_manifest[cue_id] = parsed[cue_id]
+		_cue_manifest_sources[cue_id] = path
 
 func _ensure_players() -> void:
 	if not _players.is_empty():
@@ -101,6 +117,7 @@ func _resolve_stream(cue_id: String) -> AudioStream:
 	if asset_path.is_empty():
 		return null
 	_last_asset_path = asset_path
+	_last_manifest_path = String(_cue_manifest_sources.get(cue_id, ""))
 	if _stream_cache.has(asset_path):
 		return _stream_cache[asset_path] as AudioStream
 	var stream: AudioStream = null
@@ -134,3 +151,4 @@ func _release_audio_resources() -> void:
 	_players.clear()
 	_stream_cache.clear()
 	_last_asset_path = ""
+	_last_manifest_path = ""

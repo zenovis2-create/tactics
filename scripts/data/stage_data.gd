@@ -5,6 +5,7 @@ const UnitData = preload("res://scripts/data/unit_data.gd")
 const InteractiveObjectData = preload("res://scripts/data/interactive_object_data.gd")
 
 @export var stage_id: StringName = &"stage_001"
+@export var choice_point_id: StringName = &""
 @export var stage_title: String = ""
 @export var map_scene: PackedScene
 @export var grid_size: Vector2i = Vector2i(8, 8)
@@ -23,6 +24,15 @@ const InteractiveObjectData = preload("res://scripts/data/interactive_object_dat
 @export_multiline var objective_text: String = ""
 @export var interaction_objective_texts: PackedStringArray = PackedStringArray()
 @export var interaction_objective_state_ids: Array[StringName] = []
+@export var rescue_objective_id: StringName = &""
+@export var rescue_objective_required_count: int = 0
+@export var rescue_objective_object_ids: Array[StringName] = []
+@export var hold_objective_id: StringName = &""
+@export var hold_objective_required_turns: int = 0
+@export var finale_name_anchor_ids: Array[StringName] = []
+@export var finale_minimum_name_anchors: int = 0
+@export var ally_attack_bonus: int = 0
+@export var ally_defense_bonus: int = 0
 @export var start_cutscene_id: StringName = &""
 @export var clear_cutscene_id: StringName = &""
 @export_multiline var next_destination_summary: String = ""

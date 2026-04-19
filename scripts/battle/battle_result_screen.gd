@@ -4,14 +4,19 @@ extends Control
 ## 승리/패배 제목 + 목표 + 보상 + 기억 조각 + Burden/Trust 변화 + 지원 공격 횟수.
 
 signal result_confirmed
+signal encyclopedia_requested
 
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
 @onready var background: ColorRect = get_node_or_null("Background") as ColorRect
 @onready var panel: PanelContainer = get_node_or_null("Panel") as PanelContainer
 @onready var title_label: Label = get_node_or_null("Panel/Margin/Content/TitleLabel") as Label
 @onready var body_label: RichTextLabel = get_node_or_null("Panel/Margin/Content/BodyLabel") as RichTextLabel
-@onready var confirm_button: Button = get_node_or_null("Panel/Margin/Content/ConfirmButton") as Button
+@onready var footer_buttons: HBoxContainer = get_node_or_null("Panel/Margin/Content/FooterButtons") as HBoxContainer
+@onready var open_encyclopedia_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/OpenEncyclopediaButton") as Button
+@onready var confirm_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/ConfirmButton") as Button
 
 var _last_result: Dictionary = {}
 
@@ -19,9 +24,13 @@ func _ready() -> void:
 	visible = false
 	# _ensure_labels는 setup()에서도 호출되므로 노드가 없으면 폴백 생성
 	_ensure_labels()
+	_ensure_footer_buttons()
 	_ensure_confirm_button()
+	_ensure_open_encyclopedia_button()
 	if confirm_button != null:
 		confirm_button.pressed.connect(_on_confirm)
+	if open_encyclopedia_button != null:
+		open_encyclopedia_button.pressed.connect(_on_open_encyclopedia)
 
 
 func _ensure_labels() -> void:
@@ -41,12 +50,31 @@ func _ensure_labels() -> void:
 func _ensure_confirm_button() -> void:
 	if confirm_button != null:
 		return
+	_ensure_footer_buttons()
 	confirm_button = Button.new()
 	confirm_button.text = "Confirm"
-	add_child(confirm_button)
+	footer_buttons.add_child(confirm_button)
+
+func _ensure_footer_buttons() -> void:
+	if footer_buttons != null:
+		return
+	footer_buttons = HBoxContainer.new()
+	footer_buttons.name = "FooterButtons"
+	footer_buttons.alignment = BoxContainer.ALIGNMENT_END
+	add_child(footer_buttons)
+
+func _ensure_open_encyclopedia_button() -> void:
+	if open_encyclopedia_button != null:
+		return
+	_ensure_footer_buttons()
+	open_encyclopedia_button = Button.new()
+	open_encyclopedia_button.name = "OpenEncyclopediaButton"
+	open_encyclopedia_button.text = "Open Encyclopedia"
+	footer_buttons.add_child(open_encyclopedia_button)
 
 func show_result(result: Dictionary) -> void:
 	_last_result = result
+	_record_battle_result(result)
 	visible = true
 
 	var title: String = str(result.get("title", "Battle Result"))
@@ -115,6 +143,14 @@ func show_result(result: Dictionary) -> void:
 		if support_bond > 0:
 			body_lines.append("[b]Support Bond:[/b] %d" % support_bond)
 
+	var closest_bond: Dictionary = result.get("closest_bond", {})
+	if not closest_bond.is_empty():
+		body_lines.append("Your closest bond was %s — %s support, %d battles together" % [
+			_resolve_closest_bond_ally_name(String(closest_bond.get("pair", ""))),
+			SupportConversations.get_rank_label(int(closest_bond.get("rank", 0))),
+			int(closest_bond.get("battles_together", 0))
+		])
+
 	if title_label != null:
 		title_label.text = title
 	if body_label != null:
@@ -123,6 +159,8 @@ func show_result(result: Dictionary) -> void:
 	# 버튼 포커스
 	if confirm_button != null:
 		confirm_button.grab_focus()
+	if open_encyclopedia_button != null:
+		open_encyclopedia_button.disabled = false
 
 func hide_result() -> void:
 	visible = false
@@ -132,9 +170,57 @@ func get_result_snapshot() -> Dictionary:
 		"visible": visible,
 		"title": title_label.text if title_label != null else "",
 		"body_lines_count": body_label.text.count("\n") + 1 if body_label != null else 0,
-		"has_confirm_button": confirm_button != null
+		"has_confirm_button": confirm_button != null,
+		"has_open_encyclopedia_button": open_encyclopedia_button != null
 	}
+
+func _record_battle_result(result: Dictionary) -> void:
+	var progression: ProgressionData = result.get("progression_data", null) as ProgressionData
+	if progression == null:
+		return
+	var objectives: Array[String] = []
+	var raw_objectives: Variant = result.get("objectives_completed", [])
+	if typeof(raw_objectives) == TYPE_ARRAY:
+		for entry in raw_objectives:
+			objectives.append(String(entry))
+	var notes := String(result.get("notes", "Battle cleared.")).strip_edges()
+	_record_support_conversations(result, progression)
+	progression.add_battle_record({
+		"stage_id": String(result.get("stage_id", "")),
+		"turns": int(result.get("turn_count", 0)),
+		"star_rating": int(result.get("star_rating", 0)),
+		"objectives_completed": objectives,
+		"notes": notes
+	})
+
+func _record_support_conversations(result: Dictionary, progression: ProgressionData) -> void:
+	if progression == null:
+		return
+	var raw_entries: Variant = result.get("support_conversations_fired", [])
+	if typeof(raw_entries) != TYPE_ARRAY:
+		return
+	for entry_variant in raw_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry := entry_variant as Dictionary
+		progression.record_support_history({
+			"pair": String(entry.get("pair", "")).strip_edges(),
+			"rank": int(entry.get("rank", 0)),
+			"chapter": String(entry.get("chapter", result.get("chapter", ""))).strip_edges(),
+			"stage_id": String(entry.get("stage_id", result.get("stage_id", ""))).strip_edges(),
+			"timestamp": int(entry.get("timestamp", Time.get_unix_time_from_system()))
+		})
+
+func _resolve_closest_bond_ally_name(pair_id: String) -> String:
+	var normalized_pair := SupportConversations.normalize_pair_id(pair_id)
+	for unit_id in normalized_pair.split(":", false):
+		if unit_id != "ally_rian":
+			return SupportConversations.get_unit_display_name(unit_id)
+	return "Ally"
 
 func _on_confirm() -> void:
 	result_confirmed.emit()
 	hide_result()
+
+func _on_open_encyclopedia() -> void:
+	encyclopedia_requested.emit()

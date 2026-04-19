@@ -80,9 +80,32 @@ func _run() -> void:
             quit(1)
             return
 
+        if StringName(battle.stage_data.start_cutscene_id) != _get_stage_intro_cutscene_id(stage_id):
+            push_error("CH07 stage %s intro cutscene id mismatch: expected %s, got %s." % [stage_id, _get_stage_intro_cutscene_id(stage_id), battle.stage_data.start_cutscene_id])
+            quit(1)
+            return
+
+        if StringName(battle.stage_data.clear_cutscene_id) != _get_stage_outro_cutscene_id(stage_id):
+            push_error("CH07 stage %s clear cutscene id mismatch: expected %s, got %s." % [stage_id, _get_stage_outro_cutscene_id(stage_id), battle.stage_data.clear_cutscene_id])
+            quit(1)
+            return
+
+        if not _has_cutscene_start(battle.cutscene_player.get_event_log(), _get_stage_intro_cutscene_id(stage_id)):
+            push_error("CH07 shell did not start intro cutscene %s." % [_get_stage_intro_cutscene_id(stage_id)])
+            quit(1)
+            return
+
+        var cutscene_log_before_victory: int = battle.cutscene_player.get_event_log().size()
+
         await _play_battle_to_victory(battle, stage_id)
         await process_frame
         await process_frame
+
+        var victory_cutscene_entries: Array[Dictionary] = battle.cutscene_player.get_event_log().slice(cutscene_log_before_victory)
+        if not _has_cutscene_start(victory_cutscene_entries, _get_stage_outro_cutscene_id(stage_id)):
+            push_error("CH07 shell did not start clear cutscene %s." % [_get_stage_outro_cutscene_id(stage_id)])
+            quit(1)
+            return
 
         var post_battle_snapshot: Dictionary = main.get_campaign_state_snapshot()
         if stage_id != EXPECTED_CH07_ORDER[-1]:
@@ -299,6 +322,18 @@ func _get_ready_ally_units(battle) -> Array:
         if is_instance_valid(unit) and not unit.is_defeated() and battle.turn_manager.can_unit_act(unit):
             ready_units.append(unit)
     return ready_units
+
+func _has_cutscene_start(log: Array[Dictionary], cutscene_id: StringName) -> bool:
+    for entry in log:
+        if entry.get("event", "") == "cutscene_started" and entry.get("id", &"") == cutscene_id:
+            return true
+    return false
+
+func _get_stage_intro_cutscene_id(stage_id: StringName) -> StringName:
+    return StringName("%s_intro" % String(stage_id).to_lower())
+
+func _get_stage_outro_cutscene_id(stage_id: StringName) -> StringName:
+    return StringName("%s_outro" % String(stage_id).to_lower())
 
 func _is_battle_finished(battle) -> bool:
     var phase: int = int(battle.current_phase)

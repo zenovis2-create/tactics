@@ -9,5 +9,5 @@ display_name = "West Moon-Scent Post"
 object_type = "altar"
 grid_position = Vector2i(2, 5)
 interaction_range = 1
-reward_text = "West moon-scent post surveyed: one black-hound scent lane is stripped out of the ambush grid."
+reward_text = "West moon-scent post surveyed: one moonlit scent lane is exposed before the hounds can close it."
 interaction_text = "West moon-scent post surveyed."

@@ -1,0 +1,51 @@
+{
+  "ui_common_cancel_01": {
+    "asset_path": "res://audio/sfx/ui_common_cancel_01.wav",
+    "duration_ms": 130,
+    "lane": "ui_common",
+    "notes": "Productionized high-frequency cancel cue.",
+    "priority": "low"
+  },
+  "ui_common_confirm_01": {
+    "asset_path": "res://audio/sfx/ui_common_confirm_01.wav",
+    "duration_ms": 140,
+    "lane": "ui_common",
+    "notes": "Productionized high-frequency confirm cue.",
+    "priority": "low"
+  },
+  "ui_inventory_close_01": {
+    "asset_path": "res://audio/sfx/ui_inventory_close_01.wav",
+    "duration_ms": 150,
+    "lane": "ui_panel",
+    "notes": "Productionized inventory close cue.",
+    "priority": "low"
+  },
+  "ui_inventory_open_01": {
+    "asset_path": "res://audio/sfx/ui_inventory_open_01.wav",
+    "duration_ms": 170,
+    "lane": "ui_panel",
+    "notes": "Productionized inventory open cue.",
+    "priority": "low"
+  },
+  "ui_panel_tab_shift_01": {
+    "asset_path": "res://audio/sfx/ui_panel_tab_shift_01.wav",
+    "duration_ms": 180,
+    "lane": "ui_panel",
+    "notes": "Productionized panel tab shift cue.",
+    "priority": "low"
+  },
+  "camp_party_select_01": {
+    "asset_path": "res://audio/sfx/camp_party_select_01.wav",
+    "duration_ms": 170,
+    "lane": "camp_party",
+    "notes": "Productionized party select cue.",
+    "priority": "medium"
+  },
+  "camp_next_battle_confirm_01": {
+    "asset_path": "res://audio/sfx/camp_next_battle_confirm_01.wav",
+    "duration_ms": 240,
+    "lane": "camp_recommit",
+    "notes": "Productionized next-battle confirm cue.",
+    "priority": "medium"
+  }
+}

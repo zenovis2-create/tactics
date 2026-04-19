@@ -46,6 +46,8 @@ Vector2i(8, 2): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("Cut the west and east sermon pulleys to break the hymn channels. (0/2)", "One sermon pulley is broken. Break the remaining hymn channel. (1/2)", "Both sermon pulleys are broken. The prayer hall is exposed. (2/2)")
+interaction_objective_state_ids = [&"sermon_channels_locked", &"sermon_channels_partial", &"sermon_channels_open"]
 start_cutscene_id = &"ch07_04_intro"
 clear_cutscene_id = &"ch07_04_outro"
 next_destination_summary = "The hymn channels break, and the last route into Saria's prayer hall is exposed."

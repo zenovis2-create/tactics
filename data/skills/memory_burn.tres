@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"memory_burn"
+display_name = "Memory Burn"
+range = 2
+power_modifier = 1
+targeting_rule = &"adjacent_enemy"
+unlock_condition = {}

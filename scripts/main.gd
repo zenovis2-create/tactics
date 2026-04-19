@@ -10,9 +10,49 @@ const BgmRouter = preload("res://scripts/audio/bgm_router.gd")
 const TitleScreen = preload("res://scripts/ui/title_screen.gd")
 const DefeatScreen = preload("res://scripts/ui/defeat_screen.gd")
 const SaveLoadPanel = preload("res://scripts/ui/save_load_panel.gd")
+const EncyclopediaPanel = preload("res://scripts/ui/encyclopedia_panel.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const UnitData = preload("res://scripts/data/unit_data.gd")
+
+const ng_plus_shop_items: Array[Dictionary] = [
+    {
+        "id": "bond_anchor",
+        "name": "Bond Anchor",
+        "cost": 15,
+        "description": "All allies start with S-rank support with Rian."
+    },
+    {
+        "id": "veteran_squad",
+        "name": "Veteran Squad",
+        "cost": 10,
+        "description": "All allies start at level 5."
+    },
+    {
+        "id": "iron_memory",
+        "name": "Iron Memory",
+        "cost": 8,
+        "description": "Recovered memory fragments carry into the next run."
+    },
+    {
+        "id": "lete_bow",
+        "name": "Lete's Bow",
+        "cost": 12,
+        "description": "Unlock Lete's bow from the start of a new campaign."
+    },
+    {
+        "id": "mira_archive",
+        "name": "Mira's Archive",
+        "cost": 10,
+        "description": "All intel and briefing records start unlocked."
+    },
+    {
+        "id": "divine_blessing",
+        "name": "Divine Blessing",
+        "cost": 20,
+        "description": "Grants one free Name Call in the CH10 finale."
+    }
+]
 
 @onready var battle_controller: BattleController = $BattleScene
 @onready var campaign_controller: CampaignController = $CampaignController
@@ -22,6 +62,7 @@ const UnitData = preload("res://scripts/data/unit_data.gd")
 @onready var title_screen: TitleScreen = $UILayer/TitleScreen
 @onready var defeat_screen: DefeatScreen = $UILayer/DefeatScreen
 @onready var save_load_panel: SaveLoadPanel = $UILayer/SaveLoadPanel
+@onready var encyclopedia_panel: EncyclopediaPanel = $UILayer/EncyclopediaPanel
 
 var _save_service: SaveService
 
@@ -60,6 +101,7 @@ func _ready() -> void:
     if title_screen != null:
         title_screen.new_game_requested.connect(_on_new_game_requested)
         title_screen.load_game_requested.connect(_on_load_game_requested)
+        title_screen.ng_plus_purchase_requested.connect(_on_ng_plus_purchase_requested)
 
     # DefeatScreen 시그널
     if defeat_screen != null:
@@ -73,6 +115,9 @@ func _ready() -> void:
         save_load_panel.load_requested.connect(_on_save_load_requested)
     if campaign_panel != null:
         campaign_panel.save_panel_requested.connect(open_save_panel)
+        campaign_panel.encyclopedia_requested.connect(_open_encyclopedia)
+    if battle_controller != null and battle_controller.hud != null:
+        battle_controller.hud.encyclopedia_requested.connect(_open_encyclopedia)
 
     # 타이틀 화면으로 시작
     _show_title()
@@ -101,12 +146,22 @@ func open_load_panel() -> void:
     if save_load_panel != null:
         save_load_panel.open_load_mode()
 
+func _open_encyclopedia() -> void:
+    if encyclopedia_panel == null or campaign_controller == null:
+        return
+    var context: Dictionary = campaign_controller.get_encyclopedia_context()
+    if context.is_empty():
+        return
+    encyclopedia_panel.show_context(context)
+
 # --- 흐름 제어 ---
 
 func _show_title() -> void:
+    _restore_title_progression_from_autosave_if_needed()
     if title_screen != null:
         title_screen.setup_save_service(_save_service)
         title_screen.setup_load_panel(save_load_panel)
+        title_screen.setup_ng_plus_shop(_get_progression_data(), ng_plus_shop_items)
         title_screen.visible = true
     if battle_controller != null:
         battle_controller.visible = false
@@ -131,12 +186,63 @@ func _start_loaded_game(data: ProgressionData) -> void:
     # ProgressionService에 로드 데이터 적용
     if battle_controller.progression_service != null:
         battle_controller.progression_service.load_data(data)
-    campaign_controller.start_chapter_one_flow()
+    campaign_controller.start_chapter_one_flow(false)
+
+func purchase_ng_plus_item(item_id: String) -> bool:
+    _restore_title_progression_from_autosave_if_needed()
+    var progression: ProgressionData = _get_progression_data()
+    if progression == null:
+        return false
+    var shop_item: Dictionary = _find_ng_plus_shop_item(item_id)
+    if shop_item.is_empty() or progression.has_ng_plus_purchase(item_id):
+        return false
+    var cost: int = int(shop_item.get("cost", 0))
+    if cost <= 0 or progression.badges_of_heroism < cost:
+        return false
+    progression.badges_of_heroism -= cost
+    if not progression.add_ng_plus_purchase(item_id):
+        progression.badges_of_heroism += cost
+        return false
+    if item_id == "iron_memory" and progression.ng_plus_saved_fragments.is_empty():
+        progression.set_ng_plus_saved_fragments(progression.get_recovered_fragment_ids())
+    if _save_service != null:
+        _save_service.save_progression(progression, 0)
+    _refresh_title_ng_plus()
+    return true
+
+func _get_progression_data() -> ProgressionData:
+    if battle_controller == null or battle_controller.progression_service == null:
+        return null
+    return battle_controller.progression_service.get_data()
+
+func _restore_title_progression_from_autosave_if_needed() -> void:
+    if _save_service == null or battle_controller == null or battle_controller.progression_service == null:
+        return
+    var progression: ProgressionData = battle_controller.progression_service.get_data()
+    if progression != null and (progression.badges_of_heroism > 0 or not progression.ng_plus_purchases.is_empty() or not progression.earned_badges.is_empty()):
+        return
+    if not _save_service.slot_exists(0):
+        return
+    var loaded: ProgressionData = _save_service.load_progression(0)
+    if loaded != null:
+        battle_controller.progression_service.load_data(loaded)
+
+func _find_ng_plus_shop_item(item_id: String) -> Dictionary:
+    for item: Dictionary in ng_plus_shop_items:
+        if String(item.get("id", "")) == item_id:
+            return item.duplicate(true)
+    return {}
+
+func _refresh_title_ng_plus() -> void:
+    if title_screen != null:
+        title_screen.setup_ng_plus_shop(_get_progression_data(), ng_plus_shop_items)
 
 # --- 시그널 핸들러 ---
 
 func _on_battle_finished_main(result: StringName, _stage_id: StringName) -> void:
     if result != &"victory" and defeat_screen != null:
+        if campaign_controller != null and String(campaign_controller.get_state_snapshot().get("mode", "")) == "defeat":
+            return
         if bgm_router != null:
             bgm_router.play_cue("bgm_cutscene_ch01", true)
         var rounds: int = battle_controller.round_index if battle_controller != null else 0
@@ -148,6 +254,9 @@ func _on_new_game_requested() -> void:
 func _on_load_game_requested(slot: int) -> void:
     var data: ProgressionData = _save_service.load_progression(slot) if _save_service != null else null
     _start_loaded_game(data)
+
+func _on_ng_plus_purchase_requested(item_id: String) -> void:
+    purchase_ng_plus_item(item_id)
 
 func _on_retry_requested() -> void:
     # 현재 스테이지 재시작
@@ -172,6 +281,8 @@ func _on_campaign_mode_changed(mode: String) -> void:
             _play_battle_bgm()
         "camp":
             bgm_router.play_cue("bgm_camp")
+        "defeat":
+            bgm_router.play_cue("bgm_cutscene_ch01")
         "cutscene":
             bgm_router.play_cue("bgm_cutscene_ch01")
         "chapter_intro":

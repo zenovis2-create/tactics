@@ -1,10 +1,13 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_karon.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch10_04_west_decree_anchor.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch10_04_center_edict_anchor.tres" id="7_object_b"]
+[ext_resource type="Resource" path="res://data/objects/ch10_04_east_decree_anchor.tres" id="8_object_c"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -29,9 +32,12 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
-interactive_objects = []
-win_condition = &"defeat_all_enemies"
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
+win_condition = &"resolve_all_interactions_and_defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+objective_text = "Break the three decree anchors, then defeat Karon's first phase and the remaining enemy line to open the royal hall."
+interaction_objective_texts = PackedStringArray("Break the three decree anchors, then defeat Karon's first phase and the remaining enemy line to open the royal hall. (0/3)", "One decree anchor is shattered. Break the remaining edict anchors. (1/3)", "Two decree anchors are shattered. Break the final edict anchor. (2/3)", "The decree chain is broken. Defeat Karon's first phase and the remaining enemy line to open the royal hall. (3/3)")
+interaction_objective_state_ids = [&"decree_chain_locked", &"decree_chain_partial", &"decree_chain_fractured", &"decree_chain_broken"]
 start_cutscene_id = &"ch10_04_intro"
 clear_cutscene_id = &"ch10_04_outro"
 next_destination_summary = "The royal hall breaks open, and the bell chamber below becomes the last road left."

@@ -3,6 +3,8 @@ extends SceneTree
 const MAIN_SCENE: PackedScene = preload("res://scenes/Main.tscn")
 const CH01_FINAL_STAGE = preload("res://data/stages/ch01_05_stage.tres")
 const CRITICAL_PLACEHOLDER_FRAGMENT := "/audio/sfx/"
+const PRODUCTION_MANIFEST_PATH := "res://data/audio/sfx_manifest.json"
+const PLACEHOLDER_MANIFEST_PATH := "res://data/audio/sfx_placeholder_manifest.json"
 
 var _failed: bool = false
 
@@ -38,14 +40,14 @@ func _run() -> void:
 	battle.hud._on_wait_pressed()
 	await process_frame
 	_assert_last_cue(main, "ui_common_confirm_01")
-	_assert_critical_placeholder_asset(main, "ui_common_confirm_01")
+	_assert_manifest_source(main, "ui_common_confirm_01", PRODUCTION_MANIFEST_PATH)
 	if _failed:
 		return
 
 	battle.hud._on_cancel_pressed()
 	await process_frame
 	_assert_last_cue(main, "ui_common_cancel_01")
-	_assert_critical_placeholder_asset(main, "ui_common_cancel_01")
+	_assert_manifest_source(main, "ui_common_cancel_01", PRODUCTION_MANIFEST_PATH)
 	if _failed:
 		return
 
@@ -98,6 +100,7 @@ func _run() -> void:
 	await process_frame
 	_assert_last_cue(main, "camp_party_select_01")
 	_assert_resolved_asset(main, "camp_party_select_01")
+	_assert_manifest_source(main, "camp_party_select_01", PRODUCTION_MANIFEST_PATH)
 	if _failed:
 		return
 
@@ -119,13 +122,14 @@ func _run() -> void:
 	await process_frame
 	_assert_last_cue(main, "ui_panel_tab_shift_01")
 	_assert_resolved_asset(main, "ui_panel_tab_shift_01")
+	_assert_manifest_source(main, "ui_panel_tab_shift_01", PRODUCTION_MANIFEST_PATH)
 	if _failed:
 		return
 
 	main.campaign_panel._on_advance_pressed()
 	await process_frame
 	_assert_history_contains(main, "camp_next_battle_confirm_01")
-	_assert_critical_placeholder_asset(main, "camp_next_battle_confirm_01")
+	_assert_manifest_source(main, "camp_next_battle_confirm_01", PRODUCTION_MANIFEST_PATH)
 	_assert_no_missing_cues(main)
 	if _failed:
 		return
@@ -162,6 +166,14 @@ func _assert_critical_placeholder_asset(main, expected_cue: String) -> void:
 	var asset_path := String(snapshot.get("last_asset_path", ""))
 	if not asset_path.contains(CRITICAL_PLACEHOLDER_FRAGMENT):
 		_fail("Expected cue %s to resolve under %s, got %s." % [expected_cue, CRITICAL_PLACEHOLDER_FRAGMENT, asset_path])
+	_assert_manifest_source(main, expected_cue, PLACEHOLDER_MANIFEST_PATH)
+
+func _assert_manifest_source(main, expected_cue: String, expected_manifest_path: String) -> void:
+	main.audio_event_router._resolve_stream(expected_cue)
+	var snapshot: Dictionary = main.audio_event_router.get_snapshot()
+	var manifest_path := String(snapshot.get("last_manifest_path", ""))
+	if manifest_path != expected_manifest_path:
+		_fail("Expected cue %s to resolve from %s, got %s." % [expected_cue, expected_manifest_path, manifest_path])
 
 func _assert_no_missing_cues(main) -> void:
 	var snapshot: Dictionary = main.audio_event_router.get_snapshot()

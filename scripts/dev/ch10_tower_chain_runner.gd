@@ -47,6 +47,29 @@ const STAGE_CASES := [
 			&"corridor_partial",
 			&"corridor_open"
 		]
+	},
+	{
+		"stage": preload("res://data/stages/ch10_04_stage.tres"),
+		"required_interactions": 3,
+		"win_condition": "resolve_all_interactions_and_defeat_all_enemies",
+		"objective_text": "Break the three decree anchors, then defeat Karon's first phase and the remaining enemy line to open the royal hall.",
+		"object_ids": [
+			&"ch10_04_west_decree_anchor",
+			&"ch10_04_center_edict_anchor",
+			&"ch10_04_east_decree_anchor"
+		],
+		"objective_texts": [
+			"Break the three decree anchors, then defeat Karon's first phase and the remaining enemy line to open the royal hall. (0/3)",
+			"One decree anchor is shattered. Break the remaining edict anchors. (1/3)",
+			"Two decree anchors are shattered. Break the final edict anchor. (2/3)",
+			"The decree chain is broken. Defeat Karon's first phase and the remaining enemy line to open the royal hall. (3/3)"
+		],
+		"state_ids": [
+			&"decree_chain_locked",
+			&"decree_chain_partial",
+			&"decree_chain_fractured",
+			&"decree_chain_broken"
+		]
 	}
 ]
 
@@ -72,13 +95,24 @@ func _run_stage_case(case_data: Dictionary) -> void:
 	await process_frame
 	await process_frame
 
-	_assert_equal(String(case_data["stage"].win_condition), "resolve_all_interactions", "%s should use interaction-based victory." % case_data["stage"].stage_id)
+	_assert_equal(String(case_data["stage"].win_condition), String(case_data.get("win_condition", "resolve_all_interactions")), "%s should use the authored objective rule." % case_data["stage"].stage_id)
 	if _failed:
 		return
 
 	_assert_equal(battle.interactive_objects.size(), int(case_data["required_interactions"]), "%s should author the expected tower-chain controls." % case_data["stage"].stage_id)
 	if _failed:
 		return
+
+	if case_data.has("object_ids"):
+		for index in range(case_data["object_ids"].size()):
+			_assert_equal(StringName(battle.interactive_objects[index].object_data.object_id), case_data["object_ids"][index], "%s object order drifted." % case_data["stage"].stage_id)
+			if _failed:
+				return
+
+	if case_data.has("objective_text"):
+		_assert_equal(String(case_data["stage"].objective_text).strip_edges(), String(case_data["objective_text"]), "%s should author the decree objective text." % case_data["stage"].stage_id)
+		if _failed:
+			return
 
 	_assert_objective_state(battle, case_data, 0)
 	if _failed:
@@ -92,9 +126,18 @@ func _run_stage_case(case_data: Dictionary) -> void:
 		if _failed:
 			return
 
-	if not battle._check_battle_end():
-		_fail("%s should enter victory when all tower-chain controls are resolved." % case_data["stage"].stage_id)
-		return
+	if String(case_data.get("win_condition", "resolve_all_interactions")) == "resolve_all_interactions_and_defeat_all_enemies":
+		if battle._check_battle_end():
+			_fail("%s should not enter victory until the enemy line is also defeated." % case_data["stage"].stage_id)
+			return
+		battle.enemy_units.clear()
+		if not battle._check_battle_end():
+			_fail("%s should enter victory after controls are resolved and the enemy line is cleared." % case_data["stage"].stage_id)
+			return
+	else:
+		if not battle._check_battle_end():
+			_fail("%s should enter victory when all tower-chain controls are resolved." % case_data["stage"].stage_id)
+			return
 
 	if int(battle.current_phase) != int(battle.BattlePhase.VICTORY):
 		_fail("%s should finish in BattlePhase.VICTORY after the final control resolves." % case_data["stage"].stage_id)

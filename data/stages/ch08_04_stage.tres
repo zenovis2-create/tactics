@@ -55,8 +55,8 @@ Vector2i(8, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Erase both black-mark control brands to open Lete's hunting route. (0/2)", "One black-mark control is erased. Break the remaining brand. (1/2)", "The black-mark controls are erased. Lete's signal route is open. (2/2)")
+interaction_objective_texts = PackedStringArray("Erase both black-mark control brands to open Lete's hunting line. (0/2)", "One control brand is erased. Break the remaining black mark. (1/2)", "The black-mark controls are broken. Lete's hunting line is exposed. (2/2)")
 interaction_objective_state_ids = [&"black_mark_control_locked", &"black_mark_control_partial", &"black_mark_control_open"]
 start_cutscene_id = &"ch08_04_intro"
 clear_cutscene_id = &"ch08_04_outro"
-next_destination_summary = "The control marks break, exposing the last route into Lete's signal nest."
+next_destination_summary = "The broken control brands expose the last route into Lete's hunting ground."

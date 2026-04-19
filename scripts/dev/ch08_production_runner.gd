@@ -4,6 +4,7 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const CH08_AMBUSH_STAGE = preload("res://data/stages/ch08_02_stage.tres")
 const CH08_RUIN_VENT_STAGE = preload("res://data/stages/ch08_03_stage.tres")
 const CH08_BLACK_MARK_STAGE = preload("res://data/stages/ch08_04_stage.tres")
+const CH08_LETE_STEALTH_STAGE = preload("res://data/stages/ch08_05_stage.tres")
 
 const AMBUSH_EXPECTED_OBJECTS := [
     &"ch08_02_west_moon_scent_post",
@@ -11,9 +12,9 @@ const AMBUSH_EXPECTED_OBJECTS := [
 ]
 
 const AMBUSH_EXPECTED_TEXTS := [
-    "Break the black-hound route pressure by surveying the moon-scent post and seizing the split-line cache. (0/2)",
-    "One ambush route point is secured. Resolve the remaining black-hound signal. (1/2)",
-    "Black-hound route pressure is broken. The ambush lane is charted. (2/2)"
+	"Survey the moon-scent post and seize the split-line cache to map the moonlit kill lane. (0/2)",
+	"One ambush control point is secured. Chart the remaining kill-lane route. (1/2)",
+	"The moonlit kill lane is mapped. The descent into the lower ruins is exposed. (2/2)"
 ]
 
 const AMBUSH_EXPECTED_STATES := [
@@ -29,10 +30,10 @@ const RUIN_VENT_EXPECTED_OBJECTS := [
 ]
 
 const RUIN_VENT_EXPECTED_TEXTS := [
-    "Release the vent line, break the holding gate, and seize the cell records to expose the lower ruin route. (0/3)",
-    "One ruin-control point is secured. Release the remaining vent-line controls. (1/3)",
-    "Two ruin-control points are secured. Seize the final holding-cell record. (2/3)",
-    "Ruin vent broken. The holding cells are exposed. (3/3)"
+	"Open the vent line, break the holding gate, and seize the cell records to expose the lower-cell route. (0/3)",
+	"One lower-cell control point is secured. Release the remaining ruin controls. (1/3)",
+	"Two lower-cell control points are secured. Seize the last holding record. (2/3)",
+	"The lower cells are exposed. The ruin holding route is charted. (3/3)"
 ]
 
 const RUIN_VENT_EXPECTED_STATES := [
@@ -48,9 +49,9 @@ const BLACK_MARK_EXPECTED_OBJECTS := [
 ]
 
 const BLACK_MARK_EXPECTED_TEXTS := [
-    "Erase both black-mark control brands to open Lete's hunting route. (0/2)",
-    "One black-mark control is erased. Break the remaining brand. (1/2)",
-    "The black-mark controls are erased. Lete's signal route is open. (2/2)"
+	"Erase both black-mark control brands to open Lete's hunting line. (0/2)",
+	"One control brand is erased. Break the remaining black mark. (1/2)",
+	"The black-mark controls are broken. Lete's hunting line is exposed. (2/2)"
 ]
 
 const BLACK_MARK_EXPECTED_STATES := [
@@ -95,7 +96,11 @@ func _run() -> void:
     if _failed:
         return
 
-    print("[PASS] CH08 production runner validated black-hound route pressure, ruin vent progression, and black-mark controls.")
+    await _assert_lete_stealth_progression(CH08_LETE_STEALTH_STAGE)
+    if _failed:
+        return
+
+    print("[PASS] CH08 production runner validated black-hound route pressure, ruin vent progression, black-mark controls, and Lete stealth.")
     quit(0)
 
 func _assert_stage_progression(stage_data, expected_object_ids: Array, expected_texts: Array, expected_states: Array, gate_index: int) -> void:
@@ -169,6 +174,89 @@ func _assert_objective_state(battle, resolved_count: int, expected_texts: Array,
     if _failed:
         return
     _assert_equal(StringName(snapshot.get("state_id", &"")), expected_states[resolved_count], "Unexpected CH08 objective state id.")
+
+func _assert_lete_stealth_progression(stage_data) -> void:
+    var battle = BATTLE_SCENE.instantiate()
+    root.add_child(battle)
+    battle.set_stage(stage_data)
+
+    await process_frame
+    await process_frame
+
+    var lete = null
+    for enemy in battle.enemy_units:
+        if is_instance_valid(enemy) and enemy.unit_data != null and StringName(enemy.unit_data.unit_id) == &"enemy_lete":
+            lete = enemy
+            break
+
+    var ally = battle.ally_units[0] if not battle.ally_units.is_empty() else null
+
+    if lete == null:
+        _fail("CH08_05 should spawn enemy_lete.")
+        return
+    if ally == null:
+        _fail("CH08_05 should spawn at least one ally for stealth validation.")
+        return
+
+    _assert_equal(StringName(lete.unit_data.boss_pattern), &"lete_ch08_05", "Lete should use the CH08_05 boss pattern.")
+    if _failed:
+        return
+
+    _assert_equal(lete.token_art.visible, false, "Lete should begin hidden with token art suppressed.")
+    if _failed:
+        return
+
+    _assert_equal(lete.is_stealth_hidden(), true, "Lete should begin in stealth-hidden state.")
+    if _failed:
+        return
+
+    _assert_equal(lete.name_label.visible, false, "Hidden Lete should not show the normal nameplate.")
+    if _failed:
+        return
+
+    _assert_equal(lete.hp_label.visible, false, "Hidden Lete should not show the normal HP strip.")
+    if _failed:
+        return
+
+    _assert_equal(lete.telegraph_label.visible, true, "Hidden Lete should still expose a low-information fairness cue.")
+    if _failed:
+        return
+
+    _assert_equal(lete.telegraph_label.text, "HIDDEN", "Hidden Lete should surface the hidden cue text.")
+    if _failed:
+        return
+
+    ally.set_grid_position(lete.grid_position + Vector2i(0, 1), stage_data.cell_size)
+    battle.selected_unit = ally
+    _assert_equal(battle._can_selected_unit_attack(lete), false, "Hidden Lete should not be attackable before reveal.")
+    if _failed:
+        return
+
+    var reveal_action: Dictionary = battle._pick_enemy_action(lete)
+    if reveal_action.is_empty():
+        _fail("Lete should still produce an enemy action when the stealth loop reveals.")
+        return
+
+    await process_frame
+
+    _assert_equal(lete.token_art.visible, true, "Lete should reveal when the stealth action hook fires.")
+    if _failed:
+        return
+
+    _assert_equal(lete.is_stealth_hidden(), false, "Lete should clear stealth-hidden state after revealing.")
+    if _failed:
+        return
+
+    _assert_equal(lete.telegraph_label.text == "HIDDEN", false, "Revealed Lete should drop the hidden cue text.")
+    if _failed:
+        return
+
+    _assert_equal(battle._can_selected_unit_attack(lete), true, "Revealed Lete should become attackable again.")
+    if _failed:
+        return
+
+    battle.queue_free()
+    await process_frame
 
 func _assert_equal(actual, expected, message: String) -> void:
     if actual == expected:

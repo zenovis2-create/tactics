@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/battle/BattleScene.tscn" id="2_battle"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/TitleScreen.tscn" id="6_title"]
 [ext_resource type="PackedScene" path="res://scenes/ui/DefeatScreen.tscn" id="7_defeat"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadPanel.tscn" id="8_saveload"]
+[ext_resource type="PackedScene" path="res://scenes/ui/encyclopedia_panel.tscn" id="10_encyclopedia"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -36,3 +37,5 @@ layer = 64
 [node name="DefeatScreen" parent="UILayer" instance=ExtResource("7_defeat")]
 
 [node name="SaveLoadPanel" parent="UILayer" instance=ExtResource("8_saveload")]
+
+[node name="EncyclopediaPanel" parent="UILayer" instance=ExtResource("10_encyclopedia")]

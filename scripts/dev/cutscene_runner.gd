@@ -2,7 +2,7 @@ extends SceneTree
 
 ## 3-E: 컷씬 시스템 검증 러너
 ## - CutsceneData 필드 및 유효성 확인
-## - CutsceneCatalog CH01 리소스 3개 로드
+## - CutsceneCatalog CH01/CH07/CH08/CH09A/CH09B/CH10 리소스 및 CH01_05, CH07/CH08/CH09A/CH09B/CH10 intro/outro 로드
 ## - CutscenePlayer.play() → beat 순서대로 진행
 ## - skip() → skippable/non-skippable 구분
 ## - fragment_flash beat 이벤트 로그 기록
@@ -26,6 +26,12 @@ func _run() -> void:
 
     if not _assert_cutscene_data_fields(): return
     if not _assert_catalog_loads(): return
+    if not _assert_ch01_05_cutscenes(player): return
+    if not _assert_ch07_cutscenes(player): return
+    if not _assert_ch08_cutscenes(player): return
+    if not _assert_ch09a_cutscenes(player): return
+    if not _assert_ch09b_cutscenes(player): return
+    if not _assert_ch10_cutscenes(player): return
     if not _assert_play_advances_beats(player): return
     if not _assert_skip_skippable(player): return
     if not _assert_skip_non_skippable(player): return
@@ -68,6 +74,165 @@ func _assert_catalog_loads() -> bool:
         return _fail("ch01_fragment_flash not found in catalog")
     if ch01_flash.skippable:
         return _fail("fragment_flash cutscene should not be skippable")
+    return true
+
+func _assert_ch01_05_cutscenes(player: CutscenePlayer) -> bool:
+    var ch01_intro: CutsceneData = CutsceneCatalog.get_cutscene(&"ch01_05_intro")
+    if ch01_intro == null:
+        return _fail("ch01_05_intro not found in catalog")
+    if not ch01_intro.is_valid():
+        return _fail("ch01_05_intro should be valid (has beats)")
+    if not ch01_intro.skippable:
+        return _fail("ch01_05_intro should be skippable")
+    if not _assert_cutscene_plays(player, ch01_intro):
+        return false
+
+    var ch01_outro: CutsceneData = CutsceneCatalog.get_cutscene(&"ch01_05_outro")
+    if ch01_outro == null:
+        return _fail("ch01_05_outro not found in catalog")
+    if not ch01_outro.is_valid():
+        return _fail("ch01_05_outro should be valid (has beats)")
+    if not ch01_outro.skippable:
+        return _fail("ch01_05_outro should be skippable")
+    if not _assert_cutscene_plays(player, ch01_outro):
+        return false
+
+    return true
+
+func _assert_ch07_cutscenes(player: CutscenePlayer) -> bool:
+    var cutscene_ids: Array[StringName] = [
+        &"ch07_01_intro", &"ch07_01_outro",
+        &"ch07_02_intro", &"ch07_02_outro",
+        &"ch07_03_intro", &"ch07_03_outro",
+        &"ch07_04_intro", &"ch07_04_outro",
+        &"ch07_05_intro", &"ch07_05_outro",
+    ]
+
+    for cutscene_id in cutscene_ids:
+        var data: CutsceneData = CutsceneCatalog.get_cutscene(cutscene_id)
+        if data == null:
+            return _fail("%s not found in catalog" % String(cutscene_id))
+        if not data.is_valid():
+            return _fail("%s should be valid (has beats)" % String(cutscene_id))
+        if not data.skippable:
+            return _fail("%s should be skippable" % String(cutscene_id))
+        if not _assert_cutscene_plays(player, data):
+            return false
+
+    return true
+
+func _assert_ch08_cutscenes(player: CutscenePlayer) -> bool:
+    var cutscene_ids: Array[StringName] = [
+        &"ch08_01_intro", &"ch08_01_outro",
+        &"ch08_02_intro", &"ch08_02_outro",
+        &"ch08_03_intro", &"ch08_03_outro",
+        &"ch08_04_intro", &"ch08_04_outro",
+        &"ch08_05_intro", &"ch08_05_outro",
+    ]
+
+    for cutscene_id in cutscene_ids:
+        var data: CutsceneData = CutsceneCatalog.get_cutscene(cutscene_id)
+        if data == null:
+            return _fail("%s not found in catalog" % String(cutscene_id))
+        if not data.is_valid():
+            return _fail("%s should be valid (has beats)" % String(cutscene_id))
+        if not data.skippable:
+            return _fail("%s should be skippable" % String(cutscene_id))
+        if not _assert_cutscene_plays(player, data):
+            return false
+
+    return true
+
+func _assert_ch09a_cutscenes(player: CutscenePlayer) -> bool:
+    var cutscene_ids: Array[StringName] = [
+        &"ch09a_01_intro", &"ch09a_01_outro",
+        &"ch09a_02_intro", &"ch09a_02_outro",
+        &"ch09a_03_intro", &"ch09a_03_outro",
+        &"ch09a_04_intro", &"ch09a_04_outro",
+        &"ch09a_05_intro", &"ch09a_05_outro",
+    ]
+
+    for cutscene_id in cutscene_ids:
+        var data: CutsceneData = CutsceneCatalog.get_cutscene(cutscene_id)
+        if data == null:
+            return _fail("%s not found in catalog" % String(cutscene_id))
+        if not data.is_valid():
+            return _fail("%s should be valid (has beats)" % String(cutscene_id))
+        if not data.skippable:
+            return _fail("%s should be skippable" % String(cutscene_id))
+        if not _assert_cutscene_plays(player, data):
+            return false
+
+    return true
+
+func _assert_ch09b_cutscenes(player: CutscenePlayer) -> bool:
+    var cutscene_ids: Array[StringName] = [
+        &"ch09b_01_intro", &"ch09b_01_outro",
+        &"ch09b_02_intro", &"ch09b_02_outro",
+        &"ch09b_03_intro", &"ch09b_03_outro",
+        &"ch09b_04_intro", &"ch09b_04_outro",
+        &"ch09b_05_intro", &"ch09b_05_outro",
+    ]
+
+    for cutscene_id in cutscene_ids:
+        var data: CutsceneData = CutsceneCatalog.get_cutscene(cutscene_id)
+        if data == null:
+            return _fail("%s not found in catalog" % String(cutscene_id))
+        if not data.is_valid():
+            return _fail("%s should be valid (has beats)" % String(cutscene_id))
+        if not data.skippable:
+            return _fail("%s should be skippable" % String(cutscene_id))
+        if not _assert_cutscene_plays(player, data):
+            return false
+
+    return true
+
+func _assert_ch10_cutscenes(player: CutscenePlayer) -> bool:
+    var cutscene_ids: Array[StringName] = [
+        &"ch10_01_intro", &"ch10_01_outro",
+        &"ch10_02_intro", &"ch10_02_outro",
+        &"ch10_03_intro", &"ch10_03_outro",
+        &"ch10_04_intro", &"ch10_04_outro",
+        &"ch10_05_intro", &"ch10_05_outro",
+    ]
+
+    for cutscene_id in cutscene_ids:
+        var data: CutsceneData = CutsceneCatalog.get_cutscene(cutscene_id)
+        if data == null:
+            return _fail("%s not found in catalog" % String(cutscene_id))
+        if not data.is_valid():
+            return _fail("%s should be valid (has beats)" % String(cutscene_id))
+        if not data.skippable:
+            return _fail("%s should be skippable" % String(cutscene_id))
+        if not _assert_cutscene_plays(player, data):
+            return false
+
+    return true
+
+func _assert_cutscene_plays(player: CutscenePlayer, data: CutsceneData) -> bool:
+    player.play(data)
+    if not player.is_playing():
+        return _fail("%s should be playing after play()" % String(data.cutscene_id))
+
+    var beat_count: int = data.get_beat_count()
+    for i in beat_count:
+        player.advance_beat_immediate()
+
+    if player.is_playing():
+        return _fail("%s should stop after all beats completed" % String(data.cutscene_id))
+
+    var log: Array[Dictionary] = player.get_event_log()
+    var found_start: bool = false
+    var found_finish: bool = false
+    for entry: Dictionary in log:
+        if entry.get("event") == "cutscene_started" and entry.get("id", &"") == data.cutscene_id:
+            found_start = true
+        if entry.get("event") == "cutscene_finished" and entry.get("id", &"") == data.cutscene_id:
+            found_finish = true
+    if not found_start:
+        return _fail("event log should contain cutscene_started for %s" % String(data.cutscene_id))
+    if not found_finish:
+        return _fail("event log should contain cutscene_finished for %s" % String(data.cutscene_id))
     return true
 
 func _assert_play_advances_beats(player: CutscenePlayer) -> bool:

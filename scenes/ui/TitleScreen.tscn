@@ -46,3 +46,37 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 text = "이어하기"
 disabled = true
+
+[node name="NGPlusShopButton" type="Button" parent="Panel/Content"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+text = "NG+ Shop"
+
+[node name="NGPlusShopPanel" type="PanelContainer" parent="Panel/Content"]
+visible = false
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Content/NGPlusShopPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Content/NGPlusShopPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BadgeLabel" type="Label" parent="Panel/Content/NGPlusShopPanel/Margin/Stack"]
+layout_mode = 2
+text = "Badges of Heroism: 0"
+
+[node name="ItemList" type="VBoxContainer" parent="Panel/Content/NGPlusShopPanel/Margin/Stack"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HintLabel" type="Label" parent="Panel/Content/NGPlusShopPanel/Margin/Stack"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Purchase a Divine Currency bonus before starting a new run."

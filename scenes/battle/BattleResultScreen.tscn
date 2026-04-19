@@ -51,6 +51,14 @@ bbcode_enabled = true
 fit_content = true
 scroll_following = true
 
-[node name="ConfirmButton" type="Button" parent="Panel/Margin/Content"]
+[node name="FooterButtons" type="HBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+alignment = 2
+
+[node name="OpenEncyclopediaButton" type="Button" parent="Panel/Margin/Content/FooterButtons"]
+layout_mode = 2
+text = "Open Encyclopedia"
+
+[node name="ConfirmButton" type="Button" parent="Panel/Margin/Content/FooterButtons"]
 layout_mode = 2
 text = "Confirm"

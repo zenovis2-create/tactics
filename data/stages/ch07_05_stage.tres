@@ -1,14 +1,16 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_saria.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch07_05_shrine_investigation.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
 stage_id = &"CH07_05"
+choice_point_id = &"ch07_interlude"
 stage_title = "Prayer of Ellyor"
 grid_size = Vector2i(14, 10)
 cell_size = Vector2i(64, 64)
@@ -61,7 +63,7 @@ Vector2i(3, 7): 1,
 Vector2i(9, 7): 1,
 Vector2i(11, 7): 1
 }
-interactive_objects = []
+interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch07_05_intro"

@@ -2,6 +2,7 @@ extends SceneTree
 
 const MAIN_SCENE: PackedScene = preload("res://scenes/Main.tscn")
 const CH09B_FINAL_STAGE = preload("res://data/stages/ch09b_05_stage.tres")
+const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const EXPECTED_CH10_ORDER := [&"CH10_01", &"CH10_02", &"CH10_03", &"CH10_04", &"CH10_05"]
 
 func _initialize() -> void:
@@ -80,9 +81,97 @@ func _run() -> void:
             quit(1)
             return
 
+        if StringName(battle.stage_data.start_cutscene_id) != _get_stage_intro_cutscene_id(stage_id):
+            push_error("CH10 stage %s intro cutscene id mismatch: expected %s, got %s." % [stage_id, _get_stage_intro_cutscene_id(stage_id), battle.stage_data.start_cutscene_id])
+            quit(1)
+            return
+
+        if StringName(battle.stage_data.clear_cutscene_id) != _get_stage_outro_cutscene_id(stage_id):
+            push_error("CH10 stage %s clear cutscene id mismatch: expected %s, got %s." % [stage_id, _get_stage_outro_cutscene_id(stage_id), battle.stage_data.clear_cutscene_id])
+            quit(1)
+            return
+
+        if CutsceneCatalog.get_cutscene(battle.stage_data.start_cutscene_id) == null:
+            push_error("CH10 intro cutscene %s is not registered in the catalog." % [battle.stage_data.start_cutscene_id])
+            quit(1)
+            return
+
+        if CutsceneCatalog.get_cutscene(battle.stage_data.clear_cutscene_id) == null:
+            push_error("CH10 clear cutscene %s is not registered in the catalog." % [battle.stage_data.clear_cutscene_id])
+            quit(1)
+            return
+
+        if not _has_cutscene_start(battle.cutscene_player.get_event_log(), _get_stage_intro_cutscene_id(stage_id)):
+            push_error("CH10 shell did not start CH10 intro cutscene %s." % [_get_stage_intro_cutscene_id(stage_id)])
+            quit(1)
+            return
+
+        var cutscene_log_before_victory: int = battle.cutscene_player.get_event_log().size()
+
         await _play_battle_to_victory(battle, stage_id)
         await process_frame
         await process_frame
+
+        if stage_id == &"CH10_05":
+            var finale_summary: Dictionary = battle.get_last_result_summary()
+            if not finale_summary.has("finale_result"):
+                push_error("CH10_05 result summary did not expose finale_result payload.")
+                quit(1)
+                return
+            var finale_result: Dictionary = finale_summary.get("finale_result", {})
+            for key in [
+                "name_anchor_total",
+                "name_anchors_remaining",
+                "name_call_moments_fired",
+                "required_name_call_count",
+                "minimum_anchor_condition_met"
+            ]:
+                if not finale_result.has(key):
+                    push_error("CH10_05 finale result payload missing key: %s." % key)
+                    quit(1)
+                    return
+
+            if int(finale_result.get("name_anchor_total", 0)) != 4:
+                push_error("CH10_05 finale result should report four total name anchors, got %s." % [finale_result.get("name_anchor_total", 0)])
+                quit(1)
+                return
+
+            if int(finale_result.get("name_anchors_remaining", -1)) != 2:
+                push_error("CH10_05 shell runner expected two anchors remaining after Karon's phase shifts, got %s." % [finale_result.get("name_anchors_remaining", -1)])
+                quit(1)
+                return
+
+            if int(finale_result.get("required_name_call_count", 0)) != 6:
+                push_error("CH10_05 finale result should require six name-call moments for the true route, got %s." % [finale_result.get("required_name_call_count", 0)])
+                quit(1)
+                return
+
+            if int(finale_result.get("name_call_moments_fired", -1)) != 1:
+                push_error("CH10_05 shell runner expected exactly one live name-call moment in the current authored clear flow, got %s." % [finale_result.get("name_call_moments_fired", -1)])
+                quit(1)
+                return
+
+            if not bool(finale_result.get("minimum_anchor_condition_met", false)):
+                push_error("CH10_05 finale result should satisfy the current minimum anchor condition with two anchors remaining.")
+                quit(1)
+                return
+
+        var victory_cutscene_entries: Array[Dictionary] = battle.cutscene_player.get_event_log().slice(cutscene_log_before_victory)
+        if not _has_cutscene_start(victory_cutscene_entries, _get_stage_outro_cutscene_id(stage_id)):
+            push_error("CH10 shell did not start CH10 clear cutscene %s." % [_get_stage_outro_cutscene_id(stage_id)])
+            quit(1)
+            return
+
+        var post_battle_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if stage_id != EXPECTED_CH10_ORDER[-1]:
+            if String(post_battle_snapshot.get("mode", "")) != "cutscene":
+                push_error("Expected cutscene after %s, got %s." % [stage_id, post_battle_snapshot.get("mode", "")])
+                quit(1)
+                return
+        elif String(post_battle_snapshot.get("mode", "")) != "complete":
+            push_error("Expected complete after %s, got %s." % [stage_id, post_battle_snapshot.get("mode", "")])
+            quit(1)
+            return
 
     var final_snapshot: Dictionary = main.get_campaign_state_snapshot()
     if String(final_snapshot.get("mode", "")) != "complete":
@@ -90,8 +179,14 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(final_snapshot.get("panel_title", "")).find("CH10") == -1:
+    var final_title: String = String(final_snapshot.get("panel_title", ""))
+    if final_title.find("CH10") == -1:
         push_error("CH10 final title did not surface.")
+        quit(1)
+        return
+
+    if final_title.find("Final Resolution") == -1:
+        push_error("CH10 final title should surface the normal-resolution branch for the current authored clear flow.")
         quit(1)
         return
 
@@ -117,8 +212,65 @@ func _run() -> void:
         quit(1)
         return
 
+    if presentation_cards.size() < 2 or String(presentation_cards[1].get("title", "")).find("One Name Bears The Weight") == -1:
+        push_error("CH10 final presentation cards did not expose the normal-resolution burden card.")
+        quit(1)
+        return
+
+    if not main.advance_campaign_step():
+        push_error("CH10 shell runner expected a post-clear epilogue step after the resolution panel.")
+        quit(1)
+        return
+
+    await process_frame
+    await process_frame
+
+    var epilogue_snapshot: Dictionary = main.get_campaign_state_snapshot()
+    if String(epilogue_snapshot.get("mode", "")) != "complete":
+        push_error("Expected CH10 epilogue shell to remain in complete mode, got %s." % [epilogue_snapshot.get("mode", "")])
+        quit(1)
+        return
+
+    var epilogue_title: String = String(epilogue_snapshot.get("panel_title", ""))
+    if epilogue_title.find("CH10") == -1 or epilogue_title.find("Epilogue") == -1:
+        push_error("CH10 post-clear epilogue title did not surface.")
+        quit(1)
+        return
+
+    var epilogue_body: String = String(epilogue_snapshot.get("panel_body", ""))
+    if epilogue_body.find("remember") == -1 and epilogue_body.find("Remember") == -1:
+        push_error("CH10 epilogue body did not mention remembering what survives.")
+        quit(1)
+        return
+
+    if epilogue_body.find("name") == -1 and epilogue_body.find("Name") == -1:
+        push_error("CH10 epilogue body did not mention names surviving the tower.")
+        quit(1)
+        return
+
+    var epilogue_cards: Array = main.campaign_panel.get_snapshot().get("presentation_cards", [])
+    if epilogue_cards.size() < 2:
+        push_error("CH10 epilogue snapshot did not expose dedicated presentation cards.")
+        quit(1)
+        return
+
+    if String(epilogue_cards[0].get("title", "")).find("What Was Left") == -1:
+        push_error("CH10 epilogue presentation cards did not expose the immediate aftermath card.")
+        quit(1)
+        return
+
+    if String(epilogue_cards[1].get("title", "")).find("Neri") == -1:
+        push_error("CH10 epilogue presentation cards did not expose the surviving-name card.")
+        quit(1)
+        return
+
+    if main.advance_campaign_step():
+        push_error("CH10 shell runner should stop advancing after the dedicated epilogue shell.")
+        quit(1)
+        return
+
     await _cleanup_root_children()
-    print("[PASS] CH10 shell runner reached CH10 intro, CH10_01~05 flow, and final resolution.")
+    print("[PASS] CH10 shell runner reached CH10 intro, CH10_01~05 flow, final resolution, and post-clear epilogue shell.")
     quit(0)
 
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
@@ -294,6 +446,18 @@ func _get_ready_ally_units(battle) -> Array:
         if is_instance_valid(unit) and not unit.is_defeated() and battle.turn_manager.can_unit_act(unit):
             ready_units.append(unit)
     return ready_units
+
+func _has_cutscene_start(log: Array[Dictionary], cutscene_id: StringName) -> bool:
+    for entry in log:
+        if entry.get("event", "") == "cutscene_started" and entry.get("id", &"") == cutscene_id:
+            return true
+    return false
+
+func _get_stage_intro_cutscene_id(stage_id: StringName) -> StringName:
+    return StringName("%s_intro" % String(stage_id).to_lower())
+
+func _get_stage_outro_cutscene_id(stage_id: StringName) -> StringName:
+    return StringName("%s_outro" % String(stage_id).to_lower())
 
 func _is_battle_finished(battle) -> bool:
     var phase: int = int(battle.current_phase)
