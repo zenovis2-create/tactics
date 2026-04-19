@@ -19,15 +19,15 @@
 ---
 
 ### SPEC-P4-02: Replay Market / Guild System (전투 길드)
-- [ ] **P4-02-1** `scripts/battle/replay_data.gd` — 저장을 위한 리플레이 데이터 Resource
-- [ ] **P4-02-2** `scripts/battle/replay_manager.gd` — CRUD operations for replays
-- [ ] **P4-02-3** `scripts/battle/guild_system.gd` — 길드 생성/가입/탈퇴
-- [ ] **P4-02-4** 길드 랭킹 계산: 길드원 평균 전투 등급
-- [ ] **P4-02-5** 길드 커뮤니티 탭 UI (encyclopedia_panel.gd 확장)
-- [ ] **P4-02-6** 길드 배너 커스터마이즈 (5가지 심볼)
-- [ ] **P4-02-7** 온라인 스텁: `upload_replay_to_server()`, `download_replay()`, `is_online()`
-- [ ] **P4-02-8** `scripts/dev/guild_system_runner.gd` 작성
-- [ ] **P4-02-9** Runner 검증 — 오프라인 모드 정상 동작
+- [x] **P4-02-1** `scripts/battle/replay_data.gd` — 저장을 위한 리플레이 데이터 Resource
+- [x] **P4-02-2** `scripts/battle/replay_manager.gd` — CRUD operations for replays
+- [x] **P4-02-3** `scripts/battle/guild_system.gd` — 길드 생성/가입/탈퇴
+- [x] **P4-02-4** 길드 랭킹 계산: 길드원 평균 전투 등급
+- [x] **P4-02-5** 길드 커뮤니티 탭 UI (encyclopedia_panel.gd TAB_GUILD)
+- [x] **P4-02-6** 길드 배너 커스터마이즈 (5가지 심볼)
+- [x] **P4-02-7** 온라인 스텁: `upload_replay_to_server()`, `download_replay()`, `is_online()`
+- [x] **P4-02-8** `scripts/dev/guild_system_runner.gd` 작성
+- [x] **P4-02-9** Runner 검증 — 37/37 PASS (commit `4bb23a1`)
 
 ---
 
@@ -82,20 +82,20 @@
 - [x] **P4-06-5** CH10 Final: 세势 테마 동시 재생 → 다중화음
 - [ ] **P4-06-6** 필드 맵势 영역 진입/이탈 시 BGM 전환
 - [x] **P4-06-7** `scripts/dev/faction_music_runner.gd` 작성
-- [ ] **P4-06-8** Runner 검증 — godot headless 통과
+- [x] **P4-06-8** Runner 검증 — 39/39 PASS (commit `1676c06`)
 
 ---
 
 ### SPEC-P4-07: Observer Mode (관전 모드)
-- [ ] **P4-07-1** `scripts/ui/observer_camera.gd` — 자유 시점 카메라 컨트롤
-- [ ] **P4-07-2** 전투 중 관전 모드 토글 버튼 (battle_hud.gd에 추가)
-- [ ] **P4-07-3** 관전용 HUD: 유닛별 위치/HP/상태 표시
-- [ ] **P4-07-4** 자동 전술 해설 텍스트 생성 (패턴 기반 simple rule engine)
-- [ ] **P4-07-5** 하이라이트 자동 감지 + 클립 저장 (ScreenshotCapture.stub)
-- [ ] **P4-07-6** 스트리머 오버레이 stub (시청자 수도 표시)
-- [ ] **P4-07-7** Twitch/YouTube 연동 stub (OAuth + 채팅 읽기 메서드만 존재)
-- [ ] **P4-07-8** `scripts/dev/observer_mode_runner.gd` 작성
-- [ ] **P4-07-9** Runner 검증 — godot headless 통과
+- [x] **P4-07-1** `scripts/ui/observer_camera.gd` — 자유 시점 카메라 컨트롤
+- [x] **P4-07-2** 전투 중 관전 모드 토글 버튼 (battle_hud.gd에 추가)
+- [x] **P4-07-3** 관전용 HUD: 유닛별 위치/HP/상태 표시
+- [x] **P4-07-4** 자동 전술 해설 텍스트 생성 (패턴 기반 Dictionary rule engine)
+- [x] **P4-07-5** 하이라이트 자동 감지 + 클립 저장
+- [x] **P4-07-6** 스트리머 오버레이 stub (시청자 수도 표시)
+- [x] **P4-07-7** Twitch/YouTube 연동 stub (OAuth + 채팅 읽기 메서드만 존재)
+- [x] **P4-07-8** `scripts/dev/observer_mode_runner.gd` 작성
+- [x] **P4-07-9** Runner 검증 — godot headless 통과 (59/59 PASS, commit `1e1be4d`)
 
 ---
 
