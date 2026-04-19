@@ -33,7 +33,7 @@ func get_difficulty_stars() -> String:
 	return "★".repeat(difficulty_rating) + "☆".repeat(maxi(0, 5 - difficulty_rating))
 
 static func create_from_dict(data: Dictionary) -> GhostFormationData:
-	var ghost := GhostFormationData.new()
+	var ghost := new()
 	ghost.ghost_id = StringName(data.get("ghost_id", ""))
 	ghost.player_tag = data.get("player_tag", "Anonymous")
 	ghost.is_anonymous = data.get("is_anonymous", true)
