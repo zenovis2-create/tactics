@@ -68,6 +68,8 @@ func change_past_decision(chapter_id: String, choice_key: String, new_value: Var
 		previous_value = progression.world_state_bits.get(normalized_choice_key, null)
 
 	_history_changed = true
+	if progression != null and is_destiny_unlocked():
+		progression.earn_badge(HISTORY_CHANGER_BADGE_ID, 1)
 	past_world[normalized_choice_key] = _clone_variant(previous_value)
 	_append_decision_record(normalized_chapter_id, normalized_choice_key, previous_value, new_value)
 	_apply_choice_to_world(normalized_chapter_id, normalized_choice_key, new_value)
