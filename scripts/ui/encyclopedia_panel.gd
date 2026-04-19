@@ -15,8 +15,9 @@ const TAB_ATLAS := "atlas"
 const TAB_BOND_ENDINGS := "bond_endings"
 const TAB_USER_CREATED := "user_created"
 const TAB_GUILD := "guild"
+const TAB_DESTINY := "destiny"
 const MAX_COMMENT_LENGTH := 280
-const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED, TAB_GUILD]
+const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED, TAB_GUILD, TAB_DESTINY]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
 	TAB_TIMELINE: "Timeline",
@@ -24,7 +25,8 @@ const TAB_LABELS := {
 	TAB_ATLAS: "Atlas",
 	TAB_BOND_ENDINGS: "Bond Endings",
 	TAB_USER_CREATED: "User Created",
-	TAB_GUILD: "Guild"
+	TAB_GUILD: "Guild",
+	TAB_DESTINY: "Destiny"
 }
 const CHAPTER_LOCATION_NAMES := {
 	"CH01": "Hardren Ashfields",
@@ -55,6 +57,8 @@ var guild_button: Button
 var _guild_tab: Control
 var _guild_list: Control
 var _guild_create_container: Control
+var destiny_button: Button
+var _destiny_tab: Control
 @onready var codex_tab: Control = $Panel/Margin/Content/BodyStack/CodexTab
 @onready var codex_cards: GridContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexScroll/CodexCards
 @onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/DetailLabel
@@ -106,6 +110,10 @@ func _ready() -> void:
 	_guild_create_container = _get_node_or_null("Panel/Margin/Content/BodyStack/GuildTab/GuildCreateContainer")
 	if guild_button != null:
 		guild_button.pressed.connect(func() -> void: select_tab(TAB_GUILD))
+	destiny_button = _get_node_or_null("Panel/Margin/Content/TabButtons/DestinyButton")
+	_destiny_tab = _get_node_or_null("Panel/Margin/Content/BodyStack/DestinyTab")
+	if destiny_button != null:
+		destiny_button.pressed.connect(func() -> void: select_tab(TAB_DESTINY))
 	_ensure_comment_editor_section()
 	_ensure_support_history_section()
 	select_tab(TAB_CODEX)
@@ -129,6 +137,7 @@ func show_encyclopedia(progression_data: ProgressionData, active_chapter_id: Str
 	_rebuild_bond_endings()
 	_rebuild_user_created_scenarios()
 	_rebuild_guild_tab()
+	_rebuild_destiny_tab()
 	visible = true
 	select_tab(TAB_CODEX)
 
@@ -148,6 +157,8 @@ func select_tab(tab_name: String) -> void:
 		_user_created_tab.visible = tab_name == TAB_USER_CREATED
 	if _guild_tab != null:
 		_guild_tab.visible = tab_name == TAB_GUILD
+	if _destiny_tab != null:
+		_destiny_tab.visible = tab_name == TAB_DESTINY
 	codex_button.disabled = tab_name == TAB_CODEX
 	timeline_button.disabled = tab_name == TAB_TIMELINE
 	memorial_button.disabled = tab_name == TAB_MEMORIAL
@@ -155,6 +166,8 @@ func select_tab(tab_name: String) -> void:
 	bond_endings_button.disabled = tab_name == TAB_BOND_ENDINGS
 	if guild_button != null:
 		guild_button.disabled = tab_name == TAB_GUILD
+	if destiny_button != null:
+		destiny_button.disabled = tab_name == TAB_DESTINY
 
 func select_codex_entry(unit_key: String) -> void:
 	if not _codex_keys.has(unit_key):
@@ -861,6 +874,74 @@ func _rebuild_guild_tab() -> void:
 				]
 				_guild_list.add_child(rank_lbl)
 	gs.free()
+
+func _rebuild_destiny_tab() -> void:
+	if not _destiny_tab:
+		return
+	_clear_children(_destiny_tab)
+	var dm_path := "res://scripts/battle/destiny_manager.gd"
+	var DestinyManager = load(dm_path)
+	if DestinyManager == null:
+		var err_lbl := Label.new()
+		err_lbl.text = "Destiny system not available."
+		err_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_destiny_tab.add_child(err_lbl)
+		return
+	var dm: Node = DestinyManager.new()
+	root.add_child(dm)
+	if not dm.has_method("is_destiny_unlocked"):
+		var err_lbl := Label.new()
+		err_lbl.text = "Destiny system not properly loaded."
+		err_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_destiny_tab.add_child(err_lbl)
+		dm.free()
+		return
+	var is_unlocked: bool = dm.is_destiny_unlocked()
+	var header := Label.new()
+	header.text = "역사의 기록자" if is_unlocked else "역사의 기록자 🔒"
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.add_theme_font_size_override("font_size", 24)
+	_destiny_tab.add_child(header)
+	if not is_unlocked:
+		var lock_lbl := Label.new()
+		lock_lbl.text = "Unlocked at NG+3 or after completing the Third Eye."
+		lock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lock_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		_destiny_tab.add_child(lock_lbl)
+		dm.free()
+		return
+	var history_lbl := Label.new()
+	var change_count: int = dm.get_destiny_universe_state().get("change_count", 0)
+	history_lbl.text = "Past decisions changed: %d" % change_count
+	_destiny_tab.add_child(history_lbl)
+	var decisions: Array = dm.get_past_decisions()
+	if decisions.is_empty():
+		var no_changes := Label.new()
+		no_changes.text = "No past decisions have been changed yet."
+		no_changes.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_destiny_tab.add_child(no_changes)
+	else:
+		var title := Label.new()
+		title.text = "[b]Decision History[/b]"
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_destiny_tab.add_child(title)
+		for decision: Dictionary in decisions:
+			var card := PanelContainer.new()
+			card.set("theme_override_styles/panel", _get_card_style())
+			var vbox := VBoxContainer.new()
+			card.add_child(vbox)
+			var ch_lbl := Label.new()
+			ch_lbl.text = "[b]%s[/b]" % decision.get("chapter_id", "???")
+			vbox.add_child(ch_lbl)
+			var choice_lbl := Label.new()
+			choice_lbl.text = "Choice: %s" % decision.get("choice_key", "")
+			vbox.add_child(choice_lbl)
+			var change_lbl := Label.new()
+			change_lbl.text = "%s → %s" % [decision.get("old_value", ""), decision.get("new_value", "")]
+			change_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
+			vbox.add_child(change_lbl)
+			_destiny_tab.add_child(card)
+	dm.free()
 
 func _make_guild_member_card(member: GuildSystem.GuildMember, gs: GuildSystem) -> Control:
 	var container := PanelContainer.new()
