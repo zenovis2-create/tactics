@@ -16,10 +16,13 @@ const ChronicleEntryRef = preload("res://scripts/battle/chronicle_entry.gd")
 var tests_run: int = 0
 var tests_passed: int = 0
 var tests_failed: int = 0
+var _owned_nodes: Array[Node] = []
+var _owned_refs: Array[RefCounted] = []
 
 func _initialize() -> void:
 	print("\n=== Ghost Battle Runner ===\n")
 	run_tests()
+	_cleanup_owned_nodes()
 	print_results()
 	quit(0 if tests_failed == 0 else 1)
 
@@ -237,13 +240,13 @@ func test_champion_board_ranking() -> void:
 	_cleanup_manager(manager)
 
 func test_anonymous_vs_named_ghost() -> void:
-	var chronicle: ChronicleGeneratorRef = ChronicleGeneratorRef.new()
-	var entry := _build_mock_chronicle_entry(
+	var chronicle: ChronicleGeneratorRef = _own(ChronicleGeneratorRef.new()) as ChronicleGeneratorRef
+	var entry := _own_ref(_build_mock_chronicle_entry(
 		"CH08",
 		"The open field was cleared after 6 turns under a swift charge.",
 		ChronicleEntryRef.ChronicleStyle.CONCISE,
 		["overwhelming_force"]
-	)
+	))
 	var anonymous_ghost: GhostFormationDataRef = chronicle.extract_ghost_pattern(entry, "Hidden", true)
 	var named_ghost: GhostFormationDataRef = chronicle.extract_ghost_pattern(entry, "Visible", false)
 	verify(anonymous_ghost.is_anonymous == true, "Anonymous chronicle ghost keeps anonymity flag")
@@ -262,7 +265,7 @@ func _build_mock_chronicle_entry(chapter_id: String, narrative_text: String, sty
 	return entry
 
 func _create_clean_manager() -> GhostBattleManagerRef:
-	var manager: GhostBattleManagerRef = GhostBattleManagerRef.new()
+	var manager: GhostBattleManagerRef = _own(GhostBattleManagerRef.new()) as GhostBattleManagerRef
 	root.add_child(manager)
 	manager.clear_all_ghosts()
 	return manager
@@ -272,6 +275,28 @@ func _cleanup_manager(manager: GhostBattleManagerRef) -> void:
 		return
 	manager.clear_all_ghosts()
 	manager.free()
+
+
+func _own(node: Node) -> Node:
+	_owned_nodes.append(node)
+	return node
+
+
+func _own_ref(ref: RefCounted) -> RefCounted:
+	_owned_refs.append(ref)
+	return ref
+
+
+func _cleanup_owned_nodes() -> void:
+	for index in range(_owned_nodes.size() - 1, -1, -1):
+		var node := _owned_nodes[index]
+		if is_instance_valid(node):
+			node.free()
+	_owned_nodes.clear()
+	for index in range(_owned_refs.size() - 1, -1, -1):
+		var ref: RefCounted = _owned_refs[index]
+		_owned_refs[index] = null
+	_owned_refs.clear()
 
 func print_results() -> void:
 	print("\n=== Results ===")

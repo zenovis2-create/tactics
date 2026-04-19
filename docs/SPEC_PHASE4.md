@@ -7,14 +7,14 @@
 ### SPEC-P4-01: Ghost Battle System (유령 전투)
 - [x] **P4-01-1** `scripts/battle/ghost_battle_manager.gd` — ghost ID generation + cross-player matching
 - [x] **P4-01-2** `scripts/battle/ghost_formation_extractor.gd` — extract patterns from Chronicle battle logs
-- [x] **P4-01-3** ChronicleGenerator에 `extract_ghost_pattern() -> GhostFormationData` 추가
+- [x] **P4-01-3** ChronicleGenerator에 `extract_ghost_pattern() -> GhostFormationData` 추가 — `910c747`
 - [x] **P4-01-4** `GhostFormationData.gd` Resource: formation[], avg_turns, preferred_terrain, player_tag
-- [x] **P4-01-5** battle_controller에 ghost boss spawn 로직 추가
+- [x] **P4-01-5** battle_controller에 ghost boss spawn 로직 추가 — `910c747`
 - [x] **P4-01-6** "홍길동의 전략" 네이밍 + 익명 옵션
 - [x] **P4-01-7** 격파 시 "XXX의 전략을 격파했다" 메시지
 - [x] **P4-01-8** 챔피언 보드 시스템 stub (순위 아님, 명예의 전당)
 - [x] **P4-01-9** `scripts/dev/ghost_battle_runner.gd` 작성
-- [ ] **P4-01-10** Runner 검증 — godot headless 통과
+- [x] **P4-01-10** Runner 검증 — godot headless 통과 — `910c747` (37→62 PASS)
 
 ---
 
@@ -48,14 +48,14 @@
 
 ### SPEC-P4-04: Living Soundtrack (생존하는 사운드트랙)
 - [x] **P4-04-1** `scripts/audio/layered_music.gd` — Music autoload, 레이어드 오디오 엔진 — `e50806f`
-- [ ] **P4-04-2** project.godot에 AudioBus 추가: MusicBase, MusicDrums, MusicStrings, MusicVocal, MusicAmbience
+- [x] **P4-04-2** AudioBus runtime setup via AudioServer API (project.godot fallback) — `910c747`
 - [x] **P4-04-3** `activate_layer(layer_name, fade_time)` / `deactivate_layer(layer_name, fade_time)` — `e50806f`
 - [x] **P4-04-4** `trigger_spotlight_music(spotlight_type)` — 4가지 spotlight별 레이어 트리거 — `e50806f`
 - [x] **P4-04-5** `scripts/audio/emotional_layer_controller.gd` — Spotlight/BondDeath 신호 리스닝 — `e50806f`
 - [x] **P4-04-6** `_on_spotlight_triggered()` → Music.trigger_spotlight_music() — `e50806f`
 - [x] **P4-04-7** `_on_bond_death_started()` → vocal chorus layer 추가 — `e50806f`
 - [x] **P4-04-8** 전투 종료 시 모든 레이어 페이드아웃 (fade_time=2.0) — `e50806f`
-- [ ] **P4-04-9** 전투 시작 시 레이어드 트랙 재생 (기존 BGM에서 레이어 분리)
+- [x] **P4-04-9** 전투 시작 시 레이어드 트랙 재생 (battle_controller integration) — `910c747`
 - [x] **P4-04-10** `scripts/dev/living_soundtrack_runner.gd` 작성 — `e50806f` (90/90 PASS)
 - [x] **P4-04-11** Runner 검증 — godot headless 통과 (오디오 파일 불필요) — `e50806f`
 
@@ -100,20 +100,20 @@
 ---
 
 ### SPEC-P4-08: Moral Consequence Engine (도덕적 결과 엔진) ⭐ 단기 우선
-- [x] **P4-08-1** `scripts/battle/ethics_tracker.gd` — Ethics autoload
-- [x] **P4-08-2** ethics_score: float (-100 ~ +100), decision_log[], 기본값 0
-- [x] **P4-08-3** 결정 가중치 테이블: spared_enemy(+5), burned_bridge(-10), saved_supply(+8), ignored_warning(-5), recruited_hidden(+10), left_unit_to_die(-15)
-- [x] **P4-08-4** `record_decision(chapter_id, key, weight)` → ethics_score 업데이트
-- [x] **P4-08-5** `get_ethics_bracket() -> String` — ruthless(<-30) / pragmatic(-30~30) / compassionate(>30)
-- [x] **P4-08-6** `scripts/battle/moral_consequence_service.gd` — MoralConsequence autoload
-- [x] **P4-08-7** DecisionPoint.decision_made → Ethics.record_decision 자동 연결
-- [x] **P4-08-8** `apply_consequences_to_boss(boss_id) -> BossModifier` — ruth/comp影响 보스 스탯
-- [x] **P4-08-9** `get_boss_dialogue_variant(boss_id) -> String` — Ethics별 대사 variants
-- [x] **P4-08-10** battle_controller.gd: 보스 스폰 시 MoralConsequence 적용
-- [x] **P4-08-11** battle_result_screen.gd: 엔딩 분기 시 MoralConsequence 적용
-- [x] **P4-08-12** 세 가지 엔딩 variants: Conqueror( ruthless) / Guardian(compassionate) / Survivor(pragmatic)
-- [x] **P4-08-13** `scripts/dev/moral_consequence_runner.gd` 작성
-- [x] **P4-08-14** Runner 검증 — godot headless 통과
+- [x] **P4-08-1** `scripts/battle/ethics_tracker.gd` — Ethics autoload — `910c747`
+- [x] **P4-08-2** ethics_score: float (-100 ~ +100), decision_log[], 기본값 0 — `910c747`
+- [x] **P4-08-3** 결정 가중치 테이블: spared_enemy(+5), burned_bridge(-10), saved_supply(+8), ignored_warning(-5), recruited_hidden(+10), left_unit_to_die(-15) — `910c747`
+- [x] **P4-08-4** `record_decision(chapter_id, key, weight)` → ethics_score 업데이트 — `910c747`
+- [x] **P4-08-5** `get_ethics_bracket() -> String` — ruthless(<-30) / pragmatic(-30~30) / compassionate(>30) — `910c747`
+- [x] **P4-08-6** `scripts/battle/moral_consequence_service.gd` — MoralConsequence autoload — `910c747`
+- [x] **P4-08-7** DecisionPoint.decision_made → Ethics.record_decision 자동 연결 — `910c747`
+- [x] **P4-08-8** `apply_consequences_to_boss(boss_id) -> BossModifier` — ruth/comp影响 보스 스탯 — `910c747`
+- [x] **P4-08-9** `get_boss_dialogue_variant(boss_id) -> String` — Ethics별 대사 variants — `910c747`
+- [x] **P4-08-10** battle_controller.gd: 보스 스폰 시 MoralConsequence 적용 — `910c747`
+- [x] **P4-08-11** battle_result_screen.gd: 엔딩 분기 시 MoralConsequence 적용 — `910c747`
+- [x] **P4-08-12** 세 가지 엔딩 variants: Conqueror(ruthless) / Guardian(compassionate) / Survivor(pragmatic) — `910c747`
+- [x] **P4-08-13** `scripts/dev/moral_consequence_runner.gd` 작성 — `910c747`
+- [x] **P4-08-14** Runner 검증 — godot headless 통과 — `910c747` (68/68 PASS)
 
 ---
 
