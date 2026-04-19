@@ -97,6 +97,12 @@ func load_data(saved_data: ProgressionData) -> void:
 	var ashes = get_node_or_null("/root/Ashes")
 	if ashes != null and ashes.has_method("bind_progression"):
 		ashes.bind_progression(_data)
+	var npc_personality = get_node_or_null("/root/NPCPersonality")
+	if npc_personality != null and npc_personality.has_method("bind_progression"):
+		npc_personality.bind_progression(_data)
+	var terrain_memory = get_node_or_null("/root/TerrainMemory")
+	if terrain_memory != null and terrain_memory.has_method("bind_progression"):
+		terrain_memory.bind_progression(_data)
 	_emit_log("loaded", {})
 
 func apply_burden_delta(delta: int, reason: String) -> void:

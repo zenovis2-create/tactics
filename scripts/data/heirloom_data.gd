@@ -19,6 +19,11 @@ enum ClanSymbol {
 @export var total_battles: int = 0
 @export var total_victories: int = 0
 @export var total_deaths: int = 0
+@export var terrain_damage_map: Dictionary = {}
+@export var battle_visit_counts: Dictionary = {}
+@export var persistent_markers: Array[Dictionary] = []
+@export var battle_last_visit_dates: Dictionary = {}
+@export var museum_location: String = ""
 
 func to_summary() -> String:
 	var lines: Array[String] = [

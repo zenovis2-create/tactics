@@ -3,6 +3,7 @@ extends Node2D
 
 signal battle_finished(result: StringName, stage_id: StringName)
 signal battle_defeat(stage_id: StringName, payload: Dictionary)
+signal battle_turn_started(turn_num: int)
 signal battle_turn_ended(turn_owner: String, turn_actions: Array)
 signal bond_death_triggered(pair_id: String, ending_id: String)
 
@@ -39,6 +40,7 @@ const BattleResultScreenScript = preload("res://scripts/battle/battle_result_scr
 const ChronicleGenerator = preload("res://scripts/battle/chronicle_generator.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
+const EmotionalLayerController = preload("res://scripts/audio/emotional_layer_controller.gd")
 const DOWNPOUR_WEATHER_IDS := {
     &"downpour": true,
     &"storm": true,
@@ -200,6 +202,7 @@ var boss_marked_target_id: int = -1
 var boss_charge_pending: bool = false
 var boss_enraged: bool = false
 var enemy_attack_bonus_by_unit: Dictionary = {}
+var enemy_attack_percent_bonus_by_unit: Dictionary = {}
 var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuses
 var boss_event_history: Array[String] = []
 var boss_phase_by_unit: Dictionary = {}  ## unit instance_id → current phase StringName
@@ -252,6 +255,7 @@ var reward_service: RewardService
 var cutscene_player: CutscenePlayer
 var bond_service: Node
 var bond_death_patch = BattleControllerBondDeath.new()
+var _emotional_layer_controller: Node = null
 
 func _ready() -> void:
     _wire_signals()
@@ -268,9 +272,15 @@ func _ready() -> void:
 func _init_meta_services() -> void:
     progression_service = ProgressionService.new()
     add_child(progression_service)
+    var npc_personality = get_node_or_null("/root/NPCPersonality")
+    if npc_personality != null and npc_personality.has_method("bind_progression"):
+        npc_personality.bind_progression(progression_service.get_data())
     var ashes = get_node_or_null("/root/Ashes")
     if ashes != null and ashes.has_method("bind_progression"):
         ashes.bind_progression(progression_service.get_data())
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    if terrain_memory != null and terrain_memory.has_method("bind_progression"):
+        terrain_memory.bind_progression(progression_service.get_data())
     status_service = null
     telemetry_service = TelemetryService.new()
     add_child(telemetry_service)
@@ -293,6 +303,14 @@ func _bind_world_state_services() -> void:
         cascade.bind_progression_service(progression_service)
     if cascade != null and cascade.has_method("connect_decision_point") and decision_point != null:
         cascade.connect_decision_point(decision_point)
+    var ethics = get_node_or_null("/root/Ethics")
+    if ethics != null and ethics.has_method("bind_progression_service"):
+        ethics.bind_progression_service(progression_service)
+    var moral_consequence = get_node_or_null("/root/MoralConsequence")
+    if moral_consequence != null and moral_consequence.has_method("bind_progression_service"):
+        moral_consequence.bind_progression_service(progression_service)
+    if moral_consequence != null and moral_consequence.has_method("connect_decision_point") and decision_point != null:
+        moral_consequence.connect_decision_point(decision_point)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -305,6 +323,7 @@ func bootstrap_battle() -> void:
     boss_charge_pending = false
     boss_enraged = false
     enemy_attack_bonus_by_unit.clear()
+    enemy_attack_percent_bonus_by_unit.clear()
     enemy_movement_bonus_by_unit.clear()
     boss_event_history.clear()
     boss_phase_by_unit.clear()
@@ -359,6 +378,15 @@ func bootstrap_battle() -> void:
     var spotlight := _get_spotlight_manager()
     if spotlight != null:
         spotlight.begin_battle(_get_spotlight_battle_id())
+    var music := _get_music()
+    if music != null and music.has_method("play_layered_track"):
+        var active_layers: Array[String] = []
+        if music.has_method("get_active_layer_names"):
+            var existing_layers: Variant = music.call("get_active_layer_names")
+            if existing_layers is Array:
+                for layer_name in existing_layers:
+                    active_layers.append(String(layer_name))
+        music.call("play_layered_track", "bgm_battle_default", active_layers)
 
     # 전투 시작 전 컷씬 재생 (있는 경우)
     if cutscene_player != null and stage_data != null and stage_data.start_cutscene_id != &"":
@@ -371,6 +399,7 @@ func bootstrap_battle() -> void:
 
 func set_stage(new_stage_data: StageData) -> void:
     stage_data = _clone_stage_data(new_stage_data)
+    _record_stage_visit()
     if is_inside_tree():
         bootstrap_battle()
 
@@ -413,6 +442,7 @@ func _wire_signals() -> void:
     if not battle_turn_ended.is_connected(_on_battle_turn_ended):
         battle_turn_ended.connect(_on_battle_turn_ended)
     _wire_spotlight_signal()
+    _ensure_emotional_layer_controller()
     _connect_battlefield_evolution_signal()
 
 func _connect_battlefield_evolution_signal() -> void:
@@ -481,6 +511,7 @@ func _spawn_from_stage() -> void:
 
     if battle_board != null:
         battle_board.set_stage(stage_data)
+    _refresh_persistent_terrain_visual()
     _refresh_stage_memorial_visual()
     _spawn_group(stage_data.ally_units, stage_data.ally_spawns, "ally", ally_units)
     _spawn_group(stage_data.enemy_units, stage_data.enemy_spawns, "enemy", enemy_units)
@@ -543,6 +574,34 @@ func _refresh_stage_memorial_visual() -> void:
     var memorial := progression_data.get_stage_memorial(String(stage_data.stage_id))
     hud.set_stage_memorial(memorial, stage_data.memorial_slot)
 
+func _refresh_persistent_terrain_visual() -> void:
+    if battle_board == null:
+        return
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    if terrain_memory == null or not terrain_memory.has_method("get_damage_map_for_chapter") or stage_data == null:
+        battle_board.set_persistent_terrain_damage({})
+        return
+    battle_board.set_persistent_terrain_damage(terrain_memory.get_damage_map_for_chapter(String(stage_data.stage_id)))
+
+func _record_stage_visit() -> void:
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    if terrain_memory == null or not terrain_memory.has_method("record_battle_visit") or stage_data == null:
+        return
+    terrain_memory.record_battle_visit(String(stage_data.stage_id))
+
+func _persist_battlefield_consequences() -> void:
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    var evolution := _get_battlefield_evolution()
+    if terrain_memory == null or evolution == null or stage_data == null:
+        return
+    if not terrain_memory.has_method("record_terrain_damage"):
+        return
+    var damage_levels: Dictionary = evolution.get_persistent_damage_levels()
+    for tile_pos_variant in damage_levels.keys():
+        if typeof(tile_pos_variant) != TYPE_VECTOR2I:
+            continue
+        terrain_memory.record_terrain_damage(String(stage_data.stage_id), tile_pos_variant as Vector2i, int(damage_levels.get(tile_pos_variant, 0)))
+
 func _spawn_group(unit_defs: Array, spawn_cells: Array, faction: String, sink: Array) -> void:
     var count: int = min(unit_defs.size(), spawn_cells.size())
     for index in count:
@@ -566,6 +625,8 @@ func _spawn_group(unit_defs: Array, spawn_cells: Array, faction: String, sink: A
 
         units_root.add_child(unit)
         sink.append(unit)
+        if faction == "enemy" and unit.unit_data != null and unit.unit_data.is_boss:
+            _apply_moral_consequences_to_boss_unit(unit)
 
 func _apply_opening_boss_stealth_state() -> void:
     if stage_data == null or stage_data.stage_id != CH08_05_STAGE_ID:
@@ -820,6 +881,7 @@ func _begin_player_phase(reason: String) -> void:
     _transition_to(BattlePhase.PLAYER_PHASE_START, reason, {"round": round_index})
 
     _update_hold_objective_progress(reason)
+    battle_turn_started.emit(round_index)
 
     turn_manager.begin_phase("ally", ally_units + enemy_units, reason)
     var synergy_summary := _apply_synergy_reactions()
@@ -1385,7 +1447,9 @@ func _check_battle_end() -> bool:
     return false
 
 func _on_battle_victory() -> void:
+    _shutdown_living_soundtrack()
     last_result = "victory"
+    _persist_battlefield_consequences()
     _trigger_world_state_decision_for_stage_victory()
     if _is_mirror_battle_active():
         hidden_recruit_state["mirror_mode"] = true
@@ -1512,11 +1576,18 @@ func _on_battle_victory() -> void:
     hud.show_result_screen(last_result_summary)
 
 func _on_battle_defeat() -> void:
+    _shutdown_living_soundtrack()
     last_result = "defeat"
+    _persist_battlefield_consequences()
     if telemetry_service != null:
         telemetry_service.record_battle_end(&"defeat", round_index)
     if progression_service != null:
         progression_service.apply_burden_delta(1, "battle_defeat")
+
+func _shutdown_living_soundtrack() -> void:
+    var music := _get_music()
+    if music != null and music.has_method("deactivate_all_layers"):
+        music.call("deactivate_all_layers", 2.0)
 
 func _archive_chronicle_entry(result_summary: Dictionary) -> void:
     if stage_data == null or progression_service == null:
@@ -1602,6 +1673,18 @@ func _on_hud_menu_visibility_changed(is_open: bool) -> void:
 
 func _on_unit_defeated(unit: UnitActor) -> void:
     pending_move_origins.erase(unit.get_instance_id())
+    var defeated_tracked_npc_id := _resolve_tracked_npc_id(unit)
+    var nearby_tracked_npc_ids: Array[String] = _collect_nearby_tracked_npc_ids(unit)
+    var bonded_tracked_npc_ids: Array[String] = _collect_bonded_tracked_npc_ids(unit)
+    if not defeated_tracked_npc_id.is_empty():
+        nearby_tracked_npc_ids.erase(defeated_tracked_npc_id)
+        bonded_tracked_npc_ids.erase(defeated_tracked_npc_id)
+    var npc_personality = get_node_or_null("/root/NPCPersonality")
+    if npc_personality != null and npc_personality.has_method("record_story_action") and (not nearby_tracked_npc_ids.is_empty() or not bonded_tracked_npc_ids.is_empty()):
+        npc_personality.record_story_action("unit_dies_in_battle", {
+            "nearby_npc_ids": nearby_tracked_npc_ids,
+            "bonded_npc_ids": bonded_tracked_npc_ids,
+        })
     if unit != null and is_instance_valid(unit) and unit.unit_data != null and not falling_units_this_turn.has(unit.unit_data.unit_id):
         falling_units_this_turn.append(unit.unit_data.unit_id)
     if unit != null and is_instance_valid(unit) and unit.unit_data != null:
@@ -1687,8 +1770,39 @@ func _wire_spotlight_signal() -> void:
     if not spotlight.spotlight_triggered.is_connected(_on_spotlight_triggered):
         spotlight.spotlight_triggered.connect(_on_spotlight_triggered)
 
+func _ensure_emotional_layer_controller() -> void:
+    if _emotional_layer_controller == null or not is_instance_valid(_emotional_layer_controller):
+        _emotional_layer_controller = EmotionalLayerController.new()
+        _emotional_layer_controller.name = "EmotionalLayerController"
+        add_child(_emotional_layer_controller)
+    var turn_callback := Callable(_emotional_layer_controller, "_on_battle_turn_started")
+    if not battle_turn_started.is_connected(turn_callback):
+        battle_turn_started.connect(turn_callback)
+    var bond_callback := Callable(_emotional_layer_controller, "_on_bond_death_triggered")
+    if not bond_death_triggered.is_connected(bond_callback):
+        bond_death_triggered.connect(bond_callback)
+    var spotlight := _get_spotlight_manager()
+    if spotlight != null:
+        var spotlight_callback := Callable(_emotional_layer_controller, "_on_spotlight_triggered")
+        if not spotlight.spotlight_triggered.is_connected(spotlight_callback):
+            spotlight.spotlight_triggered.connect(spotlight_callback)
+    var bond_death_overlay := _get_bond_death_overlay()
+    if bond_death_overlay != null and bond_death_overlay.has_signal("bond_death_started"):
+        var overlay_callback := Callable(_emotional_layer_controller, "_on_bond_death_started")
+        if not bond_death_overlay.is_connected("bond_death_started", overlay_callback):
+            bond_death_overlay.connect("bond_death_started", overlay_callback)
+
 func _get_spotlight_manager() -> SpotlightManager:
     return get_node_or_null("/root/Spotlight") as SpotlightManager
+
+func _get_bond_death_overlay() -> Node:
+    var overlay := get_node_or_null("CanvasLayer/BondDeathOverlay")
+    if overlay != null:
+        return overlay
+    return get_node_or_null("/root/BondDeath")
+
+func _get_music() -> Node:
+    return get_node_or_null("/root/Music")
 
 func _get_spotlight_battle_id() -> StringName:
     return stage_data.stage_id if stage_data != null else &"unknown"
@@ -1726,6 +1840,7 @@ func _record_weather_effect_action(effect_id: StringName, affected_unit_ids: Var
 func _remove_unit_from_roster(unit: UnitActor) -> void:
     ally_units.erase(unit)
     enemy_units.erase(unit)
+    enemy_attack_percent_bonus_by_unit.erase(unit.get_instance_id())
 
 func _prune_invalid_units() -> void:
     ally_units = _filter_live_units(ally_units)
@@ -2095,6 +2210,7 @@ func _on_battlefield_evolution_occurred(event_id: String, affected_tiles: Array)
         "affected_tiles": affected_tiles,
         "round": round_index
     })
+    _refresh_persistent_terrain_visual()
 
 func _get_enemy_view() -> Node:
     return get_node_or_null("/root/EnemyView")
@@ -2263,6 +2379,52 @@ func get_special_battle_snapshot() -> Dictionary:
 
 func get_hidden_recruit_state_snapshot() -> Dictionary:
     return hidden_recruit_state.duplicate(true)
+
+func _collect_nearby_tracked_npc_ids(unit: UnitActor, max_distance: int = 3) -> Array[String]:
+    var tracked_ids: Array[String] = []
+    if unit == null or not is_instance_valid(unit):
+        return tracked_ids
+    for other_unit in ally_units + enemy_units:
+        if other_unit == unit or not is_instance_valid(other_unit) or other_unit.is_defeated():
+            continue
+        var tracked_npc_id := _resolve_tracked_npc_id(other_unit)
+        if tracked_npc_id.is_empty() or tracked_ids.has(tracked_npc_id):
+            continue
+        var distance: int = abs(other_unit.grid_position.x - unit.grid_position.x) + abs(other_unit.grid_position.y - unit.grid_position.y)
+        if distance > max_distance:
+            continue
+        tracked_ids.append(tracked_npc_id)
+    return tracked_ids
+
+func _collect_bonded_tracked_npc_ids(unit: UnitActor) -> Array[String]:
+    var tracked_ids: Array[String] = []
+    if unit == null or not is_instance_valid(unit) or unit.unit_data == null or bond_service == null:
+        return tracked_ids
+    for other_unit in ally_units + enemy_units:
+        if other_unit == unit or not is_instance_valid(other_unit) or other_unit.is_defeated() or other_unit.unit_data == null:
+            continue
+        var tracked_npc_id := _resolve_tracked_npc_id(other_unit)
+        if tracked_npc_id.is_empty() or tracked_ids.has(tracked_npc_id):
+            continue
+        if bond_service.get_support_rank(unit.unit_data.unit_id, other_unit.unit_data.unit_id) < SUPPORT_BOND_RANK_B:
+            continue
+        tracked_ids.append(tracked_npc_id)
+    return tracked_ids
+
+func _resolve_tracked_npc_id(unit: UnitActor) -> String:
+    if unit == null or not is_instance_valid(unit) or unit.unit_data == null:
+        return ""
+    match unit.unit_data.unit_id:
+        &"enemy_saria":
+            return "leonika"
+        &"ally_rian":
+            return "rian"
+        &"ally_noah":
+            return "noah"
+        &"enemy_melkion", &"ally_melkion_ally":
+            return "melkion"
+        _:
+            return ""
 
 func _build_battle_defeat_payload() -> Dictionary:
     return {
@@ -2486,6 +2648,9 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
     for key in extra_context.keys():
         attack_context[key] = extra_context[key]
 
+    if attacker.faction == "enemy" and enemy_attack_percent_bonus_by_unit.has(attacker.get_instance_id()):
+        attack_context["attack_percent_mod"] = int(attack_context.get("attack_percent_mod", 0)) + int(enemy_attack_percent_bonus_by_unit[attacker.get_instance_id()])
+
     if attacker.faction == "ally":
         if progression_service != null:
             var burden_fx := progression_service.get_burden_effect()
@@ -2534,6 +2699,32 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
                 attack_context[key] = value
 
     return attack_context
+
+func _apply_moral_consequences_to_boss_unit(unit: UnitActor) -> void:
+    var moral_consequence = get_node_or_null("/root/MoralConsequence")
+    if moral_consequence == null or not moral_consequence.has_method("resolve_boss_id") or not moral_consequence.has_method("apply_consequences_to_boss"):
+        return
+    var boss_id := String(moral_consequence.resolve_boss_id(unit.unit_data)).strip_edges()
+    if boss_id.is_empty():
+        return
+    var modifier = moral_consequence.apply_consequences_to_boss(boss_id)
+    if modifier == null:
+        return
+    var damage_bonus_percent := int(round((float(modifier.boss_damage_multiplier) - 1.0) * 100.0))
+    if damage_bonus_percent > 0:
+        enemy_attack_percent_bonus_by_unit[unit.get_instance_id()] = damage_bonus_percent
+    var health_multiplier := float(modifier.boss_health_multiplier)
+    if health_multiplier > 1.0 and unit.has_method("apply_runtime_max_hp_bonus"):
+        var bonus_hp := int(ceil(float(unit.get_max_hp()) * (health_multiplier - 1.0)))
+        unit.apply_runtime_max_hp_bonus(bonus_hp)
+    var dialogue_line := String(modifier.boss_resolve_dialogue).strip_edges()
+    if not dialogue_line.is_empty():
+        boss_event_history.append("%s:%s" % [boss_id, dialogue_line])
+        if hud != null:
+            hud.set_transition_reason("boss_ethics_dialogue", {
+                "boss": boss_id,
+                "line": dialogue_line,
+            })
 
 func select_tactical_note_at_battle_start(note_id: String) -> bool:
     var tactics = get_node_or_null("/root/Tactics")

@@ -49,6 +49,9 @@ func generate_entry(chapter_id: String, battle_log: Array, choices_made: Array) 
 	entry.narrative_text = narrative_text
 	entry.style = resolved_style
 	entry.trigger_events = trigger_events
+	var npc_personality = get_node_or_null("/root/NPCPersonality")
+	if npc_personality != null and npc_personality.has_method("queue_chronicle_reference"):
+		npc_personality.queue_chronicle_reference(entry)
 	return entry
 
 func _normalize_battle_log(battle_log: Array) -> Dictionary:

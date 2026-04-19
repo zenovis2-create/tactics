@@ -258,6 +258,10 @@ func show_result(result: Dictionary) -> void:
 	if not world_timeline_text.is_empty():
 		body_lines.append(world_timeline_text)
 
+	var moral_ending_lines := _build_moral_ending_lines(result)
+	for line in moral_ending_lines:
+		body_lines.append(line)
+
 	if title_label != null:
 		title_label.text = title
 	if body_label != null:
@@ -312,6 +316,29 @@ func _apply_badge_narrative(progression: ProgressionData, result: Dictionary) ->
 	]).strip_edges()
 	badge_narrative_text_label.text = narrative
 	badge_narrative_stone_label.text = String(payload.get("stone_text", ""))
+
+func _build_moral_ending_lines(result: Dictionary) -> PackedStringArray:
+	var lines := PackedStringArray()
+	var stage_id := String(result.get("stage_id", "")).strip_edges().to_upper()
+	if not result.has("finale_result") and not stage_id.begins_with("CH10"):
+		return lines
+	var moral_consequence = get_node_or_null("/root/MoralConsequence")
+	if moral_consequence == null or not moral_consequence.has_method("apply_consequences_to_ending"):
+		return lines
+	var ending_payload: Dictionary = moral_consequence.apply_consequences_to_ending()
+	if ending_payload.is_empty():
+		return lines
+	result["moral_ending"] = ending_payload
+	var ending_variant := String(ending_payload.get("ending_variant", "")).strip_edges()
+	if not ending_variant.is_empty():
+		lines.append("[b]Ending Variant:[/b] %s" % ending_variant)
+	var ending_text := String(ending_payload.get("ending_text", "")).strip_edges()
+	if not ending_text.is_empty():
+		lines.append(ending_text)
+	var world_state_description := String(ending_payload.get("world_state_description", "")).strip_edges()
+	if not world_state_description.is_empty():
+		lines.append(world_state_description)
+	return lines
 
 static func build_badge_narrative_payload(progression: ProgressionData) -> Dictionary:
 	var payload := {

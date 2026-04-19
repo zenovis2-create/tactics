@@ -13,6 +13,7 @@ var _stage_data = null
 var _battle_board: Node = null
 var _path_service: Node = null
 var _battle_controller: Node = null
+var _persistent_damage_levels: Dictionary = {}
 
 func prepare_for_battle(stage_data, battle_board: Node = null, path_service: Node = null, battle_controller: Node = null) -> void:
 	_stage_data = stage_data
@@ -27,6 +28,7 @@ func reset() -> void:
 	active_events.clear()
 	turn_count = 1
 	boss_enraged = false
+	_persistent_damage_levels.clear()
 	if _battle_controller != null:
 		_battle_controller.set("boss_enraged", false)
 
@@ -102,6 +104,9 @@ func apply_tile_change(position: Vector2i, new_terrain: String) -> void:
 	_stage_data.terrain_move_costs[position] = int(profile.get("move_cost", 1))
 	_stage_data.terrain_defense_bonuses[position] = int(profile.get("defense_bonus", 0))
 
+func get_persistent_damage_levels() -> Dictionary:
+	return _persistent_damage_levels.duplicate(true)
+
 func _apply_event(event: EvolutionEvent) -> void:
 	if _stage_data == null:
 		return
@@ -113,15 +118,19 @@ func _apply_event(event: EvolutionEvent) -> void:
 			EvolutionEvent.EffectType.DESTROY:
 				_stage_data.blocked_cells.erase(position)
 				apply_tile_change(position, event.new_terrain_type)
+				_record_damage_level(position, 2)
 			EvolutionEvent.EffectType.BLOCK:
 				if not _stage_data.blocked_cells.has(position):
 					_stage_data.blocked_cells.append(position)
 				apply_tile_change(position, event.new_terrain_type)
+				_record_damage_level(position, 1)
 			EvolutionEvent.EffectType.TRANSFORM:
 				_stage_data.blocked_cells.erase(position)
 				apply_tile_change(position, event.new_terrain_type)
+				_record_damage_level(position, 1)
 			EvolutionEvent.EffectType.SPAWN:
 				apply_tile_change(position, event.new_terrain_type)
+				_record_damage_level(position, 1)
 		affected_tiles.append(position)
 	if event.event_id == "ch10_final_central_platform_corruption":
 		boss_enraged = true
@@ -137,6 +146,9 @@ func _refresh_battlefield() -> void:
 		_path_service.configure_from_stage(_stage_data)
 	if _battle_controller != null and _battle_controller.has_method("_refresh_unit_visual_state"):
 		_battle_controller.call("_refresh_unit_visual_state")
+
+func _record_damage_level(position: Vector2i, damage_level: int) -> void:
+	_persistent_damage_levels[position] = maxi(int(_persistent_damage_levels.get(position, 0)), damage_level)
 
 func _pick_deterministic_tree_tile(stage_id: String, trigger_turn_value: int, available_tiles: Array[Vector2i]) -> Vector2i:
 	if available_tiles.is_empty():

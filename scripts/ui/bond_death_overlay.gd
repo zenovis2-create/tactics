@@ -1,6 +1,7 @@
 class_name BondDeathOverlay
 extends CanvasLayer
 
+signal bond_death_started
 signal bond_ending_complete
 
 const BondEndingRegistry = preload("res://scripts/battle/bond_ending_registry.gd")
@@ -42,6 +43,7 @@ func trigger_bond_ending(ending: BondEnding) -> void:
 
 	_sequence_token += 1
 	var token := _sequence_token
+	bond_death_started.emit()
 	visible = true
 	_enter_slow_motion()
 	_reset_visual_state()

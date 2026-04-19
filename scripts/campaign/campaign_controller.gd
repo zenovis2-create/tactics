@@ -965,6 +965,7 @@ func start_chapter_one_flow(reset_progression: bool = true) -> void:
         _start_new_campaign()
         return
     _prepare_chapter_one_runtime()
+    _sync_npc_personality_with_progression(false)
     _enter_stage(_active_stage_index)
 
 func _start_new_campaign() -> void:
@@ -973,6 +974,7 @@ func _start_new_campaign() -> void:
     if progression != null:
         progression.reset_for_new_campaign()
         _apply_ng_plus_purchases(progression)
+    _sync_npc_personality_with_progression(true)
     _enter_stage(_active_stage_index)
 
 func _prepare_chapter_one_runtime() -> void:
@@ -1795,6 +1797,144 @@ func _get_progression_data() -> ProgressionData:
     if _battle_controller != null and _battle_controller.progression_service != null:
         return _battle_controller.progression_service.get_data()
     return null
+
+func _sync_npc_personality_with_progression(reset_state: bool) -> void:
+    var npc_personality = _get_npc_personality()
+    var progression_data := _get_progression_data()
+    if npc_personality == null:
+        return
+    if reset_state and npc_personality.has_method("reset"):
+        npc_personality.reset(progression_data)
+        return
+    if npc_personality.has_method("bind_progression"):
+        npc_personality.bind_progression(progression_data)
+
+func _get_npc_personality():
+    return get_node_or_null("/root/NPCPersonality")
+
+func _get_adaptive_dialogue_filter():
+    return get_node_or_null("/root/AdaptiveDialogueFilter")
+
+func _apply_adaptive_dialogue_entries(lines: Array[String], base_key: String) -> Array[String]:
+    var adapted_lines := lines.duplicate()
+    var adaptive_filter = _get_adaptive_dialogue_filter()
+    if adaptive_filter == null:
+        return adapted_lines
+
+    if base_key == "ch10_final":
+        var leonika_line := String(adaptive_filter.get_adapted_dialogue_key("leonika", base_key)).strip_edges()
+        if not leonika_line.is_empty():
+            adapted_lines.insert(0, "Leonika: %s" % leonika_line)
+    elif base_key.begins_with("support_"):
+        var support_partner_id := _get_active_support_partner_npc_id()
+        if not support_partner_id.is_empty():
+            var support_variant := String(adaptive_filter.get_adapted_dialogue_key(support_partner_id, base_key)).strip_edges()
+            var support_line := _build_support_variant_line(support_partner_id, support_variant)
+            if not support_line.is_empty():
+                adapted_lines.insert(0, support_line)
+
+    var npc_personality = _get_npc_personality()
+    if npc_personality == null or not npc_personality.has_method("has_pending_chronicle_reference") or not npc_personality.has_pending_chronicle_reference():
+        return adapted_lines
+
+    var speaker_id := _find_first_dialogue_speaker_id(adapted_lines)
+    if speaker_id.is_empty():
+        return adapted_lines
+    var chronicle_reference: Dictionary = npc_personality.peek_pending_chronicle_reference() if npc_personality.has_method("peek_pending_chronicle_reference") else {}
+    var reference_line := String(adaptive_filter.inject_chronicle_reference(speaker_id, chronicle_reference)).strip_edges()
+    if reference_line.is_empty():
+        return adapted_lines
+    adapted_lines.insert(0, reference_line)
+    if npc_personality.has_method("consume_pending_chronicle_reference"):
+        npc_personality.consume_pending_chronicle_reference()
+    return adapted_lines
+
+func _get_active_support_partner_npc_id() -> String:
+    var pair_id := String(_active_support_conversation.get("pair", "")).strip_edges()
+    if pair_id.is_empty():
+        return ""
+    for raw_part in pair_id.split(":", false):
+        var normalized_part := String(raw_part).strip_edges()
+        if normalized_part == "ally_rian" or normalized_part == "rian":
+            continue
+        return normalized_part
+    return ""
+
+func _build_support_variant_line(npc_id: String, adapted_key: String) -> String:
+    var speaker_name := _normalize_dialogue_speaker_name(npc_id)
+    if speaker_name.is_empty():
+        speaker_name = npc_id.capitalize()
+    if adapted_key.ends_with("_FRIENDLY"):
+        return "%s: 이번에는 당신의 선택을 믿어도 되겠군요." % speaker_name
+    if adapted_key.ends_with("_HOSTILE"):
+        return "%s: 아직은 당신의 뜻을 다 믿지 못하겠어요." % speaker_name
+    return ""
+
+func _find_first_dialogue_speaker_id(lines: Array[String]) -> String:
+    for line in lines:
+        var normalized_line := String(line).strip_edges()
+        if not normalized_line.contains(":"):
+            continue
+        var speaker_name := normalized_line.split(":", true, 1)[0]
+        var speaker_id := _normalize_dialogue_speaker_id(speaker_name)
+        if speaker_id.is_empty():
+            continue
+        return speaker_id
+    return ""
+
+func _normalize_dialogue_speaker_id(speaker_name: String) -> String:
+    match speaker_name.strip_edges().to_lower():
+        "leonika":
+            return "leonika"
+        "rian":
+            return "rian"
+        "noah":
+            return "noah"
+        "melkion":
+            return "melkion"
+        "serin":
+            return "serin"
+        "bran":
+            return "bran"
+        "tia":
+            return "tia"
+        "enoch":
+            return "enoch"
+        "karl":
+            return "karl"
+        "lete":
+            return "lete"
+        "mira":
+            return "mira"
+        _:
+            return ""
+
+func _normalize_dialogue_speaker_name(npc_id: String) -> String:
+    match npc_id.strip_edges().to_lower():
+        "ally_rian", "rian":
+            return "Rian"
+        "ally_noah", "noah":
+            return "Noah"
+        "enemy_saria", "leonika":
+            return "Leonika"
+        "enemy_melkion", "ally_melkion_ally", "melkion":
+            return "Melkion"
+        "serin":
+            return "Serin"
+        "bran":
+            return "Bran"
+        "tia":
+            return "Tia"
+        "enoch":
+            return "Enoch"
+        "karl":
+            return "Karl"
+        "lete":
+            return "Lete"
+        "mira":
+            return "Mira"
+        _:
+            return ""
 
 func _get_world_timeline_id() -> String:
     var progression_data: ProgressionData = _get_progression_data()
@@ -2747,6 +2887,21 @@ func _build_panel_payload(mode: String) -> Dictionary:
             dialogue_entries = CampaignShellDialogueCatalog.get_resolution_dialogue(_get_world_timeline_id(), _has_worldview_complete())
             presentation_cards = _build_resolution_presentation_cards()
 
+    var adaptive_dialogue_key := ""
+    if mode == CampaignState.MODE_CAMP and _active_chapter_id == CHAPTER_CH10:
+        adaptive_dialogue_key = "ch10_final"
+    elif mode == CampaignState.MODE_COMPLETE and _active_chapter_id == CHAPTER_CH10 and _ch10_complete_phase != &"epilogue":
+        adaptive_dialogue_key = "ch10_final"
+    elif mode == CampaignState.MODE_CHOICE and _has_active_support_conversation():
+        var support_rank := int(_active_support_conversation.get("rank", 0))
+        if support_rank >= 5:
+            adaptive_dialogue_key = "support_a"
+        elif support_rank >= 4:
+            adaptive_dialogue_key = "support_b"
+        else:
+            adaptive_dialogue_key = "support_c"
+    dialogue_entries = _apply_adaptive_dialogue_entries(dialogue_entries, adaptive_dialogue_key)
+
     var alerts: Array[String] = []
     var recommendation := "Review the current state and continue when ready."
     var active_section := CampaignPanel.SECTION_SUMMARY
@@ -2981,20 +3136,57 @@ func _build_camp_presentation_cards() -> Array[Dictionary]:
             "title": "The March To The Final Tower Starts",
             "body": "Eclipse coordinates, tower lattice, and the last decree now read as concrete proof, turning the camp handoff into a committed march on the final tower."
         })
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    if terrain_memory != null and terrain_memory.has_method("get_persistent_markers"):
+        for marker in terrain_memory.get_persistent_markers():
+            cards.append({
+                "eyebrow": "전장의자국",
+                "title": String(marker.get("chapter_name", String(marker.get("chapter_id", "")).to_upper())),
+                "body": "%d회 방문 · 마지막 방문 %s" % [
+                    int(marker.get("visit_count", 0)),
+                    String(marker.get("last_visit_date", "")).strip_edges()
+                ]
+            })
     return cards
 
 func _build_museum_panel_data(mode: String) -> Dictionary:
     var progression_data := _get_progression_data()
     if progression_data == null:
         return {}
+    var terrain_memory = get_node_or_null("/root/TerrainMemory")
+    var terrain_museum_location := ""
+    var terrain_markers: Array[Dictionary] = []
+    if terrain_memory != null and terrain_memory.has_method("get_museum_location"):
+        terrain_museum_location = String(terrain_memory.get_museum_location()).strip_edges()
+    if terrain_memory != null and terrain_memory.has_method("get_persistent_markers"):
+        terrain_markers = terrain_memory.get_persistent_markers()
     var fragment_ids := progression_data.get_worldview_fragment_ids()
+    var terrain_museum_visible := not terrain_museum_location.is_empty() and (mode == CampaignState.MODE_CAMP or mode == CampaignState.MODE_COMPLETE)
+    var terrain_museum_cards: Array[Dictionary] = []
+    if terrain_museum_visible:
+        for marker in terrain_markers:
+            if String(marker.get("chapter_id", "")).strip_edges() != terrain_museum_location:
+                continue
+            terrain_museum_cards.append({
+                "speaker": "전장의museum",
+                "name": String(marker.get("chapter_name", terrain_museum_location.to_upper())),
+                "description": "%d회 되밟은 전장" % int(marker.get("visit_count", 0)),
+                "dialogue": "최근 흔적: %s" % String(marker.get("last_visit_date", "")).strip_edges()
+            })
+            break
+    var worldview_visible := progression_data.worldview_complete and (mode == CampaignState.MODE_CAMP or mode == CampaignState.MODE_COMPLETE)
+    var cards: Array[Dictionary] = []
+    for entry in CampaignShellDialogueCatalog.get_worldview_fragment_cards(fragment_ids, _get_world_timeline_id()):
+        cards.append(entry)
+    for entry in terrain_museum_cards:
+        cards.append(entry)
     return {
-        "visible": progression_data.worldview_complete and (mode == CampaignState.MODE_CAMP or mode == CampaignState.MODE_COMPLETE),
-        "complete": progression_data.worldview_complete,
-        "title": "Museum of Truth",
-        "status": "Worldview Fragments %d/3 collected" % fragment_ids.size(),
-        "badge": "Hidden Chapter Unlocked" if progression_data.worldview_complete else "",
-        "cards": CampaignShellDialogueCatalog.get_worldview_fragment_cards(fragment_ids, _get_world_timeline_id())
+        "visible": worldview_visible or terrain_museum_visible,
+        "complete": progression_data.worldview_complete or terrain_museum_visible,
+        "title": "Museum of Truth" if worldview_visible else "전장의museum",
+        "status": "Worldview Fragments %d/3 collected" % fragment_ids.size() if worldview_visible else "%s 방문 기록 보존" % terrain_museum_location.to_upper(),
+        "badge": "Hidden Chapter Unlocked" if progression_data.worldview_complete else ("Most Visited Battlefield" if terrain_museum_visible else ""),
+        "cards": cards
     }
 
 func _build_defeat_presentation_cards() -> Array[Dictionary]:
@@ -3381,6 +3573,9 @@ func _check_lete_retreat_unlock(stage: StageData, progression_data: ProgressionD
     if stage.stage_id != &"CH08_05" or not bool(hidden_state.get("lete_retreated", false)):
         return
     progression_data.unlock_ally(&"lete")
+    var npc_personality = _get_npc_personality()
+    if npc_personality != null and npc_personality.has_method("record_story_action"):
+        npc_personality.record_story_action("recruit_hidden_unit", {"recruited_npc_id": "lete"})
     _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_LETE, "Worldview Fragment unlocked — 복수의 순수함")
     _award_badge(progression_data, "secret_recruit:lete", 5, "Badge of Heroism +5 — Lete has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Lete retreats alive from the ruin fight and joins the active roster."])
@@ -3390,6 +3585,9 @@ func _check_mira_unlock(stage: StageData, progression_data: ProgressionData, hid
         return
     progression_data.mira_unlocked = true
     progression_data.unlock_ally(&"mira")
+    var npc_personality = _get_npc_personality()
+    if npc_personality != null and npc_personality.has_method("record_story_action"):
+        npc_personality.record_story_action("recruit_hidden_unit", {"recruited_npc_id": "mira"})
     _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_MIRA, "Worldview Fragment unlocked — 믿음과 의심")
     _award_badge(progression_data, "secret_recruit:mira", 5, "Badge of Heroism +5 — Mira has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Mira answers the shrine record and joins the active roster."])
@@ -3399,6 +3597,9 @@ func _check_melkion_unlock(stage: StageData, progression_data: ProgressionData, 
         return
     progression_data.melkion_unlocked = true
     progression_data.unlock_ally(&"melkion")
+    var npc_personality = _get_npc_personality()
+    if npc_personality != null and npc_personality.has_method("record_story_action"):
+        npc_personality.record_story_action("recruit_hidden_unit", {"recruited_npc_id": "melkion"})
     _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_MELKION, "Worldview Fragment unlocked — 진실의 대가")
     _award_badge(progression_data, "secret_recruit:melkion", 5, "Badge of Heroism +5 — Melkion has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Melkion rewrites his own record and joins for the next battle only."])

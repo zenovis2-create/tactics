@@ -15,13 +15,13 @@ const TERRAIN_OVERLAY_CONTRACTS := {
     &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.14, "icon": "battery.png"},
     &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.12, "icon": "cathedral.png"},
     &"bell": {"family": "bell", "card": "bell.png", "card_alpha": 0.12, "icon": "bell.png"},
-	&"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.14, "icon": "bridge.png"},
-	&"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.1, "icon": "bell.png"},
-	&"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.18, "icon": "highground.png"},
-	&"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"},
-	&"crumbling_debris": {"family": "wall", "card": "wall.png", "card_alpha": 0.1, "icon": "wall.png"},
-	&"fallen_tree": {"family": "forest", "card": "forest.png", "card_alpha": 0.18, "icon": "forest.png"},
-	&"corrupted_ground": {"family": "plain", "card": "plain.png", "card_alpha": 0.2, "icon": ""}
+    &"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.14, "icon": "bridge.png"},
+    &"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.1, "icon": "bell.png"},
+    &"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.18, "icon": "highground.png"},
+    &"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"},
+    &"crumbling_debris": {"family": "wall", "card": "wall.png", "card_alpha": 0.1, "icon": "wall.png"},
+    &"fallen_tree": {"family": "forest", "card": "forest.png", "card_alpha": 0.18, "icon": "forest.png"},
+    &"corrupted_ground": {"family": "plain", "card": "plain.png", "card_alpha": 0.2, "icon": ""}
 }
 
 var stage_data: StageData
@@ -29,6 +29,7 @@ var _tile_icon_cache: Dictionary = {}
 var _tile_card_cache: Dictionary = {}
 var _flood_zone_lookup: Dictionary = {}
 var _flood_margin_lookup: Dictionary = {}
+var _persistent_damage_lookup: Dictionary = {}
 
 func set_stage(data: StageData) -> void:
     stage_data = data
@@ -41,6 +42,10 @@ func set_flood_state(flood_cells: Array[Vector2i], margin_cells: Array[Vector2i]
         _flood_zone_lookup[cell] = true
     for cell in margin_cells:
         _flood_margin_lookup[cell] = true
+    queue_redraw()
+
+func set_persistent_terrain_damage(damage_map: Dictionary) -> void:
+    _persistent_damage_lookup = damage_map.duplicate(true)
     queue_redraw()
 
 func _draw() -> void:
@@ -111,59 +116,61 @@ func _draw() -> void:
 func _get_tile_color(cell: Vector2i, parity: int) -> Color:
     var palette := _get_palette()
     var terrain_type: StringName = stage_data.get_terrain_type(cell)
+    var base_color: Color
     match terrain_type:
         &"forest":
-            return palette.forest_a if parity % 2 == 0 else palette.forest_b
+            base_color = palette.forest_a if parity % 2 == 0 else palette.forest_b
         &"water":
-            return Color(0.180392, 0.286275, 0.380392, 1.0) if parity % 2 == 0 else Color(0.14902, 0.247059, 0.337255, 1.0)
+            base_color = Color(0.180392, 0.286275, 0.380392, 1.0) if parity % 2 == 0 else Color(0.14902, 0.247059, 0.337255, 1.0)
         &"flooded":
-            return Color(0.164706, 0.301961, 0.423529, 1.0) if parity % 2 == 0 else Color(0.137255, 0.262745, 0.384314, 1.0)
+            base_color = Color(0.164706, 0.301961, 0.423529, 1.0) if parity % 2 == 0 else Color(0.137255, 0.262745, 0.384314, 1.0)
         &"flood":
-            return Color(0.133333, 0.278431, 0.447059, 1.0) if parity % 2 == 0 else Color(0.109804, 0.235294, 0.403922, 1.0)
+            base_color = Color(0.133333, 0.278431, 0.447059, 1.0) if parity % 2 == 0 else Color(0.109804, 0.235294, 0.403922, 1.0)
         &"wall":
-            return palette.wall_a if parity % 2 == 0 else palette.wall_b
+            base_color = palette.wall_a if parity % 2 == 0 else palette.wall_b
         &"tunnel":
-            return Color(0.305882, 0.286275, 0.247059, 1.0) if parity % 2 == 0 else Color(0.270588, 0.25098, 0.215686, 1.0)
+            base_color = Color(0.305882, 0.286275, 0.247059, 1.0) if parity % 2 == 0 else Color(0.270588, 0.25098, 0.215686, 1.0)
         &"gate_control":
-            return Color(0.329412, 0.309804, 0.211765, 1.0) if parity % 2 == 0 else Color(0.294118, 0.270588, 0.180392, 1.0)
+            base_color = Color(0.329412, 0.309804, 0.211765, 1.0) if parity % 2 == 0 else Color(0.294118, 0.270588, 0.180392, 1.0)
         &"floodgate":
-            return Color(0.203922, 0.286275, 0.333333, 1.0) if parity % 2 == 0 else Color(0.176471, 0.247059, 0.298039, 1.0)
+            base_color = Color(0.203922, 0.286275, 0.333333, 1.0) if parity % 2 == 0 else Color(0.176471, 0.247059, 0.298039, 1.0)
         &"battery":
-            return Color(0.309804, 0.266667, 0.203922, 1.0) if parity % 2 == 0 else Color(0.27451, 0.231373, 0.172549, 1.0)
+            base_color = Color(0.309804, 0.266667, 0.203922, 1.0) if parity % 2 == 0 else Color(0.27451, 0.231373, 0.172549, 1.0)
         &"cathedral":
-            return Color(0.282353, 0.25098, 0.313726, 1.0) if parity % 2 == 0 else Color(0.25098, 0.219608, 0.282353, 1.0)
+            base_color = Color(0.282353, 0.25098, 0.313726, 1.0) if parity % 2 == 0 else Color(0.25098, 0.219608, 0.282353, 1.0)
         &"bell":
-            return Color(0.227451, 0.262745, 0.356863, 1.0) if parity % 2 == 0 else Color(0.2, 0.231373, 0.321569, 1.0)
+            base_color = Color(0.227451, 0.262745, 0.356863, 1.0) if parity % 2 == 0 else Color(0.2, 0.231373, 0.321569, 1.0)
         &"hymn":
-            return Color(0.27451, 0.239216, 0.317647, 1.0) if parity % 2 == 0 else Color(0.243137, 0.207843, 0.286275, 1.0)
+            base_color = Color(0.27451, 0.239216, 0.317647, 1.0) if parity % 2 == 0 else Color(0.243137, 0.207843, 0.286275, 1.0)
         &"shrine":
-            return Color(0.239216, 0.313726, 0.231373, 1.0) if parity % 2 == 0 else Color(0.211765, 0.278431, 0.203922, 1.0)
+            base_color = Color(0.239216, 0.313726, 0.231373, 1.0) if parity % 2 == 0 else Color(0.211765, 0.278431, 0.203922, 1.0)
         &"market":
-            return Color(0.32549, 0.270588, 0.227451, 1.0) if parity % 2 == 0 else Color(0.290196, 0.239216, 0.2, 1.0)
+            base_color = Color(0.32549, 0.270588, 0.227451, 1.0) if parity % 2 == 0 else Color(0.290196, 0.239216, 0.2, 1.0)
         &"marked":
-            return Color(0.333333, 0.180392, 0.219608, 1.0) if parity % 2 == 0 else Color(0.290196, 0.152941, 0.188235, 1.0)
+            base_color = Color(0.333333, 0.180392, 0.219608, 1.0) if parity % 2 == 0 else Color(0.290196, 0.152941, 0.188235, 1.0)
         &"thicket":
-            return Color(0.180392, 0.25098, 0.172549, 1.0) if parity % 2 == 0 else Color(0.152941, 0.215686, 0.145098, 1.0)
+            base_color = Color(0.180392, 0.25098, 0.172549, 1.0) if parity % 2 == 0 else Color(0.152941, 0.215686, 0.145098, 1.0)
         &"archives":
-            return Color(0.286275, 0.247059, 0.192157, 1.0) if parity % 2 == 0 else Color(0.254902, 0.219608, 0.168627, 1.0)
+            base_color = Color(0.286275, 0.247059, 0.192157, 1.0) if parity % 2 == 0 else Color(0.254902, 0.219608, 0.168627, 1.0)
         &"keeper":
-            return Color(0.215686, 0.254902, 0.290196, 1.0) if parity % 2 == 0 else Color(0.184314, 0.223529, 0.258824, 1.0)
+            base_color = Color(0.215686, 0.254902, 0.290196, 1.0) if parity % 2 == 0 else Color(0.184314, 0.223529, 0.258824, 1.0)
         &"bridge":
-            return Color(0.345098, 0.298039, 0.219608, 1.0) if parity % 2 == 0 else Color(0.313726, 0.270588, 0.2, 1.0)
+            base_color = Color(0.345098, 0.298039, 0.219608, 1.0) if parity % 2 == 0 else Color(0.313726, 0.270588, 0.2, 1.0)
         &"keep":
-            return Color(0.286275, 0.286275, 0.333333, 1.0) if parity % 2 == 0 else Color(0.25098, 0.25098, 0.298039, 1.0)
+            base_color = Color(0.286275, 0.286275, 0.333333, 1.0) if parity % 2 == 0 else Color(0.25098, 0.25098, 0.298039, 1.0)
         &"crumbling_debris":
-            return Color(0.352941, 0.321569, 0.301961, 1.0) if parity % 2 == 0 else Color(0.317647, 0.286275, 0.266667, 1.0)
+            base_color = Color(0.352941, 0.321569, 0.301961, 1.0) if parity % 2 == 0 else Color(0.317647, 0.286275, 0.266667, 1.0)
         &"fallen_tree":
-            return Color(0.235294, 0.278431, 0.172549, 1.0) if parity % 2 == 0 else Color(0.2, 0.243137, 0.145098, 1.0)
+            base_color = Color(0.235294, 0.278431, 0.172549, 1.0) if parity % 2 == 0 else Color(0.2, 0.243137, 0.145098, 1.0)
         &"corrupted_ground":
-            return Color(0.27451, 0.188235, 0.317647, 1.0) if parity % 2 == 0 else Color(0.231373, 0.156863, 0.278431, 1.0)
+            base_color = Color(0.27451, 0.188235, 0.317647, 1.0) if parity % 2 == 0 else Color(0.231373, 0.156863, 0.278431, 1.0)
         &"corridor":
-            return Color(0.215686, 0.235294, 0.305882, 1.0) if parity % 2 == 0 else Color(0.188235, 0.207843, 0.27451, 1.0)
+            base_color = Color(0.215686, 0.235294, 0.305882, 1.0) if parity % 2 == 0 else Color(0.188235, 0.207843, 0.27451, 1.0)
         &"highground":
-            return Color(0.364706, 0.333333, 0.227451, 1.0) if parity % 2 == 0 else Color(0.32549, 0.294118, 0.203922, 1.0)
+            base_color = Color(0.364706, 0.333333, 0.227451, 1.0) if parity % 2 == 0 else Color(0.32549, 0.294118, 0.203922, 1.0)
         _:
-            return palette.plain_a if parity % 2 == 0 else palette.plain_b
+            base_color = palette.plain_a if parity % 2 == 0 else palette.plain_b
+    return _apply_persistent_damage_tint(cell, base_color)
 
 func _has_interactive_object_at(cell: Vector2i) -> bool:
     for object_data in stage_data.interactive_objects:
@@ -426,10 +433,28 @@ func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
     draw_line(rect.position + Vector2(1.0, rect.size.y - 1.0), rect.position + Vector2(rect.size.x - 1.0, rect.size.y - 1.0), Color(0, 0, 0, 0.08), 1.0)
     if (cell.x + cell.y) % 2 == 0:
         draw_line(rect.position + Vector2(16.0, rect.size.y - 16.0), rect.position + Vector2(rect.size.x - 16.0, 16.0), Color(1, 1, 1, 0.035), 1.0)
+    _draw_persistent_damage_overlay(cell, rect)
     _draw_stage_cell_motif(stage_key, cell, rect)
 
 func _get_terrain_overlay_contract(terrain_type: StringName) -> Dictionary:
     return TERRAIN_OVERLAY_CONTRACTS.get(terrain_type, TERRAIN_OVERLAY_CONTRACTS.get(&"plain", {}))
+
+func _apply_persistent_damage_tint(cell: Vector2i, base_color: Color) -> Color:
+    var damage_level := int(_persistent_damage_lookup.get(cell, 0))
+    if damage_level <= 0:
+        return base_color
+    var tint_strength := clampf(0.08 * float(damage_level), 0.0, 0.22)
+    return base_color.lerp(Color(0.14, 0.11, 0.09, 1.0), tint_strength)
+
+func _draw_persistent_damage_overlay(cell: Vector2i, rect: Rect2) -> void:
+    var damage_level := int(_persistent_damage_lookup.get(cell, 0))
+    if damage_level <= 0:
+        return
+    draw_rect(rect.grow(-9.0), Color(0.0862745, 0.0666667, 0.0509804, min(0.08 + 0.04 * damage_level, 0.18)), true)
+    draw_line(rect.position + Vector2(12.0, 14.0), rect.position + Vector2(rect.size.x - 12.0, rect.size.y - 14.0), Color(0.352941, 0.294118, 0.243137, min(0.18 + 0.05 * damage_level, 0.32)), 2.0)
+    if damage_level >= 2:
+        draw_line(rect.position + Vector2(rect.size.x - 16.0, 12.0), rect.position + Vector2(16.0, rect.size.y - 12.0), Color(0.45098, 0.360784, 0.282353, 0.28), 2.0)
+        draw_circle(rect.get_center() + Vector2(8.0, -6.0), 4.0, Color(0.533333, 0.435294, 0.337255, 0.22))
 
 func _draw_contract_tile_icon(rect: Rect2, terrain_type: StringName) -> void:
     var contract := _get_terrain_overlay_contract(terrain_type)

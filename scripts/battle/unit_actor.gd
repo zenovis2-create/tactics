@@ -28,6 +28,7 @@ var _tile_defense_bonus: int = 0
 var _equipped_accessory: AccessoryData
 var _equipped_weapon: WeaponData
 var _equipped_armor: ArmorData
+var _runtime_max_hp_bonus: int = 0
 var _move_tween: Tween
 var _mark_pulse_tween: Tween
 var _damage_flash_tween: Tween
@@ -72,7 +73,16 @@ func _ready() -> void:
 func setup_from_data(data: UnitData) -> void:
     unit_data = data
     faction = data.faction
+    _runtime_max_hp_bonus = 0
     current_hp = get_max_hp()
+    _refresh_visuals()
+
+func apply_runtime_max_hp_bonus(amount: int, refill: bool = true) -> void:
+    _runtime_max_hp_bonus = max(0, amount)
+    if refill:
+        current_hp = get_max_hp()
+    else:
+        current_hp = mini(current_hp, get_max_hp())
     _refresh_visuals()
 
 func set_grid_position(cell: Vector2i, cell_size: Vector2i = Vector2i(64, 64)) -> void:
@@ -208,7 +218,7 @@ func get_defense() -> int:
 
 func get_max_hp() -> int:
     var base_value: int = unit_data.max_hp if unit_data != null else current_hp
-    return max(1, base_value + _get_heirloom_hp_bonus())
+    return max(1, base_value + _get_heirloom_hp_bonus() + _runtime_max_hp_bonus)
 
 func get_movement() -> int:
     var base_value: int = unit_data.movement if unit_data != null else 3

@@ -31,6 +31,11 @@ func generate_heirloom(progression_data: ProgressionData) -> HeirloomData:
 	heirloom.total_battles = int(battle_stats.get("total_battles", 0))
 	heirloom.total_victories = int(battle_stats.get("total_victories", 0))
 	heirloom.total_deaths = int(battle_stats.get("total_deaths", 0))
+	heirloom.terrain_damage_map = progression_data.terrain_damage_map.duplicate(true)
+	heirloom.battle_visit_counts = progression_data.battle_visit_counts.duplicate(true)
+	heirloom.persistent_markers = progression_data.persistent_markers.duplicate(true)
+	heirloom.battle_last_visit_dates = progression_data.battle_last_visit_dates.duplicate(true)
+	heirloom.museum_location = _resolve_museum_location(progression_data)
 	heirloom.chronicle_summary = _build_chronicle_summary(heirloom, battle_stats)
 	return heirloom
 
@@ -66,6 +71,12 @@ func apply_heirloom_to_ngplus(heirloom: HeirloomData, target_progression: Progre
 		target_progression.unlock_ally(StringName(holder_id))
 	target_progression.encyclopedia_comments["player_title"] = _player_title
 	target_progression.encyclopedia_comments["heirloom_chronicle"] = heirloom.chronicle_summary
+	target_progression.terrain_damage_map = heirloom.terrain_damage_map.duplicate(true)
+	target_progression.battle_visit_counts = heirloom.battle_visit_counts.duplicate(true)
+	target_progression.persistent_markers = heirloom.persistent_markers.duplicate(true)
+	target_progression.battle_last_visit_dates = heirloom.battle_last_visit_dates.duplicate(true)
+	if not heirloom.museum_location.is_empty():
+		target_progression.encyclopedia_comments["terrain_museum_location"] = heirloom.museum_location
 
 func get_clan_skill_bonus(clan_symbol: int) -> Dictionary:
 	match clan_symbol:
@@ -291,6 +302,17 @@ func _build_inherited_skill_stat_bonus(inherited_skills: Array[Dictionary]) -> D
 		"attack_bonus": maxi(1, int(ceil(float(skill_count) / 2.0))),
 		"defense_bonus": int(floor(float(skill_count) / 2.0)),
 	}
+
+func _resolve_museum_location(progression_data: ProgressionData) -> String:
+	var best_stage_id := ""
+	var best_visit_count := 0
+	for stage_id_variant in progression_data.battle_visit_counts.keys():
+		var stage_id := String(stage_id_variant).strip_edges().to_lower()
+		var visit_count: int = max(0, int(progression_data.battle_visit_counts.get(stage_id_variant, 0)))
+		if visit_count > best_visit_count or (visit_count == best_visit_count and not stage_id.is_empty() and (best_stage_id.is_empty() or stage_id < best_stage_id)):
+			best_visit_count = visit_count
+			best_stage_id = stage_id
+	return best_stage_id
 
 func _collect_progression_unit_ids(target_progression: ProgressionData) -> Array[String]:
 	var unit_lookup: Dictionary = {}
