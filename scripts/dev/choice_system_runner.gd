@@ -3,6 +3,7 @@ extends SceneTree
 const MAIN_SCENE: PackedScene = preload("res://scenes/Main.tscn")
 const CampaignState = preload("res://scripts/campaign/campaign_state.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CH05_FINAL_STAGE = preload("res://data/stages/ch05_05_stage.tres")
 const CH07_FINAL_STAGE = preload("res://data/stages/ch07_05_stage.tres")
 const CH08_PRE_BOSS_STAGE = preload("res://data/stages/ch08_04_stage.tres")
@@ -99,6 +100,17 @@ const CASES: Array[Dictionary] = [
 		"chapter_id": &"CH10",
 		"stage_index": 3,
 		"stage": CH10_PRE_FINALE_STAGE
+	},
+	{
+		"label": "CH10 pre-finale Destiny",
+		"choice_point_id": &"ch10_pre_finale",
+		"option_id": "ch10_record_the_chosen",
+		"seed_kind": "pre_boss",
+		"chapter_id": &"CH10",
+		"stage_index": 3,
+		"stage": CH10_PRE_FINALE_STAGE,
+		"seed_destiny_unlocked": true,
+		"expected_option_count": 3
 	}
 ]
 
@@ -116,7 +128,7 @@ func _run() -> void:
 			push_error("[FAIL] %s: %s" % [String(config.get("label", "choice case")), result])
 
 	if all_passed:
-		print("[PASS] choice_system_runner validated all 10 choice outcomes.")
+		print("[PASS] choice_system_runner validated all %d choice outcomes." % CASES.size())
 		quit(0)
 		return
 
@@ -138,6 +150,15 @@ func _run_case(config: Dictionary) -> String:
 		main.queue_free()
 		await process_frame
 		return "Campaign controller was not available."
+
+	var blank_progression := ProgressionData.new()
+	if main.has_method("_get_progression_data"):
+		var battle = main.get_node_or_null("BattleScene")
+		if battle != null and battle.progression_service != null:
+			battle.progression_service.load_data(blank_progression)
+	var save_service = main.get_node_or_null("SaveService")
+	if save_service != null and save_service.has_method("save_progression"):
+		save_service.save_progression(blank_progression, 0)
 
 	var seed_error := await _seed_choice(main, campaign, config)
 	if not seed_error.is_empty():
@@ -183,6 +204,12 @@ func _seed_choice(main: Node, campaign, config: Dictionary) -> String:
 			campaign._active_stage_index = int(config.get("stage_index", 0))
 			campaign._current_stage = config.get("stage", null)
 			campaign._active_mode = CampaignState.MODE_CUTSCENE
+			if bool(config.get("seed_destiny_unlocked", false)):
+				var progression = campaign._get_progression_data()
+				if progression != null:
+					progression.add_ng_plus_purchase("ng_plus_1")
+					progression.add_ng_plus_purchase("ng_plus_2")
+					progression.add_ng_plus_purchase("ng_plus_3")
 			if not campaign.advance_step():
 				return "advance_step() did not enter the pre-boss choice state."
 			await process_frame
@@ -203,8 +230,9 @@ func _validate_choice_panel(panel_snapshot: Dictionary, config: Dictionary) -> S
 	if String(panel_snapshot.get("choice_prompt", "")).strip_edges().is_empty():
 		return "Choice prompt was empty."
 	var options: Array = panel_snapshot.get("choice_options", [])
-	if options.size() != 2:
-		return "Expected 2 choice options, got %d." % options.size()
+	var expected_option_count := int(config.get("expected_option_count", 2))
+	if options.size() != expected_option_count:
+		return "Expected %d choice options, got %d." % [expected_option_count, options.size()]
 	for option in options:
 		if typeof(option) != TYPE_DICTIONARY:
 			return "Choice option payload was not a dictionary."
@@ -277,6 +305,11 @@ func _verify_choice_outcome(main: Node, config: Dictionary) -> String:
 					return "CH10 A did not apply the ally attack bonus."
 				if not _allies_gain_bonus_attack(battle.ally_units):
 					return "CH10 A did not carry the attack bonus into ally battle stats."
+			elif String(config.get("option_id", "")) == "ch10_record_the_chosen":
+				if battle.stage_data.ally_attack_bonus != 1 or battle.stage_data.ally_defense_bonus != 1:
+					return "CH10 Destiny did not apply the balanced ally bonuses."
+				if not _allies_gain_bonus_attack(battle.ally_units) or not _allies_gain_bonus_defense(battle.ally_units):
+					return "CH10 Destiny did not carry the balanced bonuses into ally battle stats."
 			else:
 				if battle.stage_data.ally_attack_bonus != 0 or battle.stage_data.ally_defense_bonus != 1:
 					return "CH10 B did not apply the ally defense bonus."

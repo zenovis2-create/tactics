@@ -9,6 +9,7 @@ const FAIL := "❌ FAIL"
 
 const DestinyManagerRef = preload("res://scripts/battle/destiny_manager.gd")
 const DestinyUIRef = preload("res://scripts/ui/destiny_ui.gd")
+const ChronicleViewerRef = preload("res://scripts/ui/chronicle_viewer.gd")
 const ProgressionDataRef = preload("res://scripts/data/progression_data.gd")
 
 var tests_run: int = 0
@@ -39,6 +40,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await test_destiny_manager()
 	await test_destiny_ui()
+	await test_chronicle_viewer()
 	test_encyclopedia_extension()
 	print_results()
 	quit(0 if tests_failed == 0 else 1)
@@ -76,16 +78,23 @@ func test_destiny_manager() -> void:
 	var progression := ProgressionDataRef.new()
 	progression.ng_plus_purchases = ["ng_plus_1", "ng_plus_2", "ng_plus_3"]
 	var previous_progression: Variant = null
+	var active_progression: ProgressionDataRef = progression
 	if save_service != null:
 		previous_progression = save_service.call("load_progression", 0)
 		save_service.call("save_progression", progression, 0)
 		# Capture the reloaded progression and pass it to manager explicitly
 		var reloaded: Variant = save_service.call("load_progression", 0)
 		var reloaded_progression = reloaded as ProgressionDataRef if reloaded is ProgressionDataRef else null
+		if reloaded_progression != null:
+			active_progression = reloaded_progression
 		manager.refresh_from_progression(reloaded_progression)
 	await process_frame
 
 	verify(manager.is_destiny_unlocked() == true, "is_destiny_unlocked() is true at NG+3", "ng_plus_purchases count satisfies the gate")
+	verify(manager.sync_choice_state("CH10", "ch10_pre_finale", "ch10_name_the_fallen") == true, "sync_choice_state() persists an authored campaign choice")
+	var rewrite_entries: Array = manager.get_chronicle_rewrite_entries()
+	verify(not rewrite_entries.is_empty(), "get_chronicle_rewrite_entries() exposes rewriteable Chronicle choices once a choice is recorded")
+	verify(String((rewrite_entries[0] as Dictionary).get("current_value", "")) == "ch10_name_the_fallen", "Chronicle rewrite entry exposes the current CH10 option id")
 
 	verify(manager.record_decision("CH01", "branch_choice", "stay") == true, "record_decision() returns true")
 	var decisions_after_record: Array = manager.get_past_decisions()
@@ -98,11 +107,15 @@ func test_destiny_manager() -> void:
 	verify(decisions_after_change.size() == before_change_count + 1, "change_past_decision() appends a changed decision record")
 	verify(String((decisions_after_change[decisions_after_change.size() - 1] as Dictionary).get("new_value", "")) == "leave", "change_past_decision() modifies the latest decision")
 	verify(manager.is_history_changer() == true, "is_history_changer() returns true after a change")
+	verify(manager.change_past_decision("CH10", "ch10_pre_finale", "ch10_record_the_chosen") == true, "change_past_decision() rewrites the CH10 finale branch")
+	verify(active_progression.ch10_attack_bonus == 1 and active_progression.ch10_defense_bonus == 1, "Historian branch grants the balanced CH10 finale bonuses")
+	verify(manager.get_rewritten_choice_keys().has("ch10_pre_finale"), "Rewritten choice keys track Chronicle-originated branch changes")
 
 	var universe_state: Dictionary = manager.get_destiny_universe_state()
 	verify(universe_state.has("current_world") and universe_state["current_world"] is Dictionary, "get_destiny_universe_state() includes current_world")
 	verify(universe_state.has("past_world") and universe_state["past_world"] is Dictionary, "get_destiny_universe_state() includes past_world")
 	verify(universe_state.has("past_decisions") and universe_state["past_decisions"] is Array, "get_destiny_universe_state() includes past_decisions")
+	verify(universe_state.has("change_count") and int(universe_state.get("change_count", 0)) >= 1, "get_destiny_universe_state() includes change_count for rewritten choices")
 	verify(universe_state.has("history_changer") and universe_state["history_changer"] is bool, "get_destiny_universe_state() includes history_changer")
 	verify(universe_state.has("destiny_unlocked") and universe_state["destiny_unlocked"] is bool, "get_destiny_universe_state() includes destiny_unlocked")
 
@@ -144,6 +157,34 @@ func test_destiny_ui() -> void:
 
 	ui.queue_free()
 	manager_stub.queue_free()
+	await process_frame
+
+
+func test_chronicle_viewer() -> void:
+	if ChronicleViewerRef == null:
+		tests_failed += 1
+		print("[%s] ChronicleViewer class failed to load" % FAIL)
+		return
+	verify(true, "ChronicleViewer class loads")
+
+	var progression := ProgressionDataRef.new()
+	progression.add_ng_plus_purchase("ng_plus_1")
+	progression.add_ng_plus_purchase("ng_plus_2")
+	progression.add_ng_plus_purchase("ng_plus_3")
+	progression.world_state_bits["ch10_pre_finale"] = "ch10_record_the_chosen"
+	progression.world_state_bits["destiny_rewritten_choice_keys"] = ["ch10_pre_finale"]
+	progression.choices_made = ["ch10_pre_finale:ch10_record_the_chosen"]
+
+	var viewer = ChronicleViewerRef.new()
+	root.add_child(viewer)
+	await process_frame
+	viewer.bind_progression(progression)
+	await process_frame
+
+	verify(_find_label_text(viewer, "Rewrite the Chronicle") != null, "ChronicleViewer exposes the Chronicle rewrite panel")
+	verify(_find_label_text(viewer, "Current record: 역사의 기록자") != null, "ChronicleViewer surfaces the active rewriteable choice label")
+
+	viewer.queue_free()
 	await process_frame
 
 

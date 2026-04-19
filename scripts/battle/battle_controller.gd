@@ -98,6 +98,8 @@ const CH10_FINALE_NAME_CALL_IDS: Array[StringName] = [
     &"ally_karl",
     &"ally_noah"
 ]
+const CH10_HISTORIAN_BRANCH_OPTION_ID := "ch10_record_the_chosen"
+const DESTINY_REWRITTEN_CHOICE_KEYS_KEY := "destiny_rewritten_choice_keys"
 const CH01_STAGE_EVIDENCE_LOG: Dictionary = {
     &"CH01_05": [
         "flag_evidence_hardren_seal_obtained — Hardren seal recovered; the ash-field command chain can be traced north toward the border evidence trail."
@@ -2573,9 +2575,15 @@ func _reset_finale_contract_state() -> void:
     if not _is_ch10_finale_stage() or progression_service == null:
         return
     var progression_data = progression_service.get_data()
-    if progression_data == null or not progression_data.free_name_call or CH10_FINALE_NAME_CALL_IDS.is_empty():
+    if progression_data == null or CH10_FINALE_NAME_CALL_IDS.is_empty():
         return
-    finale_name_call_state[CH10_FINALE_NAME_CALL_IDS[0]] = true
+    var prefilled_count := _get_initial_finale_name_call_count(progression_data)
+    for index in range(prefilled_count):
+        if index < 0 or index >= CH10_FINALE_NAME_CALL_IDS.size():
+            continue
+        var companion_id := CH10_FINALE_NAME_CALL_IDS[index]
+        finale_name_call_state[companion_id] = true
+        finale_name_call_lines[String(companion_id)] = _get_finale_name_call_line(companion_id)
 
 func _build_finale_result_summary() -> Dictionary:
     if stage_data == null or stage_data.finale_name_anchor_ids.is_empty():
@@ -2619,6 +2627,40 @@ func _get_current_finale_name_call_ids() -> Array[StringName]:
             continue
         companion_ids.append(unit_data.unit_id)
     return companion_ids
+
+func _get_initial_finale_name_call_count(progression_data) -> int:
+    if progression_data == null:
+        return 0
+    var count := 0
+    if bool(progression_data.free_name_call):
+        count += 1
+    if _is_ch10_historian_branch(progression_data):
+        count += 1 + _get_destiny_rewritten_choice_count(progression_data)
+    return clampi(count, 0, CH10_FINALE_NAME_CALL_IDS.size())
+
+func _is_ch10_historian_branch(progression_data) -> bool:
+    if progression_data == null:
+        return false
+    if String(progression_data.world_state_bits.get("ch10_pre_finale", "")).strip_edges() == CH10_HISTORIAN_BRANCH_OPTION_ID:
+        return true
+    for raw_choice in progression_data.choices_made:
+        if String(raw_choice).strip_edges() == "ch10_pre_finale:%s" % CH10_HISTORIAN_BRANCH_OPTION_ID:
+            return true
+    return false
+
+func _get_destiny_rewritten_choice_count(progression_data) -> int:
+    if progression_data == null:
+        return 0
+    var raw_value: Variant = progression_data.world_state_bits.get(DESTINY_REWRITTEN_CHOICE_KEYS_KEY, [])
+    if typeof(raw_value) != TYPE_ARRAY:
+        return 0
+    var rewritten_keys: Array[String] = []
+    for raw_entry in raw_value:
+        var choice_key := String(raw_entry).strip_edges()
+        if choice_key.is_empty() or rewritten_keys.has(choice_key):
+            continue
+        rewritten_keys.append(choice_key)
+    return rewritten_keys.size()
 
 func _is_ch10_finale_stage() -> bool:
     return stage_data != null and stage_data.stage_id == &"CH10_05"

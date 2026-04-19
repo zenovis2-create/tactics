@@ -60,6 +60,16 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if stage_id == &"CH10_05" and String(stage_snapshot.get("mode", "")) == "choice":
+            if StringName(stage_snapshot.get("choice_stage_id", &"")) != &"ch10_pre_finale":
+                push_error("Expected the CH10 pre-finale choice before CH10_05, got %s." % [stage_snapshot.get("choice_stage_id", &"")])
+                quit(1)
+                return
+            main.campaign_controller._make_choice("ch10_name_the_fallen")
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
+
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)
@@ -275,6 +285,18 @@ func _run() -> void:
 
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
     var stage_id_text: String = String(stage_id)
+    if stage_id == &"CH10_05":
+        battle.record_finale_name_call_fired(&"ally_serin")
+        if battle.stage_data != null and battle.stage_data.finale_name_anchor_ids.size() >= 2:
+            battle.record_finale_name_anchor_destroyed(battle.stage_data.finale_name_anchor_ids[0])
+            battle.record_finale_name_anchor_destroyed(battle.stage_data.finale_name_anchor_ids[1])
+        battle.enemy_units.clear()
+        battle._check_battle_end()
+        await process_frame
+        await process_frame
+        if int(battle.current_phase) == int(battle.BattlePhase.VICTORY):
+            return
+
     var win_condition: String = String(battle.stage_data.win_condition) if battle != null and battle.stage_data != null else ""
     if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
         _force_resolve_all_interactions(battle)

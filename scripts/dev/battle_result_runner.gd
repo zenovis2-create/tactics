@@ -120,6 +120,20 @@ func _run() -> void:
 	if int(finale_result.get("name_call_moments_fired", -1)) < 0:
 		return _fail("CH10_05 finale_result should expose a non-negative name-call count.")
 
+	var result_screen = finale_battle.hud.result_screen if finale_battle.hud != null else null
+	if result_screen == null:
+		return _fail("CH10_05 battle should expose a BattleResultScreen for ending credit verification.")
+	var true_result := finale_summary.duplicate(true)
+	var true_finale_result: Dictionary = true_result.get("finale_result", {}).duplicate(true)
+	true_finale_result["name_call_moments_fired"] = int(true_finale_result.get("required_name_call_count", 0))
+	true_result["finale_result"] = true_finale_result
+	result_screen.show_result(true_result)
+	var result_snapshot: Dictionary = result_screen.get_result_snapshot()
+	if not bool(result_snapshot.get("ending_credits_visible", false)):
+		return _fail("True ending result should surface the ending credits panel.")
+	if String(result_snapshot.get("ending_credits_title", "")).find("운명이 선택한 사람들") == -1:
+		return _fail("True ending credits should use the '운명이 선택한 사람들' title.")
+
 	print("[PASS] battle_result_runner: battle result summary exposes objective, records, and progression unlocks.")
 	quit(0)
 

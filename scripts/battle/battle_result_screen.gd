@@ -19,6 +19,9 @@ const SupportConversations = preload("res://scripts/data/support_conversations.g
 @onready var badge_narrative_summary_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/SummaryLabel") as Label
 @onready var badge_narrative_text_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/NarrativeLabel") as Label
 @onready var badge_narrative_stone_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/StoneLabel") as Label
+@onready var ending_credits_panel: PanelContainer = get_node_or_null("Panel/Margin/Content/EndingCreditsPanel") as PanelContainer
+@onready var ending_credits_title_label: Label = get_node_or_null("Panel/Margin/Content/EndingCreditsPanel/Margin/Content/TitleLabel") as Label
+@onready var ending_credits_body_label: RichTextLabel = get_node_or_null("Panel/Margin/Content/EndingCreditsPanel/Margin/Content/BodyLabel") as RichTextLabel
 @onready var footer_buttons: HBoxContainer = get_node_or_null("Panel/Margin/Content/FooterButtons") as HBoxContainer
 @onready var open_encyclopedia_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/OpenEncyclopediaButton") as Button
 @onready var confirm_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/ConfirmButton") as Button
@@ -30,10 +33,12 @@ func _ready() -> void:
 	# _ensure_labels는 setup()에서도 호출되므로 노드가 없으면 폴백 생성
 	_ensure_labels()
 	_ensure_badge_narrative_section()
+	_ensure_ending_credits_section()
 	_ensure_footer_buttons()
 	_ensure_confirm_button()
 	_ensure_open_encyclopedia_button()
 	_style_badge_narrative_section()
+	_style_ending_credits_section()
 	if confirm_button != null:
 		confirm_button.pressed.connect(_on_confirm)
 	if open_encyclopedia_button != null:
@@ -129,6 +134,47 @@ func _ensure_open_encyclopedia_button() -> void:
 	open_encyclopedia_button.text = "Open Encyclopedia"
 	footer_buttons.add_child(open_encyclopedia_button)
 
+func _ensure_ending_credits_section() -> void:
+	if ending_credits_panel != null and ending_credits_title_label != null and ending_credits_body_label != null:
+		return
+	var content := get_node_or_null("Panel/Margin/Content") as VBoxContainer
+	ending_credits_panel = PanelContainer.new()
+	ending_credits_panel.name = "EndingCreditsPanel"
+	ending_credits_panel.visible = false
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 18)
+	margin.add_theme_constant_override("margin_top", 16)
+	margin.add_theme_constant_override("margin_right", 18)
+	margin.add_theme_constant_override("margin_bottom", 16)
+	ending_credits_panel.add_child(margin)
+
+	var content_box := VBoxContainer.new()
+	content_box.name = "Content"
+	content_box.add_theme_constant_override("separation", 10)
+	margin.add_child(content_box)
+
+	ending_credits_title_label = Label.new()
+	ending_credits_title_label.name = "TitleLabel"
+	ending_credits_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content_box.add_child(ending_credits_title_label)
+
+	ending_credits_body_label = RichTextLabel.new()
+	ending_credits_body_label.name = "BodyLabel"
+	ending_credits_body_label.bbcode_enabled = true
+	ending_credits_body_label.fit_content = true
+	ending_credits_body_label.scroll_active = false
+	ending_credits_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content_box.add_child(ending_credits_body_label)
+
+	if content != null:
+		content.add_child(ending_credits_panel)
+		if footer_buttons != null and footer_buttons.get_parent() == content:
+			content.move_child(ending_credits_panel, footer_buttons.get_index())
+	else:
+		add_child(ending_credits_panel)
+
 func _style_badge_narrative_section() -> void:
 	if badge_narrative_panel != null:
 		var panel_style := StyleBoxFlat.new()
@@ -170,6 +216,23 @@ func _style_badge_narrative_section() -> void:
 		badge_narrative_stone_label.add_theme_color_override("font_outline_color", Color(0.121569, 0.121569, 0.141176, 0.96))
 		badge_narrative_stone_label.add_theme_constant_override("outline_size", 4)
 		badge_narrative_stone_label.add_theme_font_size_override("font_size", 16)
+
+func _style_ending_credits_section() -> void:
+	if ending_credits_panel != null:
+		var panel_style := StyleBoxFlat.new()
+		panel_style.bg_color = Color(0.07, 0.06, 0.1, 0.94)
+		panel_style.border_color = Color(0.92, 0.84, 0.62, 0.92)
+		panel_style.set_border_width_all(2)
+		panel_style.set_corner_radius_all(18)
+		panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+		panel_style.shadow_size = 8
+		ending_credits_panel.add_theme_stylebox_override("panel", panel_style)
+	if ending_credits_title_label != null:
+		ending_credits_title_label.add_theme_font_size_override("font_size", 24)
+		ending_credits_title_label.add_theme_color_override("font_color", Color(0.98, 0.94, 0.82))
+	if ending_credits_body_label != null:
+		ending_credits_body_label.add_theme_font_size_override("normal_font_size", 16)
+		ending_credits_body_label.add_theme_color_override("default_color", Color(0.95, 0.92, 0.87))
 
 func show_result(result: Dictionary) -> void:
 	_last_result = result
@@ -261,6 +324,8 @@ func show_result(result: Dictionary) -> void:
 	var moral_ending_lines := _build_moral_ending_lines(result)
 	for line in moral_ending_lines:
 		body_lines.append(line)
+	if _is_true_ending_result(result):
+		body_lines.append("[b]True Ending:[/b] 운명이 선택한 사람들")
 
 	if title_label != null:
 		title_label.text = title
@@ -269,6 +334,7 @@ func show_result(result: Dictionary) -> void:
 
 	var progression: ProgressionData = result.get("progression_data", null) as ProgressionData
 	_apply_badge_narrative(progression, result)
+	_apply_true_ending_credits(result)
 
 	# 버튼 포커스
 	if confirm_button != null:
@@ -280,6 +346,8 @@ func hide_result() -> void:
 	visible = false
 	if badge_narrative_panel != null:
 		badge_narrative_panel.visible = false
+	if ending_credits_panel != null:
+		ending_credits_panel.visible = false
 
 func get_result_snapshot() -> Dictionary:
 	return {
@@ -290,6 +358,9 @@ func get_result_snapshot() -> Dictionary:
 		"badge_narrative_summary": badge_narrative_summary_label.text if badge_narrative_summary_label != null else "",
 		"badge_narrative_text": badge_narrative_text_label.text if badge_narrative_text_label != null else "",
 		"badge_narrative_stone": badge_narrative_stone_label.text if badge_narrative_stone_label != null else "",
+		"ending_credits_visible": ending_credits_panel.visible if ending_credits_panel != null else false,
+		"ending_credits_title": ending_credits_title_label.text if ending_credits_title_label != null else "",
+		"ending_credits_body": ending_credits_body_label.text if ending_credits_body_label != null else "",
 		"has_confirm_button": confirm_button != null,
 		"has_open_encyclopedia_button": open_encyclopedia_button != null
 	}
@@ -317,6 +388,27 @@ func _apply_badge_narrative(progression: ProgressionData, result: Dictionary) ->
 	badge_narrative_text_label.text = narrative
 	badge_narrative_stone_label.text = String(payload.get("stone_text", ""))
 
+func _apply_true_ending_credits(result: Dictionary) -> void:
+	if ending_credits_panel == null or ending_credits_title_label == null or ending_credits_body_label == null:
+		return
+	if not _is_true_ending_result(result):
+		ending_credits_panel.visible = false
+		ending_credits_title_label.text = ""
+		ending_credits_body_label.text = ""
+		return
+	ending_credits_panel.visible = true
+	ending_credits_title_label.text = "운명이 선택한 사람들"
+	ending_credits_body_label.text = "\n".join([
+		"[center][b]True Ending Credits[/b][/center]",
+		"[center]The bell falls silent, and the survivors carry each other forward.[/center]",
+		"",
+		"[b]Remembered By[/b]\nRian, Serin, Bran, Tia, Enoch, Karl, Noah, Neri",
+		"",
+		"[b]Chronicle[/b]\nThe rewritten records answered the tower until no name had to stand alone.",
+		"",
+		"[b]Ending Title[/b]\n운명이 선택한 사람들"
+		])
+
 func _build_moral_ending_lines(result: Dictionary) -> PackedStringArray:
 	var lines := PackedStringArray()
 	var stage_id := String(result.get("stage_id", "")).strip_edges().to_upper()
@@ -339,6 +431,13 @@ func _build_moral_ending_lines(result: Dictionary) -> PackedStringArray:
 	if not world_state_description.is_empty():
 		lines.append(world_state_description)
 	return lines
+
+func _is_true_ending_result(result: Dictionary) -> bool:
+	var finale_result: Dictionary = result.get("finale_result", {})
+	if finale_result.is_empty():
+		return false
+	var required_calls: int = int(finale_result.get("required_name_call_count", 0))
+	return bool(finale_result.get("minimum_anchor_condition_met", false)) and required_calls > 0 and int(finale_result.get("name_call_moments_fired", 0)) >= required_calls
 
 static func build_badge_narrative_payload(progression: ProgressionData) -> Dictionary:
 	var payload := {
