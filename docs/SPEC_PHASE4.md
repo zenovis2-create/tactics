@@ -15,6 +15,7 @@
 - [x] **P4-01-8** 챔피언 보드 시스템 stub (순위 아님, 명예의 전당)
 - [x] **P4-01-9** `scripts/dev/ghost_battle_runner.gd` 작성
 - [x] **P4-01-10** Runner 검증 — godot headless 통과 — `910c747` (37→62 PASS)
+- [x] **P4-01-11** Chronicle에 등록된 ghost 전적 뷰어 UI — `51693ad`
 
 ---
 
@@ -62,15 +63,15 @@
 ---
 
 ### SPEC-P4-05: Adaptive Narrative Engine (적응형 서사)
-- [ ] **P4-05-1** `scripts/battle/adaptive_dialogue_filter.gd` — DialogueTree 필터링
-- [ ] **P4-05-2** ChronicleGenerator 패턴 → NPC 성격 매핑 (aggressive/defensive/merciful)
-- [ ] **P4-05-3** campaign_controller에 `adapt_dialogue_by_chronicle()` 메서드
-- [ ] **P4-05-4** 레오니카 대화 variants: ruthless/pragmatic/compassionate 트랙
-- [ ] **P4-05-5** "_CH10_LEONIKA_RUTHLESS", "_CH10_LEONIKA_COMPASSIONATE" 등 dialogue key 추가
-- [ ] **P4-05-6** Bond Death 직후 NPC가追悼 대사 자동 출력
-- [ ] **P4-05-7** NPC 표정 아이콘 변경 시스템 (campaign_shell_dialogue_catalog.gd 확장)
-- [ ] **P4-05-8** `scripts/dev/adaptive_narrative_runner.gd` 작성
-- [ ] **P4-05-9** Runner 검증 — godot headless 통과
+- [x] **P4-05-1** `scripts/battle/adaptive_dialogue_filter.gd` — DialogueTree 필터링 — `04e7673`
+- [x] **P4-05-2** ChronicleGenerator 패턴 → NPC 성격 매핑 (aggressive/defensive/merciful) — `04e7673`
+- [x] **P4-05-3** campaign_controller에 `adapt_dialogue_by_chronicle()` 메서드 — `04e7673`
+- [x] **P4-05-4** 레오니카 대화 variants: ruthless/pragmatic/compassionate 트랙 — `04e7673`
+- [x] **P4-05-5** "_CH10_LEONIKA_RUTHLESS", "_CH10_LEONIKA_COMPASSIONATE" 등 dialogue key 추가 — `04e7673`
+- [x] **P4-05-6** Bond Death 직후 NPC가追悼 대사 자동 출력 — `04e7673`
+- [x] **P4-05-7** NPC 표정 아이콘 변경 시스템 (campaign_shell_dialogue_catalog.gd 확장) — `04e7673`
+- [x] **P4-05-8** `scripts/dev/adaptive_narrative_runner.gd` 작성 — `04e7673`
+- [x] **P4-05-9** Runner 검증 — godot headless 통과 — `04e7673`
 
 ---
 
@@ -118,16 +119,16 @@
 ---
 
 ### SPEC-P4-09: Persistent World Consequences (전장의 기억)
-- [ ] **P4-09-1** progression_data.gd에 `terrain_damage_map: Dictionary` 추가
-- [ ] **P4-09-2** `terrain_damage_map[chapter_id] = {tile_pos: damage_level}` 형태
-- [ ] **P4-09-3** battle_controller: 전투 중 지형 손상 → terrain_damage_map 기록
-- [ ] **P4-09-4** StageData 로드 시 terrain_damage_map 적용 → 손상된 타일 시각화
-- [ ] **P4-09-5** 반복 플레이 시 누적 손상: 3회 이상 전투된 위치에 memorial marker
-- [ ] **P4-09-6** memorial_scene.gd에 "전장의자국" 섹션 추가
-- [ ] **P4-09-7** NG+에서 terrain_damage_map 영구 저장 + world map 표시
-- [ ] **P4-09-8** "전장의museum" 건립: 가장 많은 전투가 벌어진 위치에特殊 구조물
-- [ ] **P4-09-9** `scripts/dev/persistent_world_runner.gd` 작성
-- [ ] **P4-09-10** Runner 검증 — godot headless 통과
+- [x] **P4-09-1** progression_data.gd에 `terrain_damage_map: Dictionary` 추가 — `5bf47b7`
+- [x] **P4-09-2** `terrain_damage_map[chapter_id] = {tile_pos: damage_level}` 형태 — `5bf47b7`
+- [x] **P4-09-3** battle_controller: 전투 중 지형 손상 → terrain_damage_map 기록 — `5bf47b7`
+- [x] **P4-09-4** StageData 로드 시 terrain_damage_map 적용 → 손상된 타일 시각화 — `7f8362e`
+- [x] **P4-09-5** 반복 플레이 시 누적 손상: 3회 이상 전투된 위치에 memorial marker — `5bf47b7`
+- [x] **P4-09-6** memorial_scene.gd에 "전장의자국" 섹션 추가 — `5bf47b7`
+- [x] **P4-09-7** NG+에서 terrain_damage_map 영구 저장 + world map 표시 — `5bf47b7`
+- [x] **P4-09-8** "전장의museum" 건립: 가장 많은 전투가 벌어진 위치에特殊 구조물 — `7f8362e`
+- [x] **P4-09-9** `scripts/dev/persistent_world_runner.gd` 작성 — `5bf47b7`
+- [x] **P4-09-10** Runner 검증 — godot headless 통과 — `5bf47b7`
 
 ---
 
@@ -135,14 +136,14 @@
 - [x] **P4-10-1** NG+ 3회차에서만解锁: "제3의 눈" 클리어 조건 — `966d69f`
 - [x] **P4-10-2** `scripts/battle/destiny_manager.gd` — Destiny autoload — `966d69f`
 - [x] **P4-10-3** 이중세계관 데이터 구조: `{current_world: Dict, past_world: Dict}` — `966d69f`
-- [ ] **P4-10-4** 과거 결정 변경 UI: Chronicle에서 특정 선택지를 다시 고르기
+- [x] **P4-10-4** 과거 결정 변경 UI: Chronicle에서 특정 선택지를 다시 고르기 — `8f94539`
 - [x] **P4-10-5** 과거 변경 시 현재 세계 동기화: `resync_world_with_past_change()` — `966d69f`
-- [ ] **P4-10-6** "역사의 기록자" 스킬 트리: CH10 최종전에서 선택지 확장
+- [x] **P4-10-6** "역사의 기록자" 스킬 트리: CH10 최종전에서 선택지 확장 — `8f94539`
 - [x] **P4-10-7** Encyclopedia에 "역사의 기록자" 탭 (7번째 탭) — 모든 과거 변경 이력 — `966d69f`
 - [x] **P4-10-8** HeirloomLegacy와 통합: 3회차 가문血脉이 "역사를 바꾼 가문" 배지 — `2e40ac6`
-- [ ] **P4-10-9** "운명이 선택한 사람들" True Ending 엔딩 크레딧
+- [x] **P4-10-9** "운명이 선택한 사람들" True Ending 엔딩 크레딧 — `8f94539`
 - [x] **P4-10-10** `scripts/dev/destiny_system_runner.gd` 작성 — `966d69f`
-- [x] **P4-10-11** Runner 검증 — godot headless 통과 — `966d69f` (21/21 PASS)
+- [x] **P4-10-11** Runner 검증 — godot headless 통과 — `966d69f` (21→31 PASS)
 
 ---
 
@@ -181,4 +182,4 @@ P4-08 (Moral Consequence) extends: SPEC-B (DecisionPoint)
 
 ---
 
-**Total: 110 checklist items across 10 Phase 4 specs**
+**Total: 103 checklist items across 10 Phase 4 specs**
