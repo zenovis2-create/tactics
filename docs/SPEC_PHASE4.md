@@ -32,16 +32,16 @@
 ---
 
 ### SPEC-P4-03: Scenario Creator (시나리오 창작자) ⭐ 최우선
-- [ ] **P4-03-1** `scripts/editor/scenario_editor.gd` — 시나리오 에디터 코어
-- [ ] **P4-03-2** `scripts/data/scenario.gd` — 시나리오 Resource: chapter_id, stage_id, spawns[], dialogues[], objectives[]
+- [x] **P4-03-1** `scripts/editor/scenario_editor.gd` — 시나리오 에디터 코어
+- [x] **P4-03-2** `scripts/data/scenario.gd` — 시나리오 Resource: chapter_id, stage_id, spawns[], dialogues[], objectives[]
 - [ ] **P4-03-3** `scripts/editor/scenario_stage_picker.gd` — 기존 맵 선택 위젯
 - [ ] **P4-03-4** `scripts/editor/scenario_dialogue_editor.gd` — 대사 편집기
 - [ ] **P4-03-5** `scripts/editor/scenario_spawn_editor.gd` — 적/아군 배치 편집기
 - [ ] **P4-03-6** CampaignController에 "시나리오 모드" 진입 포인트
-- [ ] **P4-03-7** EncyclopediaTabs에 "사용자 창작" 탭 (6번째 탭)
-- [ ] **P4-03-8** 시나리오 공유: `scripts/dev/scenario_loader.gd` — 파일에서 로드
-- [ ] **P4-03-9** Steam Workshop stub (게시/다운로드 메서드만 존재)
-- [ ] **P4-03-10** `scripts/dev/scenario_creator_runner.gd` 작성
+- [x] **P4-03-7** EncyclopediaTabs에 "사용자 창작" 탭 (6번째 탭)
+- [x] **P4-03-8** 시나리오 공유: `scripts/dev/scenario_loader.gd` — 파일에서 로드
+- [x] **P4-03-9** Steam Workshop stub (게시/다운로드 메서드만 존재)
+- [x] **P4-03-10** `scripts/dev/scenario_creator_runner.gd` 작성
 - [ ] **P4-03-11** Runner 검증 — godot headless 통과
 
 ---

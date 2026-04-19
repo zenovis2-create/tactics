@@ -13,14 +13,16 @@ const TAB_TIMELINE := "timeline"
 const TAB_MEMORIAL := "memorial"
 const TAB_ATLAS := "atlas"
 const TAB_BOND_ENDINGS := "bond_endings"
+const TAB_USER_CREATED := "user_created"
 const MAX_COMMENT_LENGTH := 280
-const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS]
+const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
 	TAB_TIMELINE: "Timeline",
 	TAB_MEMORIAL: "Memorial",
 	TAB_ATLAS: "Atlas",
-	TAB_BOND_ENDINGS: "Bond Endings"
+	TAB_BOND_ENDINGS: "Bond Endings",
+	TAB_USER_CREATED: "User Created"
 }
 const CHAPTER_LOCATION_NAMES := {
 	"CH01": "Hardren Ashfields",
@@ -44,6 +46,9 @@ const CHAPTER_LOCATION_NAMES := {
 @onready var memorial_button: Button = $Panel/Margin/Content/TabButtons/MemorialButton
 @onready var atlas_button: Button = $Panel/Margin/Content/TabButtons/AtlasButton
 @onready var bond_endings_button: Button = $Panel/Margin/Content/TabButtons/BondEndingsButton
+var user_created_button: Button
+var _user_created_tab: Control
+var _user_created_list: Control
 @onready var codex_tab: Control = $Panel/Margin/Content/BodyStack/CodexTab
 @onready var codex_cards: GridContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexScroll/CodexCards
 @onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/DetailLabel
@@ -84,6 +89,11 @@ func _ready() -> void:
 	memorial_button.pressed.connect(func() -> void: select_tab(TAB_MEMORIAL))
 	atlas_button.pressed.connect(func() -> void: select_tab(TAB_ATLAS))
 	bond_endings_button.pressed.connect(func() -> void: select_tab(TAB_BOND_ENDINGS))
+	user_created_button = _get_node_or_null("Panel/Margin/Content/TabButtons/UserCreatedButton")
+	_user_created_tab = _get_node_or_null("Panel/Margin/Content/BodyStack/UserCreatedTab")
+	_user_created_list = _get_node_or_null("Panel/Margin/Content/BodyStack/UserCreatedTab/UserCreatedScroll/UserCreatedList")
+	if user_created_button != null:
+		user_created_button.pressed.connect(func() -> void: select_tab(TAB_USER_CREATED))
 	_ensure_comment_editor_section()
 	_ensure_support_history_section()
 	select_tab(TAB_CODEX)
@@ -105,6 +115,7 @@ func show_encyclopedia(progression_data: ProgressionData, active_chapter_id: Str
 	_rebuild_memorial()
 	_rebuild_atlas()
 	_rebuild_bond_endings()
+	_rebuild_user_created_scenarios()
 	visible = true
 	select_tab(TAB_CODEX)
 
@@ -120,6 +131,8 @@ func select_tab(tab_name: String) -> void:
 	memorial_tab.visible = tab_name == TAB_MEMORIAL
 	atlas_tab.visible = tab_name == TAB_ATLAS
 	bond_endings_tab.visible = tab_name == TAB_BOND_ENDINGS
+	if _user_created_tab != null:
+		_user_created_tab.visible = tab_name == TAB_USER_CREATED
 	codex_button.disabled = tab_name == TAB_CODEX
 	timeline_button.disabled = tab_name == TAB_TIMELINE
 	memorial_button.disabled = tab_name == TAB_MEMORIAL
@@ -732,3 +745,57 @@ func _clear_children(node: Node) -> void:
 func _on_close_pressed() -> void:
 	hide_panel()
 	close_requested.emit()
+
+func _rebuild_user_created_scenarios() -> void:
+	if not _progression_data:
+		return
+	if not _user_created_tab or not _user_created_list:
+		return
+	var ScenarioLoader = load("res://scripts/dev/scenario_loader.gd")
+	var scenarios: Array[Dictionary] = ScenarioLoader.list_all_scenarios()
+	_clear_children(user_created_list)
+	if scenarios.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "No user-created scenarios yet.\nCreate one from the Campaign menu."
+		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_user_created_list.add_child(empty_label)
+		return
+	for scenario_info: Dictionary in scenarios:
+		var card := _make_user_scenario_card(scenario_info)
+		_user_created_list.add_child(card)
+
+func _make_user_scenario_card(info: Dictionary) -> Control:
+	var container := PanelContainer.new()
+	container.set("theme_override_styles/panel", _get_card_style())
+	var vbox := VBoxContainer.new()
+	container.add_child(vbox)
+	var title_label := Label.new()
+	title_label.text = info.get("title", "Untitled")
+	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_label.size_flags_vertical = SIZE_SHRINK_BEGIN
+	vbox.add_child(title_label)
+	var meta_label := Label.new()
+	meta_label.text = "by %s  |  ★%d  |  %d stage(s)" % [
+		info.get("author", "Unknown"),
+		info.get("difficulty", 1),
+		info.get("stage_count", 0)
+	]
+	meta_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	meta_label.size_flags_vertical = SIZE_SHRINK_BEGIN
+	vbox.add_child(meta_label)
+	var tags_label := Label.new()
+	var tags: Array = info.get("tags", [])
+	if not tags.is_empty():
+		tags_label.text = "Tags: %s" % ", ".join(tags)
+		tags_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.7))
+		tags_label.size_flags_vertical = SIZE_SHRINK_BEGIN
+		vbox.add_child(tags_label)
+	return container
+
+func _get_card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.12, 0.14, 0.18)
+	style.set_border_color(Color(0.2, 0.22, 0.28))
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(8)
+	return style
