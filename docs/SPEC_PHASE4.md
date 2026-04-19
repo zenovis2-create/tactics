@@ -34,30 +34,30 @@
 ### SPEC-P4-03: Scenario Creator (시나리오 창작자) ⭐ 최우선
 - [x] **P4-03-1** `scripts/editor/scenario_editor.gd` — 시나리오 에디터 코어
 - [x] **P4-03-2** `scripts/data/scenario.gd` — 시나리오 Resource: chapter_id, stage_id, spawns[], dialogues[], objectives[]
-- [ ] **P4-03-3** `scripts/editor/scenario_stage_picker.gd` — 기존 맵 선택 위젯
-- [ ] **P4-03-4** `scripts/editor/scenario_dialogue_editor.gd` — 대사 편집기
-- [ ] **P4-03-5** `scripts/editor/scenario_spawn_editor.gd` — 적/아군 배치 편집기
+- [x] **P4-03-3** `scripts/editor/scenario_stage_picker.gd` — 기존 맵 선택 위젯 — `e50806f`
+- [x] **P4-03-4** `scripts/editor/scenario_dialogue_editor.gd` — 대사 편집기 — `e50806f`
+- [x] **P4-03-5** `scripts/editor/scenario_spawn_editor.gd` — 적/아군 배치 편집기 — `e50806f`
 - [ ] **P4-03-6** CampaignController에 "시나리오 모드" 진입 포인트
 - [x] **P4-03-7** EncyclopediaTabs에 "사용자 창작" 탭 (6번째 탭)
 - [x] **P4-03-8** 시나리오 공유: `scripts/dev/scenario_loader.gd` — 파일에서 로드
 - [x] **P4-03-9** Steam Workshop stub (게시/다운로드 메서드만 존재)
-- [x] **P4-03-10** `scripts/dev/scenario_creator_runner.gd` 작성
-- [ ] **P4-03-11** Runner 검증 — godot headless 통과
+- [x] **P4-03-10** `scripts/dev/scenario_creator_runner.gd` 작성 — `e50806f` (81/81 PASS)
+- [x] **P4-03-11** Runner 검증 — godot headless 통과 — `e50806f`
 
 ---
 
 ### SPEC-P4-04: Living Soundtrack (생존하는 사운드트랙)
-- [ ] **P4-04-1** `scripts/audio/layered_music.gd` — Music autoload, 레이어드 오디오 엔진
+- [x] **P4-04-1** `scripts/audio/layered_music.gd` — Music autoload, 레이어드 오디오 엔진 — `e50806f`
 - [ ] **P4-04-2** project.godot에 AudioBus 추가: MusicBase, MusicDrums, MusicStrings, MusicVocal, MusicAmbience
-- [ ] **P4-04-3** `activate_layer(layer_name, fade_time)` / `deactivate_layer(layer_name, fade_time)`
-- [ ] **P4-04-4** `trigger_spotlight_music(spotlight_type)` — 4가지 spotlight별 레이어 트리거
-- [ ] **P4-04-5** `scripts/audio/emotional_layer_controller.gd` — Spotlight/BondDeath 신호 리스닝
-- [ ] **P4-04-6** `_on_spotlight_triggered()` → Music.trigger_spotlight_music()
-- [ ] **P4-04-7** `_on_bond_death_started()` → vocal chorus layer 추가
-- [ ] **P4-04-8** 전투 종료 시 모든 레이어 페이드아웃 (fade_time=2.0)
+- [x] **P4-04-3** `activate_layer(layer_name, fade_time)` / `deactivate_layer(layer_name, fade_time)` — `e50806f`
+- [x] **P4-04-4** `trigger_spotlight_music(spotlight_type)` — 4가지 spotlight별 레이어 트리거 — `e50806f`
+- [x] **P4-04-5** `scripts/audio/emotional_layer_controller.gd` — Spotlight/BondDeath 신호 리스닝 — `e50806f`
+- [x] **P4-04-6** `_on_spotlight_triggered()` → Music.trigger_spotlight_music() — `e50806f`
+- [x] **P4-04-7** `_on_bond_death_started()` → vocal chorus layer 추가 — `e50806f`
+- [x] **P4-04-8** 전투 종료 시 모든 레이어 페이드아웃 (fade_time=2.0) — `e50806f`
 - [ ] **P4-04-9** 전투 시작 시 레이어드 트랙 재생 (기존 BGM에서 레이어 분리)
-- [ ] **P4-04-10** `scripts/dev/living_soundtrack_runner.gd` 작성
-- [ ] **P4-04-11** Runner 검증 — godot headless 통과 (오디오 파일 불필요)
+- [x] **P4-04-10** `scripts/dev/living_soundtrack_runner.gd` 작성 — `e50806f` (90/90 PASS)
+- [x] **P4-04-11** Runner 검증 — godot headless 통과 (오디오 파일 불필요) — `e50806f`
 
 ---
 
@@ -80,9 +80,9 @@
 - [x] **P4-06-3** 전투 시작 시势 기반 BGM 선택 (campaign_controller에서 호출)
 - [x] **P4-06-4**势 교차 전투: 테마 Cross-fade 로직 (2.0s blend)
 - [x] **P4-06-5** CH10 Final: 세势 테마 동시 재생 → 다중화음
-- [ ] **P4-06-6** 필드 맵势 영역 진입/이탈 시 BGM 전환
+- [x] **P4-06-6** 필드 맵势 영역 진입/이탈 시 BGM 전환 — `e50806f` (crossfade_to_cue API)
 - [x] **P4-06-7** `scripts/dev/faction_music_runner.gd` 작성
-- [x] **P4-06-8** Runner 검증 — 39/39 PASS (commit `1676c06`)
+- [x] **P4-06-8** Runner 검증 — 50/50 PASS (39→50, `e50806f`)
 
 ---
 
