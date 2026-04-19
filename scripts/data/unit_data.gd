@@ -23,6 +23,8 @@ const JobData = preload("res://scripts/data/job_data.gd")
 @export var boss_pattern: StringName = &""
 @export var applies_oblivion: bool = false  ## 이 적이 공격 대신 망각 스택을 적용할 수 있는지
 @export var boss_phase_thresholds: Dictionary = {}  ## HP% → phase name, e.g. {50: &"enrage", 25: &"despair"}
+@export var last_words: String = "..."
+@export_enum("COMMON", "RARE", "LEGENDARY") var rarity: String = "COMMON"
 
 func get_boss_phase_for_hp(hp_percent: float) -> StringName:
     ## Returns the current boss phase name for the given HP percentage.

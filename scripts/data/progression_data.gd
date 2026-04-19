@@ -84,6 +84,7 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var epitaphs: Array[String] = []
 @export var memorial_records: Array[Dictionary] = []
 @export var stage_memorials: Dictionary = {}
+@export var ashes_collected: Array[Dictionary] = []
 @export var enoch_wounded: bool = false
 @export var ledger_count: int = 0
 @export var world_timeline_id: String = "A"
@@ -150,6 +151,7 @@ func reset_for_new_campaign() -> void:
 	recover_chapter_count = 0
 	epitaphs.clear()
 	memorial_records.clear()
+	ashes_collected.clear()
 	enoch_wounded = false
 	ledger_count = 0
 	world_timeline_id = "A"
@@ -597,6 +599,7 @@ func to_debug_dict() -> Dictionary:
 		"support_progress_by_pair": support_progress_by_pair.duplicate(true),
 		"epitaphs": epitaphs.duplicate(),
 		"memorial_records": memorial_records.duplicate(true),
+		"ashes_collected": ashes_collected.duplicate(true),
 		"stage_memorials": stage_memorials.duplicate(true),
 		"enoch_wounded": enoch_wounded,
 		"ledger_count": ledger_count,

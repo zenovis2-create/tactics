@@ -618,6 +618,9 @@ func _format_reason(reason: String, payload: Dictionary) -> String:
             int(payload.get("share", 0)),
             int(payload.get("shared_units", 0))
         ]
+    if reason.begins_with("spotlight_"):
+        var headline := String(payload.get("headline", "")).strip_edges()
+        return "Spotlight — %s" % (headline if not headline.is_empty() else _to_title_words(reason))
     var normalized_reason := _to_title_words(reason)
     if payload.is_empty():
         return normalized_reason
@@ -905,6 +908,14 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
         "damage_shared":
             _show_telegraph_surface("support", "Bond Guard", "A bond 5 ally split the hit across the line.")
+        "spotlight_triple_kill":
+            _show_telegraph_surface("danger", "Carnage", "Three enemies dropped in one turn. The fight just tilted hard.")
+        "spotlight_last_stand":
+            _show_telegraph_surface("danger", "Stubborn Heart", "A near-fallen unit struck back from the edge of defeat.")
+        "spotlight_weather_master":
+            _show_telegraph_surface("support", "Harmony with Nature", "Multiple weather reactions chained together in a single turn.")
+        "spotlight_sacrifice_play":
+            _show_telegraph_surface("charge", "Last Words", "One ally fell to keep another alive through the action.")
         _:
             _clear_telegraph_surface()
 

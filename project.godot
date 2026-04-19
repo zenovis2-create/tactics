@@ -19,6 +19,11 @@ run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Ashes="*res://scripts/battle/ashes_collection.gd"
+Spotlight="*res://scripts/battle/spotlight_manager.gd"
+
 [display]
 
 window/size/viewport_width=1280

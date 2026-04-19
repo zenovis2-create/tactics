@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/campaign/campaign_panel.gd" id="1_panel"]
+[ext_resource type="Script" path="res://scripts/ui/memorial_wall_ashes.gd" id="2_ashes_wall"]
 
 [node name="CampaignPanel" type="Control"]
 visible = false
@@ -546,6 +547,33 @@ layout_mode = 2
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+
+[node name="AshesWallSection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack"]
+layout_mode = 2
+theme_override_constants/separation = 8
+script = ExtResource("2_ashes_wall")
+
+[node name="HeaderLabel" type="Label" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/AshesWallSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "역사의 그림자"
+
+[node name="EmptyLabel" type="Label" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/AshesWallSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "아직 수집된 적의 잿더미가 없습니다."
+
+[node name="AshesScroll" type="ScrollContainer" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/AshesWallSection"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="AshesGrid" type="GridContainer" parent="Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/AshesWallSection/AshesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
 
 [node name="FooterRow" type="HBoxContainer" parent="Panel/Margin/Content"]
 layout_mode = 2

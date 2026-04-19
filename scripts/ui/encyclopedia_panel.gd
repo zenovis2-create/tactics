@@ -3,6 +3,7 @@ extends Control
 
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
+const MemorialSceneBondSection = preload("res://scripts/campaign/memorial_scene_bond_section.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
 signal close_requested
@@ -11,13 +12,15 @@ const TAB_CODEX := "codex"
 const TAB_TIMELINE := "timeline"
 const TAB_MEMORIAL := "memorial"
 const TAB_ATLAS := "atlas"
+const TAB_BOND_ENDINGS := "bond_endings"
 const MAX_COMMENT_LENGTH := 280
-const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS]
+const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
 	TAB_TIMELINE: "Timeline",
 	TAB_MEMORIAL: "Memorial",
-	TAB_ATLAS: "Atlas"
+	TAB_ATLAS: "Atlas",
+	TAB_BOND_ENDINGS: "Bond Endings"
 }
 const CHAPTER_LOCATION_NAMES := {
 	"CH01": "Hardren Ashfields",
@@ -40,6 +43,7 @@ const CHAPTER_LOCATION_NAMES := {
 @onready var timeline_button: Button = $Panel/Margin/Content/TabButtons/TimelineButton
 @onready var memorial_button: Button = $Panel/Margin/Content/TabButtons/MemorialButton
 @onready var atlas_button: Button = $Panel/Margin/Content/TabButtons/AtlasButton
+@onready var bond_endings_button: Button = $Panel/Margin/Content/TabButtons/BondEndingsButton
 @onready var codex_tab: Control = $Panel/Margin/Content/BodyStack/CodexTab
 @onready var codex_cards: GridContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexScroll/CodexCards
 @onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/DetailLabel
@@ -51,6 +55,8 @@ const CHAPTER_LOCATION_NAMES := {
 @onready var memorial_cards: GridContainer = $Panel/Margin/Content/BodyStack/MemorialTab/MemorialScroll/MemorialCards
 @onready var atlas_tab: Control = $Panel/Margin/Content/BodyStack/AtlasTab
 @onready var atlas_label: RichTextLabel = $Panel/Margin/Content/BodyStack/AtlasTab/AtlasScroll/AtlasLabel
+@onready var bond_endings_tab: Control = $Panel/Margin/Content/BodyStack/BondEndingsTab
+@onready var bond_endings_list: VBoxContainer = $Panel/Margin/Content/BodyStack/BondEndingsTab/BondEndingsScroll/BondEndingsList
 
 var _progression_data: ProgressionData = null
 var _active_chapter_id: StringName = StringName()
@@ -77,6 +83,7 @@ func _ready() -> void:
 	timeline_button.pressed.connect(func() -> void: select_tab(TAB_TIMELINE))
 	memorial_button.pressed.connect(func() -> void: select_tab(TAB_MEMORIAL))
 	atlas_button.pressed.connect(func() -> void: select_tab(TAB_ATLAS))
+	bond_endings_button.pressed.connect(func() -> void: select_tab(TAB_BOND_ENDINGS))
 	_ensure_comment_editor_section()
 	_ensure_support_history_section()
 	select_tab(TAB_CODEX)
@@ -97,6 +104,7 @@ func show_encyclopedia(progression_data: ProgressionData, active_chapter_id: Str
 	_rebuild_timeline()
 	_rebuild_memorial()
 	_rebuild_atlas()
+	_rebuild_bond_endings()
 	visible = true
 	select_tab(TAB_CODEX)
 
@@ -111,10 +119,12 @@ func select_tab(tab_name: String) -> void:
 	timeline_tab.visible = tab_name == TAB_TIMELINE
 	memorial_tab.visible = tab_name == TAB_MEMORIAL
 	atlas_tab.visible = tab_name == TAB_ATLAS
+	bond_endings_tab.visible = tab_name == TAB_BOND_ENDINGS
 	codex_button.disabled = tab_name == TAB_CODEX
 	timeline_button.disabled = tab_name == TAB_TIMELINE
 	memorial_button.disabled = tab_name == TAB_MEMORIAL
 	atlas_button.disabled = tab_name == TAB_ATLAS
+	bond_endings_button.disabled = tab_name == TAB_BOND_ENDINGS
 
 func select_codex_entry(unit_key: String) -> void:
 	if not _codex_keys.has(unit_key):
@@ -140,6 +150,7 @@ func get_snapshot() -> Dictionary:
 		"timeline_text": timeline_label.text,
 		"memorial_count": min(3, _progression_data.get_honor_roll().size()) if _progression_data != null else 0,
 		"atlas_text": atlas_label.text,
+		"bond_endings_count": _get_unlocked_bond_ending_count(),
 		"atlas_memorial_marker": _build_atlas_memorial_marker_text(),
 		"atlas_stage_memorials": _build_atlas_stage_memorial_lines()
 	}
@@ -536,6 +547,56 @@ func _rebuild_atlas() -> void:
 		for line in stage_memorial_lines:
 			lines.append(line)
 	atlas_label.text = "\n".join(lines)
+
+func _rebuild_bond_endings() -> void:
+	_clear_children(bond_endings_list)
+	var endings: Array[Dictionary] = MemorialSceneBondSection.get_registered_pairs(_progression_data)
+	if endings.is_empty():
+		var empty_label := Label.new()
+		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty_label.text = "No bond endings have been registered yet."
+		bond_endings_list.add_child(empty_label)
+		return
+	for ending in endings:
+		bond_endings_list.add_child(_build_bond_ending_entry(ending))
+
+func _build_bond_ending_entry(ending: Dictionary) -> PanelContainer:
+	var unlocked := bool(ending.get("unlocked", false))
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(0.0, 96.0)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	var stack := VBoxContainer.new()
+	stack.add_theme_constant_override("separation", 4)
+	var title := Label.new()
+	title.add_theme_font_size_override("font_size", 20)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.text = String(ending.get("ending_title", "???")) if unlocked else "???"
+	var meta := Label.new()
+	meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if unlocked:
+		meta.text = "%s\nChapter %d · %s" % [
+			String(ending.get("pair_names", "")),
+			int(ending.get("chapter_number", 0)),
+			String(ending.get("unlocked_date", "Unknown date"))
+		]
+	else:
+		meta.text = "???"
+	stack.add_child(title)
+	stack.add_child(meta)
+	margin.add_child(stack)
+	card.add_child(margin)
+	return card
+
+func _get_unlocked_bond_ending_count() -> int:
+	var count := 0
+	for ending in MemorialSceneBondSection.get_registered_pairs(_progression_data):
+		if bool(ending.get("unlocked", false)):
+			count += 1
+	return count
 
 func _build_atlas_memorial_marker_text() -> String:
 	if _progression_data == null:

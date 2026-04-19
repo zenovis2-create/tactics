@@ -17,6 +17,8 @@ default_skill = ExtResource("2_skill")
 is_boss = true
 boss_pattern = &"lete_ch08_05"
 boss_phase_thresholds = {
-50: &"enrage",
-25: &"despair"
+	50: &"enrage",
+	25: &"despair"
 }
+last_words = "어둠이 날 부른다..."
+rarity = "LEGENDARY"

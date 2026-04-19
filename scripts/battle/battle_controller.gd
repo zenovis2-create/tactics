@@ -3,8 +3,11 @@ extends Node2D
 
 signal battle_finished(result: StringName, stage_id: StringName)
 signal battle_defeat(stage_id: StringName, payload: Dictionary)
+signal battle_turn_ended(turn_owner: String, turn_actions: Array)
+signal bond_death_triggered(pair_id: String, ending_id: String)
 
 const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
+const SpotlightManager = preload("res://scripts/battle/spotlight_manager.gd")
 const UnitActor = preload("res://scripts/battle/unit_actor.gd")
 const InteractiveObjectActor = preload("res://scripts/battle/interactive_object_actor.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
@@ -28,6 +31,7 @@ const RewardService = preload("res://scripts/battle/reward_service.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BOND_SERVICE_PATH := "res://scripts/battle/bond_service.gd"
+const BattleControllerBondDeath = preload("res://scripts/battle/battle_controller_bond_death.gd")
 const BattleResultScreenScript = preload("res://scripts/battle/battle_result_screen.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
@@ -206,6 +210,7 @@ var _pending_namecall_unit: UnitActor
 var _pending_namecall_reason: String = ""
 var desperate_wave_context: Dictionary = {}
 var _last_defeated_ally_id: StringName = &""
+var falling_units_this_turn: Array[StringName] = []
 
 var current_phase: int = BattlePhase.BATTLE_INIT
 var round_index: int = 1
@@ -214,9 +219,12 @@ var board_origin: Vector2 = Vector2.ZERO
 var board_scale: float = 1.0
 var _battle_flash_tween: Tween
 var _fx_cache: Dictionary = {}
+var _current_turn_actions: Array[Dictionary] = []
+var _spotlight_slow_mo_token: int = 0
 var flood_zone_positions: Array[Vector2i] = []
 var flood_margin_positions: Array[Vector2i] = []
 var _flood_expansion_turns: int = 0
+var last_spotlight_effect: Dictionary = {}
 
 # M4/M5/M6 services — instantiated at runtime, not scene nodes.
 var progression_service: ProgressionService
@@ -225,6 +233,7 @@ var telemetry_service: TelemetryService
 var reward_service: RewardService
 var cutscene_player: CutscenePlayer
 var bond_service: Node
+var bond_death_patch = BattleControllerBondDeath.new()
 
 func _ready() -> void:
     _wire_signals()
@@ -241,6 +250,9 @@ func _ready() -> void:
 func _init_meta_services() -> void:
     progression_service = ProgressionService.new()
     add_child(progression_service)
+    var ashes = get_node_or_null("/root/Ashes")
+    if ashes != null and ashes.has_method("bind_progression"):
+        ashes.bind_progression(progression_service.get_data())
     status_service = null
     telemetry_service = TelemetryService.new()
     add_child(telemetry_service)
@@ -276,6 +288,11 @@ func bootstrap_battle() -> void:
     _pending_namecall_unit = null
     _pending_namecall_reason = ""
     _last_defeated_ally_id = &""
+    _current_turn_actions.clear()
+    last_spotlight_effect.clear()
+    _spotlight_slow_mo_token += 1
+    Engine.time_scale = 1.0
+    falling_units_this_turn.clear()
     _reset_flood_state()
     _reset_finale_contract_state()
     if bond_service != null and progression_service != null:
@@ -293,6 +310,9 @@ func bootstrap_battle() -> void:
         status_service.reset()
     if reward_service != null and stage_data != null:
         reward_service.record_stage_entry(stage_data.stage_id)
+    var spotlight := _get_spotlight_manager()
+    if spotlight != null:
+        spotlight.begin_battle(_get_spotlight_battle_id())
 
     # 전투 시작 전 컷씬 재생 (있는 경우)
     if cutscene_player != null and stage_data != null and stage_data.start_cutscene_id != &"":
@@ -343,8 +363,13 @@ func _wire_signals() -> void:
     hud.menu_visibility_changed.connect(_on_hud_menu_visibility_changed)
     hud.namecall_choice_selected.connect(_on_namecall_choice_selected)
     turn_manager.action_state_changed.connect(_on_action_state_changed)
+    if not battle_turn_ended.is_connected(_on_battle_turn_ended):
+        battle_turn_ended.connect(_on_battle_turn_ended)
+    _wire_spotlight_signal()
 
 func _clear_battle_state() -> void:
+    _current_turn_actions.clear()
+    last_spotlight_effect.clear()
     for child in units_root.get_children():
         child.queue_free()
 
@@ -649,6 +674,8 @@ func _finalize_selected_unit_action(acting_unit: UnitActor, reason: String, skip
     _clear_selection()
     _refresh_unit_visual_state()
 
+    _check_bond_death()
+
     if _check_battle_end():
         return
 
@@ -724,10 +751,12 @@ func _begin_player_phase(reason: String) -> void:
     _update_hold_objective_progress(reason)
 
     turn_manager.begin_phase("ally", ally_units + enemy_units, reason)
-    _apply_synergy_reactions()
-    _apply_weather_effects()
+    var synergy_summary := _apply_synergy_reactions()
+    var weather_summary := _apply_weather_effects()
+    _record_environment_turn_actions(synergy_summary, weather_summary)
     _apply_phase_start_statuses("ally")
     pending_move_origins.clear()
+    falling_units_this_turn.clear()
     _refresh_unit_visual_state()
     _clear_selection()
 
@@ -744,20 +773,25 @@ func _begin_player_phase(reason: String) -> void:
         return
 
 func _end_player_phase(reason: String) -> void:
+    _check_bond_death()
+    falling_units_this_turn.clear()
     _clear_selection()
     _transition_to(BattlePhase.PLAYER_PHASE_END, reason, {"round": round_index})
+    _emit_turn_ended_signal("ally")
     _begin_enemy_phase("enemy_phase_open")
 
 func _begin_enemy_phase(reason: String) -> void:
     _transition_to(BattlePhase.ENEMY_PHASE_START, reason, {"round": round_index})
 
     turn_manager.begin_phase("enemy", ally_units + enemy_units, reason)
-    _apply_synergy_reactions()
-    _apply_weather_effects({"apply_rain_tick": false})
+    var synergy_summary := _apply_synergy_reactions()
+    var weather_summary := _apply_weather_effects({"apply_rain_tick": false})
+    _record_environment_turn_actions(synergy_summary, weather_summary)
     _apply_phase_start_statuses("enemy")
     # Clear per-round bonuses; boss phase bonuses are re-applied in _check_boss_phase_transitions
     enemy_attack_bonus_by_unit.clear()
     enemy_movement_bonus_by_unit.clear()
+    falling_units_this_turn.clear()
     _refresh_unit_visual_state()
     _clear_selection()
 
@@ -803,6 +837,8 @@ func _run_enemy_phase() -> void:
 
         _refresh_unit_visual_state()
 
+        _check_bond_death()
+
         if _check_battle_end():
             return
 
@@ -810,6 +846,10 @@ func _run_enemy_phase() -> void:
         "acted_count": acted_count,
         "round": round_index
     })
+    _emit_turn_ended_signal("enemy")
+
+    _check_bond_death()
+    falling_units_this_turn.clear()
 
     _update_flood_zones()
     if _check_battle_end():
@@ -912,6 +952,8 @@ func _apply_enemy_action(enemy: UnitActor, action: Dictionary) -> void:
             })
 
 func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Dictionary = {}) -> void:
+    var attacker_hp_before: int = attacker.current_hp
+    var attacker_max_hp: int = attacker.unit_data.max_hp if attacker.unit_data != null else attacker.current_hp
     var attack_context: Dictionary = _build_attack_context(attacker, defender, extra_context)
     if _should_apply_lete_story_retreat(defender):
         attack_context["story_retreat_min_hp"] = 1
@@ -999,6 +1041,15 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
     elif not damage_share_payload.is_empty():
         phase_reason = "damage_shared"
     _sync_hud_phase(phase_reason, follow_up_payload)
+    _record_turn_action({
+        "type": "attack",
+        "actor_id": attacker.unit_data.unit_id if attacker.unit_data != null else &"",
+        "actor_hp_before": attacker_hp_before,
+        "actor_max_hp": attacker_max_hp,
+        "target_id": defender.unit_data.unit_id if defender.unit_data != null else &"",
+        "killed_unit_ids": [defender.unit_data.unit_id] if bool(result.get("defender_defeated", false)) and defender.unit_data != null else [],
+        "source": "primary_attack"
+    })
 
 func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
     if total_damage <= 0:
@@ -1008,6 +1059,7 @@ func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
         return {}
 
     var redirected_total: int = 0
+    var sacrificed_unit_ids: Array[StringName] = []
     for share in share_result.get("shared_amounts", []):
         var unit: UnitActor = share.get("unit", null)
         var shared_damage: int = int(share.get("shared_damage", 0))
@@ -1017,10 +1069,22 @@ func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
         redirected_total += shared_damage
         if unit.is_defeated():
             _remove_unit_from_roster(unit)
+            if unit.unit_data != null:
+                sacrificed_unit_ids.append(unit.unit_data.unit_id)
 
     if redirected_total > 0:
         defender.current_hp = mini(defender.unit_data.max_hp, defender.current_hp + redirected_total)
         defender._refresh_visuals()
+        if not defender.is_defeated() and defender.unit_data != null:
+            for sacrificed_unit_id in sacrificed_unit_ids:
+                _record_turn_action({
+                    "type": "sacrifice_play",
+                    "actor_id": sacrificed_unit_id,
+                    "saved_unit_id": defender.unit_data.unit_id,
+                    "protected_unit_id": defender.unit_data.unit_id,
+                    "actor_died": true,
+                    "source": "damage_share"
+                })
 
     var payload := {
         "target": defender.unit_data.unit_id,
@@ -1041,6 +1105,8 @@ func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bo
     return false
 
 func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
+    var supporter_hp_before: int = supporter.current_hp
+    var supporter_max_hp: int = supporter.unit_data.max_hp if supporter.unit_data != null else supporter.current_hp
     var support_context := _build_attack_context(supporter, defender, {
         "attack_bonus": -2,
         "allow_counterattack": false
@@ -1077,6 +1143,15 @@ func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
     hud.set_transition_reason("support_attack_resolved", last_support_attack_details)
     if bool(support_result.get("defender_defeated", false)):
         _remove_unit_from_roster(defender)
+    _record_turn_action({
+        "type": "attack",
+        "actor_id": supporter.unit_data.unit_id if supporter.unit_data != null else &"",
+        "actor_hp_before": supporter_hp_before,
+        "actor_max_hp": supporter_max_hp,
+        "target_id": defender.unit_data.unit_id if defender.unit_data != null else &"",
+        "killed_unit_ids": [defender.unit_data.unit_id] if bool(support_result.get("defender_defeated", false)) and defender.unit_data != null else [],
+        "source": "support_attack"
+    })
 
 func _resolve_interaction(unit: UnitActor, object_actor: InteractiveObjectActor) -> void:
     var result: Dictionary = object_actor.resolve_interaction(unit)
@@ -1134,6 +1209,18 @@ func _play_battle_flash(color: Color, duration: float) -> void:
     battle_flash.color = color
     _battle_flash_tween = create_tween()
     _battle_flash_tween.tween_property(battle_flash, "color:a", 0.0, duration)
+
+func _queue_spotlight_slow_mo(duration: float, scale: float = 0.35) -> void:
+    if duration <= 0.0 or not is_inside_tree() or DisplayServer.get_name() == "headless":
+        return
+    _spotlight_slow_mo_token += 1
+    var token: int = _spotlight_slow_mo_token
+    Engine.time_scale = clampf(scale, 0.05, 1.0)
+    var timer := get_tree().create_timer(duration, true, false, true)
+    timer.timeout.connect(func() -> void:
+        if token == _spotlight_slow_mo_token:
+            Engine.time_scale = 1.0
+    , CONNECT_ONE_SHOT)
 
 func _play_world_fx(file_name: String, cell: Vector2i, tint: Color, duration: float, scale_amount: float) -> void:
     if effects_root == null:
@@ -1395,6 +1482,8 @@ func _on_hud_menu_visibility_changed(is_open: bool) -> void:
 
 func _on_unit_defeated(unit: UnitActor) -> void:
     pending_move_origins.erase(unit.get_instance_id())
+    if unit != null and is_instance_valid(unit) and unit.unit_data != null and not falling_units_this_turn.has(unit.unit_data.unit_id):
+        falling_units_this_turn.append(unit.unit_data.unit_id)
     turn_manager.mark_downed(unit, "unit_defeated", {"round": round_index})
     if status_service != null:
         status_service.remove_unit(unit)
@@ -1406,8 +1495,31 @@ func _on_unit_defeated(unit: UnitActor) -> void:
                 bond_service.notify_unit_died(unit.unit_data.unit_id, unit.unit_data.display_name)
         else:
             telemetry_service.record_enemy_death()
+            var ashes = get_node_or_null("/root/Ashes")
+            if ashes != null and unit.unit_data != null and ashes.has_method("set_current_stage") and ashes.has_method("collect_ashes"):
+                ashes.set_current_stage(String(stage_data.stage_id) if stage_data != null else "")
+                ashes.collect_ashes(String(unit.unit_data.unit_id))
     _remove_unit_from_roster(unit)
     _sync_hud_phase("unit_defeated", {"round": round_index})
+
+func _check_bond_death():
+    if bond_death_patch == null or bond_service == null:
+        return null
+    var resolution: Dictionary = bond_death_patch.resolve_bond_death(falling_units_this_turn, bond_service)
+    if resolution.is_empty():
+        return null
+    var pair_id := String(resolution.get("pair_id", ""))
+    var ending = resolution.get("ending", null)
+    if pair_id.is_empty() or ending == null:
+        return null
+    bond_death_triggered.emit(pair_id, String(ending.id))
+    falling_units_this_turn.clear()
+    return ending
+
+func get_bond_ending_registry():
+    if bond_death_patch == null:
+        return null
+    return bond_death_patch.get_registry()
 
 func _on_action_state_changed(unit: UnitActor, from_state: StringName, to_state: StringName, reason: String, payload: Dictionary) -> void:
     var transition_payload: Dictionary = payload.duplicate(true)
@@ -1418,6 +1530,58 @@ func _on_action_state_changed(unit: UnitActor, from_state: StringName, to_state:
     transition_payload["to"] = to_state
     hud.set_transition_reason(reason, transition_payload)
     _sync_hud_phase(reason, transition_payload)
+
+func _on_battle_turn_ended(_turn_owner: String, turn_actions: Array) -> void:
+    var spotlight := _get_spotlight_manager()
+    if spotlight == null:
+        return
+    spotlight.check_spotlight_conditions(turn_actions)
+
+func _on_spotlight_triggered(spotlight_type: StringName, unit_ids: Array) -> void:
+    var spotlight := _get_spotlight_manager()
+    if spotlight == null or spotlight.get_active_battle_id() != _get_spotlight_battle_id():
+        return
+    last_spotlight_effect = spotlight.apply_spotlight_effects(self, spotlight_type, _variant_to_string_name_array(unit_ids))
+
+func _wire_spotlight_signal() -> void:
+    var spotlight := _get_spotlight_manager()
+    if spotlight == null:
+        return
+    if not spotlight.spotlight_triggered.is_connected(_on_spotlight_triggered):
+        spotlight.spotlight_triggered.connect(_on_spotlight_triggered)
+
+func _get_spotlight_manager() -> SpotlightManager:
+    return get_node_or_null("/root/Spotlight") as SpotlightManager
+
+func _get_spotlight_battle_id() -> StringName:
+    return stage_data.stage_id if stage_data != null else &"unknown"
+
+func _emit_turn_ended_signal(turn_owner: String) -> void:
+    var turn_snapshot: Array = _current_turn_actions.duplicate(true)
+    battle_turn_ended.emit(turn_owner, turn_snapshot)
+    _current_turn_actions.clear()
+
+func _record_turn_action(action: Dictionary) -> void:
+    if action.is_empty():
+        return
+    _current_turn_actions.append(action.duplicate(true))
+
+func _record_environment_turn_actions(synergy_summary: Dictionary, weather_summary: Dictionary) -> void:
+    _record_weather_effect_action(&"steam_confusion", synergy_summary.get("steam_confusion_units", []))
+    _record_weather_effect_action(&"night_smoke", synergy_summary.get("night_smoke_penalty_units", []))
+    _record_weather_effect_action(&"rain_comfort", weather_summary.get("rain_comfort_units", []))
+    _record_weather_effect_action(&"rain_drain", weather_summary.get("rain_drained_units", []))
+    _record_weather_effect_action(&"thunder_fear", weather_summary.get("fear_targets", []))
+
+func _record_weather_effect_action(effect_id: StringName, affected_unit_ids: Variant) -> void:
+    var unit_ids: Array[StringName] = _variant_to_string_name_array(affected_unit_ids)
+    if unit_ids.is_empty():
+        return
+    _record_turn_action({
+        "type": "weather",
+        "weather_effect_id": effect_id,
+        "affected_unit_ids": unit_ids
+    })
 
 func _remove_unit_from_roster(unit: UnitActor) -> void:
     ally_units.erase(unit)
@@ -2264,6 +2428,19 @@ func _variant_to_string_array(value: Variant) -> Array[String]:
             result.append(String(item))
         return result
     return []
+
+func _variant_to_string_name_array(value: Variant) -> Array[StringName]:
+    var result: Array[StringName] = []
+    if value is Array:
+        for item in value:
+            var unit_id: StringName = StringName(item)
+            if unit_id != &"":
+                result.append(unit_id)
+    else:
+        var single_unit_id: StringName = StringName(value)
+        if single_unit_id != &"":
+            result.append(single_unit_id)
+    return result
 
 func _variant_to_unit_array(value: Variant) -> Array:
     if value is Array:

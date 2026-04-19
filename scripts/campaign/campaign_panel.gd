@@ -109,6 +109,7 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var evidence_list: RichTextLabel = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/EvidenceList
 @onready var letter_heading_label: Label = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/LetterHeading
 @onready var letter_list: RichTextLabel = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/LetterList
+@onready var ashes_wall_section: Node = $Panel/Margin/Content/BodyStack/RecordsSection/RecordsStack/AshesWallSection
 @onready var advance_button: Button = $Panel/Margin/Content/FooterRow/AdvanceButton
 @onready var save_button: Button = $Panel/Margin/Content/FooterRow/SaveButton
 @onready var encyclopedia_button: Button = $Panel/Margin/Content/FooterRow/EncyclopediaButton
@@ -229,6 +230,7 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     evidence_list.text = _format_lines_for_panel(_evidence_entries, "No evidence logged yet.")
     letter_heading_label.text = "Letters (%d)" % _letter_entries.size()
     letter_list.text = _format_lines_for_panel(_letter_entries, "No letters received yet.")
+    _render_ashes_memorial_wall()
     advance_button.text = button_text
     advance_button.custom_minimum_size = Vector2(0.0, PRIMARY_CTA_HEIGHT)
     advance_button.visible = not uses_choice_panel or not has_choice_options
@@ -341,6 +343,8 @@ func hide_panel() -> void:
     evidence_list.text = ""
     letter_heading_label.text = "Letters"
     letter_list.text = ""
+    if ashes_wall_section != null and ashes_wall_section.has_method("render_entries"):
+        ashes_wall_section.render_entries([])
     for child in party_roster_buttons.get_children():
         child.queue_free()
     honor_seat_heading_label.text = "Seat of Honor"
@@ -350,6 +354,7 @@ func hide_panel() -> void:
     visible = false
 
 func get_snapshot() -> Dictionary:
+    var ashes_snapshot := _get_ashes_snapshot()
     return {
         "mode": _current_mode,
         "title": title_label.text,
@@ -387,11 +392,30 @@ func get_snapshot() -> Dictionary:
         "available_weapon_entries": _available_weapon_entries.duplicate(),
         "available_armor_entries": _available_armor_entries.duplicate(),
         "available_accessory_entries": _available_accessory_entries.duplicate(),
+        "ashes_count": int(ashes_snapshot.get("ashes_count", 0)),
+        "ashes_entries": ashes_snapshot.get("enemy_names", []),
         "memorial_visible": _memorial_active,
         "memorial_unit_name": memorial_name_label.text if memorial_name_label != null else "",
         "memorial_quote": _memorial_quote,
         "memorial_seconds_remaining": snappedf(_memorial_remaining, 0.1),
         "memorial_progress": memorial_timer_bar.value if memorial_timer_bar != null else 0.0
+    }
+
+func _render_ashes_memorial_wall() -> void:
+    if ashes_wall_section == null or not ashes_wall_section.has_method("render_entries"):
+        return
+    var ashes = get_node_or_null("/root/Ashes")
+    var entries: Array = []
+    if ashes != null and ashes.has_method("get_memorial_wall_data"):
+        entries = ashes.get_memorial_wall_data()
+    ashes_wall_section.render_entries(entries)
+
+func _get_ashes_snapshot() -> Dictionary:
+    if ashes_wall_section != null and ashes_wall_section.has_method("get_snapshot"):
+        return ashes_wall_section.get_snapshot()
+    return {
+        "ashes_count": 0,
+        "enemy_names": []
     }
 
 func show_memorial_scene(payload: Dictionary) -> void:

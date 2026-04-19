@@ -17,6 +17,8 @@ default_skill = ExtResource("2_skill")
 is_boss = true
 boss_pattern = &"roderic_ch01_05"
 boss_phase_thresholds = {
-50: &"enrage",
-25: &"despair"
+	50: &"enrage",
+	25: &"despair"
 }
+last_words = "제 꿈이..."
+rarity = "RARE"

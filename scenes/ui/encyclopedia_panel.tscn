@@ -51,7 +51,7 @@ text = "Close"
 
 [node name="TabButtons" type="GridContainer" parent="Panel/Margin/Content"]
 layout_mode = 2
-columns = 4
+columns = 5
 theme_override_constants/separation = 10
 
 [node name="CodexButton" type="Button" parent="Panel/Margin/Content/TabButtons"]
@@ -73,6 +73,11 @@ text = "Memorial"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Atlas"
+
+[node name="BondEndingsButton" type="Button" parent="Panel/Margin/Content/TabButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bond Endings"
 
 [node name="BodyStack" type="VBoxContainer" parent="Panel/Margin/Content"]
 layout_mode = 2
@@ -173,3 +178,18 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
+
+[node name="BondEndingsTab" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BondEndingsScroll" type="ScrollContainer" parent="Panel/Margin/Content/BodyStack/BondEndingsTab"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="BondEndingsList" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/BondEndingsTab/BondEndingsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
