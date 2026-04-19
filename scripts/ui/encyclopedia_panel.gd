@@ -5,6 +5,8 @@ const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
 const MemorialSceneBondSection = preload("res://scripts/campaign/memorial_scene_bond_section.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
+const GhostFormationData = preload("res://scripts/data/ghost_formation_data.gd")
+const GuildSystem = preload("res://scripts/battle/guild_system.gd")
 
 signal close_requested
 
@@ -17,6 +19,7 @@ const TAB_USER_CREATED := "user_created"
 const TAB_GUILD := "guild"
 const TAB_DESTINY := "destiny"
 const MAX_COMMENT_LENGTH := 280
+const GHOST_REGISTRY_PATH := "user://ghost_registry.dat"
 const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS, TAB_BOND_ENDINGS, TAB_USER_CREATED, TAB_GUILD, TAB_DESTINY]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
@@ -528,7 +531,67 @@ func _rebuild_timeline() -> void:
 				int(record.get("turns", 0)),
 				int(record.get("star_rating", 0))
 			])
+	var ghost_lines := _build_ghost_record_lines()
+	if not ghost_lines.is_empty():
+		if not lines.is_empty():
+			lines.append("")
+		lines.append_array(ghost_lines)
 	timeline_label.text = "\n".join(lines)
+
+func _build_ghost_record_lines() -> Array[String]:
+	var lines: Array[String] = ["[b]Ghost Records[/b]"]
+	var ghost_records := _load_ghost_records()
+	if ghost_records.is_empty():
+		lines.append("  • No ghost battle records registered yet.")
+		return lines
+	for ghost in ghost_records:
+		var ghost_id_text := String(ghost.ghost_id).strip_edges()
+		var player_tag := ghost.player_tag.strip_edges()
+		var chapter_id := ghost.chapter_id.strip_edges().to_upper()
+		if player_tag.is_empty():
+			player_tag = "Anonymous"
+		if chapter_id.is_empty():
+			chapter_id = "Unknown"
+		lines.append("  • ghost_id: %s" % ghost_id_text)
+		lines.append("    player_tag: %s | chapter: %s | avg_turns: %.1f | difficulty_rating: %d" % [
+			player_tag,
+			chapter_id,
+			ghost.avg_turns,
+			ghost.difficulty_rating
+		])
+	return lines
+
+func _load_ghost_records() -> Array[GhostFormationData]:
+	var ghost_records: Array[GhostFormationData] = []
+	if not FileAccess.file_exists(GHOST_REGISTRY_PATH):
+		return ghost_records
+	var file := FileAccess.open(GHOST_REGISTRY_PATH, FileAccess.READ)
+	if file == null:
+		return ghost_records
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return ghost_records
+	var data := parsed as Dictionary
+	var raw_ghosts: Array = data.get("ghosts", []) as Array
+	if typeof(raw_ghosts) != TYPE_ARRAY:
+		return ghost_records
+	for raw_ghost in raw_ghosts:
+		if typeof(raw_ghost) != TYPE_DICTIONARY:
+			continue
+		var ghost := GhostFormationData.create_from_dict(raw_ghost as Dictionary)
+		if ghost == null or String(ghost.ghost_id).strip_edges().is_empty():
+			continue
+		ghost_records.append(ghost)
+	ghost_records.sort_custom(func(a: GhostFormationData, b: GhostFormationData) -> bool:
+		var chapter_a := a.chapter_id.strip_edges().to_upper()
+		var chapter_b := b.chapter_id.strip_edges().to_upper()
+		if chapter_a == chapter_b:
+			if is_equal_approx(a.avg_turns, b.avg_turns):
+				return String(a.ghost_id) < String(b.ghost_id)
+			return a.avg_turns < b.avg_turns
+		return chapter_a < chapter_b
+	)
+	return ghost_records
 
 func _rebuild_memorial() -> void:
 	_clear_children(memorial_cards)
@@ -783,7 +846,7 @@ func _rebuild_user_created_scenarios() -> void:
 		return
 	var ScenarioLoader = load("res://scripts/dev/scenario_loader.gd")
 	var scenarios: Array[Dictionary] = ScenarioLoader.list_all_scenarios()
-	_clear_children(user_created_list)
+	_clear_children(_user_created_list)
 	if scenarios.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "No user-created scenarios yet.\nCreate one from the Campaign menu."
@@ -798,9 +861,8 @@ func _rebuild_guild_tab() -> void:
 	if not _guild_tab or not _guild_list:
 		return
 	_clear_children(_guild_list)
-	var GuildSystem = load("res://scripts/battle/guild_system.gd")
 	var gs: GuildSystem = GuildSystem.new()
-	root.add_child(gs)
+	get_tree().root.add_child(gs)
 	var in_guild := gs.is_in_guild()
 	var guild: GuildSystem.Guild = gs.get_current_guild()
 	if in_guild and guild != null:
@@ -888,7 +950,7 @@ func _rebuild_destiny_tab() -> void:
 		_destiny_tab.add_child(err_lbl)
 		return
 	var dm: Node = DestinyManager.new()
-	root.add_child(dm)
+	get_tree().root.add_child(dm)
 	if not dm.has_method("is_destiny_unlocked"):
 		var err_lbl := Label.new()
 		err_lbl.text = "Destiny system not properly loaded."
@@ -994,3 +1056,8 @@ func _get_card_style() -> StyleBoxFlat:
 	style.set_corner_radius_all(4)
 	style.set_content_margin_all(8)
 	return style
+
+func _get_node_or_null(path: NodePath) -> Node:
+	if has_node(path):
+		return get_node(path)
+	return null

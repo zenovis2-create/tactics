@@ -52,7 +52,11 @@ static func create_from_dict(data: Dictionary) -> GhostFormationData:
 	ghost.unique_tactics = PackedStringArray(data.get("unique_tactics", []))
 	ghost.allies_deployed = PackedStringArray(data.get("allies_deployed", []))
 	ghost.enemies_faced = PackedStringArray(data.get("enemies_faced", []))
-	ghost.formation = Array(data.get("formation", []))
+	var formation_entries: Array = data.get("formation", []) as Array
+	for entry in formation_entries:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		ghost.formation.append((entry as Dictionary).duplicate(true))
 	return ghost
 
 static func create_from_chronicle(chronicle_entry: ChronicleEntry, player_tag: String = "Unknown", is_anonymous: bool = true) -> GhostFormationData:
