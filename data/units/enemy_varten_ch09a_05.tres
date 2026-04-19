@@ -20,3 +20,7 @@ default_skill = ExtResource("2_skill")
 skills = [ExtResource("2_skill"), ExtResource("3_skill"), ExtResource("4_skill"), ExtResource("5_skill")]
 is_boss = true
 boss_pattern = &"karl_ch09a_05"
+boss_phase_thresholds = {
+50: &"enraged",
+25: &"desperate"
+}

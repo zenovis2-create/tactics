@@ -15,7 +15,7 @@ cell_size = Vector2i(64, 64)
 ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
 enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
 ally_spawns = [Vector2i(1, 6), Vector2i(2, 6)]
-enemy_spawns = [Vector2i(5, 1), Vector2i(6, 6)]
+enemy_spawns = [Vector2i(6, 1), Vector2i(6, 6)]
 blocked_cells = [Vector2i(2, 2), Vector2i(3, 3), Vector2i(4, 3)]
 terrain_move_costs = {
 Vector2i(1, 1): 2,
@@ -35,9 +35,40 @@ Vector2i(5, 1): 1,
 Vector2i(4, 3): 2,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "fire",
+"position": Vector2i(5, 1),
+"radius": 0,
+"effect": "Iron Keep braziers punish anyone holding the dais."
+}, {
+"type": "destructible",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "Barricades can be broken to crack the keep open."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 2),
+"radius": 0,
+"effect": "Gate chokepoints force a single-file breach."
+}]
+optional_objectives = [{
+"id": "valtor_civilian_escapes",
+"description": "See that Valtor's civilian makes it out alive.",
+"condition": "flag:valtor_civilian_escapes",
+"star_value": 2
+}, {
+"id": "fort_resistance_zero",
+"description": "Reduce the fort resistance to 0 before the final blow.",
+"condition": "flag:fort_resistance_zero",
+"star_value": 2
+}]
+turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "Defeat Valgar and take the keep dais."
+landmark_labels = PackedStringArray("Iron Approach", "Keep Dais", "Oath Throne")
+weather_type = "night"
 start_cutscene_id = &"ch06_05_intro"
 clear_cutscene_id = &"ch06_05_outro"
-next_destination_summary = "Valtor falls, and the Ellyor relief edicts point the march toward the purification rite."
+next_destination_summary = "Next: March from Valgar's keep toward the purification rite."

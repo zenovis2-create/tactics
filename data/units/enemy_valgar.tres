@@ -15,7 +15,7 @@ movement = 3
 attack_range = 1
 default_skill = ExtResource("2_skill")
 is_boss = true
-boss_pattern = &"roderic_ch01_05"
+boss_pattern = &"valgar_ch06_05"
 boss_phase_thresholds = {
 50: &"enrage",
 25: &"despair"
