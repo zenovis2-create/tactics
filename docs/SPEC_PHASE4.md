@@ -5,15 +5,15 @@
 ---
 
 ### SPEC-P4-01: Ghost Battle System (유령 전투)
-- [ ] **P4-01-1** `scripts/battle/ghost_battle_manager.gd` — ghost ID generation + cross-player matching
-- [ ] **P4-01-2** `scripts/battle/ghost_formation_extractor.gd` — extract patterns from Chronicle battle logs
+- [x] **P4-01-1** `scripts/battle/ghost_battle_manager.gd` — ghost ID generation + cross-player matching
+- [x] **P4-01-2** `scripts/battle/ghost_formation_extractor.gd` — extract patterns from Chronicle battle logs
 - [ ] **P4-01-3** ChronicleGenerator에 `extract_ghost_pattern() -> GhostFormationData` 추가
-- [ ] **P4-01-4** `GhostFormationData.gd` Resource: formation[], avg_turns, preferred_terrain, player_tag
+- [x] **P4-01-4** `GhostFormationData.gd` Resource: formation[], avg_turns, preferred_terrain, player_tag
 - [ ] **P4-01-5** battle_controller에 ghost boss spawn 로직 추가
-- [ ] **P4-01-6** "홍길동의 전략" 네이밍 + 익명 옵션
-- [ ] **P4-01-7** 격파 시 "XXX의 전략을 격파했다" 메시지
-- [ ] **P4-01-8** 챔피언 보드 시스템 stub (순위 아님, 명예의 전당)
-- [ ] **P4-01-9** `scripts/dev/ghost_battle_runner.gd` 작성
+- [x] **P4-01-6** "홍길동의 전략" 네이밍 + 익명 옵션
+- [x] **P4-01-7** 격파 시 "XXX의 전략을 격파했다" 메시지
+- [x] **P4-01-8** 챔피언 보드 시스템 stub (순위 아님, 명예의 전당)
+- [x] **P4-01-9** `scripts/dev/ghost_battle_runner.gd` 작성
 - [ ] **P4-01-10** Runner 검증 — godot headless 통과
 
 ---
