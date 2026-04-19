@@ -28,6 +28,7 @@ const RewardService = preload("res://scripts/battle/reward_service.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BondService = preload("res://scripts/battle/bond_service.gd")
+const BattleResultScreenScript = preload("res://scripts/battle/battle_result_screen.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
@@ -159,6 +160,10 @@ var hold_objective_round_started: int = -1
 var finale_name_anchor_state: Dictionary = {}
 var finale_name_call_state: Dictionary = {}
 var finale_name_call_lines: Dictionary = {}
+var namecall_pending: bool = false
+var _pending_namecall_companion_id: StringName = &""
+var _pending_namecall_unit: UnitActor
+var _pending_namecall_reason: String = ""
 var desperate_wave_context: Dictionary = {}
 var _last_defeated_ally_id: StringName = &""
 
@@ -220,6 +225,10 @@ func bootstrap_battle() -> void:
     hold_objective_armed = false
     hold_objective_completed = false
     hold_objective_round_started = -1
+    namecall_pending = false
+    _pending_namecall_companion_id = &""
+    _pending_namecall_unit = null
+    _pending_namecall_reason = ""
     _last_defeated_ally_id = &""
     _reset_finale_contract_state()
     if bond_service != null and progression_service != null:
@@ -284,6 +293,7 @@ func _wire_signals() -> void:
     hud.wait_requested.connect(_on_wait_requested)
     hud.end_turn_requested.connect(_on_end_turn_requested)
     hud.menu_visibility_changed.connect(_on_hud_menu_visibility_changed)
+    hud.namecall_choice_selected.connect(_on_namecall_choice_selected)
     turn_manager.action_state_changed.connect(_on_action_state_changed)
 
 func _clear_battle_state() -> void:
@@ -550,8 +560,15 @@ func _complete_selected_unit_action(reason: String) -> void:
     if is_instance_valid(acting_unit):
         pending_move_origins.erase(acting_unit.get_instance_id())
 
+    if is_instance_valid(acting_unit) and not acting_unit.is_defeated() and _begin_namecall_choice_if_needed(acting_unit, reason):
+        return
+
+    _finalize_selected_unit_action(acting_unit, reason)
+
+func _finalize_selected_unit_action(acting_unit: UnitActor, reason: String, skip_namecall_record: bool = false) -> void:
     if is_instance_valid(acting_unit) and not acting_unit.is_defeated():
-        _try_record_live_finale_name_call(acting_unit)
+        if not skip_namecall_record:
+            _try_record_live_finale_name_call(acting_unit)
         turn_manager.mark_acted(acting_unit, reason, {"round": round_index})
 
     _clear_selection()
@@ -567,6 +584,64 @@ func _complete_selected_unit_action(reason: String) -> void:
             "ready_units": turn_manager.get_ready_unit_count("ally", ally_units)
         })
         _focus_first_ready_unit_if_any()
+
+func _begin_namecall_choice_if_needed(acting_unit: UnitActor, reason: String) -> bool:
+    var companion_id := _resolve_namecall_choice_companion_id(acting_unit)
+    if companion_id == &"" or hud == null:
+        return false
+    _pending_namecall_unit = acting_unit
+    _pending_namecall_reason = reason
+    _show_namecall_choice(companion_id)
+    return true
+
+func _resolve_namecall_choice_companion_id(acting_unit: UnitActor) -> StringName:
+    if not _is_ch10_finale_stage() or acting_unit == null or not is_instance_valid(acting_unit) or acting_unit.unit_data == null:
+        return &""
+    if namecall_pending and _pending_namecall_companion_id != &"":
+        return _pending_namecall_companion_id
+    var required_name_call_ids: Array[StringName] = _get_required_finale_name_call_ids()
+    for companion_id: StringName in required_name_call_ids:
+        if not bool(finale_name_call_state.get(companion_id, false)):
+            return companion_id
+    return &""
+
+func _show_namecall_choice(_companion_id: StringName = &"") -> void:
+    if hud == null:
+        return
+    hud.show_namecall_choice("그 이름... 불러도 될까요?", 3.0)
+
+func _on_namecall_choice_selected(choice_id: String) -> void:
+    var acting_unit: UnitActor = _pending_namecall_unit
+    var pending_reason: String = _pending_namecall_reason
+    var companion_id := _resolve_namecall_choice_companion_id(acting_unit)
+    _pending_namecall_unit = null
+    _pending_namecall_reason = ""
+    if companion_id != &"":
+        if choice_id == "defer":
+            _defer_namecall_choice(companion_id)
+        else:
+            _accept_namecall_choice(companion_id)
+    _finalize_selected_unit_action(acting_unit, pending_reason, true)
+
+func _accept_namecall_choice(companion_id: StringName) -> void:
+    namecall_pending = false
+    _pending_namecall_companion_id = &""
+    var support_rank: int = 0
+    if bond_service != null:
+        bond_service.promote_name_call_support(&"ally_rian", companion_id)
+        support_rank = bond_service.get_support_rank(&"ally_rian", companion_id)
+    var line := SupportConversations.get_name_call_choice_line(String(companion_id), support_rank, true)
+    record_finale_name_call_fired(companion_id, line)
+
+func _defer_namecall_choice(companion_id: StringName) -> void:
+    namecall_pending = true
+    _pending_namecall_companion_id = companion_id
+    finale_name_call_lines[String(companion_id)] = SupportConversations.get_name_call_choice_line(String(companion_id), BondService.SUPPORT_B_RANK, false)
+    if progression_service == null:
+        return
+    var progression_data = progression_service.get_data()
+    if progression_data != null:
+        progression_data.namecall_rejected_count += 1
 
 func _begin_player_phase(reason: String) -> void:
     _transition_to(BattlePhase.PLAYER_PHASE_START, reason, {"round": round_index})
@@ -1078,6 +1153,7 @@ func _on_battle_victory() -> void:
         "supporter_bond_level": 0,
         "burden_delta": 0,
         "trust_delta": 0,
+        "badge_narrative": "",
         "hidden_recruit_state": {},
     }
     var burden_before := 0
@@ -1135,6 +1211,7 @@ func _on_battle_victory() -> void:
             result_summary["trust_delta"] = after_data.trust - trust_before
             result_summary["recovered_fragment_ids"] = after_data.get_recovered_fragment_ids()
             result_summary["unlocked_command_ids"] = after_data.get_unlocked_command_ids()
+            result_summary["badge_narrative"] = String(BattleResultScreenScript.build_badge_narrative_payload(after_data).get("narrative", ""))
             result_summary["progression_data"] = after_data
     if telemetry_service != null:
         var session_snapshot: Dictionary = telemetry_service.get_session_snapshot()
@@ -1491,6 +1568,7 @@ func _sync_selection_hud() -> void:
     var hp_text: String = "%d/%d" % [selected_unit.current_hp, selected_unit.unit_data.max_hp]
     var terrain_text: String = _get_tile_summary_text(selected_unit.grid_position)
     var oblivion_stack: int = status_service.get_oblivion_stack(selected_unit) if status_service != null else 0
+    var combat_quote := _get_selected_unit_combat_quote()
     hud.set_selection_summary(
         selected_unit.unit_data.display_name,
         hp_text,
@@ -1500,7 +1578,8 @@ func _sync_selection_hud() -> void:
         attackable_count,
         interactable_count,
         terrain_text,
-        oblivion_stack
+        oblivion_stack,
+        combat_quote
     )
 
     var can_wait: bool = turn_manager.can_unit_act(selected_unit)
@@ -1537,6 +1616,14 @@ func _get_tile_summary_text(cell: Vector2i) -> String:
     if move_cost > 1:
         return "%s %dMV" % [terrain_type, move_cost]
     return terrain_type
+
+func _get_selected_unit_combat_quote() -> String:
+    if selected_unit == null or selected_unit.unit_data == null or progression_service == null:
+        return ""
+    var data := progression_service.get_data()
+    if data == null:
+        return ""
+    return data.get_unit_quote(String(selected_unit.unit_data.unit_id))
 
 func _transition_to(next_phase: int, reason: String, payload: Dictionary = {}) -> bool:
     if current_phase == next_phase:
@@ -1738,11 +1825,11 @@ func record_finale_name_anchor_destroyed(anchor_id: StringName) -> void:
         return
     finale_name_anchor_state[anchor_id] = false
 
-func record_finale_name_call_fired(companion_id: StringName) -> void:
+func record_finale_name_call_fired(companion_id: StringName, line_override: String = "") -> void:
     if not _get_required_finale_name_call_ids().has(companion_id):
         return
     finale_name_call_state[companion_id] = true
-    finale_name_call_lines[String(companion_id)] = _get_finale_name_call_line(companion_id)
+    finale_name_call_lines[String(companion_id)] = line_override if not line_override.strip_edges().is_empty() else _get_finale_name_call_line(companion_id)
 
 func get_finale_result_snapshot() -> Dictionary:
     return _build_finale_result_summary().duplicate(true)

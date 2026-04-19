@@ -37,6 +37,17 @@ const RETREAT_OPTION_FULL: String = "defeat_full_retreat"
 const RETREAT_OPTION_SACRIFICE: String = "defeat_sacrifice_protocol"
 const RETREAT_OPTION_DESPERATE: String = "defeat_desperate_stand"
 const RETREAT_OPTION_SACRIFICE_PREFIX: String = "defeat_sacrifice_unit:"
+const MEMORIAL_QUOTE_PREFIX := "나는後悔ない."
+const SACRIFICE_EPITAPHS := {
+    &"ally_serin": "등불은 넘겨줬다. 이제 앞으로 가.",
+    &"ally_bran": "대열을 무너뜨리지 마라.",
+    &"ally_tia": "숲은 너희 발자국을 기억할 거야.",
+    &"ally_enoch": "기록은 남겼다. 끝까지 읽어.",
+    &"ally_karl": "깃발은 쓰러져도 행군은 끝나지 않는다.",
+    &"ally_noah": "이 이름만은 끝까지 지켜.",
+    &"ally_mira": "진실은 태워도 재가 남아.",
+    &"ally_melkion_ally": "증명은 이제 너희 몫이다."
+}
 
 const CHOICE_CH05_CAMP: StringName = &"ch05_camp"
 const CHOICE_CH07_INTERLUDE: StringName = &"ch07_interlude"
@@ -901,6 +912,7 @@ var _defeat_choice_prompt: String = ""
 var _post_defeat_destination: String = ""
 var _desperate_stand_context: Dictionary = {}
 var _last_memorial_scene: Dictionary = {}
+var _suppress_s_rank_memorial: bool = false
 
 func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -> void:
     _battle_controller = battle_controller
@@ -931,6 +943,8 @@ func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -
         _campaign_panel.accessory_cycle_requested.connect(_on_accessory_cycle_requested)
     if _campaign_panel != null and not _campaign_panel.choice_selected.is_connected(_on_choice_selected):
         _campaign_panel.choice_selected.connect(_on_choice_selected)
+    if _campaign_panel != null and not _campaign_panel.memorial_finished.is_connected(_on_memorial_scene_finished):
+        _campaign_panel.memorial_finished.connect(_on_memorial_scene_finished)
 
 func start_chapter_one_flow(reset_progression: bool = true) -> void:
     if reset_progression:
@@ -1277,6 +1291,8 @@ func _on_battle_defeat(stage_id: StringName, payload: Dictionary) -> void:
     _enter_defeat_state()
 
 func _on_s_rank_ally_died(unit_id: StringName, unit_name: String, support_rank: int) -> void:
+    if _suppress_s_rank_memorial:
+        return
     _trigger_memorial_scene(unit_id, unit_name, support_rank)
 
 func _on_support_rank_increased(pair_id: String, new_rank: int) -> void:
@@ -1354,7 +1370,7 @@ func _apply_full_retreat(payload: Dictionary = _defeat_payload) -> void:
     progression.recovering_units.clear()
     for unit_id in _get_retreat_recovering_unit_ids(payload):
         var unit_text := String(unit_id)
-        if progression.sacrificed_units.has(unit_text):
+        if progression.has_sacrificed_unit(unit_text):
             continue
         if not progression.recovering_units.has(unit_text):
             progression.recovering_units.append(unit_text)
@@ -1371,21 +1387,31 @@ func _apply_sacrifice(unit_id: String) -> void:
     if progression == null:
         return
     var unit_text := String(normalized_unit_id)
-    if not progression.sacrificed_units.has(unit_text):
-        progression.sacrificed_units.append(unit_text)
+    var unit_name := _get_unit_display_name(normalized_unit_id)
+    var memorial_quote := _build_memorial_quote(_resolve_sacrifice_epitaph(normalized_unit_id, unit_name))
+    progression.add_sacrificed_unit(unit_text, unit_name, memorial_quote)
+    progression.set_unit_quote(unit_text, memorial_quote)
+    progression.add_memorial_record(
+        unit_text,
+        unit_name,
+        memorial_quote,
+        String(_active_chapter_id),
+        String(_current_stage.stage_id) if _current_stage != null else ""
+    )
     progression.recovering_units.erase(unit_text)
     progression.unit_progression.erase(unit_text)
     _deployed_party_unit_ids.erase(normalized_unit_id)
     _equipped_weapon_by_unit_id.erase(unit_text)
     _equipped_armor_by_unit_id.erase(unit_text)
     _equipped_accessory_by_unit_id.erase(unit_text)
-    _append_unique_lines(_chapter_reward_entries, ["Sacrifice Protocol: %s was left behind so the squad could retreat." % _get_unit_display_name(normalized_unit_id)])
-    _append_memorial_entry(normalized_unit_id, _get_unit_display_name(normalized_unit_id), "sacrifice_protocol")
+    _append_unique_lines(_chapter_reward_entries, ["Sacrifice Protocol: %s was left behind so the squad could retreat." % unit_name])
+    _append_memorial_entry(normalized_unit_id, unit_name, "sacrifice_protocol")
     _post_defeat_destination = "camp"
     if _battle_controller != null and _battle_controller.bond_service != null:
-        _battle_controller.bond_service.notify_unit_died(normalized_unit_id, _get_unit_display_name(normalized_unit_id))
-    if _active_mode == CampaignState.MODE_DEFEAT and _last_memorial_scene.is_empty():
-        _enter_camp_state()
+        _suppress_s_rank_memorial = true
+        _battle_controller.bond_service.notify_unit_died(normalized_unit_id, unit_name)
+        _suppress_s_rank_memorial = false
+    _show_memorial_scene(unit_text)
     _autosave_progression()
 
 func _execute_desperate_stand() -> void:
@@ -1464,11 +1490,38 @@ func _trigger_memorial_scene(unit_id: StringName, unit_name: String, support_ran
     _last_memorial_scene = {
         "unit_id": String(unit_id),
         "unit_name": resolved_name,
-        "support_rank": support_rank
+        "support_rank": support_rank,
+        "epitaph": _build_memorial_quote(_resolve_sacrifice_epitaph(unit_id, resolved_name)),
+        "duration_seconds": 30.0
     }
     _append_memorial_entry(unit_id, resolved_name, "s_rank_memorial")
-    if _active_mode == CampaignState.MODE_BATTLE:
+    _show_memorial_scene(String(unit_id))
+
+func _append_memorial_entry(unit_id: StringName, unit_name: String, reason: String) -> void:
+    var entry := "Memorial — %s (%s)" % [unit_name, reason.replace("_", " ")]
+    _append_unique_lines(_unlocked_memory_entries, [entry])
+
+func _show_memorial_scene(sacrificed_unit_id: String) -> void:
+    var normalized_unit_id := StringName(sacrificed_unit_id.strip_edges())
+    if normalized_unit_id == StringName():
         return
+    var progression := _get_progression_data()
+    var memorial_record: Dictionary = progression.get_memorial_record(String(normalized_unit_id)) if progression != null else {}
+    var resolved_name := String(_last_memorial_scene.get("unit_name", "")).strip_edges()
+    if resolved_name.is_empty():
+        resolved_name = String(memorial_record.get("unit_name", "")).strip_edges()
+    if resolved_name.is_empty():
+        resolved_name = _get_unit_display_name(normalized_unit_id)
+    var resolved_quote := String(_last_memorial_scene.get("epitaph", "")).strip_edges()
+    if resolved_quote.is_empty():
+        resolved_quote = String(memorial_record.get("epitaph", "")).strip_edges()
+    if resolved_quote.is_empty():
+        resolved_quote = _build_memorial_quote(_resolve_sacrifice_epitaph(normalized_unit_id, resolved_name))
+    _last_memorial_scene["unit_id"] = String(normalized_unit_id)
+    _last_memorial_scene["unit_name"] = resolved_name
+    _last_memorial_scene["epitaph"] = resolved_quote
+    _last_memorial_scene["duration_seconds"] = float(_last_memorial_scene.get("duration_seconds", 30.0))
+
     _active_mode = CampaignState.MODE_DEFEAT
     _defeat_choice_prompt = ""
     _defeat_choice_options.clear()
@@ -1476,13 +1529,23 @@ func _trigger_memorial_scene(unit_id: StringName, unit_name: String, support_ran
     _set_panel_state(
         CampaignState.MODE_DEFEAT,
         "%s Memorial" % resolved_name,
-        "%s fell with an S-rank bond to Rian. The squad pauses long enough to mark the name before moving again." % resolved_name,
+        "%s is remembered in stone before the squad breaks camp again." % resolved_name,
         "Continue"
     )
+    if _campaign_panel != null:
+        _campaign_panel.show_memorial_scene({
+            "unit_id": String(normalized_unit_id),
+            "unit_name": resolved_name,
+            "quote": resolved_quote,
+            "duration_seconds": float(_last_memorial_scene.get("duration_seconds", 30.0))
+        })
 
-func _append_memorial_entry(unit_id: StringName, unit_name: String, reason: String) -> void:
-    var entry := "Memorial — %s (%s)" % [unit_name, reason.replace("_", " ")]
-    _append_unique_lines(_unlocked_memory_entries, [entry])
+func _on_memorial_scene_finished() -> void:
+    if _active_mode != CampaignState.MODE_DEFEAT:
+        return
+    if _post_defeat_destination == "camp":
+        _post_defeat_destination = ""
+        _enter_camp_state()
 
 func _enter_camp_state() -> void:
     _active_mode = CampaignState.MODE_CAMP
@@ -1706,7 +1769,7 @@ func _get_progression_data() -> ProgressionData:
 
 func _is_unit_sacrificed(unit_id: StringName) -> bool:
     var progression_data: ProgressionData = _get_progression_data()
-    return progression_data != null and progression_data.sacrificed_units.has(String(unit_id))
+    return progression_data != null and progression_data.has_sacrificed_unit(String(unit_id))
 
 func _is_unit_recovering(unit_id: StringName) -> bool:
     var progression_data: ProgressionData = _get_progression_data()
@@ -2500,6 +2563,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
         "recommendation": recommendation,
         "party_entries": party_entries,
         "party_details": party_details,
+        "honor_entries": _build_honor_roll_entries(),
         "inventory_entries": inventory_entries,
         "memory_entries": memory_entries,
         "evidence_entries": evidence_entries,
@@ -2703,7 +2767,7 @@ func _build_defeat_presentation_cards() -> Array[Dictionary]:
         cards.append({
             "eyebrow": "Memorial",
             "title": "%s Remembered" % String(_last_memorial_scene.get("unit_name", "The Fallen")),
-            "body": "The squad records the loss before the march continues."
+            "body": String(_last_memorial_scene.get("epitaph", "The squad records the loss before the march continues."))
         })
     return cards
 
@@ -3252,6 +3316,17 @@ func _build_campaign_party_summary_lines() -> Array[String]:
         ])
     return lines
 
+func _build_honor_roll_entries() -> Array[String]:
+    var lines: Array[String] = []
+    var progression := _get_progression_data()
+    if progression == null:
+        return lines
+    for record in progression.get_honor_roll():
+        var unit_name := String(record.get("unit_name", "The Fallen")).strip_edges()
+        var epitaph := String(record.get("epitaph", "")).strip_edges()
+        lines.append("%s — %s" % [unit_name, epitaph if not epitaph.is_empty() else "名誉의 자리"])
+    return lines
+
 func _build_campaign_party_detail_entries() -> Array[Dictionary]:
     var details: Array[Dictionary] = []
     for unit_data in _get_campaign_party_roster():
@@ -3322,10 +3397,26 @@ func _get_campaign_party_roster() -> Array[UnitData]:
     for unit_id in CampaignCatalog.get_party_roster_order():
         if not _is_recruit_unlocked(unit_id):
             continue
+        if _is_unit_sacrificed(unit_id):
+            continue
         var unit_data: UnitData = CampaignCatalog.get_unit_data(unit_id)
         if unit_data != null:
             roster.append(unit_data)
     return roster
+
+func _resolve_sacrifice_epitaph(unit_id: StringName, unit_name: String) -> String:
+    var mapped := String(SACRIFICE_EPITAPHS.get(unit_id, "")).strip_edges()
+    if not mapped.is_empty():
+        return mapped
+    return "%s, march on without me." % unit_name
+
+func _build_memorial_quote(epitaph: String) -> String:
+    var normalized := epitaph.strip_edges()
+    if normalized.is_empty():
+        return MEMORIAL_QUOTE_PREFIX
+    if normalized.begins_with(MEMORIAL_QUOTE_PREFIX):
+        return normalized
+    return "%s %s" % [MEMORIAL_QUOTE_PREFIX, normalized]
 
 func _get_unit_data_by_id(unit_id: StringName) -> UnitData:
     return CampaignCatalog.get_unit_data(unit_id)

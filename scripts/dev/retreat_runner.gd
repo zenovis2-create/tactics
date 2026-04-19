@@ -133,13 +133,21 @@ func _run_sacrifice_path() -> bool:
     await process_frame
 
     var progression = battle.progression_service.get_data()
-    if not progression.sacrificed_units.has("ally_serin"):
+    if not progression.has_sacrificed_unit("ally_serin"):
         push_error("Sacrifice Protocol should populate sacrificed_units with ally_serin.")
         await _teardown_main(main)
         return false
+    var memorial_snapshot: Dictionary = panel.get_snapshot()
+    if String(memorial_snapshot.get("mode", "")) != CampaignState.MODE_DEFEAT or not bool(memorial_snapshot.get("memorial_visible", false)):
+        push_error("Sacrifice Protocol should open the memorial scene before returning to camp.")
+        await _teardown_main(main)
+        return false
+    panel.skip_memorial_scene()
+    await process_frame
+    await process_frame
     var camp_snapshot: Dictionary = panel.get_snapshot()
     if String(camp_snapshot.get("mode", "")) != CampaignState.MODE_CAMP:
-        push_error("Sacrifice Protocol should route back to camp mode when no memorial scene is active.")
+        push_error("Sacrifice Protocol should route back to camp mode after the memorial scene completes.")
         await _teardown_main(main)
         return false
     if _party_detail_exists(camp_snapshot, "ally_serin"):

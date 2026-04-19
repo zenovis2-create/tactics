@@ -60,7 +60,8 @@ func _seed_progression(progression: ProgressionData) -> void:
 		{"stage_id": "CH03_05", "turns": 6, "star_rating": 2, "objectives_completed": ["Break the river ambush"], "notes": "Greenwood route opened."},
 		{"stage_id": "CH05_05", "turns": 5, "star_rating": 3, "objectives_completed": ["Hold the archive wing"], "notes": "Archive proof relay recovered."}
 	]
-	progression.epitaphs = ["Serin — She held the bridge lantern high enough for the squad to cross."]
+	progression.add_sacrificed_unit("ally_serin", "Serin", "She held the bridge lantern high enough for the squad to cross.")
+	progression.add_memorial_record("ally_serin", "Serin", "She held the bridge lantern high enough for the squad to cross.", "CH01", "CH01_05")
 
 func _assert_codex(encyclopedia) -> bool:
 	encyclopedia.select_codex_entry("ally_rian")

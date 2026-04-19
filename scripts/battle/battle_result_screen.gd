@@ -14,6 +14,11 @@ const SupportConversations = preload("res://scripts/data/support_conversations.g
 @onready var panel: PanelContainer = get_node_or_null("Panel") as PanelContainer
 @onready var title_label: Label = get_node_or_null("Panel/Margin/Content/TitleLabel") as Label
 @onready var body_label: RichTextLabel = get_node_or_null("Panel/Margin/Content/BodyLabel") as RichTextLabel
+@onready var badge_narrative_panel: PanelContainer = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel") as PanelContainer
+@onready var badge_narrative_gradient: TextureRect = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Gradient") as TextureRect
+@onready var badge_narrative_summary_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/SummaryLabel") as Label
+@onready var badge_narrative_text_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/NarrativeLabel") as Label
+@onready var badge_narrative_stone_label: Label = get_node_or_null("Panel/Margin/Content/BadgeDeathsNarrativePanel/Margin/Content/StoneLabel") as Label
 @onready var footer_buttons: HBoxContainer = get_node_or_null("Panel/Margin/Content/FooterButtons") as HBoxContainer
 @onready var open_encyclopedia_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/OpenEncyclopediaButton") as Button
 @onready var confirm_button: Button = get_node_or_null("Panel/Margin/Content/FooterButtons/ConfirmButton") as Button
@@ -24,9 +29,11 @@ func _ready() -> void:
 	visible = false
 	# _ensure_labels는 setup()에서도 호출되므로 노드가 없으면 폴백 생성
 	_ensure_labels()
+	_ensure_badge_narrative_section()
 	_ensure_footer_buttons()
 	_ensure_confirm_button()
 	_ensure_open_encyclopedia_button()
+	_style_badge_narrative_section()
 	if confirm_button != null:
 		confirm_button.pressed.connect(_on_confirm)
 	if open_encyclopedia_button != null:
@@ -55,6 +62,56 @@ func _ensure_confirm_button() -> void:
 	confirm_button.text = "Confirm"
 	footer_buttons.add_child(confirm_button)
 
+func _ensure_badge_narrative_section() -> void:
+	if badge_narrative_panel != null and badge_narrative_summary_label != null and badge_narrative_text_label != null and badge_narrative_stone_label != null:
+		return
+	var content := get_node_or_null("Panel/Margin/Content") as VBoxContainer
+	badge_narrative_panel = PanelContainer.new()
+	badge_narrative_panel.name = "BadgeDeathsNarrativePanel"
+	badge_narrative_panel.visible = false
+	badge_narrative_panel.custom_minimum_size = Vector2(0.0, 180.0)
+
+	badge_narrative_gradient = TextureRect.new()
+	badge_narrative_gradient.name = "Gradient"
+	badge_narrative_gradient.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge_narrative_gradient.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	badge_narrative_panel.add_child(badge_narrative_gradient)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_bottom", 14)
+	badge_narrative_panel.add_child(margin)
+
+	var content_box := VBoxContainer.new()
+	content_box.name = "Content"
+	content_box.add_theme_constant_override("separation", 10)
+	margin.add_child(content_box)
+
+	badge_narrative_summary_label = Label.new()
+	badge_narrative_summary_label.name = "SummaryLabel"
+	badge_narrative_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content_box.add_child(badge_narrative_summary_label)
+
+	badge_narrative_text_label = Label.new()
+	badge_narrative_text_label.name = "NarrativeLabel"
+	badge_narrative_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content_box.add_child(badge_narrative_text_label)
+
+	badge_narrative_stone_label = Label.new()
+	badge_narrative_stone_label.name = "StoneLabel"
+	badge_narrative_stone_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content_box.add_child(badge_narrative_stone_label)
+
+	if content != null:
+		content.add_child(badge_narrative_panel)
+		if footer_buttons != null and footer_buttons.get_parent() == content:
+			content.move_child(badge_narrative_panel, footer_buttons.get_index())
+	else:
+		add_child(badge_narrative_panel)
+
 func _ensure_footer_buttons() -> void:
 	if footer_buttons != null:
 		return
@@ -71,6 +128,48 @@ func _ensure_open_encyclopedia_button() -> void:
 	open_encyclopedia_button.name = "OpenEncyclopediaButton"
 	open_encyclopedia_button.text = "Open Encyclopedia"
 	footer_buttons.add_child(open_encyclopedia_button)
+
+func _style_badge_narrative_section() -> void:
+	if badge_narrative_panel != null:
+		var panel_style := StyleBoxFlat.new()
+		panel_style.bg_color = Color(0.0, 0.0, 0.0, 0.0)
+		panel_style.border_color = Color(0.709804, 0.580392, 0.427451, 0.9)
+		panel_style.set_border_width_all(2)
+		panel_style.set_corner_radius_all(14)
+		panel_style.shadow_color = Color(0.0, 0.0, 0.0, 0.28)
+		panel_style.shadow_size = 6
+		badge_narrative_panel.add_theme_stylebox_override("panel", panel_style)
+	if badge_narrative_gradient != null:
+		var gradient := Gradient.new()
+		gradient.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+		gradient.colors = PackedColorArray([
+			Color(0.078431, 0.047059, 0.07451, 0.96),
+			Color(0.14902, 0.090196, 0.109804, 0.94),
+			Color(0.043137, 0.043137, 0.058824, 0.98)
+		])
+		var texture := GradientTexture2D.new()
+		texture.gradient = gradient
+		texture.fill = GradientTexture2D.FILL_LINEAR
+		texture.fill_from = Vector2(0.0, 0.0)
+		texture.fill_to = Vector2(1.0, 1.0)
+		badge_narrative_gradient.texture = texture
+		badge_narrative_gradient.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge_narrative_gradient.stretch_mode = TextureRect.STRETCH_SCALE
+	if badge_narrative_summary_label != null:
+		badge_narrative_summary_label.add_theme_color_override("font_color", Color(0.972549, 0.905882, 0.803922, 1.0))
+		badge_narrative_summary_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+		badge_narrative_summary_label.add_theme_constant_override("outline_size", 2)
+		badge_narrative_summary_label.add_theme_font_size_override("font_size", 17)
+	if badge_narrative_text_label != null:
+		badge_narrative_text_label.add_theme_color_override("font_color", Color(0.968627, 0.933333, 0.87451, 1.0))
+		badge_narrative_text_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.88))
+		badge_narrative_text_label.add_theme_constant_override("outline_size", 1)
+		badge_narrative_text_label.add_theme_font_size_override("font_size", 15)
+	if badge_narrative_stone_label != null:
+		badge_narrative_stone_label.add_theme_color_override("font_color", Color(0.823529, 0.843137, 0.839216, 1.0))
+		badge_narrative_stone_label.add_theme_color_override("font_outline_color", Color(0.121569, 0.121569, 0.141176, 0.96))
+		badge_narrative_stone_label.add_theme_constant_override("outline_size", 4)
+		badge_narrative_stone_label.add_theme_font_size_override("font_size", 16)
 
 func show_result(result: Dictionary) -> void:
 	_last_result = result
@@ -156,6 +255,9 @@ func show_result(result: Dictionary) -> void:
 	if body_label != null:
 		body_label.text = "\n".join(body_lines)
 
+	var progression: ProgressionData = result.get("progression_data", null) as ProgressionData
+	_apply_badge_narrative(progression, result)
+
 	# 버튼 포커스
 	if confirm_button != null:
 		confirm_button.grab_focus()
@@ -164,15 +266,93 @@ func show_result(result: Dictionary) -> void:
 
 func hide_result() -> void:
 	visible = false
+	if badge_narrative_panel != null:
+		badge_narrative_panel.visible = false
 
 func get_result_snapshot() -> Dictionary:
 	return {
 		"visible": visible,
 		"title": title_label.text if title_label != null else "",
 		"body_lines_count": body_label.text.count("\n") + 1 if body_label != null else 0,
+		"badge_narrative_visible": badge_narrative_panel.visible if badge_narrative_panel != null else false,
+		"badge_narrative_summary": badge_narrative_summary_label.text if badge_narrative_summary_label != null else "",
+		"badge_narrative_text": badge_narrative_text_label.text if badge_narrative_text_label != null else "",
+		"badge_narrative_stone": badge_narrative_stone_label.text if badge_narrative_stone_label != null else "",
 		"has_confirm_button": confirm_button != null,
 		"has_open_encyclopedia_button": open_encyclopedia_button != null
 	}
+
+func _apply_badge_narrative(progression: ProgressionData, result: Dictionary) -> void:
+	if badge_narrative_panel == null or badge_narrative_summary_label == null or badge_narrative_text_label == null or badge_narrative_stone_label == null:
+		return
+	var payload := build_badge_narrative_payload(progression)
+	var narrative := String(payload.get("narrative", ""))
+	result["badge_narrative"] = narrative
+	var total_badges := int(payload.get("total_badges", 0))
+	if total_badges <= 0:
+		badge_narrative_panel.visible = false
+		badge_narrative_summary_label.text = ""
+		badge_narrative_text_label.text = ""
+		badge_narrative_stone_label.text = ""
+		return
+	badge_narrative_panel.visible = true
+	badge_narrative_summary_label.text = "\n".join([
+		String(payload.get("badge_line", "")),
+		String(payload.get("rebirth_line", "")),
+		String(payload.get("battle_record_line", "")),
+		String(payload.get("sacrifice_line", ""))
+	]).strip_edges()
+	badge_narrative_text_label.text = narrative
+	badge_narrative_stone_label.text = String(payload.get("stone_text", ""))
+
+static func build_badge_narrative_payload(progression: ProgressionData) -> Dictionary:
+	var payload := {
+		"total_badges": 0,
+		"badge_line": "",
+		"rebirth_line": "",
+		"battle_record_line": "",
+		"sacrifice_line": "",
+		"narrative": "",
+		"stone_text": ""
+	}
+	if progression == null:
+		return payload
+	var total_badges := int(progression.badges_of_heroism)
+	payload["total_badges"] = total_badges
+	if total_badges <= 0:
+		return payload
+	var sacrifice_records: Array[Dictionary] = progression.get_sacrifice_records()
+	var first_record: Dictionary = sacrifice_records[0] if not sacrifice_records.is_empty() else {}
+	var first_name := String(first_record.get("name", "이름 없는 동료")).strip_edges()
+	var first_epitaph := String(first_record.get("epitaph", "")).strip_edges()
+	payload["badge_line"] = "Badges of Heroism: %d" % total_badges
+	payload["rebirth_line"] = "%d badges = %d전 %d생 = 1 true death" % [total_badges, total_badges, total_badges]
+	payload["battle_record_line"] = "%d전 — 전사 없이 돌아왔다" % total_badges
+	var narrative := "당신은 %d전투를 치렀다.\n" % total_badges
+	narrative += "매 전투마다, 당신은 한 걸음씩 다가왔다.\n"
+	if not sacrifice_records.is_empty():
+		narrative += "하지만 진정으로 fight한 것은 오직 한 번.\n"
+		narrative += "%s — %s" % [
+			first_name,
+			first_epitaph if not first_epitaph.is_empty() else "끝내 남기지 못한 마지막 말"
+		]
+		payload["sacrifice_line"] = "단 한 번, 영원히 남은 죽음: %s" % first_name
+		var memorial_lines: Array[String] = []
+		for record in sacrifice_records:
+			var record_name := String(record.get("name", "이름 없는 동료")).strip_edges()
+			var record_epitaph := String(record.get("epitaph", "")).strip_edges()
+			memorial_lines.append(record_name)
+			if not record_epitaph.is_empty():
+				memorial_lines.append("\"%s\"" % record_epitaph)
+			memorial_lines.append("이 이름은 石에 새겨졌다")
+		payload["stone_text"] = "\n\n".join(memorial_lines)
+	else:
+		narrative += "살아남은 것은 당신의 의지가 아니다.\n"
+		narrative += "살아남은 것은 주변 사람들의 믿음이었다."
+		payload["sacrifice_line"] = "당신은 모든 전투에서 살아남았다. 하지만 정말로 fight한 사람만이 여기 도달할 수 있었다"
+		payload["stone_text"] = payload["sacrifice_line"]
+	payload["narrative"] = narrative
+	return payload
 
 func _record_battle_result(result: Dictionary) -> void:
 	var progression: ProgressionData = result.get("progression_data", null) as ProgressionData

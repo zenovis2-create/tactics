@@ -10,6 +10,7 @@ signal end_turn_requested
 signal menu_visibility_changed(is_open: bool)
 signal ui_cue_requested(cue_id: String)
 signal encyclopedia_requested
+signal namecall_choice_selected(choice_id: String)
 
 const COMPACT_WIDTH_THRESHOLD := 720.0
 const COMPACT_PANEL_MARGIN := 16.0
@@ -33,6 +34,7 @@ const REGULAR_TOPBAR_MAX_WIDTH := 440.0
 @onready var selection_card: PanelContainer = $BottomPanel/Margin/Content/SelectionCard
 @onready var selection_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/SelectionLabel
 @onready var detail_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/DetailLabel
+@onready var quote_label: RichTextLabel = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/QuoteLabel
 @onready var hint_label: Label = $BottomPanel/Margin/Content/HintLabel
 @onready var transition_reason_label: Label = $BottomPanel/Margin/Content/TransitionReasonLabel
 @onready var telegraph_card: PanelContainer = $BottomPanel/Margin/Content/TelegraphCard
@@ -68,6 +70,14 @@ var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
 var _last_result_title: String = "Battle Result"
 var _last_result_body: String = ""
+var _namecall_choice_overlay: Control
+var _namecall_choice_panel: PanelContainer
+var _namecall_choice_prompt_label: Label
+var _namecall_choice_timer_bar: ProgressBar
+var _namecall_choice_confirm_button: Button
+var _namecall_choice_defer_button: Button
+var _namecall_choice_duration: float = 0.0
+var _namecall_choice_time_left: float = 0.0
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -95,11 +105,21 @@ func _ready() -> void:
     set_stage_title("Tutorial Skirmish")
     _clear_telegraph_surface()
     get_viewport().size_changed.connect(_update_responsive_layout)
+    _build_namecall_choice_overlay()
     _update_responsive_layout()
     _apply_runtime_button_icons()
     _apply_visual_theme()
     _refresh_action_button_emphasis()
     _refresh_inventory_dismiss_hint()
+    set_process(false)
+
+func _process(delta: float) -> void:
+    if _namecall_choice_overlay == null or not _namecall_choice_overlay.visible:
+        return
+    _namecall_choice_time_left = maxf(0.0, _namecall_choice_time_left - delta)
+    _update_namecall_choice_timer_bar()
+    if _namecall_choice_time_left <= 0.0:
+        select_namecall_choice("accept")
 
 func set_phase(phase_text: String) -> void:
     phase_label.text = "Phase: %s" % phase_text
@@ -121,7 +141,7 @@ func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     _update_telegraph_surface(reason)
     _emit_battle_cue_for_reason(reason)
 
-func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0) -> void:
+func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0, combat_quote: String = "") -> void:
     selection_card.visible = true
     var display_name: String = unit_name
     if oblivion_stack > 0:
@@ -137,11 +157,16 @@ func set_selection_summary(unit_name: String, hp_text: String, movement: int, at
     ]
     if not terrain_text.is_empty():
         detail_label.text += "  Tile:%s" % terrain_text
+    var normalized_quote := combat_quote.strip_edges()
+    quote_label.visible = not normalized_quote.is_empty()
+    quote_label.text = "[i]Combat Quote: \"%s\"[/i]" % normalized_quote
 
 func clear_selection() -> void:
     selection_card.visible = false
     selection_label.text = "No unit selected."
     detail_label.text = "Select a ready ally to inspect movement, attack range, and nearby objectives."
+    quote_label.visible = false
+    quote_label.text = ""
 
 func set_action_hint(hint_text: String) -> void:
     hint_label.text = hint_text
@@ -185,30 +210,164 @@ func _sync_party_list_container_compat(party_lines: Array[String]) -> void:
         row.text = line
         _party_list_container_compat.add_child(row)
 
+func _build_namecall_choice_overlay() -> void:
+    if _namecall_choice_overlay != null:
+        return
+    _namecall_choice_overlay = Control.new()
+    _namecall_choice_overlay.name = "NameCallChoiceOverlay"
+    _namecall_choice_overlay.visible = false
+    _namecall_choice_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+    _namecall_choice_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(_namecall_choice_overlay)
+
+    var center := CenterContainer.new()
+    center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _namecall_choice_overlay.add_child(center)
+
+    _namecall_choice_panel = PanelContainer.new()
+    _namecall_choice_panel.custom_minimum_size = Vector2(460.0, 0.0)
+    _namecall_choice_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+    center.add_child(_namecall_choice_panel)
+
+    var margin := MarginContainer.new()
+    margin.add_theme_constant_override("margin_left", 24)
+    margin.add_theme_constant_override("margin_top", 24)
+    margin.add_theme_constant_override("margin_right", 24)
+    margin.add_theme_constant_override("margin_bottom", 24)
+    _namecall_choice_panel.add_child(margin)
+
+    var stack := VBoxContainer.new()
+    stack.add_theme_constant_override("separation", 16)
+    margin.add_child(stack)
+
+    var eyebrow := Label.new()
+    eyebrow.text = "NAME CALL"
+    eyebrow.add_theme_font_size_override("font_size", 14)
+    stack.add_child(eyebrow)
+
+    _namecall_choice_prompt_label = Label.new()
+    _namecall_choice_prompt_label.text = "그 이름... 불러도 될까요?"
+    _namecall_choice_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _namecall_choice_prompt_label.add_theme_font_size_override("font_size", 24)
+    stack.add_child(_namecall_choice_prompt_label)
+
+    _namecall_choice_timer_bar = ProgressBar.new()
+    _namecall_choice_timer_bar.show_percentage = false
+    _namecall_choice_timer_bar.min_value = 0.0
+    _namecall_choice_timer_bar.max_value = 100.0
+    _namecall_choice_timer_bar.value = 100.0
+    _namecall_choice_timer_bar.custom_minimum_size = Vector2(0.0, 18.0)
+    stack.add_child(_namecall_choice_timer_bar)
+
+    var button_row := HBoxContainer.new()
+    button_row.add_theme_constant_override("separation", 12)
+    stack.add_child(button_row)
+
+    _namecall_choice_confirm_button = Button.new()
+    _namecall_choice_confirm_button.text = "응"
+    _namecall_choice_confirm_button.custom_minimum_size = Vector2(0.0, 58.0)
+    _namecall_choice_confirm_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _namecall_choice_confirm_button.pressed.connect(func() -> void: select_namecall_choice("accept"))
+    button_row.add_child(_namecall_choice_confirm_button)
+
+    _namecall_choice_defer_button = Button.new()
+    _namecall_choice_defer_button.text = "아직이다"
+    _namecall_choice_defer_button.custom_minimum_size = Vector2(0.0, 58.0)
+    _namecall_choice_defer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _namecall_choice_defer_button.pressed.connect(func() -> void: select_namecall_choice("defer"))
+    button_row.add_child(_namecall_choice_defer_button)
+
+func show_namecall_choice(prompt_text: String, duration: float = 3.0) -> void:
+    if _namecall_choice_overlay == null:
+        _build_namecall_choice_overlay()
+    _last_focus_owner = get_viewport().gui_get_focus_owner()
+    _namecall_choice_duration = maxf(duration, 0.1)
+    _namecall_choice_time_left = _namecall_choice_duration
+    if _namecall_choice_prompt_label != null:
+        _namecall_choice_prompt_label.text = prompt_text
+    _namecall_choice_overlay.show()
+    _sync_modal_state()
+    _update_namecall_choice_timer_bar()
+    set_process(true)
+    if _namecall_choice_confirm_button != null:
+        _namecall_choice_confirm_button.grab_focus()
+
+func hide_namecall_choice() -> void:
+    if _namecall_choice_overlay == null or not _namecall_choice_overlay.visible:
+        return
+    _namecall_choice_time_left = 0.0
+    _namecall_choice_duration = 0.0
+    _namecall_choice_overlay.hide()
+    set_process(false)
+    _sync_modal_state()
+    if not inventory_panel.visible:
+        if is_instance_valid(_last_focus_owner):
+            _last_focus_owner.grab_focus()
+        elif inventory_button != null:
+            inventory_button.grab_focus()
+    _last_focus_owner = null
+
+func select_namecall_choice(choice_id: String) -> void:
+    if _namecall_choice_overlay == null or not _namecall_choice_overlay.visible:
+        return
+    var normalized_choice := choice_id.strip_edges().to_lower()
+    if normalized_choice != "defer":
+        normalized_choice = "accept"
+    hide_namecall_choice()
+    ui_cue_requested.emit("ui_common_confirm_01" if normalized_choice == "accept" else "ui_common_cancel_01")
+    namecall_choice_selected.emit(normalized_choice)
+
+func get_namecall_choice_snapshot() -> Dictionary:
+    var progress_ratio: float = 0.0
+    if _namecall_choice_duration > 0.0:
+        progress_ratio = clampf(_namecall_choice_time_left / _namecall_choice_duration, 0.0, 1.0)
+    return {
+        "visible": _namecall_choice_overlay != null and _namecall_choice_overlay.visible,
+        "prompt": _namecall_choice_prompt_label.text if _namecall_choice_prompt_label != null else "",
+        "time_left": _namecall_choice_time_left,
+        "duration": _namecall_choice_duration,
+        "progress_ratio": progress_ratio,
+        "accept_label": _namecall_choice_confirm_button.text if _namecall_choice_confirm_button != null else "",
+        "defer_label": _namecall_choice_defer_button.text if _namecall_choice_defer_button != null else ""
+    }
+
+func _update_namecall_choice_timer_bar() -> void:
+    if _namecall_choice_timer_bar == null:
+        return
+    var progress_ratio: float = 0.0
+    if _namecall_choice_duration > 0.0:
+        progress_ratio = clampf(_namecall_choice_time_left / _namecall_choice_duration, 0.0, 1.0)
+    _namecall_choice_timer_bar.value = progress_ratio * 100.0
+
+func _sync_modal_state() -> void:
+    var has_modal := inventory_panel.visible or (_namecall_choice_overlay != null and _namecall_choice_overlay.visible)
+    overlay_scrim.visible = has_modal
+    menu_visibility_changed.emit(has_modal)
+
 func open_inventory_panel() -> void:
-    if inventory_panel.visible:
+    if inventory_panel.visible or (_namecall_choice_overlay != null and _namecall_choice_overlay.visible):
         return
 
     _last_focus_owner = get_viewport().gui_get_focus_owner()
-    overlay_scrim.show()
     inventory_panel.show()
+    _sync_modal_state()
     ui_cue_requested.emit("ui_inventory_open_01")
-    menu_visibility_changed.emit(true)
     close_inventory_button.grab_focus()
 
 func close_inventory_panel() -> void:
     if not inventory_panel.visible:
         return
 
-    overlay_scrim.hide()
     inventory_panel.hide()
+    _sync_modal_state()
     ui_cue_requested.emit("ui_inventory_close_01")
-    menu_visibility_changed.emit(false)
-    if is_instance_valid(_last_focus_owner):
+    if not (_namecall_choice_overlay != null and _namecall_choice_overlay.visible) and is_instance_valid(_last_focus_owner):
         _last_focus_owner.grab_focus()
-    else:
+    elif not (_namecall_choice_overlay != null and _namecall_choice_overlay.visible):
         inventory_button.grab_focus()
-    _last_focus_owner = null
+    if not (_namecall_choice_overlay != null and _namecall_choice_overlay.visible):
+        _last_focus_owner = null
 
 func is_menu_open() -> bool:
     return inventory_panel.visible
@@ -232,6 +391,8 @@ func set_battle_frame_metrics(board_origin: Vector2, board_size: Vector2) -> voi
     _apply_layout_for_viewport_size(get_viewport_rect().size)
 
 func dismiss_overlay_at_position(screen_position: Vector2) -> bool:
+    if _namecall_choice_overlay != null and _namecall_choice_overlay.visible:
+        return false
     if not inventory_panel.visible:
         return false
 
@@ -250,6 +411,8 @@ func get_input_blocking_rects() -> Array[Rect2]:
         rects.append(_get_global_rect_for(overlay_scrim))
     if inventory_panel.visible:
         rects.append(_get_global_rect_for(inventory_panel))
+    if _namecall_choice_overlay != null and _namecall_choice_overlay.visible:
+        rects.append(_get_global_rect_for(_namecall_choice_overlay))
     return rects
 
 func show_result(result_text: String) -> void:
@@ -293,6 +456,9 @@ func _on_result_screen_encyclopedia_requested() -> void:
     encyclopedia_requested.emit()
 
 func _unhandled_input(event: InputEvent) -> void:
+    if _namecall_choice_overlay != null and _namecall_choice_overlay.visible:
+        get_viewport().set_input_as_handled()
+        return
     if not inventory_panel.visible:
         return
 
@@ -387,6 +553,8 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
     for button in [inventory_button, cancel_button, wait_button, end_turn_button]:
         button.custom_minimum_size = Vector2(0.0, action_button_height)
     _refresh_inventory_dismiss_hint()
+    if _namecall_choice_panel != null:
+        _namecall_choice_panel.custom_minimum_size = Vector2(maxf(280.0, minf(460.0, viewport_size.x - 48.0)), 0.0)
 
     if _compact_layout:
         top_bar.anchor_left = 0.0
@@ -503,6 +671,37 @@ func _apply_visual_theme() -> void:
     )
     wait_button.add_theme_constant_override("outline_size", 1)
     end_turn_button.add_theme_constant_override("outline_size", 1)
+    if _namecall_choice_panel != null:
+        _namecall_choice_panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.09, 0.078, 0.106, 0.98), Color(0.835, 0.62, 0.341, 0.92), 24))
+    if _namecall_choice_prompt_label != null:
+        _namecall_choice_prompt_label.add_theme_color_override("font_color", Color(0.976, 0.957, 0.925, 1.0))
+    if _namecall_choice_timer_bar != null:
+        var timer_background := StyleBoxFlat.new()
+        timer_background.bg_color = Color(0.173, 0.188, 0.235, 0.92)
+        timer_background.set_corner_radius_all(10)
+        _namecall_choice_timer_bar.add_theme_stylebox_override("background", timer_background)
+        var timer_fill := StyleBoxFlat.new()
+        timer_fill.bg_color = Color(0.925, 0.541, 0.176, 0.98)
+        timer_fill.set_corner_radius_all(10)
+        _namecall_choice_timer_bar.add_theme_stylebox_override("fill", timer_fill)
+    if _namecall_choice_confirm_button != null:
+        _style_action_button(
+            _namecall_choice_confirm_button,
+            Color(0.765, 0.388, 0.122, 1.0),
+            Color(0.914, 0.49, 0.192, 1.0),
+            Color(1.0, 0.816, 0.596, 0.84),
+            16,
+            4
+        )
+    if _namecall_choice_defer_button != null:
+        _style_action_button(
+            _namecall_choice_defer_button,
+            Color(0.247, 0.267, 0.322, 1.0),
+            Color(0.329, 0.357, 0.431, 1.0),
+            Color(0.776, 0.816, 0.886, 0.42),
+            16,
+            2
+        )
 
 func _apply_runtime_button_icons() -> void:
     _assign_runtime_icon(inventory_button, "bag.png")

@@ -12,6 +12,7 @@ signal armor_cycle_requested(unit_id: StringName)
 signal accessory_cycle_requested(unit_id: StringName)
 signal choice_selected(option_id: String)
 signal ui_cue_requested(cue_id: String)
+signal memorial_finished
 
 const COMPACT_WIDTH_THRESHOLD := 760.0
 const COMPACT_PANEL_MARGIN := 16.0
@@ -77,6 +78,8 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var party_content: BoxContainer = $Panel/Margin/Content/BodyStack/PartySection/PartyContent
 @onready var party_roster_scroll: ScrollContainer = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/RosterScroll
 @onready var party_roster_buttons: VBoxContainer = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/RosterScroll/RosterButtons
+@onready var honor_seat_heading_label: Label = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard/Margin/HonorSeatStack/HonorSeatHeading
+@onready var honor_seat_list: RichTextLabel = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard/Margin/HonorSeatStack/HonorSeatList
 @onready var party_name_label: Label = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SelectedUnitLabel
 @onready var party_status_label: Label = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/StatusLabel
 @onready var party_stats_label: Label = $Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/StatsLabel
@@ -105,6 +108,14 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var save_button: Button = $Panel/Margin/Content/FooterRow/SaveButton
 @onready var encyclopedia_button: Button = $Panel/Margin/Content/FooterRow/EncyclopediaButton
 @onready var panel: PanelContainer = $Panel
+@onready var memorial_overlay: Control = $MemorialOverlay
+@onready var memorial_scrim: ColorRect = $MemorialOverlay/Scrim
+@onready var memorial_card: PanelContainer = $MemorialOverlay/MemorialCenter/MemorialCard
+@onready var memorial_name_label: Label = $MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/StoneLabel
+@onready var memorial_quote_label: RichTextLabel = $MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/EpitaphLabel
+@onready var memorial_timer_label: Label = $MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/TimerRow/TimerLabel
+@onready var memorial_timer_bar: ProgressBar = $MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/TimerBar
+@onready var memorial_skip_button: Button = $MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/SkipButton
 
 var _compact_layout: bool = false
 
@@ -113,6 +124,7 @@ var _current_recommendation: String = ""
 var _current_flow_text: String = ""
 var _party_entries: Array[String] = []
 var _party_details: Array[Dictionary] = []
+var _honor_entries: Array[String] = []
 var _inventory_entries: Array[String] = []
 var _memory_entries: Array[String] = []
 var _evidence_entries: Array[String] = []
@@ -136,6 +148,11 @@ var _choice_container: VBoxContainer
 var _choice_prompt_label: Label
 var _choice_option_buttons: Array[Button] = []
 var _choice_option_hint_labels: Array[Label] = []
+var _memorial_active: bool = false
+var _memorial_duration: float = 30.0
+var _memorial_remaining: float = 0.0
+var _memorial_quote: String = ""
+var _memorial_tween: Tween
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -150,9 +167,11 @@ func _ready() -> void:
     party_weapon_button.pressed.connect(_on_party_weapon_pressed)
     party_armor_button.pressed.connect(_on_party_armor_pressed)
     party_accessory_button.pressed.connect(_on_party_accessory_pressed)
+    memorial_skip_button.pressed.connect(_on_memorial_skip_pressed)
     get_viewport().size_changed.connect(_update_responsive_layout)
     _build_choice_panel()
     _update_responsive_layout()
+    _hide_memorial_scene(false)
     hide_panel()
 
 func show_state(mode: String, title_text: String, body_text: String, button_text: String = "Continue", payload: Dictionary = {}) -> void:
@@ -161,6 +180,7 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     _current_flow_text = String(payload.get("flow_label", _build_default_flow_label(mode)))
     _party_entries = _variant_to_string_array(payload.get("party_entries", []))
     _party_details = _variant_to_dictionary_array(payload.get("party_details", []))
+    _honor_entries = _variant_to_string_array(payload.get("honor_entries", []))
     _inventory_entries = _variant_to_string_array(payload.get("inventory_entries", []))
     _memory_entries = _variant_to_string_array(payload.get("memory_entries", []))
     _evidence_entries = _variant_to_string_array(payload.get("evidence_entries", []))
@@ -217,6 +237,7 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     _render_choice_panel()
 
     _rebuild_party_roster()
+    _render_honor_roll()
     _select_section(String(payload.get("active_section", SECTION_SUMMARY)))
     var selected_party_unit_id := String(payload.get("selected_party_unit_id", ""))
     if not selected_party_unit_id.is_empty() and _select_party_by_unit_id(selected_party_unit_id):
@@ -231,6 +252,7 @@ func hide_panel() -> void:
     _current_flow_text = ""
     _party_entries.clear()
     _party_details.clear()
+    _honor_entries.clear()
     _inventory_entries.clear()
     _memory_entries.clear()
     _evidence_entries.clear()
@@ -305,6 +327,9 @@ func hide_panel() -> void:
     letter_list.text = ""
     for child in party_roster_buttons.get_children():
         child.queue_free()
+    honor_seat_heading_label.text = "Seat of Honor"
+    honor_seat_list.text = ""
+    _hide_memorial_scene(false)
     _render_choice_panel()
     visible = false
 
@@ -319,6 +344,7 @@ func get_snapshot() -> Dictionary:
         "section_hint": section_hint_label.text,
         "party_entries": _party_entries.duplicate(),
         "party_details": _party_details.duplicate(true),
+        "honor_entries": _honor_entries.duplicate(),
         "inventory_entries": _inventory_entries.duplicate(),
         "memory_entries": _memory_entries.duplicate(),
         "evidence_entries": _evidence_entries.duplicate(),
@@ -338,8 +364,57 @@ func get_snapshot() -> Dictionary:
         "locked_party_unit_ids": _locked_party_unit_ids.duplicate(),
         "available_weapon_entries": _available_weapon_entries.duplicate(),
         "available_armor_entries": _available_armor_entries.duplicate(),
-        "available_accessory_entries": _available_accessory_entries.duplicate()
+        "available_accessory_entries": _available_accessory_entries.duplicate(),
+        "memorial_visible": _memorial_active,
+        "memorial_unit_name": memorial_name_label.text if memorial_name_label != null else "",
+        "memorial_quote": _memorial_quote,
+        "memorial_seconds_remaining": snappedf(_memorial_remaining, 0.1),
+        "memorial_progress": memorial_timer_bar.value if memorial_timer_bar != null else 0.0
     }
+
+func show_memorial_scene(payload: Dictionary) -> void:
+    _memorial_duration = max(1.0, float(payload.get("duration_seconds", 30.0)))
+    _memorial_remaining = _memorial_duration
+    _memorial_quote = String(payload.get("quote", "")).strip_edges()
+    memorial_name_label.text = "sacrifice: %s" % String(payload.get("unit_name", "The Fallen")).strip_edges()
+    memorial_quote_label.text = "[i]유언: %s[/i]" % _memorial_quote
+    memorial_timer_bar.max_value = _memorial_duration
+    memorial_timer_bar.value = _memorial_remaining
+    memorial_timer_label.text = "%.1fs" % _memorial_remaining
+    memorial_overlay.visible = true
+    memorial_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+    _memorial_active = true
+
+    if _memorial_tween != null:
+        _memorial_tween.kill()
+    memorial_scrim.modulate.a = 0.0
+    memorial_card.modulate.a = 0.0
+    memorial_name_label.modulate.a = 0.0
+    memorial_name_label.scale = Vector2(0.92, 0.92)
+    memorial_quote_label.modulate.a = 0.0
+    memorial_skip_button.disabled = false
+    _memorial_tween = create_tween()
+    _memorial_tween.set_parallel(true)
+    _memorial_tween.tween_property(memorial_scrim, "modulate:a", 1.0, 0.6)
+    _memorial_tween.tween_property(memorial_card, "modulate:a", 1.0, 0.6)
+    _memorial_tween.tween_property(memorial_name_label, "modulate:a", 1.0, 1.1)
+    _memorial_tween.tween_property(memorial_name_label, "scale", Vector2.ONE, 1.1)
+    _memorial_tween.chain().tween_property(memorial_quote_label, "modulate:a", 1.0, 1.4)
+
+func hide_memorial_scene() -> void:
+    _hide_memorial_scene(false)
+
+func skip_memorial_scene() -> void:
+    _complete_memorial_scene()
+
+func _process(delta: float) -> void:
+    if not _memorial_active:
+        return
+    _memorial_remaining = max(0.0, _memorial_remaining - delta)
+    memorial_timer_bar.value = _memorial_remaining
+    memorial_timer_label.text = "%.1fs" % _memorial_remaining
+    if _memorial_remaining <= 0.0:
+        _complete_memorial_scene()
 
 func get_layout_snapshot() -> Dictionary:
     return {
@@ -692,6 +767,10 @@ func _rebuild_party_roster() -> void:
         button.pressed.connect(func() -> void: _select_party_index(button_index))
         party_roster_buttons.add_child(button)
 
+func _render_honor_roll() -> void:
+    honor_seat_heading_label.text = "Seat of Honor (%d)" % _honor_entries.size()
+    honor_seat_list.text = _format_lines_for_panel(_honor_entries, "No honored names recorded yet.")
+
 func _select_party_index(index: int) -> void:
     if _party_details.is_empty():
         _selected_party_index = -1
@@ -864,6 +943,41 @@ func _get_selected_party_unit_id() -> String:
     if _selected_party_index < 0 or _selected_party_index >= _party_details.size():
         return ""
     return str(_party_details[_selected_party_index].get("unit_id", ""))
+
+func _on_memorial_skip_pressed() -> void:
+    _complete_memorial_scene()
+
+func _complete_memorial_scene() -> void:
+    if not _memorial_active:
+        return
+    _hide_memorial_scene(true)
+
+func _hide_memorial_scene(emit_finished: bool) -> void:
+    if _memorial_tween != null:
+        _memorial_tween.kill()
+        _memorial_tween = null
+    _memorial_active = false
+    _memorial_remaining = 0.0
+    _memorial_quote = ""
+    if memorial_timer_bar != null:
+        memorial_timer_bar.value = 0.0
+    if memorial_timer_label != null:
+        memorial_timer_label.text = "0.0s"
+    if memorial_quote_label != null:
+        memorial_quote_label.text = ""
+        memorial_quote_label.modulate = Color(1, 1, 1, 0)
+    if memorial_name_label != null:
+        memorial_name_label.text = ""
+        memorial_name_label.modulate = Color(1, 1, 1, 0)
+        memorial_name_label.scale = Vector2.ONE
+    if memorial_card != null:
+        memorial_card.modulate = Color(1, 1, 1, 0)
+    if memorial_scrim != null:
+        memorial_scrim.modulate = Color(1, 1, 1, 0)
+    if memorial_overlay != null:
+        memorial_overlay.visible = false
+    if emit_finished:
+        memorial_finished.emit()
 
 func _format_slot_item_text(slot_kind: String, slot_value: String) -> String:
     var normalized_value := slot_value.strip_edges()

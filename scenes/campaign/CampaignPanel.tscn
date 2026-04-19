@@ -260,6 +260,32 @@ size_flags_vertical = 3
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
+[node name="HonorSeatCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HonorSeatStack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HonorSeatHeading" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard/Margin/HonorSeatStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Seat of Honor"
+
+[node name="HonorSeatList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/RosterColumn/HonorSeatCard/Margin/HonorSeatStack"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
 [node name="DetailCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -509,3 +535,94 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Continue"
+
+[node name="MemorialOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="Scrim" type="ColorRect" parent="MemorialOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.0352941, 0.0392157, 0.054902, 0.88)
+
+[node name="MemorialCenter" type="CenterContainer" parent="MemorialOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="MemorialCard" type="PanelContainer" parent="MemorialOverlay/MemorialCenter"]
+custom_minimum_size = Vector2(520, 360)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="MemorialOverlay/MemorialCenter/MemorialCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="MemorialStack" type="VBoxContainer" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HeadingLabel" type="Label" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "30초 묵념"
+
+[node name="StoneLabel" type="Label" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+modulate = Color(0.768627, 0.772549, 0.788235, 1)
+autowrap_mode = 2
+text = "sacrifice: The Fallen"
+
+[node name="EpitaphLabel" type="RichTextLabel" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="TimerRow" type="HBoxContainer" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TimerHeading" type="Label" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/TimerRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "묵념"
+
+[node name="TimerLabel" type="Label" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack/TimerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 16
+text = "30.0s"
+
+[node name="TimerBar" type="ProgressBar" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 30.0
+value = 30.0
+show_percentage = false
+
+[node name="SkipButton" type="Button" parent="MemorialOverlay/MemorialCenter/MemorialCard/Margin/MemorialStack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "계속 →"

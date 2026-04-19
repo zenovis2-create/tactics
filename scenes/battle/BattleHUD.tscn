@@ -127,6 +127,13 @@ theme_override_font_sizes/font_size = 9
 autowrap_mode = 2
 text = "Select a ready ally to inspect movement, attack range, and nearby objectives."
 
+[node name="QuoteLabel" type="RichTextLabel" parent="BottomPanel/Margin/Content/SelectionCard/Padding/Stack"]
+visible = false
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
 [node name="HintLabel" type="Label" parent="BottomPanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8

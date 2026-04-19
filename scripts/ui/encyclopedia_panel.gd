@@ -118,8 +118,9 @@ func get_snapshot() -> Dictionary:
 		"codex_detail": codex_detail_label.text,
 		"support_history_text": _support_history_label.text if _support_history_label != null else "",
 		"timeline_text": timeline_label.text,
-		"memorial_count": min(3, _progression_data.epitaphs.size()) if _progression_data != null else 0,
-		"atlas_text": atlas_label.text
+		"memorial_count": min(3, _progression_data.get_honor_roll().size()) if _progression_data != null else 0,
+		"atlas_text": atlas_label.text,
+		"atlas_memorial_marker": _build_atlas_memorial_marker_text()
 	}
 
 func _rebuild_codex() -> void:
@@ -272,13 +273,15 @@ func _rebuild_timeline() -> void:
 
 func _rebuild_memorial() -> void:
 	_clear_children(memorial_cards)
-	if _progression_data == null or _progression_data.epitaphs.is_empty():
+	if _progression_data == null or _progression_data.get_honor_roll().is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "No sacrifices have been etched into the memorial."
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		memorial_cards.add_child(empty_label)
 		return
-	for index in range(min(3, _progression_data.epitaphs.size())):
+	var honor_roll := _progression_data.get_honor_roll()
+	for index in range(min(3, honor_roll.size())):
+		var record := honor_roll[index]
 		var card := PanelContainer.new()
 		card.custom_minimum_size = Vector2(200.0, 120.0)
 		var margin := MarginContainer.new()
@@ -288,7 +291,10 @@ func _rebuild_memorial() -> void:
 		margin.add_theme_constant_override("margin_bottom", 10)
 		var label := Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.text = _progression_data.epitaphs[index]
+		label.text = "%s\n%s" % [
+			String(record.get("unit_name", "The Fallen")),
+			String(record.get("epitaph", ""))
+		]
 		margin.add_child(label)
 		card.add_child(margin)
 		memorial_cards.add_child(card)
@@ -300,13 +306,35 @@ func _rebuild_atlas() -> void:
 	var chapters := _get_completed_chapters()
 	if chapters.is_empty() and _active_chapter_id != StringName():
 		chapters.append(String(_active_chapter_id))
-	if chapters.is_empty():
+	var marker_text := _build_atlas_memorial_marker_text()
+	if chapters.is_empty() and marker_text.is_empty():
 		atlas_label.text = "No route has been charted yet."
 		return
 	var locations: Array[String] = []
 	for chapter_id in chapters:
 		locations.append(_get_location_name(chapter_id))
-	atlas_label.text = "[b]Visited Route[/b]\n%s" % " -> ".join(locations)
+	var lines: Array[String] = []
+	if not locations.is_empty():
+		lines.append("[b]Visited Route[/b]")
+		lines.append(" -> ".join(locations))
+	if not marker_text.is_empty():
+		if not lines.is_empty():
+			lines.append("")
+		lines.append("[b]Memorial Marker[/b]")
+		lines.append(marker_text)
+	atlas_label.text = "\n".join(lines)
+
+func _build_atlas_memorial_marker_text() -> String:
+	if _progression_data == null:
+		return ""
+	var marker := _progression_data.get_first_memorial_marker()
+	if marker.is_empty():
+		return ""
+	var chapter_id := String(marker.get("chapter_id", "")).strip_edges()
+	if chapter_id.is_empty():
+		chapter_id = _derive_chapter_from_stage(String(marker.get("stage_id", "")).strip_edges())
+	var location_name := _get_location_name(chapter_id) if not chapter_id.is_empty() else String(marker.get("stage_id", "Memorial Site"))
+	return "✦ %s — %s" % [location_name, String(marker.get("unit_name", "The Fallen"))]
 
 func _build_codex_card_label(entry: Dictionary) -> String:
 	var support_suffix := ""

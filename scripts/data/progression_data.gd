@@ -54,7 +54,7 @@ extends Resource
 
 @export var recovering_units: Array[String] = []
 
-@export var sacrificed_units: Array[String] = []
+@export var sacrificed_units: Array = []
 
 @export var recover_chapter_count: int = 0
 
@@ -78,6 +78,7 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var support_history: Array[Dictionary] = []
 @export var available_support_conversations: Array[String] = []
 @export var epitaphs: Array[String] = []
+@export var memorial_records: Array[Dictionary] = []
 @export var enoch_wounded: bool = false
 @export var ledger_count: int = 0
 @export var mira_trust_level: int = 0
@@ -87,6 +88,7 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var melkion_awareness: bool = false
 @export var ch10_attack_bonus: int = 0
 @export var ch10_defense_bonus: int = 0
+@export var namecall_rejected_count: int = 0
 
 func earn_badge(badge_id: String, amount: int) -> bool:
 	var normalized: String = badge_id.strip_edges()
@@ -131,6 +133,11 @@ func reset_for_new_campaign() -> void:
 	choices_made.clear()
 	support_history.clear()
 	available_support_conversations.clear()
+	recovering_units.clear()
+	sacrificed_units.clear()
+	recover_chapter_count = 0
+	epitaphs.clear()
+	memorial_records.clear()
 	enoch_wounded = false
 	ledger_count = 0
 	mira_trust_level = 0
@@ -140,6 +147,7 @@ func reset_for_new_campaign() -> void:
 	melkion_awareness = false
 	ch10_attack_bonus = 0
 	ch10_defense_bonus = 0
+	namecall_rejected_count = 0
 	free_name_call = has_ng_plus_purchase("divine_blessing")
 
 func has_fragment(fragment_id: StringName) -> bool:
@@ -293,6 +301,159 @@ func add_epitaph(epitaph_text: String) -> void:
 		return
 	epitaphs.append(normalized)
 
+func set_unit_quote(unit_id: String, quote_text: String) -> void:
+	var key := unit_id.strip_edges()
+	var normalized_quote := quote_text.strip_edges()
+	if key.is_empty():
+		return
+	var entry: Dictionary = encyclopedia_entries.get(key, {}).duplicate(true)
+	if entry.is_empty():
+		entry = {
+			"name": key.capitalize(),
+			"type": "Ally",
+			"chapter_introduced": 1,
+			"stats": {},
+			"support_rank": 0
+		}
+	entry["quote"] = normalized_quote
+	encyclopedia_entries[key] = entry
+
+func get_unit_quote(unit_id: String) -> String:
+	var key := unit_id.strip_edges()
+	if key.is_empty():
+		return ""
+	return String(encyclopedia_entries.get(key, {}).get("quote", "")).strip_edges()
+
+func add_memorial_record(unit_id: String, unit_name: String, epitaph_text: String, chapter_id: String = "", stage_id: String = "") -> Dictionary:
+	var normalized_unit_id := unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	var normalized_name := unit_name.strip_edges()
+	if normalized_name.is_empty():
+		normalized_name = normalized_unit_id.capitalize()
+	var normalized_epitaph := epitaph_text.strip_edges()
+	var record := {
+		"unit_id": normalized_unit_id,
+		"unit_name": normalized_name,
+		"epitaph": normalized_epitaph,
+		"chapter_id": chapter_id.strip_edges(),
+		"stage_id": stage_id.strip_edges(),
+		"timestamp": int(Time.get_unix_time_from_system())
+	}
+	for index in range(memorial_records.size()):
+		if String(memorial_records[index].get("unit_id", "")) == normalized_unit_id:
+			memorial_records[index] = record
+			if not normalized_epitaph.is_empty():
+				add_epitaph("%s — %s" % [normalized_name, normalized_epitaph])
+			return record
+	memorial_records.append(record)
+	if not normalized_epitaph.is_empty():
+		add_epitaph("%s — %s" % [normalized_name, normalized_epitaph])
+	return record
+
+func get_memorial_record(unit_id: String) -> Dictionary:
+	var normalized_unit_id := unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for record in memorial_records:
+		if String(record.get("unit_id", "")) == normalized_unit_id:
+			return (record as Dictionary).duplicate(true)
+	return {}
+
+func get_honor_roll() -> Array[Dictionary]:
+	var honor_roll: Array[Dictionary] = []
+	for record in memorial_records:
+		honor_roll.append((record as Dictionary).duplicate(true))
+	honor_roll.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("timestamp", 0)) < int(b.get("timestamp", 0))
+	)
+	return honor_roll
+
+func get_first_memorial_marker() -> Dictionary:
+	var honor_roll := get_honor_roll()
+	if honor_roll.is_empty():
+		return {}
+	return honor_roll[0].duplicate(true)
+
+func has_sacrificed_unit(unit_id: String) -> bool:
+	var normalized := unit_id.strip_edges()
+	if normalized.is_empty():
+		return false
+	for entry_variant in sacrificed_units:
+		if typeof(entry_variant) == TYPE_DICTIONARY:
+			var entry := entry_variant as Dictionary
+			if String(entry.get("unit_id", "")).strip_edges() == normalized:
+				return true
+			if String(entry.get("name", "")).strip_edges() == normalized:
+				return true
+		elif String(entry_variant).strip_edges() == normalized:
+			return true
+	return false
+
+func add_sacrificed_unit(unit_id: String, unit_name: String = "", epitaph_text: String = "") -> bool:
+	var normalized_id := unit_id.strip_edges()
+	if normalized_id.is_empty() or has_sacrificed_unit(normalized_id):
+		return false
+	var resolved_name := unit_name.strip_edges()
+	if resolved_name.is_empty():
+		resolved_name = _humanize_sacrifice_name(normalized_id)
+	sacrificed_units.append({
+		"unit_id": normalized_id,
+		"name": resolved_name,
+		"epitaph": _normalize_epitaph_text(epitaph_text, resolved_name)
+	})
+	return true
+
+func get_sacrifice_records() -> Array[Dictionary]:
+	var records: Array[Dictionary] = []
+	for index in range(sacrificed_units.size()):
+		var raw_entry: Variant = sacrificed_units[index]
+		var record := {
+			"unit_id": "",
+			"name": "",
+			"epitaph": ""
+		}
+		if typeof(raw_entry) == TYPE_DICTIONARY:
+			var entry := raw_entry as Dictionary
+			record["unit_id"] = String(entry.get("unit_id", "")).strip_edges()
+			record["name"] = String(entry.get("name", "")).strip_edges()
+			record["epitaph"] = String(entry.get("epitaph", "")).strip_edges()
+		else:
+			record["unit_id"] = String(raw_entry).strip_edges()
+		if String(record.get("name", "")).is_empty():
+			record["name"] = _humanize_sacrifice_name(String(record.get("unit_id", "")))
+		if String(record.get("epitaph", "")).is_empty() and index < epitaphs.size():
+			record["epitaph"] = _normalize_epitaph_text(String(epitaphs[index]), String(record.get("name", "")))
+		records.append(record)
+	return records
+
+func _normalize_epitaph_text(raw_epitaph: String, unit_name: String) -> String:
+	var normalized := raw_epitaph.strip_edges()
+	if normalized.is_empty():
+		return ""
+	var resolved_name := unit_name.strip_edges()
+	if not resolved_name.is_empty():
+		var long_prefix := "%s — " % resolved_name
+		var short_prefix := "%s - " % resolved_name
+		if normalized.begins_with(long_prefix):
+			return normalized.trim_prefix(long_prefix).strip_edges()
+		if normalized.begins_with(short_prefix):
+			return normalized.trim_prefix(short_prefix).strip_edges()
+	return normalized
+
+func _humanize_sacrifice_name(raw_value: String) -> String:
+	var normalized := raw_value.strip_edges()
+	if normalized.begins_with("ally_"):
+		normalized = normalized.trim_prefix("ally_")
+	elif normalized.begins_with("enemy_"):
+		normalized = normalized.trim_prefix("enemy_")
+	if normalized.is_empty():
+		return "Unknown"
+	var parts := normalized.split("_", false)
+	for index in range(parts.size()):
+		parts[index] = String(parts[index]).capitalize()
+	return " ".join(parts)
+
 func get_unit_progress_snapshot() -> Dictionary:
 	var snapshot: Dictionary = {}
 	var keys: Array[String] = []
@@ -321,6 +482,7 @@ func to_debug_dict() -> Dictionary:
 		"support_history": support_history.duplicate(true),
 		"available_support_conversations": available_support_conversations.duplicate(),
 		"epitaphs": epitaphs.duplicate(),
+		"memorial_records": memorial_records.duplicate(true),
 		"enoch_wounded": enoch_wounded,
 		"ledger_count": ledger_count,
 		"mira_trust_level": mira_trust_level,
@@ -330,6 +492,7 @@ func to_debug_dict() -> Dictionary:
 		"melkion_awareness": melkion_awareness,
 		"ch10_attack_bonus": ch10_attack_bonus,
 		"ch10_defense_bonus": ch10_defense_bonus,
+		"namecall_rejected_count": namecall_rejected_count,
 		"badges_of_heroism": badges_of_heroism,
 		"earned_badges": earned_badges.duplicate(),
 		"ng_plus_purchases": ng_plus_purchases.duplicate(),
@@ -346,6 +509,6 @@ func to_debug_dict() -> Dictionary:
 		"mira_unlocked": mira_unlocked,
 		"melkion_unlocked": melkion_unlocked,
 		"recovering_units": recovering_units.duplicate(),
-		"sacrificed_units": sacrificed_units.duplicate(),
+		"sacrificed_units": get_sacrifice_records(),
 		"recover_chapter_count": recover_chapter_count
 	}

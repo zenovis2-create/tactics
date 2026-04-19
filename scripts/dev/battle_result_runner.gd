@@ -36,7 +36,8 @@ func _run() -> void:
 		"fragment_id",
 		"command_unlocked",
 		"burden_delta",
-		"trust_delta"
+		"trust_delta",
+		"badge_narrative"
 	]:
 		if not summary.has(key):
 			return _fail("Result summary missing key: %s" % key)

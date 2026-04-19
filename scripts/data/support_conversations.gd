@@ -27,6 +27,17 @@ const NAME_CALL_LINES := {
 	}
 }
 
+const NAME_CALL_CHOICE_LINES := {
+	"ally_serin": {
+		"accept": "당신이 내 이름... 처음 불러준 사람입니다.",
+		"defer": "당신과 싸울 수 있어서 다행입니다,长官."
+	},
+	"default": {
+		"accept": "%s... you were the first to call my name.",
+		"defer": "I am glad I can fight beside you, Commander."
+	}
+}
+
 static func normalize_pair_id(pair_id: String) -> String:
 	var normalized := pair_id.strip_edges()
 	if normalized.is_empty():
@@ -68,6 +79,19 @@ static func get_name_call_line(unit_id: String, support_rank: int) -> String:
 	elif support_rank >= 3:
 		rank_key = 3
 	var template := String(line_set.get(rank_key, line_set.get("generic", "%s, with me.")))
+	var ally_name := get_unit_display_name(normalized_unit)
+	if template.contains("%s"):
+		return template % ally_name
+	return template
+
+static func get_name_call_choice_line(unit_id: String, support_rank: int, accepted: bool) -> String:
+	var normalized_unit := unit_id.strip_edges()
+	if accepted and support_rank < 6:
+		return get_name_call_line(normalized_unit, support_rank)
+	var line_set: Dictionary = NAME_CALL_CHOICE_LINES.get(normalized_unit, NAME_CALL_CHOICE_LINES["default"])
+	var template := String(line_set.get("accept" if accepted else "defer", "")).strip_edges()
+	if template.is_empty():
+		return get_name_call_line(normalized_unit, support_rank)
 	var ally_name := get_unit_display_name(normalized_unit)
 	if template.contains("%s"):
 		return template % ally_name
