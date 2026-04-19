@@ -2,6 +2,7 @@ class_name BattleHUD
 extends Control
 
 const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
+const CommanderProfile = preload("res://scripts/battle/commander_profile.gd")
 const TelegraphTextureLibrary = preload("res://scripts/battle/telegraph_texture_library.gd")
 
 signal wait_requested
@@ -33,15 +34,19 @@ const MEMORIAL_MARKER_ICONS := {
     "medal": "🏅",
     "candle": "🕯️"
 }
+const COMMANDER_FLAW_BADGE_TEXT := "완고"
+const COMMANDER_FLAW_WARNING_TEXT := "당신의 指官官 결함이 드러난다!"
 
 @onready var top_bar: PanelContainer = $TopBar
 @onready var bottom_panel: PanelContainer = $BottomPanel
+@onready var meta_row: HBoxContainer = $TopBar/Margin/TopRow/MetaRow
 @onready var round_label: Label = $TopBar/Margin/TopRow/MetaRow/RoundLabel
 @onready var phase_label: Label = $TopBar/Margin/TopRow/MetaRow/PhaseLabel
 @onready var objective_label: Label = $TopBar/Margin/TopRow/ObjectiveLabel
 @onready var stage_chip: PanelContainer = $TopBar/Margin/TopRow/StageChip
 @onready var stage_label: Label = $TopBar/Margin/TopRow/StageChip/Padding/StageLabel
 @onready var selection_card: PanelContainer = $BottomPanel/Margin/Content/SelectionCard
+@onready var selection_stack: VBoxContainer = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack
 @onready var selection_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/SelectionLabel
 @onready var detail_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/DetailLabel
 @onready var quote_label: RichTextLabel = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/QuoteLabel
@@ -94,6 +99,14 @@ var _namecall_choice_confirm_button: Button
 var _namecall_choice_defer_button: Button
 var _namecall_choice_duration: float = 0.0
 var _namecall_choice_time_left: float = 0.0
+var _commander_flaw_detector: Node
+var _commander_flaw_chip: PanelContainer
+var _commander_flaw_chip_label: Label
+var _commander_flaw_selection_row: HBoxContainer
+var _commander_flaw_badge: PanelContainer
+var _commander_flaw_badge_label: Label
+var _commander_flaw_warning_label: Label
+var _commander_flaw_warning_tween: Tween
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -124,11 +137,14 @@ func _ready() -> void:
     _build_flood_margin_overlay()
     _build_stage_memorial_overlay()
     _build_namecall_choice_overlay()
+    _build_commander_flaw_ui()
+    _connect_commander_flaw_detector()
     _update_responsive_layout()
     _apply_runtime_button_icons()
     _apply_visual_theme()
     _refresh_action_button_emphasis()
     _refresh_inventory_dismiss_hint()
+    _update_commander_flaws()
     set_process(false)
 
 func _process(delta: float) -> void:
@@ -184,6 +200,7 @@ func set_selection_summary(unit_name: String, hp_text: String, movement: int, at
     var normalized_quote := combat_quote.strip_edges()
     quote_label.visible = not normalized_quote.is_empty()
     quote_label.text = "[i]Combat Quote: \"%s\"[/i]" % normalized_quote
+    _update_commander_flaws()
 
 func clear_selection() -> void:
     selection_card.visible = false
@@ -191,6 +208,7 @@ func clear_selection() -> void:
     detail_label.text = "Select a ready ally to inspect movement, attack range, and nearby objectives."
     quote_label.visible = false
     quote_label.text = ""
+    _update_commander_flaws()
 
 func set_action_hint(hint_text: String) -> void:
     hint_label.text = hint_text
@@ -233,6 +251,121 @@ func _sync_party_list_container_compat(party_lines: Array[String]) -> void:
         var row := Label.new()
         row.text = line
         _party_list_container_compat.add_child(row)
+
+func _build_commander_flaw_ui() -> void:
+    if _commander_flaw_chip != null:
+        return
+
+    _commander_flaw_chip = PanelContainer.new()
+    _commander_flaw_chip.name = "CommanderFlawChip"
+    _commander_flaw_chip.visible = false
+    meta_row.add_child(_commander_flaw_chip)
+
+    var chip_padding := MarginContainer.new()
+    chip_padding.add_theme_constant_override("margin_left", 8)
+    chip_padding.add_theme_constant_override("margin_top", 2)
+    chip_padding.add_theme_constant_override("margin_right", 8)
+    chip_padding.add_theme_constant_override("margin_bottom", 2)
+    _commander_flaw_chip.add_child(chip_padding)
+
+    _commander_flaw_chip_label = Label.new()
+    _commander_flaw_chip_label.text = COMMANDER_FLAW_BADGE_TEXT
+    _commander_flaw_chip_label.add_theme_font_size_override("font_size", 10)
+    chip_padding.add_child(_commander_flaw_chip_label)
+
+    var selection_index := selection_label.get_index()
+    _commander_flaw_selection_row = HBoxContainer.new()
+    _commander_flaw_selection_row.name = "CommanderFlawSelectionRow"
+    _commander_flaw_selection_row.add_theme_constant_override("separation", 6)
+    selection_stack.add_child(_commander_flaw_selection_row)
+    selection_stack.move_child(_commander_flaw_selection_row, selection_index)
+    selection_stack.remove_child(selection_label)
+    _commander_flaw_selection_row.add_child(selection_label)
+    selection_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+    _commander_flaw_badge = PanelContainer.new()
+    _commander_flaw_badge.name = "CommanderFlawBadge"
+    _commander_flaw_badge.visible = false
+    _commander_flaw_selection_row.add_child(_commander_flaw_badge)
+
+    var badge_padding := MarginContainer.new()
+    badge_padding.add_theme_constant_override("margin_left", 6)
+    badge_padding.add_theme_constant_override("margin_top", 1)
+    badge_padding.add_theme_constant_override("margin_right", 6)
+    badge_padding.add_theme_constant_override("margin_bottom", 1)
+    _commander_flaw_badge.add_child(badge_padding)
+
+    _commander_flaw_badge_label = Label.new()
+    _commander_flaw_badge_label.text = COMMANDER_FLAW_BADGE_TEXT
+    _commander_flaw_badge_label.add_theme_font_size_override("font_size", 10)
+    badge_padding.add_child(_commander_flaw_badge_label)
+
+    _commander_flaw_warning_label = Label.new()
+    _commander_flaw_warning_label.name = "CommanderFlawWarningLabel"
+    _commander_flaw_warning_label.visible = false
+    _commander_flaw_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    _commander_flaw_warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _commander_flaw_warning_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+    var content: VBoxContainer = $BottomPanel/Margin/Content
+    content.add_child(_commander_flaw_warning_label)
+    content.move_child(_commander_flaw_warning_label, selection_card.get_index() + 1)
+
+func _connect_commander_flaw_detector() -> void:
+    _commander_flaw_detector = get_node_or_null("/root/FlawDetector")
+    if _commander_flaw_detector == null:
+        return
+    var profile_changed_callable := Callable(self, "_on_commander_flaw_profile_changed")
+    if _commander_flaw_detector.has_signal("profile_changed") and not _commander_flaw_detector.is_connected("profile_changed", profile_changed_callable):
+        _commander_flaw_detector.connect("profile_changed", profile_changed_callable)
+    var warning_callable := Callable(self, "_on_commander_flaw_warning_requested")
+    if _commander_flaw_detector.has_signal("flaw_warning_requested") and not _commander_flaw_detector.is_connected("flaw_warning_requested", warning_callable):
+        _commander_flaw_detector.connect("flaw_warning_requested", warning_callable)
+
+func _on_commander_flaw_profile_changed(_profile) -> void:
+    _update_commander_flaws()
+
+func _on_commander_flaw_warning_requested(message: String, _flaw_type: int) -> void:
+    _flash_commander_flaw_warning(message)
+
+func _update_commander_flaws() -> void:
+    if _commander_flaw_chip == null or _commander_flaw_badge == null:
+        return
+    var is_active := false
+    var tooltip := ""
+    if _commander_flaw_detector == null:
+        _commander_flaw_detector = get_node_or_null("/root/FlawDetector")
+    if _commander_flaw_detector != null and _commander_flaw_detector.has_method("has_active_flaw"):
+        is_active = bool(_commander_flaw_detector.call("has_active_flaw"))
+        var profile: CommanderProfile = _commander_flaw_detector.get("current_profile") as CommanderProfile
+        if profile != null:
+            var profile_description: String = profile.flaw_description
+            var label_text: String = String(CommanderProfile.get_flaw_name(profile.flaw_type))
+            if _commander_flaw_detector.has_method("get_active_flaw_label"):
+                label_text = String(_commander_flaw_detector.call("get_active_flaw_label"))
+            tooltip = "%s\n%s" % [String(label_text), profile_description] if not profile_description.is_empty() else String(label_text)
+    _commander_flaw_chip.visible = is_active
+    _commander_flaw_badge.visible = is_active and selection_card.visible
+    _commander_flaw_chip.tooltip_text = tooltip
+    _commander_flaw_badge.tooltip_text = tooltip
+    if not is_active and _commander_flaw_warning_label != null and not _commander_flaw_warning_label.visible:
+        _commander_flaw_warning_label.text = ""
+
+func _flash_commander_flaw_warning(message: String) -> void:
+    if _commander_flaw_warning_label == null:
+        return
+    if _commander_flaw_warning_tween != null:
+        _commander_flaw_warning_tween.kill()
+    _commander_flaw_warning_label.text = message if not message.strip_edges().is_empty() else COMMANDER_FLAW_WARNING_TEXT
+    _commander_flaw_warning_label.visible = true
+    _commander_flaw_warning_label.modulate = Color(1.0, 0.925, 0.741, 0.0)
+    _commander_flaw_warning_tween = create_tween()
+    _commander_flaw_warning_tween.tween_property(_commander_flaw_warning_label, "modulate:a", 1.0, 0.15)
+    _commander_flaw_warning_tween.tween_interval(1.05)
+    _commander_flaw_warning_tween.tween_property(_commander_flaw_warning_label, "modulate:a", 0.0, 0.35)
+    _commander_flaw_warning_tween.finished.connect(func() -> void:
+        if _commander_flaw_warning_label != null:
+            _commander_flaw_warning_label.visible = false
+    )
 
 func _build_namecall_choice_overlay() -> void:
     if _namecall_choice_overlay != null:
@@ -735,9 +868,21 @@ func _apply_visual_theme() -> void:
     var selection_style := _make_panel_style(Color(0.102, 0.11, 0.137, 0.95), Color(0.365, 0.451, 0.608, 0.85), 18)
     ($BottomPanel/Margin/Content/SelectionCard as PanelContainer).add_theme_stylebox_override("panel", selection_style)
     stage_chip.add_theme_stylebox_override("panel", _make_panel_style(Color(0.102, 0.11, 0.153, 0.9), Color(0.482, 0.596, 0.761, 0.85), 14))
+    if _commander_flaw_chip != null:
+        _commander_flaw_chip.add_theme_stylebox_override("panel", _make_panel_style(Color(0.235, 0.118, 0.114, 0.92), Color(0.925, 0.655, 0.298, 0.94), 14))
+    if _commander_flaw_badge != null:
+        _commander_flaw_badge.add_theme_stylebox_override("panel", _make_panel_style(Color(0.251, 0.129, 0.118, 0.94), Color(0.949, 0.733, 0.333, 0.94), 12))
 
     for label in [round_label, phase_label, objective_label, selection_label, detail_label, hint_label, transition_reason_label, telegraph_label, telegraph_detail_label]:
         label.add_theme_color_override("font_color", Color(0.949, 0.965, 0.984, 1.0))
+
+    if _commander_flaw_chip_label != null:
+        _commander_flaw_chip_label.add_theme_color_override("font_color", Color(1.0, 0.941, 0.816, 1.0))
+    if _commander_flaw_badge_label != null:
+        _commander_flaw_badge_label.add_theme_color_override("font_color", Color(1.0, 0.949, 0.847, 1.0))
+    if _commander_flaw_warning_label != null:
+        _commander_flaw_warning_label.add_theme_color_override("font_color", Color(1.0, 0.874, 0.639, 1.0))
+        _commander_flaw_warning_label.add_theme_font_size_override("font_size", 11)
 
     stage_label.add_theme_color_override("font_color", Color(0.858824, 0.905882, 0.964706, 1.0))
     objective_label.add_theme_color_override("font_color", Color(0.784, 0.843, 0.918, 1.0))

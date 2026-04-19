@@ -23,6 +23,10 @@ config/icon="res://icon.svg"
 
 Ashes="*res://scripts/battle/ashes_collection.gd"
 Spotlight="*res://scripts/battle/spotlight_manager.gd"
+Chronicle="*res://scripts/battle/chronicle_generator.gd"
+EnemyView="*res://scripts/battle/enemy_perspective_manager.gd"
+Heirloom="*res://scripts/battle/heirloom_service.gd"
+FlawDetector="*res://scripts/battle/tactical_flaw_detector.gd"
 
 [display]
 

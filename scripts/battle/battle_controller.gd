@@ -16,6 +16,7 @@ const PathService = preload("res://scripts/battle/path_service.gd")
 const RangeService = preload("res://scripts/battle/range_service.gd")
 const CombatService = preload("res://scripts/battle/combat_service.gd")
 const AIService = preload("res://scripts/battle/ai_service.gd")
+const EnemyCommander = preload("res://scripts/battle/enemy_commander.gd")
 const InputController = preload("res://scripts/battle/input_controller.gd")
 const GridCursor = preload("res://scripts/battle/grid_cursor.gd")
 const BattleHUD = preload("res://scripts/battle/battle_hud.gd")
@@ -33,6 +34,7 @@ const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BOND_SERVICE_PATH := "res://scripts/battle/bond_service.gd"
 const BattleControllerBondDeath = preload("res://scripts/battle/battle_controller_bond_death.gd")
 const BattleResultScreenScript = preload("res://scripts/battle/battle_result_screen.gd")
+const ChronicleGenerator = preload("res://scripts/battle/chronicle_generator.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 const DOWNPOUR_WEATHER_IDS := {
@@ -69,6 +71,8 @@ const SUPPORT_BOND_RANK_B: int = 4
 const MAX_BOND_LEVEL: int = 5
 const MAX_OBLIVION_STACK: int = 3
 const CARDINAL_DIRECTIONS := [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]
+const MIRROR_LEONIKA_UNIT_ID: StringName = &"enemy_saria"
+const MIRROR_LEONIKA_DIALOGUE := "당신이 나였다면 어떻게 했을까?"
 
 const CH01_STAGE_MEMORY_LOG: Dictionary = {
     &"CH01_05": [
@@ -225,6 +229,13 @@ var flood_zone_positions: Array[Vector2i] = []
 var flood_margin_positions: Array[Vector2i] = []
 var _flood_expansion_turns: int = 0
 var last_spotlight_effect: Dictionary = {}
+var _chronicle_enemy_opening_count: int = 0
+var _chronicle_ally_opening_count: int = 0
+var _chronicle_enemy_defeats: Array[String] = []
+var _chronicle_allies_lost: Array[Dictionary] = []
+var _chronicle_weather_events: Array[String] = []
+var _chronicle_turn_history: Array[Dictionary] = []
+var mirror_enemy_commander = EnemyCommander.new()
 
 # M4/M5/M6 services — instantiated at runtime, not scene nodes.
 var progression_service: ProgressionService
@@ -290,16 +301,27 @@ func bootstrap_battle() -> void:
     _last_defeated_ally_id = &""
     _current_turn_actions.clear()
     last_spotlight_effect.clear()
+    _chronicle_enemy_defeats.clear()
+    _chronicle_allies_lost.clear()
+    _chronicle_weather_events.clear()
+    _chronicle_turn_history.clear()
+    _chronicle_enemy_opening_count = 0
+    _chronicle_ally_opening_count = 0
     _spotlight_slow_mo_token += 1
     Engine.time_scale = 1.0
     falling_units_this_turn.clear()
+    if mirror_enemy_commander != null:
+        mirror_enemy_commander.reset()
     _reset_flood_state()
     _reset_finale_contract_state()
     if bond_service != null and progression_service != null:
         bond_service.setup_progression(progression_service.get_data())
 
     _clear_battle_state()
+    _apply_mirror_stage_configuration()
     _spawn_from_stage()
+    _chronicle_ally_opening_count = ally_units.size()
+    _chronicle_enemy_opening_count = enemy_units.size()
     path_service.configure_from_stage(stage_data)
     _layout_battlefield()
     _initialize_flood_zones()
@@ -321,6 +343,7 @@ func bootstrap_battle() -> void:
             cutscene_player.play(start_data)
 
     _begin_player_phase("battle_initialized")
+    _show_mirror_mode_intro()
 
 func set_stage(new_stage_data: StageData) -> void:
     stage_data = _clone_stage_data(new_stage_data)
@@ -1315,6 +1338,13 @@ func _check_battle_end() -> bool:
 
 func _on_battle_victory() -> void:
     last_result = "victory"
+    if _is_mirror_battle_active():
+        hidden_recruit_state["mirror_mode"] = true
+        hidden_recruit_state["mirror_leonika_survived"] = _has_live_mirror_leonika()
+        hidden_recruit_state["mirror_perspective_decision_count"] = mirror_enemy_commander.perspective_decisions.size() if mirror_enemy_commander != null else 0
+        var enemy_view := _get_enemy_view()
+        if enemy_view != null and enemy_view.has_method("record_mirror_victory"):
+            enemy_view.record_mirror_victory(stage_data.stage_id if stage_data != null else &"")
     var result_summary := {
         "outcome": "victory",
         "title": "Victory",
@@ -1414,6 +1444,7 @@ func _on_battle_victory() -> void:
     result_summary["objectives_completed"] = completed_objectives
     result_summary["notes"] = "Victory archived in the field record."
     result_summary["hidden_recruit_state"] = get_hidden_recruit_state_snapshot()
+    _archive_chronicle_entry(result_summary)
     var finale_result: Dictionary = _build_finale_result_summary()
     if not finale_result.is_empty():
         result_summary["finale_result"] = finale_result
@@ -1437,6 +1468,46 @@ func _on_battle_defeat() -> void:
         telemetry_service.record_battle_end(&"defeat", round_index)
     if progression_service != null:
         progression_service.apply_burden_delta(1, "battle_defeat")
+
+func _archive_chronicle_entry(result_summary: Dictionary) -> void:
+    if stage_data == null or progression_service == null:
+        return
+    var chronicle := get_node_or_null("/root/Chronicle") as ChronicleGenerator
+    if chronicle == null:
+        return
+    var progression = progression_service.get_data()
+    if progression == null:
+        return
+    var entry := chronicle.generate_entry(String(stage_data.stage_id), _build_chronicle_battle_log(), progression.choices_made)
+    if entry == null:
+        return
+    progression.add_chronicle_entry(entry)
+    result_summary["chronicle_entry"] = entry.to_summary_dict()
+
+func _build_chronicle_battle_log() -> Array:
+    var key_moments: Array[Dictionary] = []
+    for raw_turn in _chronicle_turn_history:
+        if typeof(raw_turn) != TYPE_DICTIONARY:
+            continue
+        var turn_data := raw_turn as Dictionary
+        var turn_number := int(turn_data.get("turn", round_index))
+        var turn_owner := String(turn_data.get("turn_owner", "")).strip_edges()
+        for raw_action in turn_data.get("actions", []):
+            if typeof(raw_action) != TYPE_DICTIONARY:
+                continue
+            var action := (raw_action as Dictionary).duplicate(true)
+            action["turn"] = int(action.get("turn", turn_number))
+            action["turn_owner"] = turn_owner
+            key_moments.append(action)
+    return [{
+        "turn_count": round_index,
+        "ally_count": _chronicle_ally_opening_count,
+        "enemy_count": _chronicle_enemy_opening_count,
+        "enemies_defeated": _chronicle_enemy_defeats.duplicate(),
+        "allies_lost": _chronicle_allies_lost.duplicate(true),
+        "weather_events": _chronicle_weather_events.duplicate(),
+        "key_moments": key_moments,
+    }]
 
 func _on_wait_requested() -> void:
     if selected_unit == null or not _is_player_input_phase() or not turn_manager.can_unit_act(selected_unit):
@@ -1484,6 +1555,18 @@ func _on_unit_defeated(unit: UnitActor) -> void:
     pending_move_origins.erase(unit.get_instance_id())
     if unit != null and is_instance_valid(unit) and unit.unit_data != null and not falling_units_this_turn.has(unit.unit_data.unit_id):
         falling_units_this_turn.append(unit.unit_data.unit_id)
+    if unit != null and is_instance_valid(unit) and unit.unit_data != null:
+        if unit.faction == "enemy":
+            var defeated_enemy_id := String(unit.unit_data.unit_id).strip_edges()
+            if not defeated_enemy_id.is_empty() and not _chronicle_enemy_defeats.has(defeated_enemy_id):
+                _chronicle_enemy_defeats.append(defeated_enemy_id)
+        elif unit.faction == "ally":
+            var defeated_ally_id := String(unit.unit_data.unit_id).strip_edges()
+            if not defeated_ally_id.is_empty():
+                _chronicle_allies_lost.append({
+                    "unit_id": defeated_ally_id,
+                    "turn": round_index
+                })
     turn_manager.mark_downed(unit, "unit_defeated", {"round": round_index})
     if status_service != null:
         status_service.remove_unit(unit)
@@ -1532,6 +1615,11 @@ func _on_action_state_changed(unit: UnitActor, from_state: StringName, to_state:
     _sync_hud_phase(reason, transition_payload)
 
 func _on_battle_turn_ended(_turn_owner: String, turn_actions: Array) -> void:
+    _chronicle_turn_history.append({
+        "turn": round_index,
+        "turn_owner": _turn_owner,
+        "actions": turn_actions.duplicate(true)
+    })
     var spotlight := _get_spotlight_manager()
     if spotlight == null:
         return
@@ -1577,6 +1665,9 @@ func _record_weather_effect_action(effect_id: StringName, affected_unit_ids: Var
     var unit_ids: Array[StringName] = _variant_to_string_name_array(affected_unit_ids)
     if unit_ids.is_empty():
         return
+    var normalized_effect_id := String(effect_id).strip_edges()
+    if not normalized_effect_id.is_empty() and not _chronicle_weather_events.has(normalized_effect_id):
+        _chronicle_weather_events.append(normalized_effect_id)
     _record_turn_action({
         "type": "weather",
         "weather_effect_id": effect_id,
@@ -1932,6 +2023,44 @@ func _sync_hud_phase(reason: String, payload: Dictionary) -> void:
     )
     hud.set_transition_reason(reason, payload)
     _sync_selection_hud()
+
+func _get_enemy_view() -> Node:
+    return get_node_or_null("/root/EnemyView")
+
+func _is_mirror_battle_active() -> bool:
+    var enemy_view := _get_enemy_view()
+    return enemy_view != null and stage_data != null and bool(enemy_view.get("mirror_mode_active")) and stage_data.stage_id == CH07_05_STAGE_ID
+
+func _apply_mirror_stage_configuration() -> void:
+    if not _is_mirror_battle_active():
+        return
+    var enemy_view := _get_enemy_view()
+    if enemy_view != null and enemy_view.has_method("prepare_stage_for_mirror_mode"):
+        enemy_view.prepare_stage_for_mirror_mode(stage_data)
+    hidden_recruit_state["mirror_mode"] = true
+    hidden_recruit_state["mirror_chapter_title"] = _get_mirror_chapter_title()
+
+func _show_mirror_mode_intro() -> void:
+    if not _is_mirror_battle_active():
+        return
+    _record_reward_entry("Leonika — \"%s\"" % MIRROR_LEONIKA_DIALOGUE)
+    hidden_recruit_state["mirror_dialogue"] = MIRROR_LEONIKA_DIALOGUE
+    _sync_hud_phase("leonika_perspective", {
+        "speaker": "Leonika",
+        "line": MIRROR_LEONIKA_DIALOGUE
+    })
+
+func _get_mirror_chapter_title() -> String:
+    var enemy_view := _get_enemy_view()
+    if enemy_view != null and enemy_view.has_method("get_mirror_chapter_title"):
+        return String(enemy_view.get_mirror_chapter_title())
+    return "적의 눈으로 보기"
+
+func _has_live_mirror_leonika() -> bool:
+    for unit in ally_units:
+        if is_instance_valid(unit) and not unit.is_defeated() and unit.unit_data != null and unit.unit_data.unit_id == MIRROR_LEONIKA_UNIT_ID:
+            return true
+    return false
 
 func _phase_name(phase_value: int) -> String:
     return PHASE_NAMES.get(phase_value, "UNKNOWN")
@@ -2317,6 +2446,17 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
         attack_context["ability_locked"] = bool(attacker_status_fx.get("ability_locked", false))
         attack_context["defense_percent_mod"] = int(defender_status_fx.get("defense_percent_mod", 0))
 
+    var heirloom = get_node_or_null("/root/Heirloom")
+    if heirloom != null and heirloom.has_method("get_attack_context_bonus"):
+        var heirloom_context: Dictionary = heirloom.get_attack_context_bonus(attacker, defender)
+        for key_variant in heirloom_context.keys():
+            var key := String(key_variant)
+            var value = heirloom_context.get(key_variant)
+            if typeof(value) in [TYPE_INT, TYPE_FLOAT] and attack_context.has(key):
+                attack_context[key] = int(attack_context.get(key, 0)) + int(value)
+            else:
+                attack_context[key] = value
+
     return attack_context
 
 func _apply_synergy_reactions(context: Dictionary = {}) -> Dictionary:
@@ -2666,6 +2806,8 @@ func _get_objective_state_id(resolved_count: int, required_count: int) -> String
     return &"battle_objective_default"
 
 func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
+    if _is_mirror_battle_active():
+        return _pick_mirror_enemy_action(enemy)
     if enemy.unit_data != null and enemy.unit_data.is_boss and enemy.unit_data.boss_pattern == LETE_CH08_05_BOSS_PATTERN:
         var lete_action: Dictionary = _pick_lete_action(enemy)
         if not lete_action.is_empty():
@@ -2693,6 +2835,28 @@ func _pick_enemy_action(enemy: UnitActor) -> Dictionary:
         range_service,
         _get_dynamic_blocked_cells(enemy)
     )
+
+func _pick_mirror_enemy_action(enemy: UnitActor) -> Dictionary:
+    if mirror_enemy_commander == null:
+        return {"type": "wait"}
+
+    var action_data = mirror_enemy_commander.make_mirror_decision(
+        ally_units,
+        enemy_units,
+        {
+            "active_unit": enemy,
+            "path_service": path_service,
+            "range_service": range_service,
+            "dynamic_blocked": _get_dynamic_blocked_cells(enemy),
+            "stage_data": stage_data
+        }
+    )
+    var enemy_view := _get_enemy_view()
+    if enemy_view != null and enemy_view.has_method("record_perspective_decisions"):
+        enemy_view.record_perspective_decisions(mirror_enemy_commander.perspective_decisions)
+    if action_data == null or not action_data.has_method("to_dictionary"):
+        return {"type": "wait"}
+    return action_data.to_dictionary()
 
 func _pick_lete_action(enemy: UnitActor) -> Dictionary:
     if enemy.is_stealth_hidden():

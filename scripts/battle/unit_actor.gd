@@ -8,6 +8,7 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const TelegraphTextureLibrary = preload("res://scripts/battle/telegraph_texture_library.gd")
+const HEIRLOOM_PATH := "/root/Heirloom"
 signal defeated(unit: UnitActor)
 signal attack_anim_hit  ## 공격 애니메이션 타격 시점 방출
 
@@ -71,7 +72,7 @@ func _ready() -> void:
 func setup_from_data(data: UnitData) -> void:
     unit_data = data
     faction = data.faction
-    current_hp = data.max_hp
+    current_hp = get_max_hp()
     _refresh_visuals()
 
 func set_grid_position(cell: Vector2i, cell_size: Vector2i = Vector2i(64, 64)) -> void:
@@ -147,7 +148,7 @@ func apply_damage(amount: int, type: StringName = &"damage") -> void:
 
 
 func apply_heal(amount: int) -> void:
-    current_hp = mini(unit_data.max_hp, current_hp + amount)
+    current_hp = mini(get_max_hp(), current_hp + amount)
     _refresh_visuals()
     show_damage(amount, &"heal")
 
@@ -185,6 +186,7 @@ func is_defeated() -> bool:
 
 func get_attack() -> int:
     var base_value: int = unit_data.attack if unit_data != null else 1
+    base_value += _get_heirloom_attack_bonus()
     if _equipped_weapon != null:
         base_value += _equipped_weapon.attack_bonus
     if _equipped_armor != null:
@@ -195,6 +197,7 @@ func get_attack() -> int:
 
 func get_defense() -> int:
     var base_value: int = unit_data.defense if unit_data != null else 0
+    base_value += _get_heirloom_defense_bonus()
     if _equipped_weapon != null:
         base_value += _equipped_weapon.defense_bonus
     if _equipped_armor != null:
@@ -202,6 +205,10 @@ func get_defense() -> int:
     if _equipped_accessory != null:
         base_value += _equipped_accessory.defense_bonus
     return base_value
+
+func get_max_hp() -> int:
+    var base_value: int = unit_data.max_hp if unit_data != null else current_hp
+    return max(1, base_value + _get_heirloom_hp_bonus())
 
 func get_movement() -> int:
     var base_value: int = unit_data.movement if unit_data != null else 3
@@ -298,7 +305,7 @@ func _refresh_visuals() -> void:
         mark_crosshair_v.color = _get_mark_crosshair_color()
 
     if hp_label != null:
-        var max_hp: int = unit_data.max_hp if unit_data != null else current_hp
+        var max_hp: int = get_max_hp()
         hp_label.text = "%d/%d" % [current_hp, max_hp]
         hp_label.visible = not _stealth_hidden
         var hp_ratio: float = 1.0 if max_hp <= 0 else clampf(float(current_hp) / float(max_hp), 0.0, 1.0)
@@ -589,3 +596,28 @@ func _get_base_color() -> Color:
         color = color.darkened(0.48)
 
     return color
+func _get_heirloom_service() -> Node:
+    if not is_inside_tree():
+        return null
+    var tree := get_tree()
+    if tree == null or tree.root == null:
+        return null
+    return tree.root.get_node_or_null("Heirloom")
+
+func _get_heirloom_hp_bonus() -> int:
+    var heirloom := _get_heirloom_service()
+    if heirloom == null or not heirloom.has_method("get_unit_max_hp_bonus") or unit_data == null:
+        return 0
+    return int(heirloom.get_unit_max_hp_bonus(unit_data.unit_id))
+
+func _get_heirloom_attack_bonus() -> int:
+    var heirloom := _get_heirloom_service()
+    if heirloom == null or not heirloom.has_method("get_unit_attack_bonus") or unit_data == null:
+        return 0
+    return int(heirloom.get_unit_attack_bonus(unit_data.unit_id))
+
+func _get_heirloom_defense_bonus() -> int:
+    var heirloom := _get_heirloom_service()
+    if heirloom == null or not heirloom.has_method("get_unit_defense_bonus") or unit_data == null:
+        return 0
+    return int(heirloom.get_unit_defense_bonus(unit_data.unit_id))

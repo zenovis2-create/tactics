@@ -1,8 +1,12 @@
 class_name ProgressionData
 extends Resource
 
+const ChronicleEntry = preload("res://scripts/battle/chronicle_entry.gd")
+
 ## Serializable campaign-level meta state.
 ## Owned by ProgressionService; persisted in save file.
+
+const CommanderProfile = preload("res://scripts/battle/commander_profile.gd")
 
 # Burden: 0-9. Tracks moral cost of Rian's recovered truths.
 # 0 = no weight, 9 = maximum accumulated burden.
@@ -73,6 +77,7 @@ func unlock_ally(unit_key: StringName) -> void:
 
 @export var choices_made: Array[String] = []
 @export var chapters_completed: Array[String] = []
+@export var chronicle_entries: Array[ChronicleEntry] = []
 @export var encyclopedia_entries: Dictionary = {}
 @export var encyclopedia_comments: Dictionary = {}
 @export var battle_records: Array = []
@@ -98,6 +103,7 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var ch10_attack_bonus: int = 0
 @export var ch10_defense_bonus: int = 0
 @export var namecall_rejected_count: int = 0
+@export var commander_profile: CommanderProfile = CommanderProfile.new()
 
 func earn_badge(badge_id: String, amount: int) -> bool:
 	var normalized: String = badge_id.strip_edges()
@@ -140,6 +146,7 @@ func reset_for_new_campaign() -> void:
 	mira_unlocked = false
 	melkion_unlocked = false
 	choices_made.clear()
+	chronicle_entries.clear()
 	encyclopedia_comments.clear()
 	support_history.clear()
 	comment_history.clear()
@@ -165,7 +172,13 @@ func reset_for_new_campaign() -> void:
 	ch10_attack_bonus = 0
 	ch10_defense_bonus = 0
 	namecall_rejected_count = 0
+	commander_profile = CommanderProfile.new()
 	free_name_call = has_ng_plus_purchase("divine_blessing")
+
+func ensure_commander_profile() -> CommanderProfile:
+	if commander_profile == null:
+		commander_profile = CommanderProfile.new()
+	return commander_profile
 
 func has_fragment(fragment_id: StringName) -> bool:
 	return recovered_fragments.has(fragment_id)
@@ -314,6 +327,37 @@ func add_battle_record(record: Dictionary) -> void:
 			battle_records[index] = record.duplicate(true)
 			return
 	battle_records.append(record.duplicate(true))
+
+func add_chronicle_entry(entry: ChronicleEntry) -> void:
+	if entry == null:
+		return
+	var normalized_chapter_id := entry.chapter_id.strip_edges().to_upper()
+	if normalized_chapter_id.is_empty():
+		return
+	entry.chapter_id = normalized_chapter_id
+	for index in range(chronicle_entries.size()):
+		var existing := chronicle_entries[index]
+		if existing != null and existing.chapter_id.strip_edges().to_upper() == normalized_chapter_id:
+			chronicle_entries[index] = entry
+			return
+	chronicle_entries.append(entry)
+
+func get_chronicle_entry(chapter_id: String) -> ChronicleEntry:
+	var normalized_chapter_id := chapter_id.strip_edges().to_upper()
+	if normalized_chapter_id.is_empty():
+		return null
+	for entry in chronicle_entries:
+		if entry != null and entry.chapter_id.strip_edges().to_upper() == normalized_chapter_id:
+			return entry
+	return null
+
+func get_chronicle_entry_summaries() -> Array[Dictionary]:
+	var summaries: Array[Dictionary] = []
+	for entry in chronicle_entries:
+		if entry == null:
+			continue
+		summaries.append(entry.to_summary_dict())
+	return summaries
 
 func mark_support_conversation_available(pair_id: String, rank: int) -> void:
 	var normalized_pair := pair_id.strip_edges()
@@ -590,6 +634,7 @@ func to_debug_dict() -> Dictionary:
 		"ending_tendency": String(ending_tendency),
 		"choices_made": choices_made.duplicate(),
 		"chapters_completed": chapters_completed.duplicate(),
+		"chronicle_entries": get_chronicle_entry_summaries(),
 		"encyclopedia_entries": encyclopedia_entries.duplicate(true),
 		"encyclopedia_comments": encyclopedia_comments.duplicate(true),
 		"battle_records": battle_records.duplicate(true),
@@ -613,6 +658,7 @@ func to_debug_dict() -> Dictionary:
 		"ch10_attack_bonus": ch10_attack_bonus,
 		"ch10_defense_bonus": ch10_defense_bonus,
 		"namecall_rejected_count": namecall_rejected_count,
+		"commander_profile": ensure_commander_profile().to_debug_dict(),
 		"badges_of_heroism": badges_of_heroism,
 		"earned_badges": earned_badges.duplicate(),
 		"ng_plus_purchases": ng_plus_purchases.duplicate(),
