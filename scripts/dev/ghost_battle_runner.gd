@@ -10,6 +10,8 @@ const FAIL := "❌ FAIL"
 const GhostFormationDataRef = preload("res://scripts/data/ghost_formation_data.gd")
 const GhostFormationExtractorRef = preload("res://scripts/battle/ghost_formation_extractor.gd")
 const GhostBattleManagerRef = preload("res://scripts/battle/ghost_battle_manager.gd")
+const ChronicleGeneratorRef = preload("res://scripts/battle/chronicle_generator.gd")
+const ChronicleEntryRef = preload("res://scripts/battle/chronicle_entry.gd")
 
 var tests_run: int = 0
 var tests_passed: int = 0
@@ -24,7 +26,13 @@ func _initialize() -> void:
 func run_tests() -> void:
 	test_ghost_formation_data()
 	test_ghost_formation_extractor()
+	test_extract_ghost_pattern_from_chronicle()
+	test_ghost_formation_factory_from_chronicle()
 	test_ghost_battle_manager()
+	test_ghost_battle_registry_count()
+	test_get_ghosts_by_chapter()
+	test_champion_board_ranking()
+	test_anonymous_vs_named_ghost()
 
 func verify(condition: bool, test_name: String, detail: String = "") -> void:
 	tests_run += 1
@@ -110,6 +118,35 @@ func test_ghost_formation_extractor() -> void:
 
 	print("  └─ GhostFormationExtractor: OK")
 
+func test_extract_ghost_pattern_from_chronicle() -> void:
+	verify(ChronicleGeneratorRef != null, "ChronicleGenerator class loads")
+	var chronicle: ChronicleGeneratorRef = ChronicleGeneratorRef.new()
+	var entry := _build_mock_chronicle_entry(
+		"CH06",
+		"The ridge was held after 14 turns while thunder broke the enemy line.",
+		ChronicleEntryRef.ChronicleStyle.BATTLE,
+		["weather_master", "quiet_strategy"]
+	)
+	var ghost: GhostFormationDataRef = chronicle.extract_ghost_pattern(entry, "Archivist", true)
+	verify(ghost != null, "extract_ghost_pattern() returns GhostFormationData")
+	verify(ghost.chapter_id == "CH06", "extract_ghost_pattern() preserves chapter_id")
+	verify(is_equal_approx(ghost.avg_turns, 14.0), "extract_ghost_pattern() sets avg_turns from chronicle text")
+	verify(ghost.preferred_terrain == "hills", "extract_ghost_pattern() detects terrain from chronicle text")
+	verify(ghost.unique_tactics.has("Weather Manipulation"), "extract_ghost_pattern() keeps chronicle trigger tactics")
+
+func test_ghost_formation_factory_from_chronicle() -> void:
+	var entry := _build_mock_chronicle_entry(
+		"CH07",
+		"The fortress gates held after 11 turns as patient tactics wore the enemy down.",
+		ChronicleEntryRef.ChronicleStyle.CONCISE,
+		["quiet_strategy"]
+	)
+	var ghost: GhostFormationDataRef = GhostFormationDataRef.create_from_chronicle(entry, "Marshal", false)
+	verify(ghost != null, "GhostFormationData.create_from_chronicle() returns GhostFormationData")
+	verify(ghost.player_tag == "Marshal", "create_from_chronicle() preserves player_tag")
+	verify(ghost.is_anonymous == false, "create_from_chronicle() preserves anonymity flag")
+	verify(ghost.get_display_name() == "Marshal's Strategy", "create_from_chronicle() builds named display text")
+
 func test_ghost_battle_manager() -> void:
 	if GhostBattleManagerRef == null:
 		tests_failed += 1
@@ -154,6 +191,86 @@ func test_ghost_battle_manager() -> void:
 	verify(manager.get_defeated_count() == 0, "get_defeated_count() returns 0 after clear")
 
 	print("  └─ GhostBattleManager: OK")
+	manager.free()
+
+func test_ghost_battle_registry_count() -> void:
+	var manager := _create_clean_manager()
+	var first_ghost: GhostFormationDataRef = manager.register_ghost_from_battle_log([
+		{"turn_count": 8, "enemy_count": 3, "enemies_defeated": ["e1"]}
+	], "Rook", "CH06", true)
+	var second_ghost: GhostFormationDataRef = manager.register_ghost_from_battle_log([
+		{"turn_count": 10, "enemy_count": 4, "enemies_defeated": ["e2", "e3"]}
+	], "Vera", "CH07", false)
+	verify(manager.get_total_ghost_count() == 2, "ghost_registry tracks total registered entries")
+	verify(manager.get_all_ghosts().size() == 2, "get_all_ghosts() reflects registry size")
+	verify(manager.has_ghost(first_ghost.ghost_id), "registry contains first registered ghost")
+	verify(manager.has_ghost(second_ghost.ghost_id), "registry contains second registered ghost")
+	_cleanup_manager(manager)
+
+func test_get_ghosts_by_chapter() -> void:
+	var manager := _create_clean_manager()
+	manager.register_ghost_from_battle_log([{"turn_count": 9, "enemy_count": 2}], "Lena", "CH06", true)
+	manager.register_ghost_from_battle_log([{"turn_count": 7, "enemy_count": 2}], "Ivo", "CH06", true)
+	manager.register_ghost_from_battle_log([{"turn_count": 12, "enemy_count": 5}], "Sia", "CH08", false)
+	var chapter_ghosts: Array = manager.get_ghosts_by_chapter("CH06")
+	verify(chapter_ghosts.size() == 2, "get_ghosts_by_chapter() filters matching entries")
+	verify(chapter_ghosts[0].chapter_id == "CH06", "get_ghosts_by_chapter() keeps first matching chapter")
+	verify(chapter_ghosts[1].chapter_id == "CH06", "get_ghosts_by_chapter() keeps second matching chapter")
+	_cleanup_manager(manager)
+
+func test_champion_board_ranking() -> void:
+	var manager := _create_clean_manager()
+	var steady: GhostFormationDataRef = manager.register_ghost_from_battle_log([{"turn_count": 16, "enemy_count": 4}], "Steady", "CH06", true)
+	steady.difficulty_rating = 2
+	steady.avg_turns = 16.0
+	var swift: GhostFormationDataRef = manager.register_ghost_from_battle_log([{"turn_count": 9, "enemy_count": 4}], "Swift", "CH06", false)
+	swift.difficulty_rating = 2
+	swift.avg_turns = 9.0
+	var legend: GhostFormationDataRef = manager.register_ghost_from_battle_log([{"turn_count": 13, "enemy_count": 6}], "Legend", "CH08", false)
+	legend.difficulty_rating = 4
+	legend.avg_turns = 13.0
+	var board: Array = manager.get_champion_board()
+	verify(board.size() == 2, "Champion board collapses to one entry per difficulty tier")
+	verify(int(board[0].get("difficulty", -1)) == 2, "Champion board is sorted by difficulty tier")
+	verify(is_equal_approx(float(board[0].get("turns", -1.0)), 9.0), "Champion board keeps the fastest ghost in a tier")
+	verify(int(board[1].get("rank", -1)) == 2, "Champion board assigns sequential ranks")
+	_cleanup_manager(manager)
+
+func test_anonymous_vs_named_ghost() -> void:
+	var chronicle: ChronicleGeneratorRef = ChronicleGeneratorRef.new()
+	var entry := _build_mock_chronicle_entry(
+		"CH08",
+		"The open field was cleared after 6 turns under a swift charge.",
+		ChronicleEntryRef.ChronicleStyle.CONCISE,
+		["overwhelming_force"]
+	)
+	var anonymous_ghost: GhostFormationDataRef = chronicle.extract_ghost_pattern(entry, "Hidden", true)
+	var named_ghost: GhostFormationDataRef = chronicle.extract_ghost_pattern(entry, "Visible", false)
+	verify(anonymous_ghost.is_anonymous == true, "Anonymous chronicle ghost keeps anonymity flag")
+	verify(named_ghost.is_anonymous == false, "Named chronicle ghost disables anonymity flag")
+	verify(anonymous_ghost.get_display_name() == "Unknown Commander's Strategy", "Anonymous chronicle ghost uses anonymous display name")
+	verify(named_ghost.get_display_name() == "Visible's Strategy", "Named chronicle ghost uses player tag display name")
+
+func _build_mock_chronicle_entry(chapter_id: String, narrative_text: String, style: int, trigger_events: Array[String]) -> ChronicleEntryRef:
+	var entry: ChronicleEntryRef = ChronicleEntryRef.new()
+	entry.chapter_id = chapter_id
+	entry.chapter_title = chapter_id
+	entry.entry_date = "2026-04-20"
+	entry.narrative_text = narrative_text
+	entry.style = style
+	entry.trigger_events = trigger_events.duplicate()
+	return entry
+
+func _create_clean_manager() -> GhostBattleManagerRef:
+	var manager: GhostBattleManagerRef = GhostBattleManagerRef.new()
+	root.add_child(manager)
+	manager.clear_all_ghosts()
+	return manager
+
+func _cleanup_manager(manager: GhostBattleManagerRef) -> void:
+	if manager == null:
+		return
+	manager.clear_all_ghosts()
 	manager.free()
 
 func print_results() -> void:

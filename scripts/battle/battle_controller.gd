@@ -38,9 +38,10 @@ const BOND_SERVICE_PATH := "res://scripts/battle/bond_service.gd"
 const BattleControllerBondDeath = preload("res://scripts/battle/battle_controller_bond_death.gd")
 const BattleResultScreenScript = preload("res://scripts/battle/battle_result_screen.gd")
 const ChronicleGenerator = preload("res://scripts/battle/chronicle_generator.gd")
+const GhostBattleManager = preload("res://scripts/battle/ghost_battle_manager.gd")
+const GhostFormationData = preload("res://scripts/data/ghost_formation_data.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
-const EmotionalLayerController = preload("res://scripts/audio/emotional_layer_controller.gd")
 const DOWNPOUR_WEATHER_IDS := {
     &"downpour": true,
     &"storm": true,
@@ -113,6 +114,8 @@ const STATUS_FEAR: StringName = &"fear"
 const STATUS_CONFUSION: StringName = &"混乱"
 const STATUS_NIGHT_SMOKE: StringName = &"눈不适应"
 const STATUS_RAIN_COMFORT: StringName = &"비옷의慰め"
+const GHOST_BOSS_MIN_CHAPTER: int = 6
+const GHOST_BOSS_SPAWN_CHANCE: float = 0.25
 
 enum BattlePhase {
     BATTLE_INIT,
@@ -378,15 +381,9 @@ func bootstrap_battle() -> void:
     var spotlight := _get_spotlight_manager()
     if spotlight != null:
         spotlight.begin_battle(_get_spotlight_battle_id())
-    var music := _get_music()
-    if music != null and music.has_method("play_layered_track"):
-        var active_layers: Array[String] = []
-        if music.has_method("get_active_layer_names"):
-            var existing_layers: Variant = music.call("get_active_layer_names")
-            if existing_layers is Array:
-                for layer_name in existing_layers:
-                    active_layers.append(String(layer_name))
-        music.call("play_layered_track", "bgm_battle_default", active_layers)
+    _start_living_soundtrack()
+    if _has_active_boss_enemy():
+        _emit_emotional_spotlight("boss")
 
     # 전투 시작 전 컷씬 재생 (있는 경우)
     if cutscene_player != null and stage_data != null and stage_data.start_cutscene_id != &"":
@@ -514,10 +511,80 @@ func _spawn_from_stage() -> void:
     _refresh_persistent_terrain_visual()
     _refresh_stage_memorial_visual()
     _spawn_group(stage_data.ally_units, stage_data.ally_spawns, "ally", ally_units)
-    _spawn_group(stage_data.enemy_units, stage_data.enemy_spawns, "enemy", enemy_units)
+    var enemy_unit_defs: Array[UnitData] = []
+    enemy_unit_defs.append_array(stage_data.enemy_units)
+    var enemy_spawn_cells: Array[Vector2i] = stage_data.enemy_spawns.duplicate()
+    _inject_ghost_boss_spawn(enemy_unit_defs)
+    _spawn_group(enemy_unit_defs, enemy_spawn_cells, "enemy", enemy_units)
     _spawn_interactive_objects(stage_data.interactive_objects)
     _apply_selected_tactical_note_bonus_to_allies()
     _apply_opening_boss_stealth_state()
+
+func _inject_ghost_boss_spawn(enemy_unit_defs: Array[UnitData]) -> void:
+    if stage_data == null or enemy_unit_defs.is_empty():
+        return
+    if _get_stage_chapter_number(stage_data.stage_id) < GHOST_BOSS_MIN_CHAPTER:
+        return
+    var ghost_manager := _get_ghost_battle_manager()
+    if ghost_manager == null:
+        return
+    var ghosts: Array[GhostFormationData] = ghost_manager.get_all_ghosts()
+    if ghosts.is_empty():
+        return
+    var replace_index := _find_replaceable_enemy_index(enemy_unit_defs)
+    if replace_index == -1:
+        return
+    var rng := RandomNumberGenerator.new()
+    rng.randomize()
+    if rng.randf() > GHOST_BOSS_SPAWN_CHANCE:
+        return
+    var selected_ghost: GhostFormationData = ghosts[rng.randi_range(0, ghosts.size() - 1)]
+    if selected_ghost == null:
+        return
+    if not ghost_manager.start_ghost_battle(selected_ghost.ghost_id):
+        return
+    enemy_unit_defs[replace_index] = _build_ghost_boss_unit_data(selected_ghost)
+
+func _get_ghost_battle_manager() -> GhostBattleManager:
+    return get_node_or_null("/root/GhostBattleManager") as GhostBattleManager
+
+func _find_replaceable_enemy_index(enemy_unit_defs: Array[UnitData]) -> int:
+    for index in range(enemy_unit_defs.size()):
+        var unit_data := enemy_unit_defs[index]
+        if unit_data != null and not unit_data.is_boss:
+            return index
+    return -1
+
+func _build_ghost_boss_unit_data(ghost: GhostFormationData) -> UnitData:
+    var ghost_boss := UnitData.new()
+    ghost_boss.unit_id = StringName("ghost_boss_%s" % String(ghost.ghost_id))
+    ghost_boss.display_name = ghost.get_display_name()
+    ghost_boss.faction = "enemy"
+    ghost_boss.is_boss = true
+    ghost_boss.boss_pattern = &"ghost_boss"
+    ghost_boss.personality = ghost.strategy_type
+    ghost_boss.max_hp = 18 + (ghost.difficulty_rating * 4)
+    ghost_boss.attack = 5 + ghost.difficulty_rating
+    ghost_boss.defense = 2 + int(floor(float(ghost.difficulty_rating) / 2.0))
+    ghost_boss.movement = 3 + int(ghost.avg_turns <= 8.0)
+    ghost_boss.attack_range = 1
+    ghost_boss.rarity = "LEGENDARY"
+    return ghost_boss
+
+func _get_stage_chapter_number(stage_id: StringName) -> int:
+    var stage_text := String(stage_id).strip_edges().to_upper()
+    if not stage_text.begins_with("CH"):
+        return -1
+    var digits := ""
+    for index in range(2, stage_text.length()):
+        var char := stage_text.substr(index, 1)
+        if char.is_valid_int():
+            digits += char
+        elif not digits.is_empty():
+            break
+    if digits.is_empty():
+        return -1
+    return int(digits)
 
 func _on_viewport_size_changed() -> void:
     if is_inside_tree() and stage_data != null:
@@ -1153,6 +1220,9 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         if bool(counterattack.get("target_defeated", false)):
             _remove_unit_from_roster(attacker)
 
+    _emit_critical_spotlight_if_needed(defender, int(result.get("defender_hp_before", defender.current_hp)))
+    _emit_critical_spotlight_if_needed(attacker, attacker_hp_before)
+
     # 지원 공격: 공격자가 아군이고 인접 동료 중 bond 3+ 있으면 발동
     var support_attack_triggered := false
     if attacker.faction == "ally" and bond_service != null and is_instance_valid(attacker) and not attacker.is_defeated() and not lete_retreated and not bool(result.get("defender_defeated", false)):
@@ -1198,7 +1268,9 @@ func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
         var shared_damage: int = int(share.get("shared_damage", 0))
         if unit == null or not is_instance_valid(unit) or shared_damage <= 0:
             continue
+        var shared_hp_before := unit.current_hp
         unit.apply_damage(shared_damage)
+        _emit_critical_spotlight_if_needed(unit, shared_hp_before)
         redirected_total += shared_damage
         if unit.is_defeated():
             _remove_unit_from_roster(unit)
@@ -1238,6 +1310,7 @@ func _try_resolve_support_attack(attacker: UnitActor, defender: UnitActor) -> bo
     return false
 
 func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
+    var defender_hp_before: int = defender.current_hp
     var supporter_hp_before: int = supporter.current_hp
     var supporter_max_hp: int = supporter.unit_data.max_hp if supporter.unit_data != null else supporter.current_hp
     var support_context := _build_attack_context(supporter, defender, {
@@ -1274,6 +1347,7 @@ func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
         "round": round_index
     }
     hud.set_transition_reason("support_attack_resolved", last_support_attack_details)
+    _emit_critical_spotlight_if_needed(defender, defender_hp_before)
     if bool(support_result.get("defender_defeated", false)):
         _remove_unit_from_roster(defender)
     _record_turn_action({
@@ -1447,6 +1521,7 @@ func _check_battle_end() -> bool:
     return false
 
 func _on_battle_victory() -> void:
+    _emit_emotional_spotlight("victory")
     _shutdown_living_soundtrack()
     last_result = "victory"
     _persist_battlefield_consequences()
@@ -1586,8 +1661,8 @@ func _on_battle_defeat() -> void:
 
 func _shutdown_living_soundtrack() -> void:
     var music := _get_music()
-    if music != null and music.has_method("deactivate_all_layers"):
-        music.call("deactivate_all_layers", 2.0)
+    if music != null and music.has_method("stop_all"):
+        music.call("stop_all", 2.0)
 
 func _archive_chronicle_entry(result_summary: Dictionary) -> void:
     if stage_data == null or progression_service == null:
@@ -1727,6 +1802,7 @@ func _check_bond_death():
     var ending = resolution.get("ending", null)
     if pair_id.is_empty() or ending == null:
         return null
+    _emit_emotional_spotlight("bond_death")
     bond_death_triggered.emit(pair_id, String(ending.id))
     falling_units_this_turn.clear()
     return ending
@@ -1771,26 +1847,7 @@ func _wire_spotlight_signal() -> void:
         spotlight.spotlight_triggered.connect(_on_spotlight_triggered)
 
 func _ensure_emotional_layer_controller() -> void:
-    if _emotional_layer_controller == null or not is_instance_valid(_emotional_layer_controller):
-        _emotional_layer_controller = EmotionalLayerController.new()
-        _emotional_layer_controller.name = "EmotionalLayerController"
-        add_child(_emotional_layer_controller)
-    var turn_callback := Callable(_emotional_layer_controller, "_on_battle_turn_started")
-    if not battle_turn_started.is_connected(turn_callback):
-        battle_turn_started.connect(turn_callback)
-    var bond_callback := Callable(_emotional_layer_controller, "_on_bond_death_triggered")
-    if not bond_death_triggered.is_connected(bond_callback):
-        bond_death_triggered.connect(bond_callback)
-    var spotlight := _get_spotlight_manager()
-    if spotlight != null:
-        var spotlight_callback := Callable(_emotional_layer_controller, "_on_spotlight_triggered")
-        if not spotlight.spotlight_triggered.is_connected(spotlight_callback):
-            spotlight.spotlight_triggered.connect(spotlight_callback)
-    var bond_death_overlay := _get_bond_death_overlay()
-    if bond_death_overlay != null and bond_death_overlay.has_signal("bond_death_started"):
-        var overlay_callback := Callable(_emotional_layer_controller, "_on_bond_death_started")
-        if not bond_death_overlay.is_connected("bond_death_started", overlay_callback):
-            bond_death_overlay.connect("bond_death_started", overlay_callback)
+    _emotional_layer_controller = get_node_or_null("/root/EmotionalLayerController")
 
 func _get_spotlight_manager() -> SpotlightManager:
     return get_node_or_null("/root/Spotlight") as SpotlightManager
@@ -1802,7 +1859,52 @@ func _get_bond_death_overlay() -> Node:
     return get_node_or_null("/root/BondDeath")
 
 func _get_music() -> Node:
+    var layered_music := get_node_or_null("/root/LayeredMusic")
+    if layered_music != null:
+        return layered_music
     return get_node_or_null("/root/Music")
+
+func _get_emotional_layer_controller() -> Node:
+    if _emotional_layer_controller != null and is_instance_valid(_emotional_layer_controller):
+        return _emotional_layer_controller
+    _emotional_layer_controller = get_node_or_null("/root/EmotionalLayerController")
+    return _emotional_layer_controller
+
+func _start_living_soundtrack() -> void:
+    var music := _get_music()
+    if music == null:
+        return
+    if music.has_method("crossfade_to_cue"):
+        music.call("crossfade_to_cue", "bgm_battle_default", 2.0)
+    if music.has_method("activate_layer"):
+        music.call("activate_layer", "drums", 1.5)
+        music.call("activate_layer", "ambience", 1.5)
+
+func _emit_emotional_spotlight(spotlight_type: String) -> void:
+    var controller := _get_emotional_layer_controller()
+    if controller == null or not controller.has_method("emit_spotlight"):
+        return
+    controller.call("emit_spotlight", spotlight_type)
+
+func _has_active_boss_enemy() -> bool:
+    for enemy in enemy_units:
+        if not is_instance_valid(enemy) or enemy.is_defeated() or enemy.unit_data == null:
+            continue
+        if enemy.unit_data.is_boss:
+            return true
+    return false
+
+func _emit_critical_spotlight_if_needed(unit: UnitActor, previous_hp: int) -> void:
+    if unit == null or not is_instance_valid(unit) or unit.unit_data == null or unit.is_defeated():
+        return
+    if _is_critical_hp(previous_hp, unit.unit_data.max_hp) or not _is_critical_hp(unit.current_hp, unit.unit_data.max_hp):
+        return
+    _emit_emotional_spotlight("critical")
+
+func _is_critical_hp(current_hp: int, max_hp: int) -> bool:
+    if max_hp <= 0 or current_hp <= 0:
+        return false
+    return current_hp <= maxi(1, int(ceil(float(max_hp) * 0.25)))
 
 func _get_spotlight_battle_id() -> StringName:
     return stage_data.stage_id if stage_data != null else &"unknown"
@@ -3581,6 +3683,7 @@ func _check_boss_phase_transitions() -> void:
                     "hp_percent": hp_percent,
                     "round": round_index
                 })
+                _emit_emotional_spotlight("boss")
                 # Phase transition visual feedback
                 _apply_boss_phase_effects(enemy, new_phase, old_phase)
             elif old_phase != &"":

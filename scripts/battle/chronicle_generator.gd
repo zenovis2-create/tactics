@@ -2,6 +2,7 @@ class_name ChronicleGenerator
 extends Node
 
 const ChronicleEntry = preload("res://scripts/battle/chronicle_entry.gd")
+const GhostFormationData = preload("res://scripts/data/ghost_formation_data.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 
 const DEFAULT_STYLE := ChronicleEntry.ChronicleStyle.CONCISE
@@ -53,6 +54,9 @@ func generate_entry(chapter_id: String, battle_log: Array, choices_made: Array) 
 	if npc_personality != null and npc_personality.has_method("queue_chronicle_reference"):
 		npc_personality.queue_chronicle_reference(entry)
 	return entry
+
+func extract_ghost_pattern(chronicle_entry: ChronicleEntry, player_tag: String = "Unknown", is_anonymous: bool = true) -> GhostFormationData:
+	return GhostFormationData.create_from_chronicle(chronicle_entry, player_tag, is_anonymous)
 
 func _normalize_battle_log(battle_log: Array) -> Dictionary:
 	var summary := {

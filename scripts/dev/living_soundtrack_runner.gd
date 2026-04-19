@@ -95,11 +95,19 @@ func test_layered_music_contract(music: Node) -> void:
 	verify(players.has("vocal"), "LayeredMusic registers the vocal layer")
 	verify(players.has("ambience"), "LayeredMusic registers the ambience layer")
 	verify(players.has("spotlight"), "LayeredMusic registers the spotlight layer")
+	var expected_buses := {
+		"base": &"MusicBase",
+		"drums": &"MusicDrums",
+		"strings": &"MusicStrings",
+		"vocal": &"MusicVocal",
+		"ambience": &"MusicAmbience",
+		"spotlight": &"MusicBase"
+	}
 	for layer_name in ["base", "drums", "strings", "vocal", "ambience", "spotlight"]:
 		var player := players.get(layer_name, null) as AudioStreamPlayer
 		verify(player != null, "%s player is an AudioStreamPlayer" % layer_name)
 		if player != null:
-			verify(player.bus == &"Master", "%s player uses the Master bus" % layer_name)
+			verify(player.bus == expected_buses.get(layer_name, &"MusicBase"), "%s player uses its configured soundtrack bus" % layer_name)
 
 	var initial_layers: Variant = music.call("get_active_layers")
 	verify(initial_layers is Array, "get_active_layers() returns an Array")

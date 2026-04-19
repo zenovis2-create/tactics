@@ -1,6 +1,8 @@
 class_name GhostFormationData
 extends Resource
 
+const ChronicleEntry = preload("res://scripts/battle/chronicle_entry.gd")
+
 var ghost_id: StringName = &""
 var player_tag: String = "Anonymous"
 var is_anonymous: bool = true
@@ -51,6 +53,19 @@ static func create_from_dict(data: Dictionary) -> GhostFormationData:
 	ghost.allies_deployed = PackedStringArray(data.get("allies_deployed", []))
 	ghost.enemies_faced = PackedStringArray(data.get("enemies_faced", []))
 	ghost.formation = Array(data.get("formation", []))
+	return ghost
+
+static func create_from_chronicle(chronicle_entry: ChronicleEntry, player_tag: String = "Unknown", is_anonymous: bool = true) -> GhostFormationData:
+	var extractor_script = load("res://scripts/battle/ghost_formation_extractor.gd")
+	if extractor_script != null:
+		return extractor_script.extract_from_chronicle_entry(chronicle_entry, player_tag, is_anonymous)
+
+	var ghost := new()
+	ghost.player_tag = player_tag
+	ghost.is_anonymous = is_anonymous
+	ghost.chapter_id = chronicle_entry.chapter_id
+	ghost.battle_date = chronicle_entry.entry_date
+	ghost.ghost_id = &"ghost_%s_fallback" % chronicle_entry.chapter_id
 	return ghost
 
 func to_dict() -> Dictionary:

@@ -6,6 +6,22 @@ const STUB_LAYER_ASSET_PATH := "res://audio/bgm/bgm_battle_default.wav"
 const SILENT_VOLUME_DB := -80.0
 const DEFAULT_CUE_ID := "bgm_battle_default"
 const LAYER_IDS: Array[String] = ["base", "drums", "strings", "vocal", "ambience", "spotlight"]
+const AUDIO_BUS_LAYOUT: Array[Dictionary] = [
+	{"name": &"Master", "volume_db": 0.0, "send": &""},
+	{"name": &"MusicBase", "volume_db": 0.0, "send": &"Master"},
+	{"name": &"MusicDrums", "volume_db": 0.0, "send": &"MusicBase"},
+	{"name": &"MusicStrings", "volume_db": 0.0, "send": &"MusicBase"},
+	{"name": &"MusicVocal", "volume_db": 0.0, "send": &"MusicBase"},
+	{"name": &"MusicAmbience", "volume_db": 0.0, "send": &"MusicBase"}
+]
+const LAYER_BUS_BY_ID := {
+	"base": &"MusicBase",
+	"drums": &"MusicDrums",
+	"strings": &"MusicStrings",
+	"vocal": &"MusicVocal",
+	"ambience": &"MusicAmbience",
+	"spotlight": &"MusicBase"
+}
 
 var _cue_manifest: Dictionary = {}
 var _stream_cache: Dictionary = {}
@@ -21,6 +37,7 @@ var _stop_tween: Tween = null
 
 
 func _ready() -> void:
+	_ensure_audio_buses()
 	_load_manifest()
 	_ensure_players()
 	_assign_stub_streams()
@@ -187,22 +204,44 @@ func _load_manifest() -> void:
 		_cue_manifest = parsed
 
 
+func _ensure_audio_buses() -> void:
+	for bus_config in AUDIO_BUS_LAYOUT:
+		var bus_name: StringName = bus_config.get("name", &"")
+		if bus_name == &"" or AudioServer.get_bus_index(bus_name) != -1:
+			continue
+		AudioServer.add_bus(AudioServer.bus_count)
+		AudioServer.set_bus_name(AudioServer.bus_count - 1, bus_name)
+	for bus_config in AUDIO_BUS_LAYOUT:
+		var bus_name: StringName = bus_config.get("name", &"")
+		var bus_index := AudioServer.get_bus_index(bus_name)
+		if bus_index == -1:
+			continue
+		AudioServer.set_bus_volume_db(bus_index, float(bus_config.get("volume_db", 0.0)))
+		AudioServer.set_bus_send(bus_index, bus_config.get("send", &""))
+
+
 func _ensure_players() -> void:
 	for layer_name in LAYER_IDS:
 		if _players.has(layer_name):
 			continue
-		var player := _create_player("%sLayerPlayer" % layer_name.capitalize())
+		var player := _create_layer_player(layer_name)
 		add_child(player)
 		_players[layer_name] = player
 	if _base_transition_player == null:
-		_base_transition_player = _create_player("BaseTransitionPlayer")
+		_base_transition_player = _create_player("BaseTransitionPlayer", &"MusicBase")
 		add_child(_base_transition_player)
 
 
-func _create_player(player_name: String) -> AudioStreamPlayer:
+func _create_layer_player(layer_name: String) -> AudioStreamPlayer:
+	var normalized_layer := _normalize_layer_name(layer_name)
+	var bus_name: StringName = LAYER_BUS_BY_ID.get(normalized_layer, &"MusicBase")
+	return _create_player("%sLayerPlayer" % normalized_layer.capitalize(), bus_name)
+
+
+func _create_player(player_name: String, bus_name: StringName = &"MusicBase") -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.name = player_name
-	player.bus = &"Master"
+	player.bus = bus_name
 	player.autoplay = false
 	player.volume_db = SILENT_VOLUME_DB
 	return player

@@ -7,9 +7,9 @@
 ### SPEC-P4-01: Ghost Battle System (유령 전투)
 - [x] **P4-01-1** `scripts/battle/ghost_battle_manager.gd` — ghost ID generation + cross-player matching
 - [x] **P4-01-2** `scripts/battle/ghost_formation_extractor.gd` — extract patterns from Chronicle battle logs
-- [ ] **P4-01-3** ChronicleGenerator에 `extract_ghost_pattern() -> GhostFormationData` 추가
+- [x] **P4-01-3** ChronicleGenerator에 `extract_ghost_pattern() -> GhostFormationData` 추가
 - [x] **P4-01-4** `GhostFormationData.gd` Resource: formation[], avg_turns, preferred_terrain, player_tag
-- [ ] **P4-01-5** battle_controller에 ghost boss spawn 로직 추가
+- [x] **P4-01-5** battle_controller에 ghost boss spawn 로직 추가
 - [x] **P4-01-6** "홍길동의 전략" 네이밍 + 익명 옵션
 - [x] **P4-01-7** 격파 시 "XXX의 전략을 격파했다" 메시지
 - [x] **P4-01-8** 챔피언 보드 시스템 stub (순위 아님, 명예의 전당)
@@ -100,20 +100,20 @@
 ---
 
 ### SPEC-P4-08: Moral Consequence Engine (도덕적 결과 엔진) ⭐ 단기 우선
-- [ ] **P4-08-1** `scripts/battle/ethics_tracker.gd` — Ethics autoload
-- [ ] **P4-08-2** ethics_score: float (-100 ~ +100), decision_log[], 기본값 0
-- [ ] **P4-08-3** 결정 가중치 테이블: spared_enemy(+5), burned_bridge(-10), saved_supply(+8), ignored_warning(-5), recruited_hidden(+10), left_unit_to_die(-15)
-- [ ] **P4-08-4** `record_decision(chapter_id, key, weight)` → ethics_score 업데이트
-- [ ] **P4-08-5** `get_ethics_bracket() -> String` — ruthless(<-30) / pragmatic(-30~30) / compassionate(>30)
-- [ ] **P4-08-6** `scripts/battle/moral_consequence_service.gd` — MoralConsequence autoload
-- [ ] **P4-08-7** DecisionPoint.decision_made → Ethics.record_decision 자동 연결
-- [ ] **P4-08-8** `apply_consequences_to_boss(boss_id) -> BossModifier` — ruth/comp影响 보스 스탯
-- [ ] **P4-08-9** `get_boss_dialogue_variant(boss_id) -> String` — Ethics별 대사 variants
-- [ ] **P4-08-10** battle_controller.gd: 보스 스폰 시 MoralConsequence 적용
-- [ ] **P4-08-11** battle_result_screen.gd: 엔딩 분기 시 MoralConsequence 적용
-- [ ] **P4-08-12** 세 가지 엔딩 variants: Conqueror( ruthless) / Guardian(compassionate) / Survivor(pragmatic)
-- [ ] **P4-08-13** `scripts/dev/moral_consequence_runner.gd` 작성
-- [ ] **P4-08-14** Runner 검증 — godot headless 통과
+- [x] **P4-08-1** `scripts/battle/ethics_tracker.gd` — Ethics autoload
+- [x] **P4-08-2** ethics_score: float (-100 ~ +100), decision_log[], 기본값 0
+- [x] **P4-08-3** 결정 가중치 테이블: spared_enemy(+5), burned_bridge(-10), saved_supply(+8), ignored_warning(-5), recruited_hidden(+10), left_unit_to_die(-15)
+- [x] **P4-08-4** `record_decision(chapter_id, key, weight)` → ethics_score 업데이트
+- [x] **P4-08-5** `get_ethics_bracket() -> String` — ruthless(<-30) / pragmatic(-30~30) / compassionate(>30)
+- [x] **P4-08-6** `scripts/battle/moral_consequence_service.gd` — MoralConsequence autoload
+- [x] **P4-08-7** DecisionPoint.decision_made → Ethics.record_decision 자동 연결
+- [x] **P4-08-8** `apply_consequences_to_boss(boss_id) -> BossModifier` — ruth/comp影响 보스 스탯
+- [x] **P4-08-9** `get_boss_dialogue_variant(boss_id) -> String` — Ethics별 대사 variants
+- [x] **P4-08-10** battle_controller.gd: 보스 스폰 시 MoralConsequence 적용
+- [x] **P4-08-11** battle_result_screen.gd: 엔딩 분기 시 MoralConsequence 적용
+- [x] **P4-08-12** 세 가지 엔딩 variants: Conqueror( ruthless) / Guardian(compassionate) / Survivor(pragmatic)
+- [x] **P4-08-13** `scripts/dev/moral_consequence_runner.gd` 작성
+- [x] **P4-08-14** Runner 검증 — godot headless 통과
 
 ---
 
