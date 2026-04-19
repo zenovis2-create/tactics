@@ -139,7 +139,7 @@
 - [x] **P4-10-5** 과거 변경 시 현재 세계 동기화: `resync_world_with_past_change()` — `966d69f`
 - [ ] **P4-10-6** "역사의 기록자" 스킬 트리: CH10 최종전에서 선택지 확장
 - [x] **P4-10-7** Encyclopedia에 "역사의 기록자" 탭 (7번째 탭) — 모든 과거 변경 이력 — `966d69f`
-- [ ] **P4-10-8** HeirloomLegacy와 통합: 3회차 가문血脉이 "역사를 바꾼 가문" 배지
+- [x] **P4-10-8** HeirloomLegacy와 통합: 3회차 가문血脉이 "역사를 바꾼 가문" 배지 — `2e40ac6`
 - [ ] **P4-10-9** "운명이 선택한 사람들" True Ending 엔딩 크레딧
 - [x] **P4-10-10** `scripts/dev/destiny_system_runner.gd` 작성 — `966d69f`
 - [x] **P4-10-11** Runner 검증 — godot headless 통과 — `966d69f` (21/21 PASS)
