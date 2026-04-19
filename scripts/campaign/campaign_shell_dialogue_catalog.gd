@@ -239,6 +239,42 @@ const CH10_RESOLUTION_DIALOGUE_TIMELINE_B: Array[String] = [
 
 const CH10_RESOLUTION_DIALOGUE: Array[String] = CH10_RESOLUTION_DIALOGUE_TIMELINE_A
 
+const ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_RUTHLESS := "_CH10_LEONIKA_RUTHLESS"
+const ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_PRAGMATIC := "_CH10_LEONIKA_PRAGMATIC"
+const ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_COMPASSIONATE := "_CH10_LEONIKA_COMPASSIONATE"
+
+const CH10_LEONIKA_DIALOGUE_RUTHLESS: Array[String] = [
+	"Leonika: 종을 울리기 전부터 당신은 이미 돌진으로 길을 찢어 왔군. 그런 손이라면 이 탑도 피로 기억하겠지."
+]
+
+const CH10_LEONIKA_DIALOGUE_PRAGMATIC: Array[String] = [
+	"Leonika: 당신은 손실과 승리를 모두 계산하며 여기까지 올라왔다. 그 냉정함이 오늘의 결말을 정하겠지."
+]
+
+const CH10_LEONIKA_DIALOGUE_COMPASSIONATE: Array[String] = [
+	"Leonika: 끝내 멈출 줄 아는 손이라면 아직 다르게 끝낼 수 있어. 남은 이름들을 그렇게 지켜 봐."
+]
+
+const ADAPTIVE_EXPRESSION_ICONS := {
+	"leonika": {
+		"ruthless": "⚔️",
+		"pragmatic": "🛡️",
+		"compassionate": "🕊️",
+		"aggressive": "⚔️",
+		"defensive": "🛡️",
+		"merciful": "🕊️",
+	},
+	"serin": {
+		"mourning": "🕯️",
+		"ruthless": "⚔️",
+		"pragmatic": "🛡️",
+		"compassionate": "🕊️",
+	},
+	"reference": {
+		"reference": "📜"
+	}
+}
+
 const LETE_RECRUIT_DIALOGUE: Array[String] = [
 	"Lete: I chased the black-hound oath until it snapped in my hands.",
 	"Tia: Then stop chasing it. Walk with us and answer for what is left.",
@@ -410,6 +446,11 @@ const CH10_PRE_FINALE_CHOICE: Dictionary = {
 			"id": "ch10_name_the_principle",
 			"label": "Name it for the principle",
 			"hint": "CH10_05 allies gain a defense bonus for the finale."
+		},
+		{
+			"id": "ch10_record_the_chosen",
+			"label": "역사의 기록자",
+			"hint": "NG+3 / Third Eye only. Rewritten Chronicle choices are converted into answered Name Calls, and CH10_05 allies gain balanced attack and defense."
 		}
 	]
 }
@@ -545,6 +586,56 @@ static func get_interlude_dialogue(chapter_id: StringName, world_timeline_id: St
 static func get_resolution_dialogue(world_timeline_id: String = "A", worldview_complete: bool = false) -> Array[String]:
 	return _apply_worldview_truth_annotation(_get_dialogue_text("CH10_FINALE", world_timeline_id), world_timeline_id, worldview_complete)
 
+static func get_adaptive_dialogue_tree(npc_id: String, base_key: String) -> Dictionary:
+	var normalized_npc_id := npc_id.strip_edges().to_lower()
+	var normalized_base_key := base_key.strip_edges().to_lower()
+	if normalized_npc_id == "leonika" and normalized_base_key == "ch10_final":
+		return {
+			"ruthless": CH10_LEONIKA_DIALOGUE_RUTHLESS.duplicate(),
+			"pragmatic": CH10_LEONIKA_DIALOGUE_PRAGMATIC.duplicate(),
+			"compassionate": CH10_LEONIKA_DIALOGUE_COMPASSIONATE.duplicate(),
+		}
+	return {}
+
+static func get_dialogue_lines_by_key(dialogue_key: String) -> Array[String]:
+	match dialogue_key.strip_edges().to_upper():
+		ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_RUTHLESS:
+			return CH10_LEONIKA_DIALOGUE_RUTHLESS.duplicate()
+		ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_PRAGMATIC:
+			return CH10_LEONIKA_DIALOGUE_PRAGMATIC.duplicate()
+		ADAPTIVE_DIALOGUE_KEY_CH10_LEONIKA_COMPASSIONATE:
+			return CH10_LEONIKA_DIALOGUE_COMPASSIONATE.duplicate()
+		_:
+			return []
+
+static func get_expression_icon(npc_id: String, expression_key: String) -> String:
+	var normalized_npc_id := npc_id.strip_edges().to_lower()
+	var normalized_expression_key := expression_key.strip_edges().to_lower()
+	var icon_map: Dictionary = ADAPTIVE_EXPRESSION_ICONS.get(normalized_npc_id, ADAPTIVE_EXPRESSION_ICONS.get("reference", {}))
+	return String(icon_map.get(normalized_expression_key, "")).strip_edges()
+
+static func decorate_dialogue_line(npc_id: String, line: String, expression_key: String) -> String:
+	var normalized_line := line.strip_edges()
+	if normalized_line.is_empty():
+		return ""
+	var icon := get_expression_icon(npc_id, expression_key)
+	if icon.is_empty():
+		return normalized_line
+	return "%s %s" % [icon, normalized_line]
+
+static func get_bond_memorial_dialogue(fallen_name: String, track: String, speaker_id: String = "serin") -> String:
+	var normalized_name := fallen_name.strip_edges()
+	if normalized_name.is_empty():
+		normalized_name = "그 이름"
+	var speaker_name := _get_dialogue_speaker_name(speaker_id)
+	match track.strip_edges().to_lower():
+		"ruthless":
+			return decorate_dialogue_line(speaker_id, "%s: %s의 이름까지 이 전장에서 지워지게 두진 않겠어." % [speaker_name, normalized_name], "mourning")
+		"compassionate":
+			return decorate_dialogue_line(speaker_id, "%s: %s의 이름은 우리가 살아 있는 한 사라지지 않아." % [speaker_name, normalized_name], "mourning")
+		_:
+			return decorate_dialogue_line(speaker_id, "%s: %s의 몫은 우리가 끝까지 짊어진다." % [speaker_name, normalized_name], "mourning")
+
 static func get_hidden_recruit_dialogue(recruit_id: StringName) -> Array[String]:
 	match recruit_id:
 		&"lete":
@@ -602,3 +693,28 @@ static func get_choice_dialogue(choice_point_id: StringName, world_timeline_id: 
 		return choice_data
 	choice_data["dialogue_entries"] = _apply_worldview_truth_annotation(_duplicate_string_array(choice_data.get("dialogue_entries", [])), world_timeline_id, worldview_complete)
 	return choice_data
+
+static func _get_dialogue_speaker_name(speaker_id: String) -> String:
+	match speaker_id.strip_edges().to_lower():
+		"leonika", "enemy_saria":
+			return "Leonika"
+		"serin":
+			return "Serin"
+		"bran":
+			return "Bran"
+		"tia":
+			return "Tia"
+		"enoch":
+			return "Enoch"
+		"karl":
+			return "Karl"
+		"noah":
+			return "Noah"
+		"mira":
+			return "Mira"
+		"lete":
+			return "Lete"
+		"melkion":
+			return "Melkion"
+		_:
+			return speaker_id.strip_edges().capitalize()

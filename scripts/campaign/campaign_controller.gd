@@ -16,6 +16,7 @@ const ArmorData = preload("res://scripts/data/armor_data.gd")
 const CampController = preload("res://scripts/camp/camp_controller.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const DestinyManager = preload("res://scripts/battle/destiny_manager.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 const BgmRouter = preload("res://scripts/audio/bgm_router.gd")
@@ -929,6 +930,7 @@ var _desperate_stand_context: Dictionary = {}
 var _last_memorial_scene: Dictionary = {}
 var _suppress_s_rank_memorial: bool = false
 var _active_support_conversation: Dictionary = {}
+var _pending_bond_memorial_dialogue: Dictionary = {}
 
 func setup(battle_controller: BattleController, campaign_panel: CampaignPanel, bgm_router: BgmRouter = null) -> void:
     _battle_controller = battle_controller
@@ -1312,6 +1314,7 @@ func _on_battle_defeat(stage_id: StringName, payload: Dictionary) -> void:
 func _on_s_rank_ally_died(unit_id: StringName, unit_name: String, support_rank: int) -> void:
     if _suppress_s_rank_memorial:
         return
+    _queue_bond_memorial_dialogue(unit_id, unit_name, support_rank)
     _trigger_memorial_scene(unit_id, unit_name, support_rank)
 
 func _on_support_rank_increased(pair_id: String, new_rank: int) -> void:
@@ -1681,9 +1684,14 @@ func _make_choice(option_id: String) -> void:
             if normalized_option_id == "ch10_name_the_fallen":
                 progression.ch10_attack_bonus = 1
                 progression.ch10_defense_bonus = 0
-            else:
+            elif normalized_option_id == "ch10_name_the_principle":
                 progression.ch10_attack_bonus = 0
                 progression.ch10_defense_bonus = 1
+            else:
+                progression.ch10_attack_bonus = 1
+                progression.ch10_defense_bonus = 1
+
+    _sync_destiny_choice_state(String(_active_chapter_id), String(_pending_choice_stage_id), normalized_option_id, progression)
 
     var choice_record := "%s:%s" % [String(_pending_choice_stage_id), normalized_option_id]
     if not progression.choices_made.has(choice_record):
@@ -1824,23 +1832,38 @@ func _get_npc_personality():
 func _get_adaptive_dialogue_filter():
     return get_node_or_null("/root/AdaptiveDialogueFilter")
 
-func _apply_adaptive_dialogue_entries(lines: Array[String], base_key: String) -> Array[String]:
+func adapt_dialogue_by_chronicle(lines: Array[String], base_key: String) -> Array[String]:
     var adapted_lines := lines.duplicate()
+    var pending_memorial_line := _consume_pending_bond_memorial_dialogue_line()
+    if not pending_memorial_line.is_empty() and not adapted_lines.has(pending_memorial_line):
+        adapted_lines.insert(0, pending_memorial_line)
     var adaptive_filter = _get_adaptive_dialogue_filter()
     if adaptive_filter == null:
         return adapted_lines
 
+    var chronicle_context := _peek_pending_chronicle_context()
+
     if base_key == "ch10_final":
-        var leonika_line := String(adaptive_filter.get_adapted_dialogue_key("leonika", base_key)).strip_edges()
-        if not leonika_line.is_empty():
-            adapted_lines.insert(0, "Leonika: %s" % leonika_line)
+        var leonika_key := String(adaptive_filter.get_adapted_dialogue_key("leonika", base_key, chronicle_context)).strip_edges()
+        var leonika_lines := CampaignShellDialogueCatalog.get_dialogue_lines_by_key(leonika_key)
+        if leonika_lines.is_empty():
+            leonika_lines = adaptive_filter.filter_dialogue_tree(CampaignShellDialogueCatalog.get_adaptive_dialogue_tree("leonika", base_key), "leonika", chronicle_context)
+        var leonika_expression := String(adaptive_filter.get_expression_mood("leonika", chronicle_context)).strip_edges()
+        for line_index in range(leonika_lines.size() - 1, -1, -1):
+            var decorated_line := CampaignShellDialogueCatalog.decorate_dialogue_line("leonika", String(leonika_lines[line_index]).strip_edges(), leonika_expression)
+            if decorated_line.is_empty() or adapted_lines.has(decorated_line):
+                continue
+            adapted_lines.insert(0, decorated_line)
     elif base_key.begins_with("support_"):
         var support_partner_id := _get_active_support_partner_npc_id()
         if not support_partner_id.is_empty():
-            var support_variant := String(adaptive_filter.get_adapted_dialogue_key(support_partner_id, base_key)).strip_edges()
+            var support_variant := String(adaptive_filter.get_adapted_dialogue_key(support_partner_id, base_key, chronicle_context)).strip_edges()
             var support_line := _build_support_variant_line(support_partner_id, support_variant)
             if not support_line.is_empty():
-                adapted_lines.insert(0, support_line)
+                var support_expression := String(adaptive_filter.get_expression_mood(support_partner_id, chronicle_context)).strip_edges()
+                var decorated_support_line := CampaignShellDialogueCatalog.decorate_dialogue_line(support_partner_id, support_line, support_expression)
+                if not decorated_support_line.is_empty() and not adapted_lines.has(decorated_support_line):
+                    adapted_lines.insert(0, decorated_support_line)
 
     var npc_personality = _get_npc_personality()
     if npc_personality == null or not npc_personality.has_method("has_pending_chronicle_reference") or not npc_personality.has_pending_chronicle_reference():
@@ -1853,10 +1876,16 @@ func _apply_adaptive_dialogue_entries(lines: Array[String], base_key: String) ->
     var reference_line := String(adaptive_filter.inject_chronicle_reference(speaker_id, chronicle_reference)).strip_edges()
     if reference_line.is_empty():
         return adapted_lines
-    adapted_lines.insert(0, reference_line)
+    var reference_index := 0
+    if (base_key == "ch10_final" or base_key.begins_with("support_")) and not adapted_lines.is_empty():
+        reference_index = 1
+    adapted_lines.insert(reference_index, CampaignShellDialogueCatalog.decorate_dialogue_line("reference", reference_line, "reference"))
     if npc_personality.has_method("consume_pending_chronicle_reference"):
         npc_personality.consume_pending_chronicle_reference()
     return adapted_lines
+
+func _apply_adaptive_dialogue_entries(lines: Array[String], base_key: String) -> Array[String]:
+    return adapt_dialogue_by_chronicle(lines, base_key)
 
 func _get_active_support_partner_npc_id() -> String:
     var pair_id := String(_active_support_conversation.get("pair", "")).strip_edges()
@@ -1879,12 +1908,42 @@ func _build_support_variant_line(npc_id: String, adapted_key: String) -> String:
         return "%s: 아직은 당신의 뜻을 다 믿지 못하겠어요." % speaker_name
     return ""
 
+func _peek_pending_chronicle_context() -> Dictionary:
+    var npc_personality = _get_npc_personality()
+    if npc_personality == null or not npc_personality.has_method("peek_pending_chronicle_reference"):
+        return {}
+    return npc_personality.peek_pending_chronicle_reference()
+
+func _queue_bond_memorial_dialogue(unit_id: StringName, unit_name: String, support_rank: int) -> void:
+    var adaptive_filter = _get_adaptive_dialogue_filter()
+    var track := "pragmatic"
+    if adaptive_filter != null and adaptive_filter.has_method("resolve_dialogue_track"):
+        track = String(adaptive_filter.resolve_dialogue_track("serin", _peek_pending_chronicle_context())).strip_edges()
+    _pending_bond_memorial_dialogue = {
+        "unit_id": String(unit_id),
+        "unit_name": unit_name.strip_edges(),
+        "support_rank": support_rank,
+        "line": CampaignShellDialogueCatalog.get_bond_memorial_dialogue(unit_name, track, "serin")
+    }
+
+func _consume_pending_bond_memorial_dialogue_line() -> String:
+    if _pending_bond_memorial_dialogue.is_empty():
+        return ""
+    var line := String(_pending_bond_memorial_dialogue.get("line", "")).strip_edges()
+    _pending_bond_memorial_dialogue.clear()
+    return line
+
 func _find_first_dialogue_speaker_id(lines: Array[String]) -> String:
     for line in lines:
         var normalized_line := String(line).strip_edges()
         if not normalized_line.contains(":"):
             continue
         var speaker_name := normalized_line.split(":", true, 1)[0]
+        speaker_name = speaker_name.trim_prefix("⚔️ ")
+        speaker_name = speaker_name.trim_prefix("🛡️ ")
+        speaker_name = speaker_name.trim_prefix("🕊️ ")
+        speaker_name = speaker_name.trim_prefix("🕯️ ")
+        speaker_name = speaker_name.trim_prefix("📜 ")
         var speaker_id := _normalize_dialogue_speaker_id(speaker_name)
         if speaker_id.is_empty():
             continue
@@ -2880,6 +2939,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
             var choice_data: Dictionary = CampaignShellDialogueCatalog.get_choice_dialogue(choice_stage_id, _get_world_timeline_id(), _has_worldview_complete())
             choice_prompt = String(choice_data.get("prompt", _current_panel_body))
             choice_options = _variant_to_dictionary_array(choice_data.get("options", []))
+            choice_options = _decorate_choice_options(choice_stage_id, choice_options)
             dialogue_entries = _variant_to_string_array(choice_data.get("dialogue_entries", []))
     elif mode == CampaignState.MODE_DEFEAT:
         choice_prompt = _defeat_choice_prompt
@@ -3008,6 +3068,45 @@ func _build_panel_flow_label(mode: String) -> String:
             return "Chapter complete -> Await next destination"
         _:
             return "Loop state active"
+
+func _decorate_choice_options(choice_stage_id: StringName, options: Array[Dictionary]) -> Array[Dictionary]:
+    if choice_stage_id != CHOICE_CH10_PRE_FINALE:
+        return options.duplicate(true)
+    var decorated: Array[Dictionary] = []
+    var destiny_unlocked := _is_destiny_unlocked_for_progression(_get_progression_data())
+    for raw_option in options:
+        var option := raw_option.duplicate(true)
+        var option_id := String(option.get("id", "")).strip_edges()
+        if option_id != "ch10_record_the_chosen":
+            decorated.append(option)
+            continue
+        if destiny_unlocked:
+            decorated.append(option)
+            continue
+        var hint := String(option.get("hint", "")).strip_edges()
+        option["hint"] = "%s\nUnlocked at NG+3 or after completing the Third Eye." % hint if not hint.is_empty() else "Unlocked at NG+3 or after completing the Third Eye."
+    return decorated
+
+func _is_destiny_unlocked_for_progression(progression: ProgressionData) -> bool:
+    if progression == null:
+        return false
+    var destiny_manager := DestinyManager.new()
+    destiny_manager.refresh_from_progression(progression)
+    var unlocked := destiny_manager.is_destiny_unlocked()
+    destiny_manager.free()
+    return unlocked
+
+func _sync_destiny_choice_state(chapter_id: String, choice_key: String, option_id: String, progression: ProgressionData) -> void:
+    if progression == null:
+        return
+    var normalized_choice_key := choice_key.strip_edges()
+    var normalized_option_id := option_id.strip_edges()
+    if normalized_choice_key.is_empty() or normalized_option_id.is_empty():
+        return
+    var destiny_manager := DestinyManager.new()
+    destiny_manager.refresh_from_progression(progression)
+    destiny_manager.sync_choice_state(chapter_id, normalized_choice_key, normalized_option_id)
+    destiny_manager.free()
 
 func _build_camp_presentation_cards() -> Array[Dictionary]:
     var cards: Array[Dictionary] = []

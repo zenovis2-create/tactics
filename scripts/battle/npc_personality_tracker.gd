@@ -150,7 +150,7 @@ func apply_unit_death_reaction(nearby_npc_ids: Array[String], bonded_npc_ids: Ar
 			continue
 		modify_attitude(normalized_npc_id, -8.0)
 
-func queue_chronicle_reference(entry) -> void:
+func queue_chronicle_reference(entry, adaptive_profile: Dictionary = {}) -> void:
 	if entry == null:
 		return
 	var style_name := _extract_style_name(entry)
@@ -161,6 +161,10 @@ func queue_chronicle_reference(entry) -> void:
 		"chapter_title": String(entry.chapter_title).strip_edges(),
 		"narrative_text": String(entry.narrative_text).strip_edges(),
 		"style": style_name,
+		"pattern": String(adaptive_profile.get("pattern", "balanced")).strip_edges(),
+		"pattern_reason": String(adaptive_profile.get("pattern_reason", "")).strip_edges(),
+		"boss_mercy": bool(adaptive_profile.get("boss_mercy", false)),
+		"trigger_events": (adaptive_profile.get("trigger_events", []) as Array).duplicate(),
 	}
 	_sync_to_progression()
 

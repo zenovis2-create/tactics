@@ -6,6 +6,10 @@ const GhostFormationData = preload("res://scripts/data/ghost_formation_data.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 
 const DEFAULT_STYLE := ChronicleEntry.ChronicleStyle.CONCISE
+const ADAPTIVE_PATTERN_AGGRESSIVE := "aggressive"
+const ADAPTIVE_PATTERN_DEFENSIVE := "defensive"
+const ADAPTIVE_PATTERN_MERCIFUL := "merciful"
+const ADAPTIVE_PATTERN_BALANCED := "balanced"
 const STYLE_TRIGGER_PRIORITY: Array[String] = [
 	"desperate_victory",
 	"weather_master",
@@ -50,13 +54,30 @@ func generate_entry(chapter_id: String, battle_log: Array, choices_made: Array) 
 	entry.narrative_text = narrative_text
 	entry.style = resolved_style
 	entry.trigger_events = trigger_events
+	var adaptive_context := build_adaptive_dialogue_context(normalized_chapter_id, battle_log, choices_made)
 	var npc_personality = get_node_or_null("/root/NPCPersonality")
 	if npc_personality != null and npc_personality.has_method("queue_chronicle_reference"):
-		npc_personality.queue_chronicle_reference(entry)
+		npc_personality.queue_chronicle_reference(entry, adaptive_context)
 	return entry
 
 func extract_ghost_pattern(chronicle_entry: ChronicleEntry, player_tag: String = "Unknown", is_anonymous: bool = true) -> GhostFormationData:
 	return GhostFormationData.create_from_chronicle(chronicle_entry, player_tag, is_anonymous)
+
+func build_adaptive_dialogue_context(chapter_id: String, battle_log: Array, choices_made: Array) -> Dictionary:
+	var normalized_chapter_id := chapter_id.strip_edges().to_upper()
+	var summary := _normalize_battle_log(battle_log)
+	var trigger_events := _detect_trigger_events(summary)
+	var pattern := _resolve_adaptive_pattern(summary, choices_made, trigger_events)
+	return {
+		"chapter_id": normalized_chapter_id,
+		"pattern": pattern,
+		"pattern_reason": _describe_adaptive_pattern(pattern, summary, choices_made, trigger_events),
+		"boss_mercy": pattern == ADAPTIVE_PATTERN_MERCIFUL,
+		"rush_count": _count_rush_moments(summary, trigger_events),
+		"stall_count": _count_stall_moments(summary, trigger_events),
+		"turn_count": int(summary.get("turn_count", 1)),
+		"trigger_events": trigger_events.duplicate(),
+	}
 
 func _normalize_battle_log(battle_log: Array) -> Dictionary:
 	var summary := {
@@ -304,6 +325,80 @@ func _describe_choice_trace(choices_made: Array) -> String:
 	if choices_made.is_empty():
 		return "no disputed order remained"
 	return "the last standing choice was %s" % _humanize_identifier(String(choices_made[-1]))
+
+func _resolve_adaptive_pattern(summary: Dictionary, choices_made: Array, trigger_events: Array[String]) -> String:
+	if _has_merciful_pattern(summary, choices_made):
+		return ADAPTIVE_PATTERN_MERCIFUL
+	var rush_count := _count_rush_moments(summary, trigger_events)
+	var stall_count := _count_stall_moments(summary, trigger_events)
+	var turn_count := int(summary.get("turn_count", 1))
+	if rush_count > stall_count and turn_count <= 8:
+		return ADAPTIVE_PATTERN_AGGRESSIVE
+	if rush_count >= stall_count + 2:
+		return ADAPTIVE_PATTERN_AGGRESSIVE
+	if stall_count > rush_count and turn_count >= 10:
+		return ADAPTIVE_PATTERN_DEFENSIVE
+	if trigger_events.has("quiet_strategy") or turn_count >= 14:
+		return ADAPTIVE_PATTERN_DEFENSIVE
+	return ADAPTIVE_PATTERN_BALANCED
+
+func _has_merciful_pattern(summary: Dictionary, choices_made: Array) -> bool:
+	for raw_choice in choices_made:
+		var normalized_choice := String(raw_choice).strip_edges().to_lower()
+		if normalized_choice == "spared_enemy" or normalized_choice.contains("mercy"):
+			return true
+	for raw_moment in summary.get("key_moments", []):
+		if typeof(raw_moment) != TYPE_DICTIONARY:
+			continue
+		var moment := raw_moment as Dictionary
+		if bool(moment.get("boss_low_hp", false)) and (bool(moment.get("paused_attack", false)) or bool(moment.get("mercy_pause", false)) or bool(moment.get("spared", false))):
+			return true
+		var boss_hp := float(moment.get("boss_hp", -1.0))
+		var boss_max_hp := float(moment.get("boss_max_hp", 0.0))
+		if boss_max_hp > 0.0 and boss_hp >= 0.0 and (boss_hp / boss_max_hp) <= 0.25:
+			var moment_type := String(moment.get("type", "")).strip_edges().to_lower()
+			if moment_type.contains("mercy") or moment_type.contains("pause") or bool(moment.get("spared", false)):
+				return true
+	return false
+
+func _count_rush_moments(summary: Dictionary, trigger_events: Array[String]) -> int:
+	var rush_count := 0
+	if trigger_events.has("overwhelming_force"):
+		rush_count += 2
+	for raw_moment in summary.get("key_moments", []):
+		if typeof(raw_moment) != TYPE_DICTIONARY:
+			continue
+		var moment := raw_moment as Dictionary
+		var moment_type := String(moment.get("type", "")).strip_edges().to_lower()
+		if moment_type == "attack" or moment_type == "support_attack" or moment_type.contains("charge"):
+			rush_count += 1
+	return rush_count
+
+func _count_stall_moments(summary: Dictionary, trigger_events: Array[String]) -> int:
+	var stall_count := 0
+	if trigger_events.has("quiet_strategy"):
+		stall_count += 2
+	if trigger_events.has("weather_master"):
+		stall_count += 1
+	for raw_moment in summary.get("key_moments", []):
+		if typeof(raw_moment) != TYPE_DICTIONARY:
+			continue
+		var moment := raw_moment as Dictionary
+		var moment_type := String(moment.get("type", "")).strip_edges().to_lower()
+		if moment_type == "sacrifice_play" or moment_type == "weather" or moment_type.contains("wait") or moment_type.contains("guard"):
+			stall_count += 1
+	return stall_count
+
+func _describe_adaptive_pattern(pattern: String, summary: Dictionary, choices_made: Array, trigger_events: Array[String]) -> String:
+	match pattern:
+		ADAPTIVE_PATTERN_AGGRESSIVE:
+			return "rush pattern after %d turns with %d finishing exchanges" % [int(summary.get("turn_count", 1)), _count_rush_moments(summary, trigger_events)]
+		ADAPTIVE_PATTERN_DEFENSIVE:
+			return "stall pattern anchored by %d patient moments" % _count_stall_moments(summary, trigger_events)
+		ADAPTIVE_PATTERN_MERCIFUL:
+			return "mercy pattern after %s" % _describe_choice_trace(choices_made)
+		_:
+			return "balanced field record"
 
 func _format_turn_phrase(turn_count: int) -> String:
 	return "%d turns" % maxi(1, turn_count)

@@ -11,6 +11,13 @@ class BossModifier:
 	var boss_resolve_dialogue: String = ""
 	var boss_attitude: String = "neutral"
 
+
+const LEONIKA_DIALOGUE_KEYS := {
+	"ruthless": "_CH10_LEONIKA_RUTHLESS",
+	"pragmatic": "_CH10_LEONIKA_PRAGMATIC",
+	"compassionate": "_CH10_LEONIKA_COMPASSIONATE",
+}
+
 var _decision_point: Node = null
 
 func _ready() -> void:
@@ -109,6 +116,18 @@ func resolve_boss_id(unit_data: UnitData) -> String:
 			return "dark_mage"
 		_:
 			return ""
+
+func get_dialogue_variant_track() -> String:
+	return _get_ethics_bracket()
+
+func get_boss_dialogue_variant_key(boss_id: String, base_key: String = "") -> String:
+	var normalized_boss_id := boss_id.strip_edges().to_lower()
+	var normalized_base_key := base_key.strip_edges().to_lower()
+	if normalized_boss_id != "leonika":
+		return ""
+	if not normalized_base_key.is_empty() and normalized_base_key != "ch10_final":
+		return ""
+	return String(LEONIKA_DIALOGUE_KEYS.get(_get_ethics_bracket(), LEONIKA_DIALOGUE_KEYS["pragmatic"]))
 
 func _connect_decision_point() -> void:
 	var decision_point = get_node_or_null("/root/DecisionPoint")
