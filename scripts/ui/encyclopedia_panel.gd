@@ -3,6 +3,7 @@ extends Control
 
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
+const MemorialSceneScript = preload("res://scripts/campaign/memorial_scene.gd")
 const MemorialSceneBondSection = preload("res://scripts/campaign/memorial_scene_bond_section.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 const GhostFormationData = preload("res://scripts/data/ghost_formation_data.gd")
@@ -595,31 +596,55 @@ func _load_ghost_records() -> Array[GhostFormationData]:
 
 func _rebuild_memorial() -> void:
 	_clear_children(memorial_cards)
-	if _progression_data == null or _progression_data.get_honor_roll().is_empty():
+	if _progression_data == null:
+		return
+	if _progression_data.get_honor_roll().is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "No sacrifices have been etched into the memorial."
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		memorial_cards.add_child(empty_label)
+	else:
+		var honor_roll := _progression_data.get_honor_roll()
+		for index in range(min(3, honor_roll.size())):
+			var record := honor_roll[index]
+			var card := PanelContainer.new()
+			card.custom_minimum_size = Vector2(200.0, 120.0)
+			var margin := MarginContainer.new()
+			margin.add_theme_constant_override("margin_left", 10)
+			margin.add_theme_constant_override("margin_top", 10)
+			margin.add_theme_constant_override("margin_right", 10)
+			margin.add_theme_constant_override("margin_bottom", 10)
+			var label := Label.new()
+			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			label.text = "%s\n%s" % [
+				String(record.get("unit_name", "The Fallen")),
+				String(record.get("epitaph", ""))
+			]
+			margin.add_child(label)
+			card.add_child(margin)
+			memorial_cards.add_child(card)
+	var battle_scar_lines := MemorialSceneScript.build_battle_scar_lines(_progression_data)
+	var museum_line := MemorialSceneScript.build_battle_scar_museum_line(_progression_data)
+	if battle_scar_lines.is_empty() and museum_line.is_empty():
 		return
-	var honor_roll := _progression_data.get_honor_roll()
-	for index in range(min(3, honor_roll.size())):
-		var record := honor_roll[index]
-		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(200.0, 120.0)
-		var margin := MarginContainer.new()
-		margin.add_theme_constant_override("margin_left", 10)
-		margin.add_theme_constant_override("margin_top", 10)
-		margin.add_theme_constant_override("margin_right", 10)
-		margin.add_theme_constant_override("margin_bottom", 10)
-		var label := Label.new()
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.text = "%s\n%s" % [
-			String(record.get("unit_name", "The Fallen")),
-			String(record.get("epitaph", ""))
-		]
-		margin.add_child(label)
-		card.add_child(margin)
-		memorial_cards.add_child(card)
+	var battle_scar_card := PanelContainer.new()
+	battle_scar_card.custom_minimum_size = Vector2(200.0, 120.0)
+	var battle_scar_margin := MarginContainer.new()
+	battle_scar_margin.add_theme_constant_override("margin_left", 10)
+	battle_scar_margin.add_theme_constant_override("margin_top", 10)
+	battle_scar_margin.add_theme_constant_override("margin_right", 10)
+	battle_scar_margin.add_theme_constant_override("margin_bottom", 10)
+	var battle_scar_label := Label.new()
+	battle_scar_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var battle_scar_text_lines: Array[String] = ["전장의자국"]
+	if not museum_line.is_empty():
+		battle_scar_text_lines.append(museum_line)
+	for line in battle_scar_lines:
+		battle_scar_text_lines.append(line)
+	battle_scar_label.text = "\n".join(battle_scar_text_lines)
+	battle_scar_margin.add_child(battle_scar_label)
+	battle_scar_card.add_child(battle_scar_margin)
+	memorial_cards.add_child(battle_scar_card)
 
 func _rebuild_atlas() -> void:
 	if _progression_data == null:
@@ -630,8 +655,10 @@ func _rebuild_atlas() -> void:
 		chapters.append(String(_active_chapter_id))
 	var marker_text := _build_atlas_memorial_marker_text()
 	var stage_memorial_lines := _build_atlas_stage_memorial_lines()
+	var battle_scar_lines := MemorialSceneScript.build_battle_scar_lines(_progression_data)
+	var battle_scar_museum_line := MemorialSceneScript.build_battle_scar_museum_line(_progression_data)
 	if chapters.is_empty() and marker_text.is_empty():
-		if stage_memorial_lines.is_empty():
+		if stage_memorial_lines.is_empty() and battle_scar_lines.is_empty() and battle_scar_museum_line.is_empty():
 			atlas_label.text = "No route has been charted yet."
 			return
 	var locations: Array[String] = []
@@ -651,6 +678,14 @@ func _rebuild_atlas() -> void:
 			lines.append("")
 		lines.append("[b]Terrain Remembers[/b]")
 		for line in stage_memorial_lines:
+			lines.append(line)
+	if not battle_scar_lines.is_empty() or not battle_scar_museum_line.is_empty():
+		if not lines.is_empty():
+			lines.append("")
+		lines.append("[b]전장의자국[/b]")
+		if not battle_scar_museum_line.is_empty():
+			lines.append(battle_scar_museum_line)
+		for line in battle_scar_lines:
 			lines.append(line)
 	atlas_label.text = "\n".join(lines)
 
