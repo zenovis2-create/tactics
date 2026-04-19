@@ -25,10 +25,12 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const BattleBoard = preload("res://scripts/battle/battle_board.gd")
+const BattlefieldEvolution = preload("res://scripts/battle/battlefield_evolution.gd")
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
 const STATUS_SERVICE_PATH := "res://scripts/battle/status_service.gd"
 const TelemetryService = preload("res://scripts/battle/telemetry_service.gd")
 const RewardService = preload("res://scripts/battle/reward_service.gd")
+const TacticalNote = preload("res://scripts/battle/tactical_note.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
 const BOND_SERVICE_PATH := "res://scripts/battle/bond_service.gd"
@@ -196,6 +198,7 @@ var equipped_weapon_by_unit_id: Dictionary = {}
 var equipped_armor_by_unit_id: Dictionary = {}
 var boss_marked_target_id: int = -1
 var boss_charge_pending: bool = false
+var boss_enraged: bool = false
 var enemy_attack_bonus_by_unit: Dictionary = {}
 var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuses
 var boss_event_history: Array[String] = []
@@ -228,6 +231,8 @@ var _spotlight_slow_mo_token: int = 0
 var flood_zone_positions: Array[Vector2i] = []
 var flood_margin_positions: Array[Vector2i] = []
 var _flood_expansion_turns: int = 0
+var active_cascade_modifiers: Dictionary = {}
+var _cascade_flood_level_bonus: int = 0
 var last_spotlight_effect: Dictionary = {}
 var _chronicle_enemy_opening_count: int = 0
 var _chronicle_ally_opening_count: int = 0
@@ -235,6 +240,8 @@ var _chronicle_enemy_defeats: Array[String] = []
 var _chronicle_allies_lost: Array[Dictionary] = []
 var _chronicle_weather_events: Array[String] = []
 var _chronicle_turn_history: Array[Dictionary] = []
+var _selected_tactical_note: TacticalNote
+var _selected_tactical_note_bonus: float = 1.0
 var mirror_enemy_commander = EnemyCommander.new()
 
 # M4/M5/M6 services — instantiated at runtime, not scene nodes.
@@ -275,6 +282,17 @@ func _init_meta_services() -> void:
     if bond_service_script is GDScript and bond_service_script.can_instantiate():
         bond_service = bond_service_script.new()
         add_child(bond_service)
+    _bind_world_state_services()
+
+func _bind_world_state_services() -> void:
+    var decision_point = get_node_or_null("/root/DecisionPoint")
+    if decision_point != null and decision_point.has_method("bind_progression_service"):
+        decision_point.bind_progression_service(progression_service)
+    var cascade = get_node_or_null("/root/Cascade")
+    if cascade != null and cascade.has_method("bind_progression_service"):
+        cascade.bind_progression_service(progression_service)
+    if cascade != null and cascade.has_method("connect_decision_point") and decision_point != null:
+        cascade.connect_decision_point(decision_point)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -285,6 +303,7 @@ func bootstrap_battle() -> void:
     last_result = ""
     boss_marked_target_id = -1
     boss_charge_pending = false
+    boss_enraged = false
     enemy_attack_bonus_by_unit.clear()
     enemy_movement_bonus_by_unit.clear()
     boss_event_history.clear()
@@ -310,12 +329,15 @@ func bootstrap_battle() -> void:
     _spotlight_slow_mo_token += 1
     Engine.time_scale = 1.0
     falling_units_this_turn.clear()
+    active_cascade_modifiers.clear()
+    _cascade_flood_level_bonus = 0
     if mirror_enemy_commander != null:
         mirror_enemy_commander.reset()
     _reset_flood_state()
     _reset_finale_contract_state()
     if bond_service != null and progression_service != null:
         bond_service.setup_progression(progression_service.get_data())
+    _apply_pending_world_state_cascades()
 
     _clear_battle_state()
     _apply_mirror_stage_configuration()
@@ -325,6 +347,8 @@ func bootstrap_battle() -> void:
     path_service.configure_from_stage(stage_data)
     _layout_battlefield()
     _initialize_flood_zones()
+    _prepare_battlefield_evolution()
+    _apply_cascade_battle_conditions()
 
     if telemetry_service != null:
         telemetry_service.record_battle_start(stage_data.stage_id if stage_data != null else &"unknown")
@@ -389,6 +413,25 @@ func _wire_signals() -> void:
     if not battle_turn_ended.is_connected(_on_battle_turn_ended):
         battle_turn_ended.connect(_on_battle_turn_ended)
     _wire_spotlight_signal()
+    _connect_battlefield_evolution_signal()
+
+func _connect_battlefield_evolution_signal() -> void:
+    var evolution := _get_battlefield_evolution()
+    if evolution == null:
+        return
+    var callback := Callable(self, "_on_battlefield_evolution_occurred")
+    if not evolution.evolution_occurred.is_connected(callback):
+        evolution.evolution_occurred.connect(callback)
+
+func _prepare_battlefield_evolution() -> void:
+    var evolution := _get_battlefield_evolution()
+    if evolution == null:
+        return
+    evolution.prepare_for_battle(stage_data, battle_board, path_service, self)
+    boss_enraged = evolution.boss_enraged
+
+func _get_battlefield_evolution() -> BattlefieldEvolution:
+    return get_node_or_null("/root/Evolution") as BattlefieldEvolution
 
 func _clear_battle_state() -> void:
     _current_turn_actions.clear()
@@ -442,6 +485,7 @@ func _spawn_from_stage() -> void:
     _spawn_group(stage_data.ally_units, stage_data.ally_spawns, "ally", ally_units)
     _spawn_group(stage_data.enemy_units, stage_data.enemy_spawns, "enemy", enemy_units)
     _spawn_interactive_objects(stage_data.interactive_objects)
+    _apply_selected_tactical_note_bonus_to_allies()
     _apply_opening_boss_stealth_state()
 
 func _on_viewport_size_changed() -> void:
@@ -769,6 +813,10 @@ func _defer_namecall_choice(companion_id: StringName) -> void:
         progression_data.namecall_rejected_count += 1
 
 func _begin_player_phase(reason: String) -> void:
+    var evolution := _get_battlefield_evolution()
+    if evolution != null:
+        evolution.check_evolutions(round_index)
+        boss_enraged = evolution.boss_enraged
     _transition_to(BattlePhase.PLAYER_PHASE_START, reason, {"round": round_index})
 
     _update_hold_objective_progress(reason)
@@ -1338,6 +1386,7 @@ func _check_battle_end() -> bool:
 
 func _on_battle_victory() -> void:
     last_result = "victory"
+    _trigger_world_state_decision_for_stage_victory()
     if _is_mirror_battle_active():
         hidden_recruit_state["mirror_mode"] = true
         hidden_recruit_state["mirror_leonika_survived"] = _has_live_mirror_leonika()
@@ -2015,6 +2064,7 @@ func _sync_hud_phase(reason: String, payload: Dictionary) -> void:
     hud.set_phase(_phase_name(current_phase).replace("_", " "))
     hud.set_objective(_get_objective_text())
     hud.set_stage_title(stage_data.get_display_title() if stage_data != null else "")
+    hud.set_tactical_note_bonus(_selected_tactical_note_bonus)
     hud.set_inventory_snapshot(
         _get_inventory_panel_title(),
         _get_objective_text(),
@@ -2022,7 +2072,29 @@ func _sync_hud_phase(reason: String, payload: Dictionary) -> void:
         get_inventory_entries()
     )
     hud.set_transition_reason(reason, payload)
+    var evolution := _get_battlefield_evolution()
+    if evolution != null:
+        var warning_event = evolution.get_warning_event(round_index)
+        if warning_event != null:
+            hud._show_evolution_warning(warning_event)
+        else:
+            hud.clear_evolution_warning()
+    else:
+        hud.clear_evolution_warning()
     _sync_selection_hud()
+
+func _on_battlefield_evolution_occurred(event_id: String, affected_tiles: Array) -> void:
+    var evolution := _get_battlefield_evolution()
+    if evolution != null:
+        boss_enraged = evolution.boss_enraged
+    _play_battle_flash(Color(1.0, 0.870588, 0.360784, 0.22), 0.2)
+    if hud != null:
+        hud.flash_evolution_occurrence()
+    _sync_hud_phase("battlefield_evolution", {
+        "event_id": event_id,
+        "affected_tiles": affected_tiles,
+        "round": round_index
+    })
 
 func _get_enemy_view() -> Node:
     return get_node_or_null("/root/EnemyView")
@@ -2414,11 +2486,15 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
     for key in extra_context.keys():
         attack_context[key] = extra_context[key]
 
-    if attacker.faction == "ally" and progression_service != null:
-        var burden_fx := progression_service.get_burden_effect()
-        var atk_bonus: int = int(attack_context.get("attack_bonus", 0))
-        atk_bonus += int(burden_fx.get("damage_mod", 0))
-        attack_context["attack_bonus"] = atk_bonus
+    if attacker.faction == "ally":
+        if progression_service != null:
+            var burden_fx := progression_service.get_burden_effect()
+            var atk_bonus: int = int(attack_context.get("attack_bonus", 0))
+            atk_bonus += int(burden_fx.get("damage_mod", 0))
+            attack_context["attack_bonus"] = atk_bonus
+        var tactical_note_percent_bonus := int(round((maxf(_get_unit_tactical_note_bonus(attacker), 1.0) - 1.0) * 100.0))
+        if tactical_note_percent_bonus > 0:
+            attack_context["attack_percent_mod"] = int(attack_context.get("attack_percent_mod", 0)) + tactical_note_percent_bonus
 
     if include_bond_bonus and attacker.faction == "ally" and bond_service != null:
         var bond_atk_bonus: int = 0
@@ -2440,11 +2516,11 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
         attack_context["oblivion_accuracy_mod"] = int(attacker_oblivion_fx.get("accuracy_mod", 0))
         attack_context["oblivion_evasion_mod"] = int(attacker_oblivion_fx.get("evasion_mod", 0))
         attack_context["oblivion_skills_sealed"] = bool(attacker_oblivion_fx.get("skills_sealed", false))
-        attack_context["accuracy_mod"] = int(attacker_status_fx.get("accuracy_mod", 0))
-        attack_context["attack_percent_mod"] = int(attacker_status_fx.get("attack_percent_mod", 0))
+        attack_context["accuracy_mod"] = int(attack_context.get("accuracy_mod", 0)) + int(attacker_status_fx.get("accuracy_mod", 0))
+        attack_context["attack_percent_mod"] = int(attack_context.get("attack_percent_mod", 0)) + int(attacker_status_fx.get("attack_percent_mod", 0))
         attack_context["crit_rate_bonus"] = int(attacker_status_fx.get("crit_rate_bonus", 0))
         attack_context["ability_locked"] = bool(attacker_status_fx.get("ability_locked", false))
-        attack_context["defense_percent_mod"] = int(defender_status_fx.get("defense_percent_mod", 0))
+        attack_context["defense_percent_mod"] = int(attack_context.get("defense_percent_mod", 0)) + int(defender_status_fx.get("defense_percent_mod", 0))
 
     var heirloom = get_node_or_null("/root/Heirloom")
     if heirloom != null and heirloom.has_method("get_attack_context_bonus"):
@@ -2458,6 +2534,44 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
                 attack_context[key] = value
 
     return attack_context
+
+func select_tactical_note_at_battle_start(note_id: String) -> bool:
+    var tactics = get_node_or_null("/root/Tactics")
+    if tactics == null or not tactics.has_method("get_note_by_id"):
+        return false
+    var note := tactics.call("get_note_by_id", note_id) as TacticalNote
+    if note == null:
+        return false
+    _selected_tactical_note = note
+    _selected_tactical_note_bonus = _get_tactical_note_bonus(note)
+    if tactics.has_method("increment_usage"):
+        tactics.call("increment_usage", note.note_id)
+    _apply_selected_tactical_note_bonus_to_allies()
+    if hud != null:
+        hud.set_tactical_note_bonus(_selected_tactical_note_bonus)
+        hud.set_transition_reason("tactical_note_selected", {
+            "tactic_name": note.name,
+            "bonus_percent": int(round((_selected_tactical_note_bonus - 1.0) * 100.0))
+        })
+    return true
+
+func _apply_selected_tactical_note_bonus_to_allies() -> void:
+    for unit in ally_units:
+        if not is_instance_valid(unit):
+            continue
+        unit.set_meta("tactical_note_bonus_multiplier", _selected_tactical_note_bonus)
+
+func _get_unit_tactical_note_bonus(unit: UnitActor) -> float:
+    if unit == null or not is_instance_valid(unit) or unit.faction != "ally":
+        return 1.0
+    if unit.has_meta("tactical_note_bonus_multiplier"):
+        return maxf(1.0, float(unit.get_meta("tactical_note_bonus_multiplier")))
+    return _selected_tactical_note_bonus
+
+func _get_tactical_note_bonus(note: TacticalNote) -> float:
+    if note == null:
+        return 1.0
+    return 1.0 + (float(clampi(note.difficulty_rating, 1, 5)) * 0.05)
 
 func _apply_synergy_reactions(context: Dictionary = {}) -> Dictionary:
     if status_service == null:
@@ -3140,6 +3254,60 @@ func _record_flooded_stage() -> void:
     if stage_id_text.is_empty() or progression_data.flooded_stages.has(stage_id_text):
         return
     progression_data.flooded_stages.append(stage_id_text)
+
+func _apply_pending_world_state_cascades() -> void:
+    if progression_service == null or stage_data == null:
+        return
+    var cascade = get_node_or_null("/root/Cascade")
+    if cascade == null or not cascade.has_method("apply_pending_cascades") or not cascade.has_method("get_active_modifiers"):
+        return
+    var current_chapter := _extract_chapter_number_from_stage(String(stage_data.stage_id))
+    if current_chapter <= 0:
+        return
+    cascade.apply_pending_cascades(current_chapter)
+    active_cascade_modifiers = cascade.get_active_modifiers()
+    _cascade_flood_level_bonus = int(active_cascade_modifiers.get("battle_terrain_flood_level", 0))
+
+func _apply_cascade_battle_conditions() -> void:
+    if _cascade_flood_level_bonus <= 0:
+        return
+    for _index in range(_cascade_flood_level_bonus):
+        _update_flood_zones()
+
+func _trigger_world_state_decision_for_stage_victory() -> void:
+    if stage_data == null:
+        return
+    var decision_point = get_node_or_null("/root/DecisionPoint")
+    if decision_point == null or not decision_point.has_method("trigger_decision"):
+        return
+    var normalized_stage_id := String(stage_data.stage_id).strip_edges().to_upper()
+    match normalized_stage_id:
+        "CH04_01":
+            decision_point.trigger_decision("CH04", "spared_leonika", true)
+        "CH05_05":
+            decision_point.trigger_decision("CH05", "burned_bridge", true)
+        "CH06_05":
+            decision_point.trigger_decision("CH06", "saved_supply_train", true)
+        "CH07_05":
+            decision_point.trigger_decision("CH07", "ignored_warning", true)
+        _:
+            pass
+
+func _extract_chapter_number_from_stage(stage_id_text: String) -> int:
+    var normalized := stage_id_text.strip_edges().to_upper()
+    if not normalized.begins_with("CH"):
+        return 0
+    var digits := ""
+    for index in range(2, normalized.length()):
+        var character := normalized[index]
+        if character >= "0" and character <= "9":
+            digits += character
+        else:
+            break
+    return int(digits) if not digits.is_empty() else 0
+
+func get_active_cascade_modifier_snapshot() -> Dictionary:
+    return active_cascade_modifiers.duplicate(true)
 
 func _is_downpour_active() -> bool:
     return stage_data != null and DOWNPOUR_WEATHER_IDS.has(stage_data.weather_id)

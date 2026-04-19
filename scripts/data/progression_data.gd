@@ -2,6 +2,7 @@ class_name ProgressionData
 extends Resource
 
 const ChronicleEntry = preload("res://scripts/battle/chronicle_entry.gd")
+const TacticalNote = preload("res://scripts/battle/tactical_note.gd")
 
 ## Serializable campaign-level meta state.
 ## Owned by ProgressionService; persisted in save file.
@@ -103,7 +104,12 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var ch10_attack_bonus: int = 0
 @export var ch10_defense_bonus: int = 0
 @export var namecall_rejected_count: int = 0
+@export var world_state_bits: Dictionary = {}
+@export var world_state_chapters: Dictionary = {}
+@export var cascade_effects: Array[Dictionary] = []
+@export var active_battle_condition_modifiers: Dictionary = {}
 @export var commander_profile: CommanderProfile = CommanderProfile.new()
+@export var tactical_notes: Array[TacticalNote] = []
 
 func earn_badge(badge_id: String, amount: int) -> bool:
 	var normalized: String = badge_id.strip_edges()
@@ -159,6 +165,7 @@ func reset_for_new_campaign() -> void:
 	epitaphs.clear()
 	memorial_records.clear()
 	ashes_collected.clear()
+	tactical_notes.clear()
 	enoch_wounded = false
 	ledger_count = 0
 	world_timeline_id = "A"
@@ -172,6 +179,10 @@ func reset_for_new_campaign() -> void:
 	ch10_attack_bonus = 0
 	ch10_defense_bonus = 0
 	namecall_rejected_count = 0
+	world_state_bits.clear()
+	world_state_chapters.clear()
+	cascade_effects.clear()
+	active_battle_condition_modifiers.clear()
 	commander_profile = CommanderProfile.new()
 	free_name_call = has_ng_plus_purchase("divine_blessing")
 
@@ -658,6 +669,10 @@ func to_debug_dict() -> Dictionary:
 		"ch10_attack_bonus": ch10_attack_bonus,
 		"ch10_defense_bonus": ch10_defense_bonus,
 		"namecall_rejected_count": namecall_rejected_count,
+		"world_state_bits": world_state_bits.duplicate(true),
+		"world_state_chapters": world_state_chapters.duplicate(true),
+		"cascade_effects": cascade_effects.duplicate(true),
+		"active_battle_condition_modifiers": active_battle_condition_modifiers.duplicate(true),
 		"commander_profile": ensure_commander_profile().to_debug_dict(),
 		"badges_of_heroism": badges_of_heroism,
 		"earned_badges": earned_badges.duplicate(),
@@ -676,5 +691,14 @@ func to_debug_dict() -> Dictionary:
 		"melkion_unlocked": melkion_unlocked,
 		"recovering_units": recovering_units.duplicate(),
 		"sacrificed_units": get_sacrifice_records(),
-		"recover_chapter_count": recover_chapter_count
+		"recover_chapter_count": recover_chapter_count,
+		"tactical_notes": _get_tactical_note_debug_snapshot()
 	}
+
+func _get_tactical_note_debug_snapshot() -> Array[Dictionary]:
+	var snapshot: Array[Dictionary] = []
+	for note in tactical_notes:
+		if note == null:
+			continue
+		snapshot.append(note.to_debug_dict())
+	return snapshot

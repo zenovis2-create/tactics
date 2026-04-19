@@ -27,6 +27,10 @@ Chronicle="*res://scripts/battle/chronicle_generator.gd"
 EnemyView="*res://scripts/battle/enemy_perspective_manager.gd"
 Heirloom="*res://scripts/battle/heirloom_service.gd"
 FlawDetector="*res://scripts/battle/tactical_flaw_detector.gd"
+Evolution="*res://scripts/battle/battlefield_evolution.gd"
+DecisionPoint="*res://scripts/battle/decision_point.gd"
+Cascade="*res://scripts/battle/cascade_calculator.gd"
+Tactics="*res://scripts/battle/tactical_note_manager.gd"
 
 [display]
 

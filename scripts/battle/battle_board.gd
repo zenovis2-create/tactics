@@ -15,10 +15,13 @@ const TERRAIN_OVERLAY_CONTRACTS := {
     &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.14, "icon": "battery.png"},
     &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.12, "icon": "cathedral.png"},
     &"bell": {"family": "bell", "card": "bell.png", "card_alpha": 0.12, "icon": "bell.png"},
-    &"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.14, "icon": "bridge.png"},
-    &"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.1, "icon": "bell.png"},
-    &"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.18, "icon": "highground.png"},
-    &"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"}
+	&"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.14, "icon": "bridge.png"},
+	&"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.1, "icon": "bell.png"},
+	&"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.18, "icon": "highground.png"},
+	&"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"},
+	&"crumbling_debris": {"family": "wall", "card": "wall.png", "card_alpha": 0.1, "icon": "wall.png"},
+	&"fallen_tree": {"family": "forest", "card": "forest.png", "card_alpha": 0.18, "icon": "forest.png"},
+	&"corrupted_ground": {"family": "plain", "card": "plain.png", "card_alpha": 0.2, "icon": ""}
 }
 
 var stage_data: StageData
@@ -149,6 +152,12 @@ func _get_tile_color(cell: Vector2i, parity: int) -> Color:
             return Color(0.345098, 0.298039, 0.219608, 1.0) if parity % 2 == 0 else Color(0.313726, 0.270588, 0.2, 1.0)
         &"keep":
             return Color(0.286275, 0.286275, 0.333333, 1.0) if parity % 2 == 0 else Color(0.25098, 0.25098, 0.298039, 1.0)
+        &"crumbling_debris":
+            return Color(0.352941, 0.321569, 0.301961, 1.0) if parity % 2 == 0 else Color(0.317647, 0.286275, 0.266667, 1.0)
+        &"fallen_tree":
+            return Color(0.235294, 0.278431, 0.172549, 1.0) if parity % 2 == 0 else Color(0.2, 0.243137, 0.145098, 1.0)
+        &"corrupted_ground":
+            return Color(0.27451, 0.188235, 0.317647, 1.0) if parity % 2 == 0 else Color(0.231373, 0.156863, 0.278431, 1.0)
         &"corridor":
             return Color(0.215686, 0.235294, 0.305882, 1.0) if parity % 2 == 0 else Color(0.188235, 0.207843, 0.27451, 1.0)
         &"highground":

@@ -3,6 +3,7 @@ extends Control
 
 const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 const CommanderProfile = preload("res://scripts/battle/commander_profile.gd")
+const EvolutionEvent = preload("res://scripts/battle/evolution_event.gd")
 const TelegraphTextureLibrary = preload("res://scripts/battle/telegraph_texture_library.gd")
 
 signal wait_requested
@@ -80,6 +81,7 @@ var party_list_container: VBoxContainer:
         return _party_list_container_compat
 
 var _compact_layout: bool = false
+var _current_round: int = 1
 var _last_focus_owner: Control
 var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
@@ -107,6 +109,11 @@ var _commander_flaw_badge: PanelContainer
 var _commander_flaw_badge_label: Label
 var _commander_flaw_warning_label: Label
 var _commander_flaw_warning_tween: Tween
+var _evolution_warning_label: Label
+var _evolution_border_overlay: Control
+var _evolution_border_tween: Tween
+var _tactical_note_bonus_chip: PanelContainer
+var _tactical_note_bonus_label: Label
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -138,6 +145,8 @@ func _ready() -> void:
     _build_stage_memorial_overlay()
     _build_namecall_choice_overlay()
     _build_commander_flaw_ui()
+    _build_evolution_warning_ui()
+    _build_tactical_note_bonus_ui()
     _connect_commander_flaw_detector()
     _update_responsive_layout()
     _apply_runtime_button_icons()
@@ -159,6 +168,7 @@ func set_phase(phase_text: String) -> void:
     phase_label.text = "Phase: %s" % phase_text
 
 func set_round(round_number: int) -> void:
+    _current_round = round_number
     round_label.text = "Round %d" % round_number
 
 func set_objective(objective_text: String) -> void:
@@ -167,6 +177,15 @@ func set_objective(objective_text: String) -> void:
 func set_stage_title(title_text: String) -> void:
     stage_label.text = title_text
     stage_chip.visible = not title_text.strip_edges().is_empty()
+
+func set_tactical_note_bonus(multiplier: float) -> void:
+    if _tactical_note_bonus_chip == null:
+        _build_tactical_note_bonus_ui()
+    var bonus_percent := maxi(0, int(round((maxf(multiplier, 1.0) - 1.0) * 100.0)))
+    _tactical_note_bonus_chip.visible = bonus_percent > 0
+    if _tactical_note_bonus_label != null:
+        _tactical_note_bonus_label.text = "전술 보정: +%d%%" % bonus_percent
+    _tactical_note_bonus_chip.tooltip_text = "전술 노트로 인한 전투 보정" if bonus_percent > 0 else ""
 
 func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     var formatted_reason: String = _format_reason(reason, payload)
@@ -310,6 +329,26 @@ func _build_commander_flaw_ui() -> void:
     content.add_child(_commander_flaw_warning_label)
     content.move_child(_commander_flaw_warning_label, selection_card.get_index() + 1)
 
+func _build_tactical_note_bonus_ui() -> void:
+    if _tactical_note_bonus_chip != null:
+        return
+
+    _tactical_note_bonus_chip = PanelContainer.new()
+    _tactical_note_bonus_chip.name = "TacticalNoteBonusChip"
+    _tactical_note_bonus_chip.visible = false
+    meta_row.add_child(_tactical_note_bonus_chip)
+
+    var padding := MarginContainer.new()
+    padding.add_theme_constant_override("margin_left", 8)
+    padding.add_theme_constant_override("margin_top", 2)
+    padding.add_theme_constant_override("margin_right", 8)
+    padding.add_theme_constant_override("margin_bottom", 2)
+    _tactical_note_bonus_chip.add_child(padding)
+
+    _tactical_note_bonus_label = Label.new()
+    _tactical_note_bonus_label.add_theme_font_size_override("font_size", 10)
+    padding.add_child(_tactical_note_bonus_label)
+
 func _connect_commander_flaw_detector() -> void:
     _commander_flaw_detector = get_node_or_null("/root/FlawDetector")
     if _commander_flaw_detector == null:
@@ -365,6 +404,88 @@ func _flash_commander_flaw_warning(message: String) -> void:
     _commander_flaw_warning_tween.finished.connect(func() -> void:
         if _commander_flaw_warning_label != null:
             _commander_flaw_warning_label.visible = false
+    )
+
+func _build_evolution_warning_ui() -> void:
+    if _evolution_warning_label != null:
+        return
+
+    _evolution_warning_label = Label.new()
+    _evolution_warning_label.name = "EvolutionWarningLabel"
+    _evolution_warning_label.visible = false
+    _evolution_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    _evolution_warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _evolution_warning_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _evolution_warning_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+    _evolution_warning_label.offset_left = 120.0
+    _evolution_warning_label.offset_top = 54.0
+    _evolution_warning_label.offset_right = -120.0
+    _evolution_warning_label.offset_bottom = 84.0
+    _evolution_warning_label.add_theme_color_override("font_color", Color(1.0, 0.921569, 0.509804, 1.0))
+    _evolution_warning_label.add_theme_font_size_override("font_size", 12)
+    add_child(_evolution_warning_label)
+
+    _evolution_border_overlay = Control.new()
+    _evolution_border_overlay.name = "EvolutionBorderOverlay"
+    _evolution_border_overlay.visible = false
+    _evolution_border_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _evolution_border_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(_evolution_border_overlay)
+
+    for border_name in ["Top", "Bottom", "Left", "Right"]:
+        var edge := ColorRect.new()
+        edge.name = "%sEdge" % border_name
+        edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        edge.color = Color(1.0, 0.886275, 0.352941, 0.92)
+        _evolution_border_overlay.add_child(edge)
+
+    var top_edge := _evolution_border_overlay.get_node("TopEdge") as ColorRect
+    var bottom_edge := _evolution_border_overlay.get_node("BottomEdge") as ColorRect
+    var left_edge := _evolution_border_overlay.get_node("LeftEdge") as ColorRect
+    var right_edge := _evolution_border_overlay.get_node("RightEdge") as ColorRect
+
+    top_edge.anchor_right = 1.0
+    top_edge.offset_bottom = 6.0
+    bottom_edge.anchor_top = 1.0
+    bottom_edge.anchor_right = 1.0
+    bottom_edge.offset_top = -6.0
+    left_edge.anchor_bottom = 1.0
+    left_edge.offset_right = 6.0
+    right_edge.anchor_left = 1.0
+    right_edge.anchor_bottom = 1.0
+    right_edge.offset_left = -6.0
+
+func _show_evolution_warning(event: EvolutionEvent) -> void:
+    if _evolution_warning_label == null:
+        return
+    if event == null:
+        clear_evolution_warning()
+        return
+    var turns_until_event := event.trigger_turn - _current_round
+    if turns_until_event != 2:
+        clear_evolution_warning()
+        return
+    _evolution_warning_label.text = "⚠ 지형이 불안정합니다 — %d턴 후: %s" % [turns_until_event, event.narrative_text]
+    _evolution_warning_label.visible = true
+
+func clear_evolution_warning() -> void:
+    if _evolution_warning_label == null:
+        return
+    _evolution_warning_label.text = ""
+    _evolution_warning_label.visible = false
+
+func flash_evolution_occurrence() -> void:
+    if _evolution_border_overlay == null:
+        return
+    if _evolution_border_tween != null:
+        _evolution_border_tween.kill()
+    _evolution_border_overlay.visible = true
+    _evolution_border_overlay.modulate = Color(1.0, 1.0, 1.0, 0.95)
+    _evolution_border_tween = create_tween()
+    _evolution_border_tween.tween_property(_evolution_border_overlay, "modulate:a", 0.0, 0.4)
+    _evolution_border_tween.finished.connect(func() -> void:
+        if _evolution_border_overlay != null:
+            _evolution_border_overlay.visible = false
     )
 
 func _build_namecall_choice_overlay() -> void:
@@ -433,6 +554,7 @@ func _build_namecall_choice_overlay() -> void:
     _namecall_choice_defer_button.custom_minimum_size = Vector2(0.0, 58.0)
     _namecall_choice_defer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     _namecall_choice_defer_button.pressed.connect(func() -> void: select_namecall_choice("defer"))
+    button_row.add_child(_namecall_choice_defer_button)
 func _build_flood_margin_overlay() -> void:
     if _flood_margin_overlay != null:
         return
