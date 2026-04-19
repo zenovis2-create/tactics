@@ -4,8 +4,9 @@ extends Node
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 
-const MARKER_VISIT_THRESHOLD: int = 5
+const MARKER_VISIT_THRESHOLD: int = 3
 const DEFAULT_MARKER_TYPE: String = "battle_scars"
+const MUSEUM_MARKER_TYPE: String = "battlefield_museum"
 const STAGE_RESOURCE_PATH: String = "res://data/stages/%s_stage.tres"
 
 var terrain_damage_map: Dictionary = {}
@@ -48,7 +49,7 @@ func record_battle_visit(chapter_id: String) -> void:
 		return
 	battle_visit_counts[normalized_chapter_id] = get_visit_count(normalized_chapter_id) + 1
 	_battle_last_visit_dates[normalized_chapter_id] = Time.get_datetime_string_from_system()
-	_try_add_persistent_marker(normalized_chapter_id)
+	_upsert_persistent_marker(normalized_chapter_id)
 	_sync_progression()
 
 func get_damage_at(chapter_id: String, tile_pos: Vector2i) -> int:
@@ -83,18 +84,46 @@ func get_museum_location() -> String:
 			best_chapter_id = chapter_id
 	return best_chapter_id
 
+func get_marker_for_chapter(chapter_id: String) -> Dictionary:
+	var normalized_chapter_id := _normalize_chapter_id(chapter_id)
+	if normalized_chapter_id.is_empty():
+		return {}
+	for marker in persistent_markers:
+		if String(marker.get("chapter_id", "")).strip_edges() == normalized_chapter_id:
+			return (marker as Dictionary).duplicate(true)
+	return {}
+
+func get_museum_structure_for_chapter(chapter_id: String) -> Dictionary:
+	var normalized_chapter_id := _normalize_chapter_id(chapter_id)
+	if normalized_chapter_id.is_empty() or normalized_chapter_id != get_museum_location():
+		return {}
+	var marker := get_marker_for_chapter(normalized_chapter_id)
+	if marker.is_empty():
+		var stage_data := _load_stage_data(normalized_chapter_id)
+		marker = {
+			"chapter_id": normalized_chapter_id,
+			"chapter_name": _resolve_chapter_name(stage_data, normalized_chapter_id),
+			"position": _resolve_origin_tile(stage_data),
+			"visit_count": get_visit_count(normalized_chapter_id),
+			"last_visit_date": get_last_visit_date(normalized_chapter_id)
+		}
+	marker["marker_type"] = MUSEUM_MARKER_TYPE
+	marker["museum_title"] = "전장의 museum"
+	marker["museum_body"] = "%s에서 가장 많은 전투가 기록되었습니다." % String(marker.get("chapter_name", normalized_chapter_id.to_upper()))
+	return marker
+
 func get_last_visit_date(chapter_id: String) -> String:
 	var normalized_chapter_id := _normalize_chapter_id(chapter_id)
 	if normalized_chapter_id.is_empty():
 		return ""
 	return String(_battle_last_visit_dates.get(normalized_chapter_id, "")).strip_edges()
 
-func _try_add_persistent_marker(chapter_id: String) -> void:
-	if get_visit_count(chapter_id) < MARKER_VISIT_THRESHOLD or _has_marker_for_chapter(chapter_id):
+func _upsert_persistent_marker(chapter_id: String) -> void:
+	if get_visit_count(chapter_id) < MARKER_VISIT_THRESHOLD:
 		return
 	var stage_data := _load_stage_data(chapter_id)
 	var origin_tile := _resolve_origin_tile(stage_data)
-	persistent_markers.append({
+	var marker := {
 		"chapter_id": chapter_id,
 		"chapter_name": _resolve_chapter_name(stage_data, chapter_id),
 		"position": origin_tile,
@@ -102,7 +131,12 @@ func _try_add_persistent_marker(chapter_id: String) -> void:
 		"chapter_origin": chapter_id,
 		"visit_count": get_visit_count(chapter_id),
 		"last_visit_date": get_last_visit_date(chapter_id)
-	})
+	}
+	for index in range(persistent_markers.size()):
+		if String(persistent_markers[index].get("chapter_id", "")).strip_edges() == chapter_id:
+			persistent_markers[index] = marker
+			return
+	persistent_markers.append(marker)
 
 func _has_marker_for_chapter(chapter_id: String) -> bool:
 	for marker in persistent_markers:

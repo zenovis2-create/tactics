@@ -365,6 +365,7 @@ func bootstrap_battle() -> void:
 
     _clear_battle_state()
     _apply_mirror_stage_configuration()
+    _record_stage_visit()
     _spawn_from_stage()
     _chronicle_ally_opening_count = ally_units.size()
     _chronicle_enemy_opening_count = enemy_units.size()
@@ -398,7 +399,6 @@ func bootstrap_battle() -> void:
 
 func set_stage(new_stage_data: StageData) -> void:
     stage_data = _clone_stage_data(new_stage_data)
-    _record_stage_visit()
     if is_inside_tree():
         bootstrap_battle()
 
@@ -647,10 +647,19 @@ func _refresh_persistent_terrain_visual() -> void:
     if battle_board == null:
         return
     var terrain_memory = get_node_or_null("/root/TerrainMemory")
-    if terrain_memory == null or not terrain_memory.has_method("get_damage_map_for_chapter") or stage_data == null:
-        battle_board.set_persistent_terrain_damage({})
-        return
-    battle_board.set_persistent_terrain_damage(terrain_memory.get_damage_map_for_chapter(String(stage_data.stage_id)))
+    var damage_map: Dictionary = {}
+    var persistent_marker: Dictionary = {}
+    var museum_structure: Dictionary = {}
+    if terrain_memory != null and stage_data != null:
+        if terrain_memory.has_method("get_damage_map_for_chapter"):
+            damage_map = terrain_memory.get_damage_map_for_chapter(String(stage_data.stage_id))
+        if terrain_memory.has_method("get_marker_for_chapter"):
+            persistent_marker = terrain_memory.get_marker_for_chapter(String(stage_data.stage_id))
+        if terrain_memory.has_method("get_museum_structure_for_chapter"):
+            museum_structure = terrain_memory.get_museum_structure_for_chapter(String(stage_data.stage_id))
+    battle_board.set_persistent_terrain_damage(damage_map)
+    if battle_board.has_method("set_persistent_world_markers"):
+        battle_board.set_persistent_world_markers(persistent_marker, museum_structure)
 
 func _record_stage_visit() -> void:
     var terrain_memory = get_node_or_null("/root/TerrainMemory")
@@ -2618,16 +2627,6 @@ func _get_required_finale_name_call_ids() -> Array[StringName]:
         return CH10_FINALE_NAME_CALL_IDS.duplicate()
     return _get_current_finale_name_call_ids()
 
-func _get_current_finale_name_call_ids() -> Array[StringName]:
-    var companion_ids: Array[StringName] = []
-    if stage_data == null:
-        return companion_ids
-    for unit_data in stage_data.ally_units:
-        if unit_data == null:
-            continue
-        companion_ids.append(unit_data.unit_id)
-    return companion_ids
-
 func _get_initial_finale_name_call_count(progression_data) -> int:
     if progression_data == null:
         return 0
@@ -2661,6 +2660,16 @@ func _get_destiny_rewritten_choice_count(progression_data) -> int:
             continue
         rewritten_keys.append(choice_key)
     return rewritten_keys.size()
+
+func _get_current_finale_name_call_ids() -> Array[StringName]:
+    var companion_ids: Array[StringName] = []
+    if stage_data == null:
+        return companion_ids
+    for unit_data in stage_data.ally_units:
+        if unit_data == null:
+            continue
+        companion_ids.append(unit_data.unit_id)
+    return companion_ids
 
 func _is_ch10_finale_stage() -> bool:
     return stage_data != null and stage_data.stage_id == &"CH10_05"

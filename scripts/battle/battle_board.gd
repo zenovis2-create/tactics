@@ -30,6 +30,8 @@ var _tile_card_cache: Dictionary = {}
 var _flood_zone_lookup: Dictionary = {}
 var _flood_margin_lookup: Dictionary = {}
 var _persistent_damage_lookup: Dictionary = {}
+var _persistent_marker: Dictionary = {}
+var _museum_structure: Dictionary = {}
 
 func set_stage(data: StageData) -> void:
     stage_data = data
@@ -47,6 +49,22 @@ func set_flood_state(flood_cells: Array[Vector2i], margin_cells: Array[Vector2i]
 func set_persistent_terrain_damage(damage_map: Dictionary) -> void:
     _persistent_damage_lookup = damage_map.duplicate(true)
     queue_redraw()
+
+func set_persistent_world_markers(marker: Dictionary, museum_structure: Dictionary = {}) -> void:
+    _persistent_marker = marker.duplicate(true)
+    _museum_structure = museum_structure.duplicate(true)
+    queue_redraw()
+
+func get_persistent_world_snapshot() -> Dictionary:
+    return {
+        "damage_tile_count": _persistent_damage_lookup.size(),
+        "marker_visible": not _persistent_marker.is_empty(),
+        "marker_type": String(_persistent_marker.get("marker_type", "")).strip_edges(),
+        "marker_position": _resolve_marker_position(_persistent_marker),
+        "museum_visible": not _museum_structure.is_empty(),
+        "museum_type": String(_museum_structure.get("marker_type", "")).strip_edges(),
+        "museum_position": _resolve_marker_position(_museum_structure)
+    }
 
 func _draw() -> void:
     if stage_data == null:
@@ -88,6 +106,7 @@ func _draw() -> void:
             _draw_tile_detail(cell, rect)
             _draw_flood_combined_effect(cell, rect)
             _draw_terrain_advantage_marker(cell, rect)
+            _draw_persistent_world_marker(cell, rect)
 
             if stage_data.ally_spawns.has(cell):
                 draw_rect(rect.grow(-6.0), Color(0.239, 0.608, 0.976, 0.16), true)
@@ -455,6 +474,38 @@ func _draw_persistent_damage_overlay(cell: Vector2i, rect: Rect2) -> void:
     if damage_level >= 2:
         draw_line(rect.position + Vector2(rect.size.x - 16.0, 12.0), rect.position + Vector2(16.0, rect.size.y - 12.0), Color(0.45098, 0.360784, 0.282353, 0.28), 2.0)
         draw_circle(rect.get_center() + Vector2(8.0, -6.0), 4.0, Color(0.533333, 0.435294, 0.337255, 0.22))
+
+func _draw_persistent_world_marker(cell: Vector2i, rect: Rect2) -> void:
+    var museum_position := _resolve_marker_position(_museum_structure)
+    if museum_position == cell:
+        _draw_museum_structure(rect)
+        return
+    var marker_position := _resolve_marker_position(_persistent_marker)
+    if marker_position != cell:
+        return
+    _draw_battle_scar_marker(rect)
+
+func _resolve_marker_position(marker: Dictionary) -> Vector2i:
+    var value = marker.get("position", Vector2i(-1, -1))
+    if typeof(value) == TYPE_VECTOR2I:
+        return value as Vector2i
+    return Vector2i(-1, -1)
+
+func _draw_battle_scar_marker(rect: Rect2) -> void:
+    var center := rect.get_center()
+    draw_circle(center, 12.0, Color(0.121569, 0.101961, 0.0980392, 0.72))
+    draw_circle(center, 10.0, Color(0.360784, 0.309804, 0.27451, 0.36))
+    draw_line(center + Vector2(-6.0, -8.0), center + Vector2(6.0, 10.0), Color(0.886275, 0.823529, 0.721569, 0.82), 2.0)
+    draw_line(center + Vector2(-7.0, 6.0), center + Vector2(7.0, -6.0), Color(0.741176, 0.65098, 0.576471, 0.72), 2.0)
+    draw_arc(center, 16.0, PI * 1.05, PI * 1.95, 18, Color(0.854902, 0.780392, 0.713725, 0.32), 2.0)
+
+func _draw_museum_structure(rect: Rect2) -> void:
+    var frame := rect.grow(-10.0)
+    draw_rect(frame, Color(0.12549, 0.117647, 0.133333, 0.88), true)
+    draw_rect(Rect2(frame.position + Vector2(4.0, 4.0), Vector2(frame.size.x - 8.0, 10.0)), Color(0.411765, 0.333333, 0.219608, 0.8), true)
+    draw_rect(Rect2(frame.position + Vector2(frame.size.x * 0.5 - 6.0, 18.0), Vector2(12.0, frame.size.y - 26.0)), Color(0.843137, 0.760784, 0.572549, 0.36), true)
+    draw_line(frame.position + Vector2(12.0, frame.size.y - 14.0), frame.position + Vector2(frame.size.x - 12.0, frame.size.y - 14.0), Color(0.94902, 0.882353, 0.701961, 0.48), 2.0)
+    draw_arc(frame.get_center() + Vector2(0.0, -2.0), 10.0, PI, TAU, 18, Color(0.92549, 0.847059, 0.631373, 0.72), 2.0)
 
 func _draw_contract_tile_icon(rect: Rect2, terrain_type: StringName) -> void:
     var contract := _get_terrain_overlay_contract(terrain_type)

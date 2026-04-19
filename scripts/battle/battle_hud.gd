@@ -1230,39 +1230,39 @@ func _emit_battle_cue_for_reason(reason: String) -> void:
             pass
 
 func _should_hide_reason(reason: String) -> bool:
-	return reason in [
-		"controller_ready",
-		"battle_initialized",
-		"player_units_ready",
-		"player_selection_cleared",
-		"player_next_selection",
-		"player_unit_selected"
-	]
+    return reason in [
+        "controller_ready",
+        "battle_initialized",
+        "player_units_ready",
+        "player_selection_cleared",
+        "player_next_selection",
+        "player_unit_selected"
+    ]
 
 func _get_node_or_null(path: String) -> Node:
-	if has_node(path):
-		return get_node(path)
-	return null
+    if has_node(path):
+        return get_node(path)
+    return null
 
 func _build_observer_button() -> void:
-	_observer_button = _get_node_or_null("TopBar/Margin/TopRow/ObserverButton")
-	if _observer_button == null:
-		_observer_button = Button.new()
-		_observer_button.name = "ObserverButton"
-		_observer_button.text = "👁 OBSERVER"
-		_observer_button.pressed.connect(toggle_observer_mode)
-		var top_row: HBoxContainer = _get_node_or_null("TopBar/Margin/TopRow")
-		if top_row != null:
-			top_row.add_child(_observer_button)
-			top_row.move_child(_observer_button, 0)
+    _observer_button = _get_node_or_null("TopBar/Margin/TopRow/ObserverButton")
+    if _observer_button == null:
+        _observer_button = Button.new()
+        _observer_button.name = "ObserverButton"
+        _observer_button.text = "👁 OBSERVER"
+        _observer_button.pressed.connect(toggle_observer_mode)
+        var top_row := _get_node_or_null("TopBar/Margin/TopRow")
+        if top_row != null:
+            top_row.add_child(_observer_button)
+            top_row.move_child(_observer_button, 0)
 
 func toggle_observer_mode() -> void:
-	_is_observer_mode = not _is_observer_mode
-	if _observer_button != null:
-		_observer_button.text = "👁 OBSERVER ON" if _is_observer_mode else "👁 OBSERVER"
-		_observer_button.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5) if _is_observer_mode else Color(1, 1, 1))
-	print("[BattleHUD] Observer mode: %s" % ("ON" if _is_observer_mode else "OFF"))
-	observer_mode_toggled.emit(_is_observer_mode)
+    _is_observer_mode = not _is_observer_mode
+    if _observer_button != null:
+        _observer_button.text = "👁 OBSERVER ON" if _is_observer_mode else "👁 OBSERVER"
+        _observer_button.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5) if _is_observer_mode else Color(1, 1, 1))
+    print("[BattleHUD] Observer mode: %s" % ("ON" if _is_observer_mode else "OFF"))
+    observer_mode_toggled.emit(_is_observer_mode)
 
 func is_observer_mode() -> bool:
-	return _is_observer_mode
+    return _is_observer_mode
