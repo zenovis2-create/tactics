@@ -5,6 +5,7 @@ const UnitData = preload("res://scripts/data/unit_data.gd")
 const InteractiveObjectData = preload("res://scripts/data/interactive_object_data.gd")
 
 @export var stage_id: StringName = &"stage_001"
+@export var weather_id: StringName = &"clear"
 @export var choice_point_id: StringName = &""
 @export var stage_title: String = ""
 @export var map_scene: PackedScene
@@ -18,6 +19,9 @@ const InteractiveObjectData = preload("res://scripts/data/interactive_object_dat
 @export var terrain_move_costs: Dictionary = {}
 @export var terrain_types: Dictionary = {}
 @export var terrain_defense_bonuses: Dictionary = {}
+@export var weather_tags: PackedStringArray = PackedStringArray()
+@export var steam_cloud_cells: Array[Vector2i] = []
+@export var smoke_cells: Array[Vector2i] = []
 @export var interactive_objects: Array[InteractiveObjectData] = []
 @export var win_condition: StringName = &"defeat_all_enemies"
 @export var loss_condition: StringName = &"all_allies_defeated"
@@ -36,6 +40,7 @@ const InteractiveObjectData = preload("res://scripts/data/interactive_object_dat
 @export var start_cutscene_id: StringName = &""
 @export var clear_cutscene_id: StringName = &""
 @export_multiline var next_destination_summary: String = ""
+@export var memorial_slot: Vector2i = Vector2i(-1, -1)
 
 func is_cell_blocked(cell: Vector2i) -> bool:
     return blocked_cells.has(cell)
@@ -53,3 +58,6 @@ func get_display_title() -> String:
     if not stage_title.is_empty():
         return stage_title
     return String(stage_id)
+
+func has_memorial_slot() -> bool:
+    return memorial_slot.x >= 0 and memorial_slot.y >= 0

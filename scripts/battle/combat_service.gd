@@ -113,7 +113,9 @@ func _step_hit_check(_attacker: UnitActor, _defender: UnitActor, _skill: SkillDa
     # Base hit chance = 100. Stack 3 = -15 → 85 (still hits).
     # Skill-sealed (stack 3) is handled separately in BattleController context.
     var oblivion_mod: int = int(context.get("oblivion_accuracy_mod", 0))
-    var hit_chance: int = 100 + oblivion_mod  # oblivion_mod is negative
+    var weather_accuracy_mod: int = int(context.get("accuracy_mod", 0))
+    var total_accuracy_mod: int = oblivion_mod + weather_accuracy_mod
+    var hit_chance: int = 100 + total_accuracy_mod
 
     # Deterministic miss: only when hit_chance <= 0 (requires very high stacking, future tuning).
     if hit_chance <= 0:
@@ -121,7 +123,8 @@ func _step_hit_check(_attacker: UnitActor, _defender: UnitActor, _skill: SkillDa
             "step": STEP_HIT_CHECK,
             "hit": false,
             "reason": "oblivion_accuracy_zero",
-            "hit_chance": hit_chance
+            "hit_chance": hit_chance,
+            "accuracy_mod": total_accuracy_mod
         }
 
     return {
@@ -129,7 +132,8 @@ func _step_hit_check(_attacker: UnitActor, _defender: UnitActor, _skill: SkillDa
         "hit": true,
         "reason": "deterministic_no_rng",
         "hit_chance": hit_chance,
-        "oblivion_mod": oblivion_mod
+        "oblivion_mod": oblivion_mod,
+        "accuracy_mod": total_accuracy_mod
     }
 
 func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData, context: Dictionary) -> Dictionary:
@@ -139,18 +143,27 @@ func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData
     attack_value += int(context.get("attack_bonus", 0))
     # Bond adjacency bonus: 공격자가 아군과 인접하면 명중 보너스
     attack_value += int(context.get("bond_attack_bonus", 0))
+    var attack_percent_mod: int = int(context.get("attack_percent_mod", 0))
+    if attack_percent_mod != 0:
+        attack_value = maxi(1, int(round(float(attack_value) * (100.0 + float(attack_percent_mod)) / 100.0)))
 
     var terrain_defense_bonus := int(context.get("defense_bonus", 0))
     var defense_value: int = defender.get_defense() + terrain_defense_bonus
+    var defense_percent_mod: int = int(context.get("defense_percent_mod", 0))
+    if defense_percent_mod != 0:
+        defense_value = maxi(0, int(round(float(defense_value) * (100.0 + float(defense_percent_mod)) / 100.0)))
     var damage: int = max(1, attack_value - defense_value)
 
     return {
         "step": STEP_GUARD_CALC,
         "attack_value": attack_value,
         "defense_value": defense_value,
+        "attack_percent_mod": attack_percent_mod,
+        "defense_percent_mod": defense_percent_mod,
         "terrain_defense_bonus": terrain_defense_bonus,
         "terrain_type": context.get("terrain_type", "plain"),
-        "damage": damage
+        "damage": damage,
+        "crit_rate_bonus": int(context.get("crit_rate_bonus", 0))
     }
 
 func _step_damage_apply(defender: UnitActor, guard_event: Dictionary, context: Dictionary = {}) -> Dictionary:

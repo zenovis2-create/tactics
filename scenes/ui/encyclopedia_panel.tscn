@@ -113,11 +113,21 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="DetailLabel" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin"]
+[node name="DetailStack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="DetailLabel" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack"]
 layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
 fit_content = false
+
+[node name="WorldviewLabel" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
 
 [node name="TimelineTab" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
 visible = false

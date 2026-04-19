@@ -10,6 +10,7 @@
 [resource]
 script = ExtResource("1_stage")
 stage_id = &"CH04_01"
+weather_id = &"downpour"
 stage_title = "Flooded Cloister"
 grid_size = Vector2i(8, 8)
 cell_size = Vector2i(64, 64)

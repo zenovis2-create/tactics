@@ -74,13 +74,21 @@ func unlock_ally(unit_key: StringName) -> void:
 @export var choices_made: Array[String] = []
 @export var chapters_completed: Array[String] = []
 @export var encyclopedia_entries: Dictionary = {}
+@export var encyclopedia_comments: Dictionary = {}
 @export var battle_records: Array = []
 @export var support_history: Array[Dictionary] = []
+@export var comment_history: Array[Dictionary] = []
 @export var available_support_conversations: Array[String] = []
+@export var support_progress_by_pair: Dictionary = {}
+@export var flooded_stages: Array[String] = []
 @export var epitaphs: Array[String] = []
 @export var memorial_records: Array[Dictionary] = []
+@export var stage_memorials: Dictionary = {}
 @export var enoch_wounded: bool = false
 @export var ledger_count: int = 0
+@export var world_timeline_id: String = "A"
+@export var worldview_fragments: Array[String] = []
+@export var worldview_complete: bool = false
 @export var mira_trust_level: int = 0
 @export var neri_disposition: String = "neutral"
 @export var lete_early_alliance: bool = false
@@ -131,8 +139,12 @@ func reset_for_new_campaign() -> void:
 	mira_unlocked = false
 	melkion_unlocked = false
 	choices_made.clear()
+	encyclopedia_comments.clear()
 	support_history.clear()
+	comment_history.clear()
 	available_support_conversations.clear()
+	support_progress_by_pair.clear()
+	flooded_stages.clear()
 	recovering_units.clear()
 	sacrificed_units.clear()
 	recover_chapter_count = 0
@@ -140,6 +152,9 @@ func reset_for_new_campaign() -> void:
 	memorial_records.clear()
 	enoch_wounded = false
 	ledger_count = 0
+	world_timeline_id = "A"
+	worldview_fragments.clear()
+	worldview_complete = false
 	mira_trust_level = 0
 	neri_disposition = "neutral"
 	lete_early_alliance = false
@@ -167,6 +182,23 @@ func get_unlocked_command_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for command_id in unlocked_commands.keys():
 		ids.append(String(command_id))
+	ids.sort()
+	return ids
+
+func has_worldview_fragment(fragment_id: String) -> bool:
+	var normalized := fragment_id.strip_edges()
+	return not normalized.is_empty() and worldview_fragments.has(normalized)
+
+func add_worldview_fragment(fragment_id: String) -> bool:
+	var normalized := fragment_id.strip_edges()
+	if normalized.is_empty() or worldview_fragments.has(normalized):
+		return false
+	worldview_fragments.append(normalized)
+	worldview_fragments.sort()
+	return true
+
+func get_worldview_fragment_ids() -> Array[String]:
+	var ids := worldview_fragments.duplicate()
 	ids.sort()
 	return ids
 
@@ -234,6 +266,43 @@ func upsert_encyclopedia_entry(unit_id: StringName, entry: Dictionary) -> void:
 		merged["support_rank"] = 0
 	encyclopedia_entries[key] = merged
 
+func get_encyclopedia_comment(unit_id: StringName) -> String:
+	var key := String(unit_id).strip_edges()
+	if key.is_empty():
+		return ""
+	return String(encyclopedia_comments.get(key, "")).strip_edges()
+
+func set_encyclopedia_comment(unit_id: StringName, comment_text: String, who: String = "", when: String = "") -> bool:
+	var key := String(unit_id).strip_edges()
+	var normalized_comment := comment_text.strip_edges().left(280)
+	if key.is_empty() or normalized_comment.is_empty():
+		return false
+	var previous_comment := get_encyclopedia_comment(unit_id)
+	if previous_comment == normalized_comment:
+		return false
+	encyclopedia_comments[key] = normalized_comment
+	comment_history.append({
+		"unit_id": key,
+		"comment": normalized_comment,
+		"who": who.strip_edges() if not who.is_empty() else "Anonymous Archivist",
+		"when": when.strip_edges() if not when.is_empty() else Time.get_datetime_string_from_system(),
+		"timestamp": int(Time.get_unix_time_from_system())
+	})
+	return true
+
+func get_comment_history_for_unit(unit_id: StringName) -> Array[Dictionary]:
+	var key := String(unit_id).strip_edges()
+	var history: Array[Dictionary] = []
+	if key.is_empty():
+		return history
+	for entry in comment_history:
+		if String(entry.get("unit_id", "")).strip_edges() == key:
+			history.append((entry as Dictionary).duplicate(true))
+	history.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("timestamp", 0)) < int(b.get("timestamp", 0))
+	)
+	return history
+
 func add_battle_record(record: Dictionary) -> void:
 	var stage_id := String(record.get("stage_id", "")).strip_edges()
 	if stage_id.is_empty():
@@ -267,9 +336,21 @@ func record_support_history(entry: Dictionary) -> bool:
 	var rank := int(entry.get("rank", 0))
 	if pair_id.is_empty() or rank <= 0:
 		return false
+	var consume_available := bool(entry.get("consume_available", true))
 	for existing_entry in support_history:
 		if String(existing_entry.get("pair", "")) == pair_id and int(existing_entry.get("rank", 0)) == rank:
-			clear_support_conversation_available(pair_id, rank)
+			var existing_index := support_history.find(existing_entry)
+			var merged_entry := (existing_entry as Dictionary).duplicate(true)
+			merged_entry["chapter"] = String(entry.get("chapter", merged_entry.get("chapter", ""))).strip_edges()
+			merged_entry["stage_id"] = String(entry.get("stage_id", merged_entry.get("stage_id", ""))).strip_edges()
+			merged_entry["timestamp"] = int(entry.get("timestamp", merged_entry.get("timestamp", Time.get_unix_time_from_system())))
+			for extra_key in entry.keys():
+				if extra_key in ["pair", "rank", "chapter", "stage_id", "timestamp", "consume_available"]:
+					continue
+				merged_entry[extra_key] = entry[extra_key]
+			support_history[existing_index] = merged_entry
+			if consume_available:
+				clear_support_conversation_available(pair_id, rank)
 			return false
 	var stored_entry := {
 		"pair": pair_id,
@@ -278,8 +359,13 @@ func record_support_history(entry: Dictionary) -> bool:
 		"stage_id": String(entry.get("stage_id", "")).strip_edges(),
 		"timestamp": int(entry.get("timestamp", Time.get_unix_time_from_system()))
 	}
+	for extra_key in entry.keys():
+		if extra_key in ["pair", "rank", "chapter", "stage_id", "timestamp", "consume_available"]:
+			continue
+		stored_entry[extra_key] = entry[extra_key]
 	support_history.append(stored_entry)
-	clear_support_conversation_available(pair_id, rank)
+	if consume_available:
+		clear_support_conversation_available(pair_id, rank)
 	return true
 
 func get_support_history_for_pair(pair_id: String) -> Array[Dictionary]:
@@ -374,6 +460,31 @@ func get_first_memorial_marker() -> Dictionary:
 	if honor_roll.is_empty():
 		return {}
 	return honor_roll[0].duplicate(true)
+
+func upsert_stage_memorial(stage_id: String, objective: String, marker_type: String, chapter_when_achieved: int) -> Dictionary:
+	var normalized_stage_id := stage_id.strip_edges().to_upper()
+	var normalized_objective := objective.strip_edges()
+	var normalized_marker_type := marker_type.strip_edges().to_lower()
+	if normalized_stage_id.is_empty() or normalized_objective.is_empty():
+		return {}
+	if normalized_marker_type.is_empty():
+		normalized_marker_type = "flower"
+	var record := {
+		"objective": normalized_objective,
+		"marker_type": normalized_marker_type,
+		"chapter_when_achieved": max(1, chapter_when_achieved)
+	}
+	stage_memorials[normalized_stage_id] = record
+	return record.duplicate(true)
+
+func get_stage_memorial(stage_id: String) -> Dictionary:
+	var normalized_stage_id := stage_id.strip_edges().to_upper()
+	if normalized_stage_id.is_empty() or not stage_memorials.has(normalized_stage_id):
+		return {}
+	return (stage_memorials.get(normalized_stage_id, {}) as Dictionary).duplicate(true)
+
+func get_stage_memorial_snapshot() -> Dictionary:
+	return stage_memorials.duplicate(true)
 
 func has_sacrificed_unit(unit_id: String) -> bool:
 	var normalized := unit_id.strip_edges()
@@ -478,13 +589,19 @@ func to_debug_dict() -> Dictionary:
 		"choices_made": choices_made.duplicate(),
 		"chapters_completed": chapters_completed.duplicate(),
 		"encyclopedia_entries": encyclopedia_entries.duplicate(true),
+		"encyclopedia_comments": encyclopedia_comments.duplicate(true),
 		"battle_records": battle_records.duplicate(true),
 		"support_history": support_history.duplicate(true),
+		"comment_history": comment_history.duplicate(true),
 		"available_support_conversations": available_support_conversations.duplicate(),
+		"support_progress_by_pair": support_progress_by_pair.duplicate(true),
 		"epitaphs": epitaphs.duplicate(),
 		"memorial_records": memorial_records.duplicate(true),
+		"stage_memorials": stage_memorials.duplicate(true),
 		"enoch_wounded": enoch_wounded,
 		"ledger_count": ledger_count,
+		"worldview_fragments": get_worldview_fragment_ids(),
+		"worldview_complete": worldview_complete,
 		"mira_trust_level": mira_trust_level,
 		"neri_disposition": neri_disposition,
 		"lete_early_alliance": lete_early_alliance,

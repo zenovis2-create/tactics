@@ -22,15 +22,49 @@ const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 const BattleBoard = preload("res://scripts/battle/battle_board.gd")
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
-const StatusService = preload("res://scripts/battle/status_service.gd")
+const STATUS_SERVICE_PATH := "res://scripts/battle/status_service.gd"
 const TelemetryService = preload("res://scripts/battle/telemetry_service.gd")
 const RewardService = preload("res://scripts/battle/reward_service.gd")
 const CutscenePlayer = preload("res://scripts/cutscene/cutscene_player.gd")
 const CutsceneCatalog = preload("res://data/cutscenes/cutscene_catalog.gd")
-const BondService = preload("res://scripts/battle/bond_service.gd")
+const BOND_SERVICE_PATH := "res://scripts/battle/bond_service.gd"
 const BattleResultScreenScript = preload("res://scripts/battle/battle_result_screen.gd")
 const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
+const DOWNPOUR_WEATHER_IDS := {
+    &"downpour": true,
+    &"storm": true,
+    &"heavy_rain": true,
+    &"暴雨": true
+}
+const WET_TERRAIN_TYPES := {
+    &"water": true,
+    &"flooded": true,
+    &"flood": true
+}
+const FLOOD_IMPASSABLE_TERRAIN_TYPES := {
+    &"mountain": true,
+    &"cave": true
+}
+const FIRE_TERRAIN_TYPES := {
+    &"fire": true,
+    &"burning": true,
+    &"flame": true,
+    &"ember": true,
+    &"wildfire": true
+}
+const FIRE_SKILL_IDS := {
+    &"memory_burn": true
+}
+const FLOOD_TERRAIN_TYPE: StringName = &"flood"
+const FLOOD_MOVE_COST: int = 2
+const FLOOD_DEFENSE_BONUS: int = 1
+const FLOOD_EXPANSION_LIMIT: int = 3
+const DROWNING_DAMAGE: int = 5
+const SUPPORT_BOND_RANK_B: int = 4
+const MAX_BOND_LEVEL: int = 5
+const MAX_OBLIVION_STACK: int = 3
+const CARDINAL_DIRECTIONS := [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]
 
 const CH01_STAGE_MEMORY_LOG: Dictionary = {
     &"CH01_05": [
@@ -62,6 +96,11 @@ const CH01_STAGE_LETTER_LOG: Dictionary = {
         "Letter from Serin — \"The name on your scabbard is enough for now. We move north together and keep the survivors behind us safe.\""
     ]
 }
+
+const STATUS_FEAR: StringName = &"fear"
+const STATUS_CONFUSION: StringName = &"混乱"
+const STATUS_NIGHT_SMOKE: StringName = &"눈不适应"
+const STATUS_RAIN_COMFORT: StringName = &"비옷의慰め"
 
 enum BattlePhase {
     BATTLE_INIT,
@@ -123,6 +162,7 @@ const PHASE_TRANSITIONS := {
 @onready var units_root: Node2D = $Units
 @onready var objects_root: Node2D = $Objects
 @onready var effects_root: Node2D = $Effects
+@onready var flood_effect_root: Node2D = $Effects/FloodCombinedFX
 @onready var battle_flash: ColorRect = $BattleFlash
 @onready var battle_board: BattleBoard = $BattleBoard
 @onready var turn_manager: TurnManager = $TurnManager
@@ -174,20 +214,25 @@ var board_origin: Vector2 = Vector2.ZERO
 var board_scale: float = 1.0
 var _battle_flash_tween: Tween
 var _fx_cache: Dictionary = {}
+var flood_zone_positions: Array[Vector2i] = []
+var flood_margin_positions: Array[Vector2i] = []
+var _flood_expansion_turns: int = 0
 
 # M4/M5/M6 services — instantiated at runtime, not scene nodes.
 var progression_service: ProgressionService
-var status_service: StatusService
+var status_service: Node
 var telemetry_service: TelemetryService
 var reward_service: RewardService
 var cutscene_player: CutscenePlayer
-var bond_service: BondService
+var bond_service: Node
 
 func _ready() -> void:
     _wire_signals()
     get_viewport().size_changed.connect(_on_viewport_size_changed)
     if stage_data == null:
-        stage_data = DEFAULT_STAGE
+        stage_data = _clone_stage_data(DEFAULT_STAGE)
+    else:
+        stage_data = _clone_stage_data(stage_data)
 
     _init_meta_services()
     _sync_hud_phase("controller_ready", {"stage_loaded": stage_data != null})
@@ -196,16 +241,17 @@ func _ready() -> void:
 func _init_meta_services() -> void:
     progression_service = ProgressionService.new()
     add_child(progression_service)
-    status_service = StatusService.new()
-    add_child(status_service)
+    status_service = null
     telemetry_service = TelemetryService.new()
     add_child(telemetry_service)
     reward_service = RewardService.new()
     add_child(reward_service)
     cutscene_player = CutscenePlayer.new()
     add_child(cutscene_player)
-    bond_service = BondService.new()
-    add_child(bond_service)
+    var bond_service_script = load(BOND_SERVICE_PATH)
+    if bond_service_script is GDScript and bond_service_script.can_instantiate():
+        bond_service = bond_service_script.new()
+        add_child(bond_service)
 
 func bootstrap_battle() -> void:
     round_index = 1
@@ -230,6 +276,7 @@ func bootstrap_battle() -> void:
     _pending_namecall_unit = null
     _pending_namecall_reason = ""
     _last_defeated_ally_id = &""
+    _reset_flood_state()
     _reset_finale_contract_state()
     if bond_service != null and progression_service != null:
         bond_service.setup_progression(progression_service.get_data())
@@ -238,6 +285,7 @@ func bootstrap_battle() -> void:
     _spawn_from_stage()
     path_service.configure_from_stage(stage_data)
     _layout_battlefield()
+    _initialize_flood_zones()
 
     if telemetry_service != null:
         telemetry_service.record_battle_start(stage_data.stage_id if stage_data != null else &"unknown")
@@ -255,7 +303,7 @@ func bootstrap_battle() -> void:
     _begin_player_phase("battle_initialized")
 
 func set_stage(new_stage_data: StageData) -> void:
-    stage_data = new_stage_data
+    stage_data = _clone_stage_data(new_stage_data)
     if is_inside_tree():
         bootstrap_battle()
 
@@ -303,6 +351,13 @@ func _clear_battle_state() -> void:
     for child in objects_root.get_children():
         child.queue_free()
 
+    for child in effects_root.get_children():
+        if child == flood_effect_root:
+            for flood_child in flood_effect_root.get_children():
+                flood_child.queue_free()
+            continue
+        child.queue_free()
+
     ally_units.clear()
     enemy_units.clear()
     interactive_objects.clear()
@@ -313,14 +368,19 @@ func _clear_battle_state() -> void:
     grid_cursor.clear_reachable_cells()
     units_root.position = Vector2.ZERO
     objects_root.position = Vector2.ZERO
+    effects_root.position = Vector2.ZERO
     grid_cursor.position = Vector2.ZERO
     units_root.scale = Vector2.ONE
     objects_root.scale = Vector2.ONE
+    effects_root.scale = Vector2.ONE
     grid_cursor.scale = Vector2.ONE
     if battle_board != null:
         battle_board.position = Vector2.ZERO
         battle_board.scale = Vector2.ONE
+        battle_board.set_flood_state([], [])
     if hud != null and hud.is_inside_tree():
+        hud.set_flood_margin_positions([])
+        hud.set_stage_memorial({}, Vector2i(-1, -1))
         hud.close_inventory_panel()
 
 func _spawn_from_stage() -> void:
@@ -330,6 +390,7 @@ func _spawn_from_stage() -> void:
 
     if battle_board != null:
         battle_board.set_stage(stage_data)
+    _refresh_stage_memorial_visual()
     _spawn_group(stage_data.ally_units, stage_data.ally_spawns, "ally", ally_units)
     _spawn_group(stage_data.enemy_units, stage_data.enemy_spawns, "enemy", enemy_units)
     _spawn_interactive_objects(stage_data.interactive_objects)
@@ -374,7 +435,21 @@ func _layout_battlefield() -> void:
     input_controller.board_origin = board_origin
     input_controller.cell_size = Vector2i(roundi(scaled_cell_size.x), roundi(scaled_cell_size.y))
     if hud != null:
-        hud.set_battle_frame_metrics(board_origin, board_size)
+        hud.set_battle_frame_metrics(board_origin, board_size, scaled_cell_size)
+    _refresh_flood_visuals()
+
+func _refresh_stage_memorial_visual() -> void:
+    if hud == null:
+        return
+    if stage_data == null or progression_service == null:
+        hud.set_stage_memorial({}, Vector2i(-1, -1))
+        return
+    var progression_data := progression_service.get_data()
+    if progression_data == null or not stage_data.has_memorial_slot():
+        hud.set_stage_memorial({}, Vector2i(-1, -1))
+        return
+    var memorial := progression_data.get_stage_memorial(String(stage_data.stage_id))
+    hud.set_stage_memorial(memorial, stage_data.memorial_slot)
 
 func _spawn_group(unit_defs: Array, spawn_cells: Array, faction: String, sink: Array) -> void:
     var count: int = min(unit_defs.size(), spawn_cells.size())
@@ -636,7 +711,7 @@ func _accept_namecall_choice(companion_id: StringName) -> void:
 func _defer_namecall_choice(companion_id: StringName) -> void:
     namecall_pending = true
     _pending_namecall_companion_id = companion_id
-    finale_name_call_lines[String(companion_id)] = SupportConversations.get_name_call_choice_line(String(companion_id), BondService.SUPPORT_B_RANK, false)
+    finale_name_call_lines[String(companion_id)] = SupportConversations.get_name_call_choice_line(String(companion_id), SUPPORT_BOND_RANK_B, false)
     if progression_service == null:
         return
     var progression_data = progression_service.get_data()
@@ -649,6 +724,9 @@ func _begin_player_phase(reason: String) -> void:
     _update_hold_objective_progress(reason)
 
     turn_manager.begin_phase("ally", ally_units + enemy_units, reason)
+    _apply_synergy_reactions()
+    _apply_weather_effects()
+    _apply_phase_start_statuses("ally")
     pending_move_origins.clear()
     _refresh_unit_visual_state()
     _clear_selection()
@@ -674,6 +752,9 @@ func _begin_enemy_phase(reason: String) -> void:
     _transition_to(BattlePhase.ENEMY_PHASE_START, reason, {"round": round_index})
 
     turn_manager.begin_phase("enemy", ally_units + enemy_units, reason)
+    _apply_synergy_reactions()
+    _apply_weather_effects({"apply_rain_tick": false})
+    _apply_phase_start_statuses("enemy")
     # Clear per-round bonuses; boss phase bonuses are re-applied in _check_boss_phase_transitions
     enemy_attack_bonus_by_unit.clear()
     enemy_movement_bonus_by_unit.clear()
@@ -729,6 +810,10 @@ func _run_enemy_phase() -> void:
         "acted_count": acted_count,
         "round": round_index
     })
+
+    _update_flood_zones()
+    if _check_battle_end():
+        return
 
     _transition_to(BattlePhase.ROUND_END, "round_completed", {"round": round_index})
     if telemetry_service != null:
@@ -839,7 +924,11 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         "attack_bonus": attack_context.get("attack_bonus", 0),
         "counter_context": attack_context.get("counter_context", {}),
         "oblivion_accuracy_mod": attack_context.get("oblivion_accuracy_mod", 0),
-        "oblivion_skills_sealed": attack_context.get("oblivion_skills_sealed", false)
+        "oblivion_skills_sealed": attack_context.get("oblivion_skills_sealed", false),
+        "accuracy_mod": attack_context.get("accuracy_mod", 0),
+        "attack_percent_mod": attack_context.get("attack_percent_mod", 0),
+        "defense_percent_mod": attack_context.get("defense_percent_mod", 0),
+        "crit_rate_bonus": attack_context.get("crit_rate_bonus", 0)
     })
     var reason: String = String(result.get("transition_reason", "attack_resolved"))
     _play_attack_feedback(reason)
@@ -935,7 +1024,7 @@ func _apply_damage_share(defender: UnitActor, total_damage: int) -> Dictionary:
 
     var payload := {
         "target": defender.unit_data.unit_id,
-        "bond": BondService.MAX_BOND,
+        "bond": MAX_BOND_LEVEL,
         "share": int(share_result.get("share_per_ally", 0)),
         "shared_units": int((share_result.get("shared_amounts", []) as Array).size())
     }
@@ -963,7 +1052,11 @@ func _resolve_support_attack(supporter: UnitActor, defender: UnitActor) -> void:
         "attack_bonus": support_context.get("attack_bonus", 0),
         "counter_context": support_context.get("counter_context", {}),
         "oblivion_accuracy_mod": support_context.get("oblivion_accuracy_mod", 0),
-        "oblivion_skills_sealed": support_context.get("oblivion_skills_sealed", false)
+        "oblivion_skills_sealed": support_context.get("oblivion_skills_sealed", false),
+        "accuracy_mod": support_context.get("accuracy_mod", 0),
+        "attack_percent_mod": support_context.get("attack_percent_mod", 0),
+        "defense_percent_mod": support_context.get("defense_percent_mod", 0),
+        "crit_rate_bonus": support_context.get("crit_rate_bonus", 0)
     })
     if telemetry_service != null:
         telemetry_service.record_command_use(&"support_attack")
@@ -1211,6 +1304,8 @@ func _on_battle_victory() -> void:
             result_summary["trust_delta"] = after_data.trust - trust_before
             result_summary["recovered_fragment_ids"] = after_data.get_recovered_fragment_ids()
             result_summary["unlocked_command_ids"] = after_data.get_unlocked_command_ids()
+            result_summary["world_timeline_id"] = _normalize_world_timeline_id(after_data.world_timeline_id)
+            result_summary["world_timeline_text"] = _build_world_timeline_result_line(after_data.world_timeline_id, stage_data.stage_id if stage_data != null else StringName())
             result_summary["badge_narrative"] = String(BattleResultScreenScript.build_badge_narrative_payload(after_data).get("narrative", ""))
             result_summary["progression_data"] = after_data
     if telemetry_service != null:
@@ -1569,6 +1664,9 @@ func _sync_selection_hud() -> void:
     var terrain_text: String = _get_tile_summary_text(selected_unit.grid_position)
     var oblivion_stack: int = status_service.get_oblivion_stack(selected_unit) if status_service != null else 0
     var combat_quote := _get_selected_unit_combat_quote()
+    var active_statuses: Array[StringName]
+    if status_service != null:
+        active_statuses = status_service.get_statuses(selected_unit)
     hud.set_selection_summary(
         selected_unit.unit_data.display_name,
         hp_text,
@@ -1579,7 +1677,8 @@ func _sync_selection_hud() -> void:
         interactable_count,
         terrain_text,
         oblivion_stack,
-        combat_quote
+        combat_quote,
+        active_statuses
     )
 
     var can_wait: bool = turn_manager.can_unit_act(selected_unit)
@@ -1973,6 +2072,11 @@ func _build_result_summary_text(summary: Dictionary) -> String:
         var support_bond := int(summary.get("supporter_bond_level", 0))
         if support_bond > 0:
             lines.append("Support Bond: %d" % support_bond)
+    var world_timeline_id := _normalize_world_timeline_id(String(summary.get("world_timeline_id", "A")))
+    var world_timeline_text := String(summary.get("world_timeline_text", "")).strip_edges()
+    lines.append("World Timeline: %s" % world_timeline_id)
+    if not world_timeline_text.is_empty():
+        lines.append(world_timeline_text)
     lines.append("Burden Delta: %+d" % int(summary.get("burden_delta", 0)))
     lines.append("Trust Delta: %+d" % int(summary.get("trust_delta", 0)))
     _append_result_section(lines, "Rewards", _variant_to_string_array(summary.get("reward_entries", [])))
@@ -1988,6 +2092,21 @@ func _append_result_section(lines: Array[String], heading: String, entries: Arra
         return
     for entry in entries:
         lines.append("- %s" % entry)
+
+func _normalize_world_timeline_id(world_timeline_id: String) -> String:
+    var normalized := world_timeline_id.strip_edges().to_upper()
+    return "B" if normalized == "B" else "A"
+
+func _build_world_timeline_result_line(world_timeline_id: String, stage_id: StringName) -> String:
+    var normalized_timeline_id := _normalize_world_timeline_id(world_timeline_id)
+    var normalized_stage_id := String(stage_id)
+    if normalized_stage_id.begins_with("CH10"):
+        return "당신의 진실이 세계를 바꿨습니다." if normalized_timeline_id == "A" else "진실 없는 세계의 영웅입니다."
+    if normalized_stage_id.begins_with("CH07"):
+        return "세계를 구원하기 위한 선택입니다." if normalized_timeline_id == "A" else "개인적인 생존을 위한 선택입니다."
+    if normalized_stage_id.begins_with("CH06"):
+        return "진실을 알게 된 전투는 더욱 깊어집니다." if normalized_timeline_id == "A" else "진실을 모르기에 평화롭습니다."
+    return "희망 있는 세계관이 이어집니다." if normalized_timeline_id == "A" else "진실을 외면한 세계관이 이어집니다."
 
 func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_context: Dictionary = {}, include_bond_bonus: bool = true) -> Dictionary:
     var attack_context: Dictionary = {
@@ -2022,12 +2141,119 @@ func _build_attack_context(attacker: UnitActor, defender: UnitActor, extra_conte
             attack_context["bond_attack_bonus"] = bond_atk_bonus
 
     if status_service != null:
-        var status_fx: Dictionary = status_service.get_effects(attacker)
-        attack_context["oblivion_accuracy_mod"] = int(status_fx.get("accuracy_mod", 0))
-        attack_context["oblivion_evasion_mod"] = int(status_fx.get("evasion_mod", 0))
-        attack_context["oblivion_skills_sealed"] = bool(status_fx.get("skills_sealed", false))
+        var attacker_oblivion_fx: Dictionary = status_service.get_oblivion_effects(attacker)
+        var attacker_status_fx: Dictionary = status_service.get_status_effects(attacker)
+        var defender_status_fx: Dictionary = status_service.get_status_effects(defender)
+        attack_context["oblivion_accuracy_mod"] = int(attacker_oblivion_fx.get("accuracy_mod", 0))
+        attack_context["oblivion_evasion_mod"] = int(attacker_oblivion_fx.get("evasion_mod", 0))
+        attack_context["oblivion_skills_sealed"] = bool(attacker_oblivion_fx.get("skills_sealed", false))
+        attack_context["accuracy_mod"] = int(attacker_status_fx.get("accuracy_mod", 0))
+        attack_context["attack_percent_mod"] = int(attacker_status_fx.get("attack_percent_mod", 0))
+        attack_context["crit_rate_bonus"] = int(attacker_status_fx.get("crit_rate_bonus", 0))
+        attack_context["ability_locked"] = bool(attacker_status_fx.get("ability_locked", false))
+        attack_context["defense_percent_mod"] = int(defender_status_fx.get("defense_percent_mod", 0))
 
     return attack_context
+
+func _apply_synergy_reactions(context: Dictionary = {}) -> Dictionary:
+    if status_service == null:
+        return {}
+    var all_units: Array = _variant_to_unit_array(context.get("units", ally_units + enemy_units))
+    var steam_fallback: Array[Vector2i] = stage_data.steam_cloud_cells if stage_data != null else []
+    var smoke_fallback: Array[Vector2i] = stage_data.smoke_cells if stage_data != null else []
+    var steam_units: Array = _variant_to_unit_array(context.get("steam_units", _get_units_in_cells(_resolve_weather_cells(context, "steam_cloud_cells", steam_fallback), all_units)))
+    var smoke_units: Array = _variant_to_unit_array(context.get("smoke_units", _get_units_in_cells(_resolve_weather_cells(context, "smoke_cells", smoke_fallback), all_units)))
+    var steam_lookup: Dictionary = _build_unit_lookup(steam_units)
+    var smoke_lookup: Dictionary = _build_unit_lookup(smoke_units)
+    var night_active: bool = bool(context.get("night", _is_weather_active("night")))
+    var summary := {
+        "steam_confusion_units": [],
+        "night_smoke_penalty_units": []
+    }
+
+    for unit_variant in all_units:
+        var unit: UnitActor = unit_variant
+        if not is_instance_valid(unit) or unit.is_defeated():
+            continue
+        if steam_lookup.has(unit.get_instance_id()):
+            _apply_status(unit, STATUS_CONFUSION, "steam_cloud")
+            var confused_units: Array = summary["steam_confusion_units"]
+            confused_units.append(unit.unit_data.unit_id)
+            summary["steam_confusion_units"] = confused_units
+        else:
+            status_service.clear_status(unit, STATUS_CONFUSION, "steam_cloud_left")
+
+        var should_apply_night_smoke: bool = night_active and smoke_lookup.has(unit.get_instance_id()) and unit.faction == "ally"
+        if should_apply_night_smoke:
+            _apply_status(unit, STATUS_NIGHT_SMOKE, "night_smoke")
+            var night_smoke_units: Array = summary["night_smoke_penalty_units"]
+            night_smoke_units.append(unit.unit_data.unit_id)
+            summary["night_smoke_penalty_units"] = night_smoke_units
+        else:
+            status_service.clear_status(unit, STATUS_NIGHT_SMOKE, "night_smoke_cleared")
+
+    return summary
+
+func _apply_weather_effects(context: Dictionary = {}) -> Dictionary:
+    if status_service == null:
+        return {}
+    var all_units: Array = _variant_to_unit_array(context.get("units", ally_units + enemy_units))
+    var rain_active: bool = bool(context.get("rain", _is_weather_active("rain")))
+    var apply_rain_tick: bool = bool(context.get("apply_rain_tick", true))
+    var thunder_targets: Array = _variant_to_unit_array(context.get("thunder_targets", []))
+    var thunder_paralytic_success: bool = bool(context.get("thunder_paralytic_success", false))
+    var summary := {
+        "rain_comfort_units": [],
+        "rain_drained_units": [],
+        "fear_targets": []
+    }
+
+    for unit_variant in all_units:
+        var unit: UnitActor = unit_variant
+        if not is_instance_valid(unit) or unit.is_defeated():
+            continue
+        var is_fire_unit: bool = _is_fire_unit(unit)
+        if rain_active and unit.faction == "ally" and not is_fire_unit:
+            _apply_status(unit, STATUS_RAIN_COMFORT, "rain_comfort")
+            var comfort_units: Array = summary["rain_comfort_units"]
+            comfort_units.append(unit.unit_data.unit_id)
+            summary["rain_comfort_units"] = comfort_units
+        else:
+            status_service.clear_status(unit, STATUS_RAIN_COMFORT, "rain_comfort_cleared")
+
+        if rain_active and apply_rain_tick and is_fire_unit:
+            unit.current_hp = max(0, unit.current_hp - 1)
+            unit._refresh_visuals()
+            var drained_units: Array = summary["rain_drained_units"]
+            drained_units.append(unit.unit_data.unit_id)
+            summary["rain_drained_units"] = drained_units
+
+    if thunder_paralytic_success:
+        for target_variant in thunder_targets:
+            var target: UnitActor = target_variant
+            if not is_instance_valid(target) or target.is_defeated():
+                continue
+            _apply_status(target, STATUS_FEAR, "thunder_fear", 1, {"source": "thunder"})
+            var fear_targets: Array = summary["fear_targets"]
+            fear_targets.append(target.unit_data.unit_id)
+            summary["fear_targets"] = fear_targets
+
+    return summary
+
+func _apply_phase_start_statuses(faction: String) -> Array[StringName]:
+    var skipped_units: Array[StringName] = []
+    if status_service == null or turn_manager == null:
+        return skipped_units
+    var roster: Array = ally_units if faction == "ally" else enemy_units
+    for unit_variant in roster:
+        var unit: UnitActor = unit_variant
+        if not is_instance_valid(unit) or unit.is_defeated() or unit.faction != faction:
+            continue
+        var status_result: Dictionary = status_service.consume_turn_start_statuses(unit)
+        if bool(status_result.get("skip_turn", false)):
+            turn_manager.mark_acted(unit, "fear_skip_turn", {"round": round_index, "status": String(STATUS_FEAR)})
+            skipped_units.append(unit.unit_data.unit_id)
+    return skipped_units
 
 func _variant_to_string_array(value: Variant) -> Array[String]:
     if value is Array[String]:
@@ -2038,6 +2264,61 @@ func _variant_to_string_array(value: Variant) -> Array[String]:
             result.append(String(item))
         return result
     return []
+
+func _variant_to_unit_array(value: Variant) -> Array:
+    if value is Array:
+        return (value as Array).duplicate()
+    return []
+
+func _resolve_weather_cells(context: Dictionary, key: String, fallback: Array[Vector2i]) -> Array[Vector2i]:
+    var resolved: Variant = context.get(key, fallback)
+    if resolved is Array[Vector2i]:
+        return (resolved as Array[Vector2i]).duplicate()
+    var cells: Array[Vector2i] = []
+    if resolved is Array:
+        for entry in resolved:
+            if entry is Vector2i:
+                cells.append(entry)
+    return cells
+
+func _get_units_in_cells(cells: Array[Vector2i], units: Array) -> Array:
+    if cells.is_empty():
+        return []
+    var cell_lookup: Dictionary = {}
+    for cell in cells:
+        cell_lookup[cell] = true
+    var result: Array = []
+    for unit_variant in units:
+        var unit: UnitActor = unit_variant
+        if is_instance_valid(unit) and cell_lookup.has(unit.grid_position):
+            result.append(unit)
+    return result
+
+func _build_unit_lookup(units: Array) -> Dictionary:
+    var lookup: Dictionary = {}
+    for unit_variant in units:
+        var unit: UnitActor = unit_variant
+        if is_instance_valid(unit):
+            lookup[unit.get_instance_id()] = true
+    return lookup
+
+func _is_weather_active(tag: String) -> bool:
+    if stage_data == null:
+        return false
+    return stage_data.weather_tags.has(tag)
+
+func _is_fire_unit(unit: UnitActor) -> bool:
+    if unit == null or unit.unit_data == null:
+        return false
+    var personality: String = String(unit.unit_data.personality).to_lower()
+    if personality == "fire" or personality == "flame" or personality == "ember":
+        return true
+    return unit.unit_data.default_skill != null and FIRE_SKILL_IDS.has(unit.unit_data.default_skill.skill_id)
+
+func _apply_status(unit: UnitActor, status_name: StringName, reason: String, remaining_turns: int = -1, payload: Dictionary = {}) -> Dictionary:
+    if status_service == null:
+        return {}
+    return status_service.apply_status(unit, status_name, reason, remaining_turns, payload)
 
 func _get_ally_display_name(unit_id: StringName) -> String:
     for unit in ally_units:
@@ -2252,7 +2533,7 @@ func _find_oblivion_target(enemy: UnitActor) -> UnitActor:
     ## Returns the nearest ally in attack range whose 망각 stack is below max.
     var attack_cells: Array = range_service.get_attack_cells(enemy.grid_position, enemy.get_attack_range())
     var best: UnitActor = null
-    var best_stack: int = StatusService.MAX_STACK  # Only pick targets below max
+    var best_stack: int = MAX_OBLIVION_STACK  # Only pick targets below max
 
     for unit in ally_units:
         if not is_instance_valid(unit) or unit.is_defeated():
@@ -2335,6 +2616,214 @@ func _get_marked_target() -> UnitActor:
         if is_instance_valid(unit) and unit.get_instance_id() == boss_marked_target_id:
             return unit
     return null
+
+func _clone_stage_data(source_stage: StageData) -> StageData:
+    if source_stage == null:
+        return null
+    var duplicated := source_stage.duplicate(true)
+    if duplicated is StageData:
+        return duplicated
+    return source_stage
+
+func _reset_flood_state() -> void:
+    flood_zone_positions.clear()
+    flood_margin_positions.clear()
+    _flood_expansion_turns = 0
+
+func _initialize_flood_zones() -> void:
+    _reset_flood_state()
+    if not _is_downpour_active() or stage_data == null:
+        _refresh_flood_visuals()
+        return
+
+    var seeded_cells: Dictionary = {}
+    for cell_variant in stage_data.terrain_types.keys():
+        var cell: Vector2i = cell_variant
+        if _is_wet_terrain(stage_data.get_terrain_type(cell)):
+            seeded_cells[cell] = true
+
+    flood_zone_positions = _sort_cells(seeded_cells.keys())
+    _recompute_flood_margin_positions()
+    _record_flooded_stage()
+    _refresh_flood_visuals()
+
+func _update_flood_zones() -> void:
+    if not _is_downpour_active() or stage_data == null:
+        return
+    if flood_zone_positions.is_empty():
+        _initialize_flood_zones()
+    if flood_zone_positions.is_empty():
+        return
+
+    var expanded_cells: Array[Vector2i] = []
+    if _flood_expansion_turns < FLOOD_EXPANSION_LIMIT:
+        var next_cells: Dictionary = {}
+        for source_cell in flood_zone_positions:
+            for offset in CARDINAL_DIRECTIONS:
+                var candidate: Vector2i = source_cell + offset
+                if not _is_cell_in_bounds(candidate):
+                    continue
+                var terrain_type := stage_data.get_terrain_type(candidate)
+                if _is_wet_terrain(terrain_type):
+                    continue
+                if FLOOD_IMPASSABLE_TERRAIN_TYPES.has(terrain_type):
+                    continue
+                next_cells[candidate] = true
+        for candidate in next_cells.keys():
+            _set_flood_terrain(candidate)
+            expanded_cells.append(candidate)
+        if not expanded_cells.is_empty():
+            _flood_expansion_turns += 1
+            _extinguish_adjacent_fire_terrain(expanded_cells)
+
+    var drowned_units: Array[String] = _apply_flood_drowning_damage()
+    _recompute_flood_margin_positions()
+    _refresh_flood_visuals()
+    if not expanded_cells.is_empty() or not drowned_units.is_empty():
+        _sync_hud_phase("flood_zone_updated", {
+            "expanded": expanded_cells.size(),
+            "drowning": drowned_units.size(),
+            "round": round_index
+        })
+
+func _set_flood_terrain(cell: Vector2i) -> void:
+    if stage_data == null or not _is_cell_in_bounds(cell):
+        return
+    stage_data.terrain_types[cell] = FLOOD_TERRAIN_TYPE
+    stage_data.terrain_move_costs[cell] = FLOOD_MOVE_COST
+    stage_data.terrain_defense_bonuses[cell] = FLOOD_DEFENSE_BONUS
+    if not flood_zone_positions.has(cell):
+        flood_zone_positions.append(cell)
+
+func _clear_terrain_to_plain(cell: Vector2i) -> void:
+    if stage_data == null:
+        return
+    stage_data.terrain_types.erase(cell)
+    stage_data.terrain_move_costs.erase(cell)
+    stage_data.terrain_defense_bonuses.erase(cell)
+
+func _extinguish_adjacent_fire_terrain(source_cells: Array[Vector2i]) -> void:
+    if stage_data == null:
+        return
+    var cleared_cells: Dictionary = {}
+    for source_cell in source_cells:
+        for offset in CARDINAL_DIRECTIONS:
+            var candidate: Vector2i = source_cell + offset
+            if not _is_cell_in_bounds(candidate):
+                continue
+            var terrain_type := stage_data.get_terrain_type(candidate)
+            if not FIRE_TERRAIN_TYPES.has(terrain_type):
+                continue
+            cleared_cells[candidate] = true
+    for cell in cleared_cells.keys():
+        _clear_terrain_to_plain(cell)
+
+func _apply_flood_drowning_damage() -> Array[String]:
+    var drowned_units: Array[String] = []
+    if stage_data == null:
+        return drowned_units
+    for unit in ally_units + enemy_units:
+        if unit == null or not is_instance_valid(unit) or unit.is_defeated() or not _is_fire_unit(unit):
+            continue
+        if not _is_wet_terrain(stage_data.get_terrain_type(unit.grid_position)):
+            continue
+        unit.apply_damage(DROWNING_DAMAGE, &"drowning")
+        if unit.unit_data != null:
+            drowned_units.append(String(unit.unit_data.unit_id))
+    return drowned_units
+
+func _recompute_flood_margin_positions() -> void:
+    flood_margin_positions.clear()
+    if stage_data == null:
+        return
+    for cell in flood_zone_positions:
+        for offset in CARDINAL_DIRECTIONS:
+            var candidate: Vector2i = cell + offset
+            if not _is_cell_in_bounds(candidate):
+                flood_margin_positions.append(cell)
+                break
+            if not _is_wet_terrain(stage_data.get_terrain_type(candidate)):
+                flood_margin_positions.append(cell)
+                break
+    flood_margin_positions = _sort_cells(flood_margin_positions)
+
+func _refresh_flood_visuals() -> void:
+    if battle_board != null:
+        battle_board.set_stage(stage_data)
+        battle_board.set_flood_state(flood_zone_positions, flood_margin_positions)
+    if path_service != null and stage_data != null:
+        path_service.configure_from_stage(stage_data)
+    if hud != null:
+        hud.set_flood_margin_positions(flood_margin_positions)
+    _refresh_flood_effect_layer()
+    if is_inside_tree():
+        _refresh_unit_visual_state()
+
+func _refresh_flood_effect_layer() -> void:
+    if flood_effect_root == null:
+        return
+    for child in flood_effect_root.get_children():
+        child.queue_free()
+    if stage_data == null:
+        return
+    for cell in flood_zone_positions:
+        var fill := Polygon2D.new()
+        fill.polygon = PackedVector2Array([
+            Vector2.ZERO,
+            Vector2(stage_data.cell_size.x, 0.0),
+            Vector2(stage_data.cell_size.x, stage_data.cell_size.y),
+            Vector2(0.0, stage_data.cell_size.y)
+        ])
+        fill.position = Vector2(cell.x * stage_data.cell_size.x, cell.y * stage_data.cell_size.y)
+        fill.color = Color(0.247059, 0.568627, 0.901961, 0.12)
+        flood_effect_root.add_child(fill)
+        if flood_margin_positions.has(cell):
+            var crest := Polygon2D.new()
+            crest.polygon = PackedVector2Array([
+                Vector2(10.0, 8.0),
+                Vector2(stage_data.cell_size.x - 10.0, 8.0),
+                Vector2(stage_data.cell_size.x - 16.0, 14.0),
+                Vector2(16.0, 14.0)
+            ])
+            crest.position = fill.position
+            crest.color = Color(1.0, 0.380392, 0.380392, 0.22)
+            flood_effect_root.add_child(crest)
+
+func _record_flooded_stage() -> void:
+    if progression_service == null or stage_data == null:
+        return
+    var progression_data := progression_service.get_data()
+    if progression_data == null:
+        return
+    var stage_id_text := String(stage_data.stage_id)
+    if stage_id_text.is_empty() or progression_data.flooded_stages.has(stage_id_text):
+        return
+    progression_data.flooded_stages.append(stage_id_text)
+
+func _is_downpour_active() -> bool:
+    return stage_data != null and DOWNPOUR_WEATHER_IDS.has(stage_data.weather_id)
+
+func _is_wet_terrain(terrain_type: StringName) -> bool:
+    return WET_TERRAIN_TYPES.has(terrain_type)
+
+func _sort_cells(cells: Array) -> Array[Vector2i]:
+    var sorted_cells: Array[Vector2i] = []
+    for cell in cells:
+        sorted_cells.append(cell)
+    sorted_cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+        if a.y == b.y:
+            return a.x < b.x
+        return a.y < b.y
+    )
+    return sorted_cells
+
+func get_flood_state_snapshot() -> Dictionary:
+    return {
+        "weather_id": stage_data.weather_id if stage_data != null else &"",
+        "flood_zone_positions": flood_zone_positions.duplicate(),
+        "flood_margin_positions": flood_margin_positions.duplicate(),
+        "expansion_turns": _flood_expansion_turns
+    }
 
 func _apply_boss_command_buff(boss_unit: UnitActor) -> void:
     _record_boss_event("boss_command_buff")

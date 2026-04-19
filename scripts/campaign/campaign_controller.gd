@@ -17,6 +17,7 @@ const CampController = preload("res://scripts/camp/camp_controller.gd")
 const SaveService = preload("res://scripts/battle/save_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
+const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
 const CHAPTER_CH01: StringName = CampaignChapterRegistry.CHAPTER_CH01
 const CHAPTER_CH02: StringName = CampaignChapterRegistry.CHAPTER_CH02
@@ -37,6 +38,10 @@ const RETREAT_OPTION_FULL: String = "defeat_full_retreat"
 const RETREAT_OPTION_SACRIFICE: String = "defeat_sacrifice_protocol"
 const RETREAT_OPTION_DESPERATE: String = "defeat_desperate_stand"
 const RETREAT_OPTION_SACRIFICE_PREFIX: String = "defeat_sacrifice_unit:"
+const SUPPORT_OPTION_A: String = "support_context_A"
+const SUPPORT_OPTION_B: String = "support_context_B"
+const SUPPORT_OPTION_C: String = "support_context_C"
+const SUPPORT_PENDING_BONUS: int = 2
 const MEMORIAL_QUOTE_PREFIX := "나는後悔ない."
 const SACRIFICE_EPITAPHS := {
     &"ally_serin": "등불은 넘겨줬다. 이제 앞으로 가.",
@@ -60,6 +65,14 @@ const CHOICE_POINT_STAGES: Array[StringName] = [
     CHOICE_CH08_PRE_BOSS,
     CHOICE_CH09A_CAMP,
     CHOICE_CH10_PRE_FINALE
+]
+const WORLDVIEW_FRAGMENT_LETE: String = "복수의_순수함"
+const WORLDVIEW_FRAGMENT_MIRA: String = "믿음과_의심"
+const WORLDVIEW_FRAGMENT_MELKION: String = "진실의_대가"
+const WORLDVIEW_REQUIRED_FRAGMENTS: Array[String] = [
+    WORLDVIEW_FRAGMENT_LETE,
+    WORLDVIEW_FRAGMENT_MIRA,
+    WORLDVIEW_FRAGMENT_MELKION
 ]
 
 const CH01_STAGE_REWARD_LOG: Dictionary = {
@@ -913,6 +926,7 @@ var _post_defeat_destination: String = ""
 var _desperate_stand_context: Dictionary = {}
 var _last_memorial_scene: Dictionary = {}
 var _suppress_s_rank_memorial: bool = false
+var _active_support_conversation: Dictionary = {}
 
 func setup(battle_controller: BattleController, campaign_panel: CampaignPanel) -> void:
     _battle_controller = battle_controller
@@ -1306,7 +1320,10 @@ func _on_support_rank_increased(pair_id: String, new_rank: int) -> void:
         "rank": new_rank,
         "chapter": String(_active_chapter_id),
         "stage_id": String(_current_stage.stage_id) if _current_stage != null else "",
-        "timestamp": Time.get_unix_time_from_system()
+        "timestamp": Time.get_unix_time_from_system(),
+        "topic": SupportConversations.get_support_conversation_entry(pair_id, new_rank).get("topic", ""),
+        "viewed": false,
+        "consume_available": false
     })
     _sync_support_rank_entries()
 
@@ -1605,7 +1622,7 @@ func _should_enter_choice_point(choice_point_id: StringName) -> bool:
 func _enter_choice_state(stage_id: StringName) -> void:
     _pending_choice_stage_id = stage_id
     _active_mode = CampaignState.MODE_CHOICE
-    var choice_data: Dictionary = CampaignShellDialogueCatalog.get_choice_dialogue(stage_id)
+    var choice_data: Dictionary = CampaignShellDialogueCatalog.get_choice_dialogue(stage_id, _get_world_timeline_id(), _has_worldview_complete())
     var title_text: String = String(choice_data.get("title", "Critical Choice"))
     var body_text: String = String(choice_data.get("prompt", "Choose which truth the squad carries forward."))
     _set_panel_state(CampaignState.MODE_CHOICE, title_text, body_text, "")
@@ -1627,9 +1644,12 @@ func _make_choice(option_id: String) -> void:
             if normalized_option_id == "ch05_save_ledgers":
                 progression.enoch_wounded = true
                 progression.ledger_count = 5
+                progression.world_timeline_id = "A"
             else:
                 progression.enoch_wounded = false
                 progression.ledger_count = 2
+                if _is_world_timeline_break_choice(normalized_option_id) or normalized_option_id != "ch05_save_ledgers":
+                    progression.world_timeline_id = "B"
         CHOICE_CH07_INTERLUDE:
             if normalized_option_id == "ch07_believe_mira":
                 progression.mira_trust_level = 2
@@ -1677,6 +1697,9 @@ func _make_choice(option_id: String) -> void:
                 _enter_stage(_active_stage_index)
 
 func _on_choice_selected(option_id: String) -> void:
+    if not _active_support_conversation.is_empty():
+        _resolve_support_conversation_choice(option_id)
+        return
     if _active_mode == CampaignState.MODE_DEFEAT:
         var normalized_option_id := option_id.strip_edges()
         if normalized_option_id == RETREAT_OPTION_FULL:
@@ -1738,19 +1761,22 @@ func _build_camp_summary() -> String:
 
     if _current_stage != null and not _current_stage.next_destination_summary.is_empty():
         lines.append(_current_stage.next_destination_summary)
+    _append_stage_memorial_summary_line(lines)
 
     return "\n".join(lines)
 
 func _append_chapter_intro_dialogue(lines: Array[String], chapter_id: StringName) -> void:
-    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_intro_dialogue(chapter_id))
+    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_intro_dialogue(chapter_id, _get_world_timeline_id(), _has_worldview_complete()))
 
 func _append_chapter_interlude_dialogue(lines: Array[String], chapter_id: StringName) -> void:
-    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_interlude_dialogue(chapter_id))
+    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_interlude_dialogue(chapter_id, _get_world_timeline_id(), _has_worldview_complete()))
 
 func _get_active_camp_dialogue_entries() -> Array[String]:
     if _active_chapter_id == CHAPTER_CH10:
-        return CampaignShellDialogueCatalog.get_resolution_dialogue()
-    var lines: Array[String] = CampaignShellDialogueCatalog.get_interlude_dialogue(_active_chapter_id)
+        var resolution_lines := CampaignShellDialogueCatalog.get_resolution_dialogue(_get_world_timeline_id(), _has_worldview_complete())
+        _append_stage_memorial_dialogue_entry(resolution_lines)
+        return resolution_lines
+    var lines: Array[String] = CampaignShellDialogueCatalog.get_interlude_dialogue(_active_chapter_id, _get_world_timeline_id(), _has_worldview_complete())
     var progression_data: ProgressionData = _get_progression_data()
     if progression_data == null:
         return lines
@@ -1760,12 +1786,34 @@ func _get_active_camp_dialogue_entries() -> Array[String]:
         _append_unique_lines(lines, CampaignShellDialogueCatalog.get_hidden_recruit_dialogue(&"lete"))
     if _active_chapter_id == CHAPTER_CH09B and progression_data.melkion_unlocked:
         _append_unique_lines(lines, CampaignShellDialogueCatalog.get_hidden_recruit_dialogue(&"melkion"))
+    if progression_data.worldview_complete:
+        _append_unique_lines(lines, CampaignShellDialogueCatalog.get_special_dialogue(&"museum_of_truth", _get_world_timeline_id()))
+    _append_stage_memorial_dialogue_entry(lines)
     return lines
 
 func _get_progression_data() -> ProgressionData:
     if _battle_controller != null and _battle_controller.progression_service != null:
         return _battle_controller.progression_service.get_data()
     return null
+
+func _get_world_timeline_id() -> String:
+    var progression_data: ProgressionData = _get_progression_data()
+    if progression_data == null:
+        return "A"
+    var normalized_timeline_id := progression_data.world_timeline_id.strip_edges().to_upper()
+    return "B" if normalized_timeline_id == "B" else "A"
+
+func _has_worldview_complete() -> bool:
+    var progression_data: ProgressionData = _get_progression_data()
+    return progression_data != null and progression_data.worldview_complete
+
+func _is_world_timeline_break_choice(option_id: String) -> bool:
+    var normalized_option_id := option_id.strip_edges().to_lower()
+    if normalized_option_id.is_empty():
+        return false
+    return normalized_option_id == "ch05_save_enoch" \
+        or normalized_option_id.contains("destroy") \
+        or normalized_option_id.contains("reject")
 
 func _is_unit_sacrificed(unit_id: StringName) -> bool:
     var progression_data: ProgressionData = _get_progression_data()
@@ -1933,6 +1981,7 @@ func _build_ch02_camp_summary() -> String:
         "Tracking orders now point the march toward Greenwood."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH02)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch03_intro_summary() -> String:
@@ -1952,6 +2001,7 @@ func _build_ch03_camp_summary() -> String:
         "Monastery manifests point the next route toward the drowned cloister."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH03)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch04_intro_summary() -> String:
@@ -1971,6 +2021,7 @@ func _build_ch04_camp_summary() -> String:
         "The next route points toward the Gray Archive."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH04)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch05_intro_summary() -> String:
@@ -1990,6 +2041,7 @@ func _build_ch05_camp_summary() -> String:
         "Valtor siege ledgers now point the march toward the iron fortress."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH05)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch06_intro_summary() -> String:
@@ -2009,6 +2061,7 @@ func _build_ch06_camp_summary() -> String:
         "The next route points toward the purification rite in Ellyor."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH06)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch07_intro_summary() -> String:
@@ -2031,6 +2084,7 @@ func _build_ch07_camp_summary() -> String:
     if progression_data != null and progression_data.mira_unlocked:
         lines.append("Mira leaves the shrine silence behind and joins the roster.")
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH07)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch08_intro_summary() -> String:
@@ -2053,6 +2107,7 @@ func _build_ch08_camp_summary() -> String:
     if progression_data != null and progression_data.is_ally_unlocked(&"lete"):
         lines.append("Lete survives the ruin fight, abandons the black-hound oath, and joins the roster.")
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH08)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch09a_intro_summary() -> String:
@@ -2072,6 +2127,7 @@ func _build_ch09a_camp_summary() -> String:
         "The next route points inward toward the root archive and the last keeper who can navigate it."
     ]
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH09A)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch09b_intro_summary() -> String:
@@ -2094,6 +2150,7 @@ func _build_ch09b_camp_summary() -> String:
     if progression_data != null and progression_data.melkion_unlocked:
         lines.append("Melkion's rewritten oath holds for one battle only as the march turns toward the final tower.")
     _append_chapter_interlude_dialogue(lines, CHAPTER_CH09B)
+    _append_stage_memorial_summary_line(lines)
     return "\n".join(lines)
 
 func _build_ch10_intro_summary() -> String:
@@ -2119,12 +2176,13 @@ func _build_ch10_resolution_summary() -> String:
             "Karon falls, the bell stops, and the world survives only because Rian accepts the memory burden himself.",
             "The tower no longer decides what counts, but the ending still leaves one name carrying what the others cannot."
         ]
-    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_resolution_dialogue())
+    _append_unique_lines(lines, CampaignShellDialogueCatalog.get_resolution_dialogue(_get_world_timeline_id(), _has_worldview_complete()))
     return "\n".join(lines)
 
 func _set_panel_state(mode: String, title_text: String, body_text: String, button_text: String) -> void:
     _current_panel_title = title_text
     _current_panel_body = body_text
+    var resolved_button_text := button_text
     if mode == CampaignState.MODE_CAMP or mode == CampaignState.MODE_COMPLETE:
         var progression_data := _get_progression_data()
         if progression_data != null:
@@ -2132,9 +2190,10 @@ func _set_panel_state(mode: String, title_text: String, body_text: String, butto
         if mode == CampaignState.MODE_CAMP:
             _sync_campaign_roster_encyclopedia_entries()
             _sync_support_rank_entries()
+            resolved_button_text = _resolve_camp_button_text(button_text)
     mode_changed.emit(mode)
     if _campaign_panel != null:
-        _campaign_panel.show_state(mode, title_text, body_text, button_text, _build_panel_payload(mode))
+        _campaign_panel.show_state(mode, title_text, body_text, resolved_button_text, _build_panel_payload(mode))
     if _battle_controller != null:
         _battle_controller.visible = mode == CampaignState.MODE_BATTLE
 
@@ -2145,7 +2204,161 @@ func _clear_panel_state() -> void:
         _campaign_panel.hide_panel()
 
 func _on_advance_requested() -> void:
+    if _active_mode == CampaignState.MODE_CAMP and not _has_active_support_conversation() and _has_available_support_conversation():
+        _show_support_conversation()
+        return
     advance_step()
+
+func _resolve_camp_button_text(default_text: String) -> String:
+    if _has_active_support_conversation():
+        return default_text
+    if _has_available_support_conversation():
+        return "View Support Conversation"
+    return default_text
+
+func _has_active_support_conversation() -> bool:
+    return not _active_support_conversation.is_empty()
+
+func _has_available_support_conversation() -> bool:
+    var progression_data := _get_progression_data()
+    return progression_data != null and not progression_data.available_support_conversations.is_empty()
+
+func _get_next_support_conversation() -> Dictionary:
+    var progression_data := _get_progression_data()
+    if progression_data == null or progression_data.available_support_conversations.is_empty():
+        return {}
+    var conversation_key := String(progression_data.available_support_conversations[0]).strip_edges()
+    var key_parts := conversation_key.rsplit(":", true, 1)
+    if key_parts.size() != 2:
+        return {}
+    return {
+        "key": conversation_key,
+        "pair": SupportConversations.normalize_pair_id(key_parts[0]),
+        "rank": int(key_parts[1])
+    }
+
+func _show_support_conversation() -> void:
+    var conversation := _get_next_support_conversation()
+    if conversation.is_empty():
+        return
+    var pair_id := String(conversation.get("pair", "")).strip_edges()
+    var support_rank := int(conversation.get("rank", 0))
+    var entry: Dictionary = SupportConversations.get_support_conversation_entry(pair_id, support_rank)
+    var pending_bonus := 0
+    if _battle_controller != null and _battle_controller.bond_service != null:
+        pending_bonus = _battle_controller.bond_service.get_pending_support_bonus(pair_id)
+    var pair_names := _format_support_pair_names(pair_id)
+    var prompt := String(entry.get("topic", "")).strip_edges()
+    if pending_bonus > 0:
+        prompt += "\n\nDeep trust lingers from the last silence: next support rank change gains +%d." % pending_bonus
+    _active_support_conversation = {
+        "pair": pair_id,
+        "rank": support_rank,
+        "topic": String(entry.get("topic", "")).strip_edges(),
+        "return_title": _current_panel_title,
+        "return_body": _current_panel_body,
+        "prompt": prompt,
+        "choice_stage_id": "support_conversation",
+        "dialogue_entries": [
+            "%s: %s" % [pair_names[1], String(entry.get("topic", "")).strip_edges()],
+            "Rian: The answer will change what this bond becomes next."
+        ],
+        "presentation_cards": [{
+            "eyebrow": "Support",
+            "title": "%s / Rank %s" % [pair_names[0], SupportConversations.get_rank_label(support_rank)],
+            "body": "Choose how Rian responds. The result changes support rank immediately and can carry trust into the next conversation."
+        }],
+        "options": _build_support_choice_options(entry),
+        "pending_bonus": pending_bonus
+    }
+    _active_mode = CampaignState.MODE_CHOICE
+    _set_panel_state(
+        CampaignState.MODE_CHOICE,
+        "Support Conversation — %s" % pair_names[0],
+        String(entry.get("topic", "")).strip_edges(),
+        ""
+    )
+
+func _build_support_choice_options(entry: Dictionary) -> Array[Dictionary]:
+    return [
+        {
+            "id": SUPPORT_OPTION_A,
+            "label": String(entry.get("context_A", "")).strip_edges(),
+            "hint": "응원의 말 · Support Rank +1"
+        },
+        {
+            "id": SUPPORT_OPTION_B,
+            "label": String(entry.get("context_B", "")).strip_edges(),
+            "hint": "솔직한 느낌 · Support Rank unchanged"
+        },
+        {
+            "id": SUPPORT_OPTION_C,
+            "label": String(entry.get("context_C", "")).strip_edges(),
+            "hint": "조용히 듣기 · Support Rank -1 now, +2 next conversation"
+        }
+    ]
+
+func _resolve_support_conversation_choice(option_id: String) -> void:
+    if _battle_controller == null or _battle_controller.bond_service == null:
+        _active_support_conversation.clear()
+        return
+    var pair_id := String(_active_support_conversation.get("pair", "")).strip_edges()
+    var support_rank := int(_active_support_conversation.get("rank", 0))
+    var normalized_option_id := option_id.strip_edges()
+    var base_delta := 0
+    match normalized_option_id:
+        SUPPORT_OPTION_A:
+            base_delta = 1
+        SUPPORT_OPTION_B:
+            base_delta = 0
+        SUPPORT_OPTION_C:
+            base_delta = -1
+        _:
+            return
+    var bonus_applied: int = _battle_controller.bond_service.consume_pending_support_bonus(pair_id)
+    var final_rank: int = _battle_controller.bond_service.modify_support_rank(pair_id, base_delta + bonus_applied)
+    if normalized_option_id == SUPPORT_OPTION_C:
+        _battle_controller.bond_service.queue_next_support_bonus(pair_id, SUPPORT_PENDING_BONUS)
+    var progression_data := _get_progression_data()
+    if progression_data != null:
+        progression_data.record_support_history({
+            "pair": pair_id,
+            "rank": support_rank,
+            "chapter": String(_active_chapter_id),
+            "stage_id": String(_current_stage.stage_id) if _current_stage != null else "",
+            "timestamp": Time.get_unix_time_from_system(),
+            "topic": String(_active_support_conversation.get("topic", "")).strip_edges(),
+            "selected_option": normalized_option_id,
+            "selected_text": _resolve_support_choice_label(normalized_option_id),
+            "base_delta": base_delta,
+            "bonus_applied": bonus_applied,
+            "rank_after": final_rank,
+            "viewed": true,
+            "consume_available": true
+        })
+    _sync_support_rank_entries()
+    _autosave_progression()
+    var return_title := String(_active_support_conversation.get("return_title", _current_panel_title))
+    var return_body := String(_active_support_conversation.get("return_body", _current_panel_body))
+    _active_support_conversation.clear()
+    _active_mode = CampaignState.MODE_CAMP
+    _set_panel_state(CampaignState.MODE_CAMP, return_title, return_body, "Next Battle")
+
+func _resolve_support_choice_label(option_id: String) -> String:
+    for option in _variant_to_dictionary_array(_active_support_conversation.get("options", [])):
+        if String(option.get("id", "")).strip_edges() == option_id.strip_edges():
+            return String(option.get("label", "")).strip_edges()
+    return option_id.strip_edges()
+
+func _format_support_pair_names(pair_id: String) -> Array[String]:
+    var normalized_pair := SupportConversations.normalize_pair_id(pair_id)
+    var pair_names: Array[String] = []
+    for unit_id in normalized_pair.split(":", false):
+        pair_names.append(SupportConversations.get_unit_display_name(unit_id))
+    if pair_names.size() < 2:
+        return ["Rian / Ally", "Ally"]
+    pair_names.sort()
+    return ["%s / %s" % [pair_names[0], pair_names[1]], pair_names[1] if pair_names[0] == "Rian" else pair_names[0]]
 
 func _enter_chapter_two_intro() -> void:
     _active_mode = CampaignState.MODE_CHAPTER_INTRO
@@ -2467,10 +2680,12 @@ func _build_panel_payload(mode: String) -> Dictionary:
     var letter_entries: Array[String] = []
     var dialogue_entries: Array[String] = []
     var presentation_cards: Array[Dictionary] = []
+    var museum_data: Dictionary = {}
     var camp_progression_alerts: Array[String] = []
     var choice_stage_id: StringName = StringName()
     var choice_prompt: String = ""
     var choice_options: Array[Dictionary] = []
+    var progression_data := _get_progression_data()
     if _battle_controller != null:
         party_entries = _battle_controller.get_party_summary_lines()
         party_details = _battle_controller.get_party_detail_entries()
@@ -2488,6 +2703,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
     if mode == CampaignState.MODE_CAMP:
         dialogue_entries = _get_active_camp_dialogue_entries()
         presentation_cards = _build_camp_presentation_cards()
+        museum_data = _build_museum_panel_data(mode)
         if _camp_controller != null:
             var camp_summary := _camp_controller.get_camp_summary()
             if not camp_summary.is_empty():
@@ -2495,12 +2711,27 @@ func _build_panel_payload(mode: String) -> Dictionary:
                     "Burden %d / Trust %d" % [int(camp_summary.get("burden", 0)), int(camp_summary.get("trust", 0))],
                     "Fragments %d / Commands %d" % [int(camp_summary.get("recovered_fragments", 0)), int(camp_summary.get("unlocked_commands", 0))]
                 ])
+                var memorial_summary := String(camp_summary.get("memorial_summary", "")).strip_edges()
+                if not memorial_summary.is_empty():
+                    camp_progression_alerts = _merge_unique_lines(camp_progression_alerts, [memorial_summary])
+                var memorial_dialogue_entry := String(camp_summary.get("memorial_dialogue_entry", "")).strip_edges()
+                if not memorial_dialogue_entry.is_empty() and not dialogue_entries.has(memorial_dialogue_entry):
+                    dialogue_entries.append(memorial_dialogue_entry)
+        if progression_data != null and progression_data.worldview_complete:
+            camp_progression_alerts = _merge_unique_lines(camp_progression_alerts, ["Museum of Truth unlocked"])
     elif mode == CampaignState.MODE_CHOICE:
-        choice_stage_id = _pending_choice_stage_id
-        var choice_data: Dictionary = CampaignShellDialogueCatalog.get_choice_dialogue(choice_stage_id)
-        choice_prompt = String(choice_data.get("prompt", _current_panel_body))
-        choice_options = _variant_to_dictionary_array(choice_data.get("options", []))
-        dialogue_entries = _variant_to_string_array(choice_data.get("dialogue_entries", []))
+        if _has_active_support_conversation():
+            choice_stage_id = &"support_conversation"
+            choice_prompt = String(_active_support_conversation.get("prompt", _current_panel_body))
+            choice_options = _variant_to_dictionary_array(_active_support_conversation.get("options", []))
+            dialogue_entries = _variant_to_string_array(_active_support_conversation.get("dialogue_entries", []))
+            presentation_cards = _variant_to_dictionary_array(_active_support_conversation.get("presentation_cards", []))
+        else:
+            choice_stage_id = _pending_choice_stage_id
+            var choice_data: Dictionary = CampaignShellDialogueCatalog.get_choice_dialogue(choice_stage_id, _get_world_timeline_id(), _has_worldview_complete())
+            choice_prompt = String(choice_data.get("prompt", _current_panel_body))
+            choice_options = _variant_to_dictionary_array(choice_data.get("options", []))
+            dialogue_entries = _variant_to_string_array(choice_data.get("dialogue_entries", []))
     elif mode == CampaignState.MODE_DEFEAT:
         choice_prompt = _defeat_choice_prompt
         choice_options = _defeat_choice_options.duplicate(true)
@@ -2508,11 +2739,12 @@ func _build_panel_payload(mode: String) -> Dictionary:
             dialogue_entries = ["Rian: We will carry %s forward." % String(_last_memorial_scene.get("unit_name", "the fallen"))]
         presentation_cards = _build_defeat_presentation_cards()
     elif mode == CampaignState.MODE_COMPLETE and _active_chapter_id == CHAPTER_CH10:
+        museum_data = _build_museum_panel_data(mode)
         if _ch10_complete_phase == &"epilogue":
             dialogue_entries = _build_ch10_epilogue_dialogue()
             presentation_cards = _build_ch10_epilogue_presentation_cards()
         else:
-            dialogue_entries = CampaignShellDialogueCatalog.get_resolution_dialogue()
+            dialogue_entries = CampaignShellDialogueCatalog.get_resolution_dialogue(_get_world_timeline_id(), _has_worldview_complete())
             presentation_cards = _build_resolution_presentation_cards()
 
     var alerts: Array[String] = []
@@ -2528,9 +2760,17 @@ func _build_panel_payload(mode: String) -> Dictionary:
         CampaignState.MODE_CAMP:
             alerts = _build_camp_alerts(memory_entries, evidence_entries, letter_entries, inventory_entries)
             alerts = _merge_unique_lines(alerts, camp_progression_alerts)
+            if _has_available_support_conversation():
+                alerts = _merge_unique_lines(alerts, ["Support conversation ready"])
             recommendation = _build_camp_recommendation(memory_entries, evidence_entries, letter_entries, inventory_entries)
+            if progression_data != null and progression_data.worldview_complete:
+                recommendation = "Open Summary to review the Museum of Truth before advancing the campaign."
+            if _has_available_support_conversation():
+                recommendation = "Open the support conversation before moving to the next battle."
             active_section = CampaignPanel.SECTION_RECORDS
             section_badges = _build_camp_section_badges(party_entries, inventory_entries, memory_entries, evidence_entries, letter_entries)
+            if progression_data != null and progression_data.worldview_complete:
+                section_badges[CampaignPanel.SECTION_SUMMARY] = "MUSEUM"
         CampaignState.MODE_CHOICE:
             alerts = ["Critical decision", "Two consequences available"]
             recommendation = "Read both outcomes, then lock the route that fits this campaign state."
@@ -2571,6 +2811,7 @@ func _build_panel_payload(mode: String) -> Dictionary:
         "alerts": alerts,
         "dialogue_entries": dialogue_entries,
         "presentation_cards": presentation_cards,
+        "museum_data": museum_data,
         "choice_stage_id": String(choice_stage_id),
         "choice_prompt": choice_prompt,
         "choice_options": choice_options,
@@ -2740,9 +2981,21 @@ func _build_camp_presentation_cards() -> Array[Dictionary]:
             "title": "The March To The Final Tower Starts",
             "body": "Eclipse coordinates, tower lattice, and the last decree now read as concrete proof, turning the camp handoff into a committed march on the final tower."
         })
-        return cards
-
     return cards
+
+func _build_museum_panel_data(mode: String) -> Dictionary:
+    var progression_data := _get_progression_data()
+    if progression_data == null:
+        return {}
+    var fragment_ids := progression_data.get_worldview_fragment_ids()
+    return {
+        "visible": progression_data.worldview_complete and (mode == CampaignState.MODE_CAMP or mode == CampaignState.MODE_COMPLETE),
+        "complete": progression_data.worldview_complete,
+        "title": "Museum of Truth",
+        "status": "Worldview Fragments %d/3 collected" % fragment_ids.size(),
+        "badge": "Hidden Chapter Unlocked" if progression_data.worldview_complete else "",
+        "cards": CampaignShellDialogueCatalog.get_worldview_fragment_cards(fragment_ids, _get_world_timeline_id())
+    }
 
 func _build_defeat_presentation_cards() -> Array[Dictionary]:
     var cards: Array[Dictionary] = [
@@ -2813,17 +3066,22 @@ func _build_ch10_epilogue_summary() -> String:
     return "\n".join(lines)
 
 func _build_ch10_epilogue_dialogue() -> Array[String]:
+    var lines: Array[String] = []
     if _is_ch10_true_resolution():
-        return [
+        lines = [
             "Serin: \"It did not end here. We kept enough of each other to walk back out.\"",
             "Noah: \"This time memory left people standing.\"",
             "Neri: \"My name is Neri. So please, do not forget any of us.\""
         ]
-    return [
-        "Serin: \"It was not a clean ending. It was one we managed to leave behind.\"",
-        "Noah: \"The names stayed. That has to be enough to carry forward.\"",
-        "Neri: \"My name is Neri. So please, do not forget any of us.\""
-    ]
+    else:
+        lines = [
+            "Serin: \"It was not a clean ending. It was one we managed to leave behind.\"",
+            "Noah: \"The names stayed. That has to be enough to carry forward.\"",
+            "Neri: \"My name is Neri. So please, do not forget any of us.\""
+        ]
+    if _has_worldview_complete():
+        _append_unique_lines(lines, CampaignShellDialogueCatalog.get_special_dialogue(&"truth_annotation", _get_world_timeline_id()))
+    return lines
 
 func _build_ch10_epilogue_presentation_cards() -> Array[Dictionary]:
     var cards: Array[Dictionary] = []
@@ -2877,6 +3135,7 @@ func _commit_stage_rewards(stage: StageData) -> void:
             _award_badge(progression_data, "stage_clear:%s:two_star" % String(stage.stage_id), 1, "Badge of Heroism +1 — %s cleared at two stars." % String(stage.stage_id))
         for badge_id in _get_hidden_objective_badge_ids(stage, result_summary):
             _award_badge(progression_data, badge_id, 2, "Badge of Heroism +2 — hidden objective completed in %s." % String(stage.stage_id))
+        _commit_stage_memorial(stage, progression_data, result_summary)
     _append_unique_lines(_chapter_reward_entries, _battle_controller.get_inventory_entries())
     _unlock_weapons_for_stage(stage.stage_id)
     _unlock_armors_for_stage(stage.stage_id)
@@ -2975,6 +3234,139 @@ func _award_badge(progression_data: ProgressionData, badge_id: String, amount: i
     if progression_data.earn_badge(badge_id, amount):
         _append_unique_lines(_chapter_reward_entries, [reward_line])
 
+func _commit_stage_memorial(stage: StageData, progression_data: ProgressionData, result_summary: Dictionary) -> void:
+    if stage == null or progression_data == null:
+        return
+    var memorial_payload := _build_stage_memorial_payload(stage, result_summary)
+    if memorial_payload.is_empty():
+        return
+    progression_data.upsert_stage_memorial(
+        String(stage.stage_id),
+        String(memorial_payload.get("objective", "")),
+        String(memorial_payload.get("marker_type", "flower")),
+        int(memorial_payload.get("chapter_when_achieved", 1))
+    )
+
+func _build_stage_memorial_payload(stage: StageData, result_summary: Dictionary) -> Dictionary:
+    if stage == null:
+        return {}
+    var objective_text := _get_stage_memorial_objective_text(stage, result_summary)
+    if objective_text.is_empty():
+        return {}
+    var objective_type := _get_stage_memorial_objective_type(stage, result_summary)
+    return {
+        "objective": objective_text,
+        "marker_type": _resolve_stage_memorial_marker_type(objective_text, objective_type, stage),
+        "chapter_when_achieved": _get_stage_memorial_chapter_rank(stage)
+    }
+
+func _get_stage_memorial_objective_type(stage: StageData, result_summary: Dictionary) -> String:
+    if stage == null:
+        return ""
+    match stage.stage_id:
+        &"CH07_05":
+            return "shrine"
+        &"CH08_05":
+            return "mercy"
+        &"CH09A_04":
+            return "hold"
+        &"CH09B_05":
+            return "truth"
+        &"CH10_05":
+            return "anchors"
+        _:
+            var objective_state: Dictionary = result_summary.get("objective_state", {})
+            return String(objective_state.get("objective_type", "")).strip_edges().to_lower()
+
+func _get_stage_memorial_objective_text(stage: StageData, result_summary: Dictionary) -> String:
+    if stage == null:
+        return ""
+    var hidden_state: Dictionary = result_summary.get("hidden_recruit_state", {})
+    var objective_state: Dictionary = result_summary.get("objective_state", {})
+    var finale_result: Dictionary = result_summary.get("finale_result", {})
+    match stage.stage_id:
+        &"CH07_05":
+            if bool(hidden_state.get("mira_shrine_investigated", false)):
+                return "미라의 기록이 잠들어 있던 성소"
+        &"CH08_05":
+            if bool(hidden_state.get("lete_retreated", false)):
+                return "검은 사냥개의 추격에서 살아남을 길"
+        &"CH09A_04":
+            if bool(objective_state.get("hold_completed", false)):
+                return "중앙 승강기와 버려진 장교들의 퇴로"
+        &"CH09B_05":
+            if bool(hidden_state.get("melkion_flipped", false)):
+                return "심연의 기록과 멜키온의 진실"
+        &"CH10_05":
+            if bool(finale_result.get("minimum_anchor_condition_met", false)):
+                return "마지막 종이 기억할 이름의 닻"
+    return ""
+
+func _resolve_stage_memorial_marker_type(objective_text: String, objective_type: String, stage: StageData) -> String:
+    var normalized := objective_text.to_lower()
+    var normalized_type := objective_type.to_lower()
+    if normalized.contains("bridge") or normalized.contains("shrine") or normalized_type in ["bridge", "shrine"]:
+        return "flower"
+    if normalized.contains("mercy") or normalized.contains("truth") or normalized.contains("name") or normalized_type in ["mercy", "truth", "anchors"]:
+        return "candle"
+    if normalized.contains("hold") or normalized.contains("guard") or normalized.contains("protect") or normalized.contains("officer") or normalized_type in ["hold", "rescue_quota"]:
+        return "medal"
+    if stage != null and stage.has_memorial_slot() and stage.get_terrain_type(stage.memorial_slot) == &"bridge":
+        return "flower"
+    return "medal"
+
+func _get_stage_memorial_chapter_rank(stage: StageData) -> int:
+    if _active_chapter_id != StringName():
+        return CampaignChapterRegistry.get_rank(_active_chapter_id)
+    var stage_id_text := String(stage.stage_id).to_upper()
+    if stage_id_text.begins_with("CH09A"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH09A)
+    if stage_id_text.begins_with("CH09B"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH09B)
+    if stage_id_text.begins_with("CH10"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH10)
+    if stage_id_text.begins_with("CH08"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH08)
+    if stage_id_text.begins_with("CH07"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH07)
+    if stage_id_text.begins_with("CH06"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH06)
+    if stage_id_text.begins_with("CH05"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH05)
+    if stage_id_text.begins_with("CH04"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH04)
+    if stage_id_text.begins_with("CH03"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH03)
+    if stage_id_text.begins_with("CH02"):
+        return CampaignChapterRegistry.get_rank(CHAPTER_CH02)
+    return CampaignChapterRegistry.get_rank(CHAPTER_CH01)
+
+func _get_active_stage_memorial() -> Dictionary:
+    var progression_data := _get_progression_data()
+    if progression_data == null or _current_stage == null:
+        return {}
+    return progression_data.get_stage_memorial(String(_current_stage.stage_id))
+
+func _append_stage_memorial_summary_line(lines: Array[String]) -> void:
+    var memorial := _get_active_stage_memorial()
+    if memorial.is_empty():
+        return
+    var objective := String(memorial.get("objective", "")).strip_edges()
+    if objective.is_empty():
+        return
+    lines.append("이 땅은 당신의 선택을 기억합니다 — %s." % objective)
+
+func _append_stage_memorial_dialogue_entry(lines: Array[String]) -> void:
+    var memorial := _get_active_stage_memorial()
+    if memorial.is_empty():
+        return
+    var objective := String(memorial.get("objective", "")).strip_edges()
+    if objective.is_empty():
+        return
+    var line := "Narrator: 이 자리에서 당신은 %s 지켰습니다." % objective
+    if not lines.has(line):
+        lines.append(line)
+
 func _check_hidden_recruit_unlocks(stage: StageData) -> void:
     var progression_data: ProgressionData = _get_progression_data()
     if stage == null or progression_data == null or _battle_controller == null:
@@ -2989,6 +3381,7 @@ func _check_lete_retreat_unlock(stage: StageData, progression_data: ProgressionD
     if stage.stage_id != &"CH08_05" or not bool(hidden_state.get("lete_retreated", false)):
         return
     progression_data.unlock_ally(&"lete")
+    _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_LETE, "Worldview Fragment unlocked — 복수의 순수함")
     _award_badge(progression_data, "secret_recruit:lete", 5, "Badge of Heroism +5 — Lete has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Lete retreats alive from the ruin fight and joins the active roster."])
 
@@ -2997,6 +3390,7 @@ func _check_mira_unlock(stage: StageData, progression_data: ProgressionData, hid
         return
     progression_data.mira_unlocked = true
     progression_data.unlock_ally(&"mira")
+    _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_MIRA, "Worldview Fragment unlocked — 믿음과 의심")
     _award_badge(progression_data, "secret_recruit:mira", 5, "Badge of Heroism +5 — Mira has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Mira answers the shrine record and joins the active roster."])
 
@@ -3005,8 +3399,26 @@ func _check_melkion_unlock(stage: StageData, progression_data: ProgressionData, 
         return
     progression_data.melkion_unlocked = true
     progression_data.unlock_ally(&"melkion")
+    _award_worldview_fragment(progression_data, WORLDVIEW_FRAGMENT_MELKION, "Worldview Fragment unlocked — 진실의 대가")
     _award_badge(progression_data, "secret_recruit:melkion", 5, "Badge of Heroism +5 — Melkion has been recruited.")
     _append_unique_lines(_chapter_reward_entries, ["Melkion rewrites his own record and joins for the next battle only."])
+
+func _award_worldview_fragment(progression_data: ProgressionData, fragment_id: String, reward_line: String) -> void:
+    if progression_data == null or not progression_data.add_worldview_fragment(fragment_id):
+        return
+    _append_unique_lines(_chapter_reward_entries, [reward_line])
+    _check_worldview_complete(progression_data)
+
+func _check_worldview_complete(progression_data: ProgressionData) -> void:
+    if progression_data == null or progression_data.worldview_complete:
+        return
+    for fragment_id in WORLDVIEW_REQUIRED_FRAGMENTS:
+        if not progression_data.has_worldview_fragment(fragment_id):
+            return
+    progression_data.worldview_complete = true
+    _append_unique_lines(_chapter_reward_entries, [
+        "Museum of Truth unlocked — all three hidden viewpoints now resolve into a secret worldview record."
+    ])
 
 func _unlock_accessories_for_stage(stage_id: StringName) -> void:
     var unlocks: Variant = []

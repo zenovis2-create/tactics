@@ -43,3 +43,4 @@ hold_objective_required_turns = 1
 start_cutscene_id = &"ch09a_04_intro"
 clear_cutscene_id = &"ch09a_04_outro"
 next_destination_summary = "Securing the central lift opens Varten's final censor line at the central citadel approach."
+memorial_slot = Vector2i(3, 5)

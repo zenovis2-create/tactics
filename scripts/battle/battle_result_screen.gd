@@ -250,6 +250,14 @@ func show_result(result: Dictionary) -> void:
 			int(closest_bond.get("battles_together", 0))
 		])
 
+	var world_timeline_id := String(result.get("world_timeline_id", "A")).strip_edges()
+	if world_timeline_id.is_empty():
+		world_timeline_id = "A"
+	body_lines.append("[b]World Timeline:[/b] %s" % world_timeline_id)
+	var world_timeline_text := String(result.get("world_timeline_text", "")).strip_edges()
+	if not world_timeline_text.is_empty():
+		body_lines.append(world_timeline_text)
+
 	if title_label != null:
 		title_label.text = title
 	if body_label != null:

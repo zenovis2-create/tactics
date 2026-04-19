@@ -23,6 +23,16 @@ const REGULAR_ACTION_BUTTON_HEIGHT := 28.0
 const REGULAR_TOPBAR_PADDING := 4.0
 const REGULAR_BOTTOMBAR_PADDING := 8.0
 const REGULAR_TOPBAR_MAX_WIDTH := 440.0
+const STATUS_ICON_MAP := {
+    &"fear": "😱",
+    &"混乱": "💭",
+    &"눈不适应": "👁️‍🗨️"
+}
+const MEMORIAL_MARKER_ICONS := {
+    "flower": "🌸",
+    "medal": "🏅",
+    "candle": "🕯️"
+}
 
 @onready var top_bar: PanelContainer = $TopBar
 @onready var bottom_panel: PanelContainer = $BottomPanel
@@ -68,8 +78,14 @@ var _compact_layout: bool = false
 var _last_focus_owner: Control
 var _board_origin: Vector2 = Vector2.ZERO
 var _board_size: Vector2 = Vector2.ZERO
+var _board_cell_size: Vector2 = Vector2.ZERO
 var _last_result_title: String = "Battle Result"
 var _last_result_body: String = ""
+var _flood_margin_overlay: Control
+var _flood_margin_cells: Array[Vector2i] = []
+var _stage_memorial_overlay: Control
+var _stage_memorial_slot: Vector2i = Vector2i(-1, -1)
+var _stage_memorial_data: Dictionary = {}
 var _namecall_choice_overlay: Control
 var _namecall_choice_panel: PanelContainer
 var _namecall_choice_prompt_label: Label
@@ -105,6 +121,8 @@ func _ready() -> void:
     set_stage_title("Tutorial Skirmish")
     _clear_telegraph_surface()
     get_viewport().size_changed.connect(_update_responsive_layout)
+    _build_flood_margin_overlay()
+    _build_stage_memorial_overlay()
     _build_namecall_choice_overlay()
     _update_responsive_layout()
     _apply_runtime_button_icons()
@@ -141,11 +159,17 @@ func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     _update_telegraph_surface(reason)
     _emit_battle_cue_for_reason(reason)
 
-func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0, combat_quote: String = "") -> void:
+func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0, combat_quote: String = "", statuses: Array[StringName] = []) -> void:
     selection_card.visible = true
     var display_name: String = unit_name
+    var status_tokens: Array[String] = []
     if oblivion_stack > 0:
-        display_name += "  [망각 ×%d]" % oblivion_stack
+        status_tokens.append("망각 ×%d" % oblivion_stack)
+    for status_name in statuses:
+        if STATUS_ICON_MAP.has(status_name):
+            status_tokens.append(String(STATUS_ICON_MAP[status_name]))
+    if not status_tokens.is_empty():
+        display_name += "  [%s]" % " ".join(status_tokens)
     selection_label.text = display_name
     detail_label.text = "HP:%s  Move:%d  Range:%d  Re:%d  T:%d  I:%d" % [
         hp_text,
@@ -276,7 +300,40 @@ func _build_namecall_choice_overlay() -> void:
     _namecall_choice_defer_button.custom_minimum_size = Vector2(0.0, 58.0)
     _namecall_choice_defer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     _namecall_choice_defer_button.pressed.connect(func() -> void: select_namecall_choice("defer"))
-    button_row.add_child(_namecall_choice_defer_button)
+func _build_flood_margin_overlay() -> void:
+    if _flood_margin_overlay != null:
+        return
+    _flood_margin_overlay = Control.new()
+    _flood_margin_overlay.name = "FloodMarginOverlay"
+    _flood_margin_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _flood_margin_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(_flood_margin_overlay)
+
+func _build_stage_memorial_overlay() -> void:
+    if _stage_memorial_overlay != null:
+        return
+    _stage_memorial_overlay = Control.new()
+    _stage_memorial_overlay.name = "StageMemorialOverlay"
+    _stage_memorial_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _stage_memorial_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(_stage_memorial_overlay)
+
+func set_flood_margin_positions(cells: Array[Vector2i]) -> void:
+    _flood_margin_cells = cells.duplicate()
+    _refresh_flood_margin_overlay()
+
+func set_stage_memorial(memorial_data: Dictionary, memorial_slot: Vector2i) -> void:
+    _stage_memorial_data = memorial_data.duplicate(true)
+    _stage_memorial_slot = memorial_slot
+    _refresh_stage_memorial_overlay()
+
+func get_stage_memorial_snapshot() -> Dictionary:
+    return {
+        "visible": _stage_memorial_overlay != null and _stage_memorial_overlay.get_child_count() > 0,
+        "icon": _get_stage_memorial_icon(),
+        "tooltip": _build_stage_memorial_tooltip(),
+        "slot": _stage_memorial_slot
+    }
 
 func show_namecall_choice(prompt_text: String, duration: float = 3.0) -> void:
     if _namecall_choice_overlay == null:
@@ -379,16 +436,72 @@ func get_layout_snapshot() -> Dictionary:
         "action_button_min_height": inventory_button.custom_minimum_size.y,
         "inventory_body_orientation": "vertical" if inventory_body.vertical else "horizontal",
         "inventory_panel_size": inventory_panel.size,
-        "oblivion_badge_visible": selection_label.text.contains("[망각")
+        "oblivion_badge_visible": selection_label.text.contains("망각"),
+        "fear_icon_visible": selection_label.text.contains("😱"),
+        "confusion_icon_visible": selection_label.text.contains("💭"),
+        "night_smoke_icon_visible": selection_label.text.contains("👁️‍🗨️")
     }
 
 func apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
     _apply_layout_for_viewport_size(viewport_size)
 
-func set_battle_frame_metrics(board_origin: Vector2, board_size: Vector2) -> void:
+func set_battle_frame_metrics(board_origin: Vector2, board_size: Vector2, board_cell_size: Vector2 = Vector2.ZERO) -> void:
     _board_origin = board_origin
     _board_size = board_size
+    _board_cell_size = board_cell_size
+    _refresh_flood_margin_overlay()
+    _refresh_stage_memorial_overlay()
     _apply_layout_for_viewport_size(get_viewport_rect().size)
+
+func _refresh_flood_margin_overlay() -> void:
+    if _flood_margin_overlay == null:
+        return
+    for child in _flood_margin_overlay.get_children():
+        child.queue_free()
+    if _flood_margin_cells.is_empty() or _board_cell_size == Vector2.ZERO:
+        return
+
+    for cell in _flood_margin_cells:
+        var icon := Label.new()
+        icon.text = "🔴"
+        icon.tooltip_text = "침수 구역"
+        icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        icon.add_theme_font_size_override("font_size", 16)
+        icon.add_theme_color_override("font_color", Color(1.0, 0.411765, 0.411765, 0.96))
+        icon.position = _board_origin + Vector2(
+            cell.x * _board_cell_size.x + _board_cell_size.x - 18.0,
+            cell.y * _board_cell_size.y + 2.0
+        )
+        _flood_margin_overlay.add_child(icon)
+
+func _refresh_stage_memorial_overlay() -> void:
+    if _stage_memorial_overlay == null:
+        return
+    for child in _stage_memorial_overlay.get_children():
+        child.queue_free()
+    if _stage_memorial_data.is_empty() or _board_cell_size == Vector2.ZERO or _stage_memorial_slot.x < 0 or _stage_memorial_slot.y < 0:
+        return
+    var marker := Label.new()
+    marker.text = _get_stage_memorial_icon()
+    marker.tooltip_text = _build_stage_memorial_tooltip()
+    marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    marker.add_theme_font_size_override("font_size", 22)
+    marker.add_theme_color_override("font_color", Color(1.0, 0.956863, 0.905882, 0.98))
+    marker.position = _board_origin + Vector2(
+        _stage_memorial_slot.x * _board_cell_size.x + _board_cell_size.x * 0.5 - 12.0,
+        _stage_memorial_slot.y * _board_cell_size.y + 4.0
+    )
+    _stage_memorial_overlay.add_child(marker)
+
+func _get_stage_memorial_icon() -> String:
+    var marker_type := String(_stage_memorial_data.get("marker_type", "flower")).strip_edges().to_lower()
+    return String(MEMORIAL_MARKER_ICONS.get(marker_type, "🌸"))
+
+func _build_stage_memorial_tooltip() -> String:
+    var objective := String(_stage_memorial_data.get("objective", "")).strip_edges()
+    if objective.is_empty():
+        return ""
+    return "이 땅은 당신의 선택을 기억합니다 — %s" % objective
 
 func dismiss_overlay_at_position(screen_position: Vector2) -> bool:
     if _namecall_choice_overlay != null and _namecall_choice_overlay.visible:

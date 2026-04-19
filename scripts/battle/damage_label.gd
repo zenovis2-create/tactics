@@ -11,6 +11,7 @@ const FONT_SIZE_CRIT := 24
 
 var _type_colors: Dictionary = {
 	&"damage": Color(0.95, 0.22, 0.18),
+	&"drowning": Color(0.317647, 0.717647, 0.94902),
 	&"heal": Color(0.27, 0.88, 0.53),
 	&"miss": Color(0.62, 0.62, 0.62),
 	&"guard": Color(0.93, 0.76, 0.28),

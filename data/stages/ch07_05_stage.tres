@@ -69,3 +69,4 @@ loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch07_05_intro"
 clear_cutscene_id = &"ch07_05_outro"
 next_destination_summary = "The black-hound orders and forest coordinates point the pursuit toward Lete and the hidden ruins."
+memorial_slot = Vector2i(7, 2)

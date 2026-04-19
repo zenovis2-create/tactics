@@ -135,11 +135,11 @@ func set_equipped_armor(armor: ArmorData) -> void:
     _equipped_armor = armor
     _refresh_visuals()
 
-func apply_damage(amount: int) -> void:
+func apply_damage(amount: int, type: StringName = &"damage") -> void:
     current_hp = max(0, current_hp - amount)
     _refresh_visuals()
     _play_damage_flash()
-    show_damage(amount, &"damage")
+    show_damage(amount, type)
 
     if current_hp <= 0:
         defeated.emit(self)

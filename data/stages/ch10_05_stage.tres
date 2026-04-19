@@ -100,3 +100,4 @@ ally_defense_bonus = 0
 start_cutscene_id = &"ch10_05_intro"
 clear_cutscene_id = &"ch10_05_outro"
 next_destination_summary = "The bell stops, the names remain, and the campaign resolves around what survives remembering."
+memorial_slot = Vector2i(11, 10)

@@ -40,6 +40,8 @@ var _save_service: SaveService = null
 var _event_log: Array[Dictionary] = []
 var _newly_unlocked_commands: Array[String] = []
 var _recently_recovered_fragments: Array[String] = []
+var _memorial_summary: String = ""
+var _memorial_dialogue_entry: String = ""
 
 func enter_camp(
     chapter: StringName,
@@ -59,6 +61,7 @@ func enter_camp(
         _camp_data.unlocked_command_ids = progression.get_unlocked_command_ids()
         _newly_unlocked_commands = progression.get_newly_unlocked_commands()
         _recently_recovered_fragments = progression.get_recently_recovered_fragments()
+        _refresh_stage_memorial_context(stage_clear_result, progression)
         progression.snapshot_unlock_state()
     else:
         var empty_ids: Array[String] = []
@@ -66,6 +69,8 @@ func enter_camp(
         _camp_data.unlocked_command_ids = empty_ids
         _newly_unlocked_commands = []
         _recently_recovered_fragments = []
+        _memorial_summary = ""
+        _memorial_dialogue_entry = ""
     _camp_data.unlocked_axes = _compute_unlocked_axes(chapter)
     _build_pending_notifications(stage_clear_result)
     _event_log.append({"event": "camp_entered", "chapter": chapter})
@@ -97,7 +102,9 @@ func get_camp_summary() -> Dictionary:
         "has_new_records": _camp_data.has_pending_notifications(),
         "memory_entries": _camp_data.pending_memory_entries.duplicate(),
         "evidence_entries": _camp_data.pending_evidence_entries.duplicate(),
-        "letter_entries": _camp_data.pending_letter_entries.duplicate()
+        "letter_entries": _camp_data.pending_letter_entries.duplicate(),
+        "memorial_summary": _memorial_summary,
+        "memorial_dialogue_entry": _memorial_dialogue_entry
     }
 
 func get_camp_data() -> CampData:
@@ -143,3 +150,20 @@ func _build_pending_notifications(result: Dictionary) -> void:
     var letters: Array = result.get("letter_entries", [])
     for item in letters:
         _camp_data.pending_letter_entries.append(String(item))
+
+func _refresh_stage_memorial_context(stage_clear_result: Dictionary, progression: ProgressionData) -> void:
+    _memorial_summary = ""
+    _memorial_dialogue_entry = ""
+    if progression == null:
+        return
+    var stage_id := String(stage_clear_result.get("stage_id", "")).strip_edges()
+    if stage_id.is_empty():
+        return
+    var memorial := progression.get_stage_memorial(stage_id)
+    if memorial.is_empty():
+        return
+    var objective := String(memorial.get("objective", "")).strip_edges()
+    if objective.is_empty():
+        return
+    _memorial_summary = "이 땅은 당신의 선택을 기억합니다 — %s." % objective
+    _memorial_dialogue_entry = "Narrator: 이 자리에서 당신은 %s 지켰습니다." % objective

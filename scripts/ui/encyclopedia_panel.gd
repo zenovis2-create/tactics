@@ -2,6 +2,7 @@ class_name EncyclopediaPanel
 extends Control
 
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
+const CampaignShellDialogueCatalog = preload("res://scripts/campaign/campaign_shell_dialogue_catalog.gd")
 const SupportConversations = preload("res://scripts/data/support_conversations.gd")
 
 signal close_requested
@@ -10,6 +11,7 @@ const TAB_CODEX := "codex"
 const TAB_TIMELINE := "timeline"
 const TAB_MEMORIAL := "memorial"
 const TAB_ATLAS := "atlas"
+const MAX_COMMENT_LENGTH := 280
 const TAB_ORDER := [TAB_CODEX, TAB_TIMELINE, TAB_MEMORIAL, TAB_ATLAS]
 const TAB_LABELS := {
 	TAB_CODEX: "Codex",
@@ -40,8 +42,9 @@ const CHAPTER_LOCATION_NAMES := {
 @onready var atlas_button: Button = $Panel/Margin/Content/TabButtons/AtlasButton
 @onready var codex_tab: Control = $Panel/Margin/Content/BodyStack/CodexTab
 @onready var codex_cards: GridContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexScroll/CodexCards
-@onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailLabel
-@onready var codex_detail_margin: MarginContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin
+@onready var codex_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/DetailLabel
+@onready var worldview_detail_label: RichTextLabel = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack/WorldviewLabel
+@onready var codex_detail_stack: VBoxContainer = $Panel/Margin/Content/BodyStack/CodexTab/CodexBody/CodexDetail/Margin/DetailStack
 @onready var timeline_tab: Control = $Panel/Margin/Content/BodyStack/TimelineTab
 @onready var timeline_label: RichTextLabel = $Panel/Margin/Content/BodyStack/TimelineTab/TimelineScroll/TimelineLabel
 @onready var memorial_tab: Control = $Panel/Margin/Content/BodyStack/MemorialTab
@@ -57,6 +60,14 @@ var _codex_keys: Array[String] = []
 var _support_history_toggle: Button
 var _support_history_label: RichTextLabel
 var _support_history_expanded: bool = false
+var _comment_editor_container: VBoxContainer
+var _comment_editor_text: TextEdit
+var _comment_counter_label: Label
+var _comment_save_button: Button
+var _comment_cancel_button: Button
+var _comment_editor_open: bool = false
+var _comment_editor_unit_key: String = ""
+var _comment_text_syncing: bool = false
 
 func _ready() -> void:
 	visible = false
@@ -66,6 +77,7 @@ func _ready() -> void:
 	timeline_button.pressed.connect(func() -> void: select_tab(TAB_TIMELINE))
 	memorial_button.pressed.connect(func() -> void: select_tab(TAB_MEMORIAL))
 	atlas_button.pressed.connect(func() -> void: select_tab(TAB_ATLAS))
+	_ensure_comment_editor_section()
 	_ensure_support_history_section()
 	select_tab(TAB_CODEX)
 
@@ -80,6 +92,7 @@ func show_encyclopedia(progression_data: ProgressionData, active_chapter_id: Str
 	_active_chapter_id = active_chapter_id
 	if _progression_data == null:
 		return
+	_close_comment_editor()
 	_rebuild_codex()
 	_rebuild_timeline()
 	_rebuild_memorial()
@@ -106,6 +119,8 @@ func select_tab(tab_name: String) -> void:
 func select_codex_entry(unit_key: String) -> void:
 	if not _codex_keys.has(unit_key):
 		return
+	if _comment_editor_open and _comment_editor_unit_key != unit_key:
+		_close_comment_editor()
 	_selected_codex_key = unit_key
 	_rebuild_codex()
 
@@ -116,11 +131,17 @@ func get_snapshot() -> Dictionary:
 		"codex_count": _codex_keys.size(),
 		"selected_codex_key": _selected_codex_key,
 		"codex_detail": codex_detail_label.text,
+		"worldview_detail": worldview_detail_label.text,
+		"selected_comment": _progression_data.get_encyclopedia_comment(StringName(_selected_codex_key)) if _progression_data != null and not _selected_codex_key.is_empty() else "",
+		"comment_editor_visible": _comment_editor_container.visible if _comment_editor_container != null else false,
+		"comment_counter_text": _comment_counter_label.text if _comment_counter_label != null else "",
+		"comment_history_count": _progression_data.get_comment_history_for_unit(StringName(_selected_codex_key)).size() if _progression_data != null and not _selected_codex_key.is_empty() else 0,
 		"support_history_text": _support_history_label.text if _support_history_label != null else "",
 		"timeline_text": timeline_label.text,
 		"memorial_count": min(3, _progression_data.get_honor_roll().size()) if _progression_data != null else 0,
 		"atlas_text": atlas_label.text,
-		"atlas_memorial_marker": _build_atlas_memorial_marker_text()
+		"atlas_memorial_marker": _build_atlas_memorial_marker_text(),
+		"atlas_stage_memorials": _build_atlas_stage_memorial_lines()
 	}
 
 func _rebuild_codex() -> void:
@@ -128,6 +149,7 @@ func _rebuild_codex() -> void:
 	_codex_keys.clear()
 	if _progression_data == null:
 		codex_detail_label.text = ""
+		worldview_detail_label.text = ""
 		return
 	for unit_key in _progression_data.encyclopedia_entries.keys():
 		_codex_keys.append(String(unit_key))
@@ -147,28 +169,52 @@ func _rebuild_codex() -> void:
 		codex_cards.add_child(empty_label)
 		_selected_codex_key = ""
 		codex_detail_label.text = "Recruit allies or defeat enemies to start the record."
+		worldview_detail_label.text = _build_worldview_detail_text()
 		return
 	if _selected_codex_key.is_empty() or not _codex_keys.has(_selected_codex_key):
 		_selected_codex_key = _codex_keys[0]
 	for unit_key in _codex_keys:
 		var entry: Dictionary = _progression_data.encyclopedia_entries.get(unit_key, {})
+		var card := PanelContainer.new()
+		card.custom_minimum_size = Vector2(190.0, 112.0)
+		var margin := MarginContainer.new()
+		margin.add_theme_constant_override("margin_left", 8)
+		margin.add_theme_constant_override("margin_top", 8)
+		margin.add_theme_constant_override("margin_right", 8)
+		margin.add_theme_constant_override("margin_bottom", 8)
+		var stack := VBoxContainer.new()
+		stack.add_theme_constant_override("separation", 6)
 		var button := Button.new()
 		button.text = _build_codex_card_label(entry)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		button.custom_minimum_size = Vector2(190.0, 76.0)
+		button.custom_minimum_size = Vector2(0.0, 76.0)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.disabled = unit_key == _selected_codex_key
 		button.tooltip_text = _build_codex_tooltip(entry)
 		button.pressed.connect(func() -> void:
 			_selected_codex_key = unit_key
 			_rebuild_codex()
 		)
-		codex_cards.add_child(button)
+		var comment_button := Button.new()
+		comment_button.text = _build_comment_button_label(unit_key)
+		comment_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		comment_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		comment_button.tooltip_text = _build_comment_button_tooltip(unit_key)
+		comment_button.pressed.connect(func() -> void:
+			_open_comment_editor(unit_key)
+		)
+		stack.add_child(button)
+		stack.add_child(comment_button)
+		margin.add_child(stack)
+		card.add_child(margin)
+		codex_cards.add_child(card)
 	_render_codex_detail()
 
 func _render_codex_detail() -> void:
 	if _progression_data == null or _selected_codex_key.is_empty():
 		codex_detail_label.text = ""
+		worldview_detail_label.text = ""
 		return
 	var entry: Dictionary = _progression_data.encyclopedia_entries.get(_selected_codex_key, {})
 	var stats: Dictionary = entry.get("stats", {})
@@ -189,11 +235,153 @@ func _render_codex_detail() -> void:
 	var quote := String(entry.get("quote", "")).strip_edges()
 	if not quote.is_empty():
 		lines.append("\n[i]\"%s\"[/i]" % quote)
+	lines.append("")
+	lines.append("[b]PLAYER NOTES[/b]")
+	var comment := _progression_data.get_encyclopedia_comment(StringName(_selected_codex_key))
+	if comment.is_empty():
+		lines.append("[i]첫 코멘트를 남기세요 ✏️[/i]")
+	else:
+		lines.append("[b]%s[/b]" % _escape_bbcode(comment))
 	codex_detail_label.text = "\n".join(lines)
+	worldview_detail_label.text = _build_worldview_detail_text()
+	_render_comment_editor()
 	_render_support_history(entry)
 
+func open_comment_editor(unit_key: String) -> void:
+	_open_comment_editor(unit_key)
+
+func set_comment_draft(comment_text: String) -> void:
+	if _comment_editor_text == null:
+		return
+	_comment_text_syncing = true
+	_comment_editor_text.text = _truncate_comment_text(comment_text)
+	_comment_text_syncing = false
+	_update_comment_counter()
+	_update_comment_save_state()
+
+func save_comment_draft() -> void:
+	_save_comment_editor()
+
+func _ensure_comment_editor_section() -> void:
+	if codex_detail_stack == null or _comment_editor_container != null:
+		return
+	_comment_editor_container = VBoxContainer.new()
+	_comment_editor_container.visible = false
+	_comment_editor_container.add_theme_constant_override("separation", 8)
+	var title := Label.new()
+	title.text = "코멘트 쓰기"
+	_comment_editor_container.add_child(title)
+	_comment_editor_text = TextEdit.new()
+	_comment_editor_text.custom_minimum_size = Vector2(0.0, 110.0)
+	_comment_editor_text.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_comment_editor_text.text_changed.connect(_on_comment_text_changed)
+	_comment_editor_container.add_child(_comment_editor_text)
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 8)
+	_comment_counter_label = Label.new()
+	footer.add_child(_comment_counter_label)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(spacer)
+	_comment_save_button = Button.new()
+	_comment_save_button.text = "저장"
+	_comment_save_button.pressed.connect(_save_comment_editor)
+	footer.add_child(_comment_save_button)
+	_comment_cancel_button = Button.new()
+	_comment_cancel_button.text = "취소"
+	_comment_cancel_button.pressed.connect(_cancel_comment_editor)
+	footer.add_child(_comment_cancel_button)
+	_comment_editor_container.add_child(footer)
+	codex_detail_stack.add_child(_comment_editor_container)
+	_update_comment_counter()
+	_update_comment_save_state()
+
+func _render_comment_editor() -> void:
+	if _comment_editor_container == null or _comment_editor_text == null:
+		return
+	var should_show := _comment_editor_open and not _comment_editor_unit_key.is_empty() and _comment_editor_unit_key == _selected_codex_key
+	_comment_editor_container.visible = should_show
+	if not should_show:
+		return
+	if _comment_editor_text.text != _progression_data.get_encyclopedia_comment(StringName(_comment_editor_unit_key)) and _comment_editor_text.text.strip_edges().is_empty():
+		_comment_text_syncing = true
+		_comment_editor_text.text = _progression_data.get_encyclopedia_comment(StringName(_comment_editor_unit_key))
+		_comment_text_syncing = false
+	_update_comment_counter()
+	_update_comment_save_state()
+
+func _open_comment_editor(unit_key: String) -> void:
+	if _progression_data == null:
+		return
+	var normalized_unit_key := unit_key.strip_edges()
+	if normalized_unit_key.is_empty() or not _progression_data.encyclopedia_entries.has(normalized_unit_key):
+		return
+	_selected_codex_key = normalized_unit_key
+	_comment_editor_open = true
+	_comment_editor_unit_key = normalized_unit_key
+	set_comment_draft(_progression_data.get_encyclopedia_comment(StringName(normalized_unit_key)))
+	_rebuild_codex()
+	if _comment_editor_text != null:
+		_comment_editor_text.grab_focus()
+
+func _cancel_comment_editor() -> void:
+	_close_comment_editor()
+	_render_codex_detail()
+
+func _close_comment_editor(clear_draft: bool = true) -> void:
+	_comment_editor_open = false
+	_comment_editor_unit_key = ""
+	if clear_draft and _comment_editor_text != null:
+		_comment_text_syncing = true
+		_comment_editor_text.text = ""
+		_comment_text_syncing = false
+	_update_comment_counter()
+	_update_comment_save_state()
+	if _comment_editor_container != null:
+		_comment_editor_container.visible = false
+
+func _save_comment_editor() -> void:
+	if _progression_data == null or _comment_editor_text == null:
+		return
+	var unit_key := _comment_editor_unit_key.strip_edges()
+	var comment_text := _comment_editor_text.text.strip_edges()
+	if unit_key.is_empty() or comment_text.is_empty():
+		return
+	var did_save := _progression_data.set_encyclopedia_comment(
+		StringName(unit_key),
+		_truncate_comment_text(comment_text),
+		_resolve_comment_author_name(),
+		Time.get_datetime_string_from_system()
+	)
+	_close_comment_editor()
+	if did_save:
+		_rebuild_codex()
+	else:
+		_render_codex_detail()
+
+func _on_comment_text_changed() -> void:
+	if _comment_text_syncing or _comment_editor_text == null:
+		return
+	var truncated := _truncate_comment_text(_comment_editor_text.text)
+	if truncated != _comment_editor_text.text:
+		_comment_text_syncing = true
+		_comment_editor_text.text = truncated
+		_comment_text_syncing = false
+	_update_comment_counter()
+	_update_comment_save_state()
+
+func _update_comment_counter() -> void:
+	if _comment_counter_label == null or _comment_editor_text == null:
+		return
+	_comment_counter_label.text = "%d/%d" % [_comment_editor_text.text.length(), MAX_COMMENT_LENGTH]
+
+func _update_comment_save_state() -> void:
+	if _comment_save_button == null or _comment_editor_text == null:
+		return
+	_comment_save_button.disabled = _comment_editor_text.text.strip_edges().is_empty()
+
 func _ensure_support_history_section() -> void:
-	if codex_detail_margin == null or _support_history_toggle != null:
+	if codex_detail_stack == null or _support_history_toggle != null:
 		return
 	_support_history_toggle = Button.new()
 	_support_history_toggle.text = "▶ Support History"
@@ -207,8 +395,8 @@ func _ensure_support_history_section() -> void:
 	_support_history_label.bbcode_enabled = true
 	_support_history_label.fit_content = true
 	_support_history_label.visible = false
-	codex_detail_margin.add_child(_support_history_toggle)
-	codex_detail_margin.add_child(_support_history_label)
+	codex_detail_stack.add_child(_support_history_toggle)
+	codex_detail_stack.add_child(_support_history_label)
 
 func _render_support_history(entry: Dictionary) -> void:
 	if _support_history_toggle == null or _support_history_label == null or _progression_data == null:
@@ -244,6 +432,23 @@ func _render_support_history(entry: Dictionary) -> void:
 			line_text
 		])
 	_support_history_label.text = "[b]Relationship Timeline[/b]\n%s" % "\n".join(lines)
+
+func _build_worldview_detail_text() -> String:
+	if _progression_data == null:
+		return ""
+	var fragment_ids := _progression_data.get_worldview_fragment_ids()
+	var cards := CampaignShellDialogueCatalog.get_worldview_fragment_cards(fragment_ids, _progression_data.world_timeline_id)
+	var lines: Array[String] = [
+		"[b]Worldview Fragments[/b] (%d/3 collected)" % fragment_ids.size()
+	]
+	for card in cards:
+		var prefix := "• [color=lime]Collected[/color]" if bool(card.get("collected", false)) else "• [color=gray]Locked[/color]"
+		lines.append("%s — %s" % [prefix, String(card.get("name", "Fragment"))])
+		lines.append("  %s" % String(card.get("description", "")).strip_edges())
+	if _progression_data.worldview_complete:
+		lines.append("")
+		lines.append("[b]Museum of Truth[/b] unlocked")
+	return "\n".join(lines)
 
 func _rebuild_timeline() -> void:
 	if _progression_data == null:
@@ -307,9 +512,11 @@ func _rebuild_atlas() -> void:
 	if chapters.is_empty() and _active_chapter_id != StringName():
 		chapters.append(String(_active_chapter_id))
 	var marker_text := _build_atlas_memorial_marker_text()
+	var stage_memorial_lines := _build_atlas_stage_memorial_lines()
 	if chapters.is_empty() and marker_text.is_empty():
-		atlas_label.text = "No route has been charted yet."
-		return
+		if stage_memorial_lines.is_empty():
+			atlas_label.text = "No route has been charted yet."
+			return
 	var locations: Array[String] = []
 	for chapter_id in chapters:
 		locations.append(_get_location_name(chapter_id))
@@ -322,6 +529,12 @@ func _rebuild_atlas() -> void:
 			lines.append("")
 		lines.append("[b]Memorial Marker[/b]")
 		lines.append(marker_text)
+	if not stage_memorial_lines.is_empty():
+		if not lines.is_empty():
+			lines.append("")
+		lines.append("[b]Terrain Remembers[/b]")
+		for line in stage_memorial_lines:
+			lines.append(line)
 	atlas_label.text = "\n".join(lines)
 
 func _build_atlas_memorial_marker_text() -> String:
@@ -335,6 +548,31 @@ func _build_atlas_memorial_marker_text() -> String:
 		chapter_id = _derive_chapter_from_stage(String(marker.get("stage_id", "")).strip_edges())
 	var location_name := _get_location_name(chapter_id) if not chapter_id.is_empty() else String(marker.get("stage_id", "Memorial Site"))
 	return "✦ %s — %s" % [location_name, String(marker.get("unit_name", "The Fallen"))]
+
+func _build_atlas_stage_memorial_lines() -> Array[String]:
+	var lines: Array[String] = []
+	if _progression_data == null:
+		return lines
+	var memorials: Dictionary = _progression_data.get_stage_memorial_snapshot()
+	var stage_ids: Array[String] = []
+	for stage_id_variant in memorials.keys():
+		stage_ids.append(String(stage_id_variant))
+	stage_ids.sort()
+	for stage_id in stage_ids:
+		var memorial := memorials.get(stage_id, {}) as Dictionary
+		if memorial.is_empty():
+			continue
+		var chapter_id := _derive_chapter_from_stage(stage_id)
+		var location_name := _get_location_name(chapter_id) if not chapter_id.is_empty() else stage_id
+		var marker_type := String(memorial.get("marker_type", "flower")).strip_edges().to_lower()
+		var icon := "🌸"
+		if marker_type == "medal":
+			icon = "🏅"
+		elif marker_type == "candle":
+			icon = "🕯️"
+		var objective := String(memorial.get("objective", "")).strip_edges()
+		lines.append("%s %s (%s) — %s" % [icon, location_name, stage_id, objective])
+	return lines
 
 func _build_codex_card_label(entry: Dictionary) -> String:
 	var support_suffix := ""
@@ -351,6 +589,19 @@ func _build_codex_tooltip(entry: Dictionary) -> String:
 		String(entry.get("name", "Unknown")),
 		int(entry.get("chapter_introduced", 0))
 	]
+
+func _build_comment_button_label(unit_key: String) -> String:
+	if _progression_data == null:
+		return "✏️ 코멘트"
+	return "✏️ 코멘트 수정" if not _progression_data.get_encyclopedia_comment(StringName(unit_key)).is_empty() else "✏️ 코멘트 쓰기"
+
+func _build_comment_button_tooltip(unit_key: String) -> String:
+	if _progression_data == null:
+		return "이 유닛에 대한 코멘트를 남깁니다."
+	var comment := _progression_data.get_encyclopedia_comment(StringName(unit_key))
+	if comment.is_empty():
+		return "이 유닛에 대한 첫 코멘트를 남깁니다."
+	return "현재 코멘트: %s" % comment
 
 func _get_completed_chapters() -> Array[String]:
 	var chapters: Array[String] = []
@@ -397,6 +648,20 @@ func _get_location_name(chapter_id: String) -> String:
 
 func _format_support_rank(rank_value: int) -> String:
 	return SupportConversations.get_rank_label(rank_value)
+
+func _truncate_comment_text(raw_text: String) -> String:
+	return raw_text.left(MAX_COMMENT_LENGTH)
+
+func _escape_bbcode(raw_text: String) -> String:
+	return raw_text.replace("[", "[lb]").replace("]", "[rb]")
+
+func _resolve_comment_author_name() -> String:
+	var user_name := OS.get_environment("USER").strip_edges()
+	if user_name.is_empty():
+		user_name = OS.get_environment("USERNAME").strip_edges()
+	if user_name.is_empty():
+		return "Anonymous Archivist"
+	return user_name.capitalize()
 
 func _clear_children(node: Node) -> void:
 	for child in node.get_children():

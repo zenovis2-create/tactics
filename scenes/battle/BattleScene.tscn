@@ -47,6 +47,8 @@ script = ExtResource("11_board")
 
 [node name="Effects" type="Node2D" parent="."]
 
+[node name="FloodCombinedFX" type="Node2D" parent="Effects"]
+
 [node name="GridCursor" parent="." instance=ExtResource("8_cursor")]
 
 [node name="TurnManager" type="Node" parent="."]

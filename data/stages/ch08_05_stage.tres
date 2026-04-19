@@ -36,3 +36,4 @@ loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch08_05_intro"
 clear_cutscene_id = &"ch08_05_outro"
 next_destination_summary = "Special orders, checkpoint plates, and final transfer slips fix the next pursuit on Karl's outer line and the inner transfer route beyond it."
+memorial_slot = Vector2i(5, 1)

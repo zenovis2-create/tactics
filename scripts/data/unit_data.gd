@@ -13,6 +13,7 @@ const JobData = preload("res://scripts/data/job_data.gd")
 @export var defense: int = 2
 @export var movement: int = 3
 @export var attack_range: int = 1
+@export var personality: String = "steady"
 @export var default_skill: SkillData
 @export var class_data: ClassData
 @export var job_data: JobData

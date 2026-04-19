@@ -10,6 +10,35 @@ const RELATIONSHIP_TIMELINES := {
 	}
 }
 
+const SUPPORT_CONVERSATION_ENTRIES := {
+	"ally_rian:ally_serin": {
+		3: {
+			"topic": "The monastery still lingers between them. Serin finally names the fear she carried out of the flood.",
+			"context_A": "You held us together in there. I'm glad you were beside me.",
+			"context_B": "I still don't know what that night was supposed to mean for us.",
+			"context_C": "Stay quiet and let Serin say everything she has been holding back."
+		},
+		4: {
+			"topic": "Serin brings up the rear-guard line and asks whether Rian noticed how often she covered his blind side.",
+			"context_A": "I noticed. I trusted your step before I understood why.",
+			"context_B": "I noticed, but I still treated it like battlefield habit.",
+			"context_C": "Let the silence sit so Serin can decide how much of the truth to share."
+		},
+		5: {
+			"topic": "The next confession is harder: Serin admits her concern stopped feeling like tactics a long time ago.",
+			"context_A": "Then stay close to me. I won't pretend this is only strategy either.",
+			"context_B": "I feel it too, but I'm still trying to understand what to call it.",
+			"context_C": "Listen without interrupting and trust Serin to finish the thought in her own way."
+		},
+		6: {
+			"topic": "At the edge of the last battle, Serin asks whether a shared name can carry them farther than any oath.",
+			"context_A": "It can. If you call, I'll answer every time.",
+			"context_B": "I want to believe that, even if I still don't have the right words.",
+			"context_C": "Answer with presence instead of certainty and let the bond speak first."
+		}
+	}
+}
+
 const NAME_CALL_LINES := {
 	"ally_serin": {
 		"generic": "Serin, hold formation with me.",
@@ -47,6 +76,13 @@ static func normalize_pair_id(pair_id: String) -> String:
 		return normalized
 	parts.sort()
 	return "%s:%s" % [parts[0], parts[1]]
+
+static func get_support_conversation_entry(pair_id: String, rank: int) -> Dictionary:
+	var normalized_pair := normalize_pair_id(pair_id)
+	var pair_entries: Dictionary = SUPPORT_CONVERSATION_ENTRIES.get(normalized_pair, {})
+	if pair_entries.has(rank):
+		return (pair_entries.get(rank, {}) as Dictionary).duplicate(true)
+	return _build_default_support_conversation(normalized_pair, rank)
 
 static func get_support_history_line(pair_id: String, rank: int) -> String:
 	var normalized_pair := normalize_pair_id(pair_id)
@@ -119,3 +155,27 @@ static func get_unit_display_name(unit_id: String) -> String:
 	if normalized_unit.is_empty():
 		return "Ally"
 	return normalized_unit.capitalize()
+
+static func _build_default_support_conversation(pair_id: String, rank: int) -> Dictionary:
+	var ally_name := _resolve_pair_partner_name(pair_id)
+	var topic := "The bond between Rian and %s rises after another shared battle." % ally_name
+	match rank:
+		4:
+			topic = "%s quietly revisits a moment when trust arrived faster than either of them expected." % ally_name
+		5:
+			topic = "%s asks whether what they feel can still be called duty." % ally_name
+		6:
+			topic = "%s and Rian finally speak as if the bond itself has become an oath." % ally_name
+	return {
+		"topic": topic,
+		"context_A": "Tell %s they have become someone you rely on." % ally_name,
+		"context_B": "Admit that you still do not have a clean answer for what this bond means." ,
+		"context_C": "Listen in silence and let %s decide the pace of the moment." % ally_name
+	}
+
+static func _resolve_pair_partner_name(pair_id: String) -> String:
+	var normalized_pair := normalize_pair_id(pair_id)
+	for unit_id in normalized_pair.split(":", false):
+		if unit_id != "ally_rian":
+			return get_unit_display_name(unit_id)
+	return "Ally"

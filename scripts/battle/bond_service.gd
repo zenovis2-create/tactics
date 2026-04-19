@@ -50,6 +50,7 @@ func _initialize_bonds() -> void:
 func setup_progression(data: ProgressionData) -> void:
     _progression_data = data
     _initialize_bonds()
+    _load_support_progress_from_progression()
 
 func _has_bond_anchor_purchase() -> bool:
     return _progression_data != null and _progression_data.ng_plus_purchases.has("bond_anchor")
@@ -65,7 +66,7 @@ func get_support_rank(unit_a: StringName, unit_b: StringName) -> int:
         return 0
     var pair_id := _make_support_pair_id(normalized_a, normalized_b)
     if _support_progress_by_pair.has(pair_id):
-        return int((_support_progress_by_pair.get(pair_id, {}) as Dictionary).get("rank", 0))
+        return _resolve_progress_rank(_support_progress_by_pair.get(pair_id, {}) as Dictionary)
     if normalized_a == &"ally_rian" and COMPANION_IDS.has(normalized_b):
         return clampi(get_bond(normalized_b) - 1, 0, LEGACY_MAX_SUPPORT_RANK)
     if normalized_b == &"ally_rian" and COMPANION_IDS.has(normalized_a):
@@ -86,15 +87,20 @@ func register_support_progress(unit_a: StringName, unit_b: StringName, chapter_i
         return {}
 
     var progress: Dictionary = (_support_progress_by_pair.get(pair_id, {}) as Dictionary).duplicate(true)
-    var previous_rank: int = int(progress.get("rank", 0))
+    var previous_rank: int = _resolve_progress_rank(progress)
+    var previous_milestone_rank: int = _resolve_milestone_rank(progress)
+    var rank_bonus: int = _resolve_rank_bonus(progress)
     var battles_together: int = int(progress.get("battles_together", 0)) + 1
     var new_rank: int = _calculate_support_rank_from_battles(battles_together)
     progress["pair"] = pair_id
     progress["battles_together"] = battles_together
-    progress["rank"] = max(previous_rank, new_rank)
+    progress["milestone_rank"] = max(previous_milestone_rank, new_rank)
+    progress["rank_bonus"] = rank_bonus
+    progress["rank"] = clampi(int(progress.get("milestone_rank", 0)) + rank_bonus, 0, SUPPORT_S_RANK)
     progress["chapter"] = String(chapter_id)
     progress["stage_id"] = String(stage_id)
     _support_progress_by_pair[pair_id] = progress
+    _sync_support_progress_to_progression()
 
     var entry := {
         "event": "support_progress_registered",
@@ -102,13 +108,15 @@ func register_support_progress(unit_a: StringName, unit_b: StringName, chapter_i
         "battles_together": battles_together,
         "rank_before": previous_rank,
         "rank_after": int(progress.get("rank", 0)),
+        "milestone_rank_before": previous_milestone_rank,
+        "milestone_rank_after": int(progress.get("milestone_rank", 0)),
         "chapter": String(chapter_id),
         "stage_id": String(stage_id)
     }
     _event_log.append(entry)
 
-    if int(progress.get("rank", 0)) > previous_rank:
-        support_progress_updated.emit(pair_id, int(progress.get("rank", 0)))
+    if int(progress.get("milestone_rank", 0)) > previous_milestone_rank:
+        support_progress_updated.emit(pair_id, int(progress.get("milestone_rank", 0)))
     return entry
 
 func promote_name_call_support(unit_a: StringName, unit_b: StringName) -> int:
@@ -119,23 +127,103 @@ func promote_name_call_support(unit_a: StringName, unit_b: StringName) -> int:
         return 0
 
     var progress: Dictionary = (_support_progress_by_pair.get(pair_id, {}) as Dictionary).duplicate(true)
-    var previous_rank: int = int(progress.get("rank", 0))
-    if previous_rank < SUPPORT_A_RANK:
+    var previous_rank: int = _resolve_progress_rank(progress)
+    var previous_milestone_rank: int = _resolve_milestone_rank(progress)
+    var rank_bonus: int = _resolve_rank_bonus(progress)
+    if previous_milestone_rank < SUPPORT_A_RANK:
         return previous_rank
 
     progress["pair"] = pair_id
     progress["battles_together"] = int(progress.get("battles_together", 0))
-    progress["rank"] = SUPPORT_S_RANK
+    progress["milestone_rank"] = SUPPORT_S_RANK
+    progress["rank_bonus"] = rank_bonus
+    progress["rank"] = clampi(SUPPORT_S_RANK + rank_bonus, 0, SUPPORT_S_RANK)
     _support_progress_by_pair[pair_id] = progress
+    _sync_support_progress_to_progression()
     _event_log.append({
         "event": "support_name_call_promoted",
         "pair": pair_id,
         "rank_before": previous_rank,
-        "rank_after": SUPPORT_S_RANK
+        "rank_after": int(progress.get("rank", 0)),
+        "milestone_rank_before": previous_milestone_rank,
+        "milestone_rank_after": SUPPORT_S_RANK
     })
-    if previous_rank < SUPPORT_S_RANK:
+    if previous_milestone_rank < SUPPORT_S_RANK:
         support_progress_updated.emit(pair_id, SUPPORT_S_RANK)
-    return SUPPORT_S_RANK
+    return int(progress.get("rank", 0))
+
+func modify_support_rank(pair_id: String, delta: int) -> int:
+    var normalized_pair := _normalize_support_pair_id(pair_id)
+    if normalized_pair.is_empty():
+        return 0
+    var progress: Dictionary = (_support_progress_by_pair.get(normalized_pair, {}) as Dictionary).duplicate(true)
+    var previous_rank: int = _resolve_progress_rank(progress)
+    var milestone_rank: int = _resolve_milestone_rank(progress)
+    var rank_bonus: int = _resolve_rank_bonus(progress) + delta
+    progress["pair"] = normalized_pair
+    progress["battles_together"] = int(progress.get("battles_together", 0))
+    progress["milestone_rank"] = milestone_rank
+    progress["rank_bonus"] = rank_bonus
+    progress["rank"] = clampi(milestone_rank + rank_bonus, 0, SUPPORT_S_RANK)
+    _support_progress_by_pair[normalized_pair] = progress
+    _sync_support_progress_to_progression()
+    _event_log.append({
+        "event": "support_rank_modified",
+        "pair": normalized_pair,
+        "rank_before": previous_rank,
+        "rank_after": int(progress.get("rank", 0)),
+        "delta": int(progress.get("rank", 0)) - previous_rank
+    })
+    return int(progress.get("rank", 0))
+
+func queue_next_support_bonus(pair_id: String, bonus: int) -> int:
+    var normalized_pair := _normalize_support_pair_id(pair_id)
+    if normalized_pair.is_empty() or bonus == 0:
+        return get_pending_support_bonus(normalized_pair)
+    var progress: Dictionary = (_support_progress_by_pair.get(normalized_pair, {}) as Dictionary).duplicate(true)
+    var milestone_rank: int = _resolve_milestone_rank(progress)
+    var rank_bonus: int = _resolve_rank_bonus(progress)
+    progress["pair"] = normalized_pair
+    progress["battles_together"] = int(progress.get("battles_together", 0))
+    progress["milestone_rank"] = milestone_rank
+    progress["rank_bonus"] = rank_bonus
+    progress["rank"] = clampi(milestone_rank + rank_bonus, 0, SUPPORT_S_RANK)
+    progress["pending_support_bonus"] = int(progress.get("pending_support_bonus", 0)) + bonus
+    _support_progress_by_pair[normalized_pair] = progress
+    _sync_support_progress_to_progression()
+    _event_log.append({
+        "event": "support_bonus_queued",
+        "pair": normalized_pair,
+        "pending_support_bonus": int(progress.get("pending_support_bonus", 0))
+    })
+    return int(progress.get("pending_support_bonus", 0))
+
+func get_pending_support_bonus(pair_id: String) -> int:
+    var normalized_pair := _normalize_support_pair_id(pair_id)
+    if normalized_pair.is_empty():
+        return 0
+    return int((_support_progress_by_pair.get(normalized_pair, {}) as Dictionary).get("pending_support_bonus", 0))
+
+func consume_pending_support_bonus(pair_id: String) -> int:
+    var normalized_pair := _normalize_support_pair_id(pair_id)
+    if normalized_pair.is_empty() or not _support_progress_by_pair.has(normalized_pair):
+        return 0
+    var progress: Dictionary = (_support_progress_by_pair.get(normalized_pair, {}) as Dictionary).duplicate(true)
+    var pending_bonus: int = int(progress.get("pending_support_bonus", 0))
+    if pending_bonus == 0:
+        return 0
+    progress["milestone_rank"] = _resolve_milestone_rank(progress)
+    progress["rank_bonus"] = _resolve_rank_bonus(progress)
+    progress["rank"] = clampi(int(progress.get("milestone_rank", 0)) + int(progress.get("rank_bonus", 0)), 0, SUPPORT_S_RANK)
+    progress["pending_support_bonus"] = 0
+    _support_progress_by_pair[normalized_pair] = progress
+    _sync_support_progress_to_progression()
+    _event_log.append({
+        "event": "support_bonus_consumed",
+        "pair": normalized_pair,
+        "consumed_bonus": pending_bonus
+    })
+    return pending_bonus
 
 func _normalize_support_unit_id(unit_id: StringName) -> StringName:
     match unit_id:
@@ -211,6 +299,7 @@ func reset() -> void:
     _initialize_bonds()
     _event_log.clear()
     _support_progress_by_pair.clear()
+    _sync_support_progress_to_progression()
 
 func get_event_log() -> Array[Dictionary]:
     return _event_log.duplicate()
@@ -221,6 +310,7 @@ func get_snapshot() -> Dictionary:
         snap[String(id)] = get_bond(id)
     return {
         "bonds": snap,
+        "support_progress_by_pair": _support_progress_by_pair.duplicate(true),
         "squad_trust_average": get_squad_trust_average(),
         "name_anchor_eligible": get_name_anchor_eligible()
     }
@@ -303,6 +393,16 @@ func _make_support_pair_id(unit_a: StringName, unit_b: StringName) -> String:
     parts.sort()
     return "%s:%s" % [parts[0], parts[1]]
 
+func _normalize_support_pair_id(pair_id: String) -> String:
+    var normalized := pair_id.strip_edges()
+    if normalized.is_empty():
+        return ""
+    var parts := normalized.split(":", false)
+    if parts.size() != 2:
+        return ""
+    parts.sort()
+    return "%s:%s" % [parts[0], parts[1]]
+
 func _is_rian_support_pair(unit_a: StringName, unit_b: StringName) -> bool:
     return (unit_a == &"ally_rian" and COMPANION_IDS.has(unit_b)) or (unit_b == &"ally_rian" and COMPANION_IDS.has(unit_a))
 
@@ -319,5 +419,50 @@ func _qualifies_as_s_rank_pair(unit_a: StringName, unit_b: StringName, support_r
     var pair_id := _make_support_pair_id(unit_a, unit_b)
     var resolved_rank := support_rank if support_rank >= 0 else get_support_rank(unit_a, unit_b)
     if _support_progress_by_pair.has(pair_id):
-        return resolved_rank >= SUPPORT_S_RANK
+        return _resolve_milestone_rank(_support_progress_by_pair.get(pair_id, {}) as Dictionary) >= SUPPORT_S_RANK
     return resolved_rank >= LEGACY_MAX_SUPPORT_RANK
+
+func _resolve_progress_rank(progress: Dictionary) -> int:
+    if progress.is_empty():
+        return 0
+    var milestone_rank: int = _resolve_milestone_rank(progress)
+    var rank_bonus: int = _resolve_rank_bonus(progress)
+    return clampi(int(progress.get("rank", milestone_rank + rank_bonus)), 0, SUPPORT_S_RANK)
+
+func _resolve_milestone_rank(progress: Dictionary) -> int:
+    if progress.is_empty():
+        return 0
+    if progress.has("milestone_rank"):
+        return int(progress.get("milestone_rank", 0))
+    return int(progress.get("rank", 0))
+
+func _resolve_rank_bonus(progress: Dictionary) -> int:
+    if progress.is_empty():
+        return 0
+    if progress.has("rank_bonus"):
+        return int(progress.get("rank_bonus", 0))
+    return 0
+
+func _load_support_progress_from_progression() -> void:
+    _support_progress_by_pair.clear()
+    if _progression_data == null:
+        return
+    for pair_key in _progression_data.support_progress_by_pair.keys():
+        var normalized_pair := _normalize_support_pair_id(String(pair_key))
+        if normalized_pair.is_empty():
+            continue
+        var progress := (_progression_data.support_progress_by_pair.get(pair_key, {}) as Dictionary).duplicate(true)
+        var milestone_rank: int = _resolve_milestone_rank(progress)
+        var rank_bonus: int = _resolve_rank_bonus(progress)
+        progress["pair"] = normalized_pair
+        progress["battles_together"] = int(progress.get("battles_together", 0))
+        progress["milestone_rank"] = milestone_rank
+        progress["rank_bonus"] = rank_bonus
+        progress["rank"] = clampi(milestone_rank + rank_bonus, 0, SUPPORT_S_RANK)
+        progress["pending_support_bonus"] = int(progress.get("pending_support_bonus", 0))
+        _support_progress_by_pair[normalized_pair] = progress
+
+func _sync_support_progress_to_progression() -> void:
+    if _progression_data == null:
+        return
+    _progression_data.support_progress_by_pair = _support_progress_by_pair.duplicate(true)

@@ -63,6 +63,11 @@ const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memor
 @onready var body_label: Label = $Panel/Margin/Content/BodyStack/SummarySection/BodyLabel
 @onready var presentation_heading_label: Label = $Panel/Margin/Content/BodyStack/SummarySection/PresentationHeading
 @onready var presentation_cards: VBoxContainer = $Panel/Margin/Content/BodyStack/SummarySection/PresentationCards
+@onready var museum_panel: PanelContainer = $Panel/Margin/Content/BodyStack/SummarySection/MuseumOfTruthPanel
+@onready var museum_heading_label: Label = $Panel/Margin/Content/BodyStack/SummarySection/MuseumOfTruthPanel/Margin/Stack/HeadingLabel
+@onready var museum_status_label: Label = $Panel/Margin/Content/BodyStack/SummarySection/MuseumOfTruthPanel/Margin/Stack/StatusLabel
+@onready var museum_badge_label: Label = $Panel/Margin/Content/BodyStack/SummarySection/MuseumOfTruthPanel/Margin/Stack/BadgeLabel
+@onready var museum_cards: GridContainer = $Panel/Margin/Content/BodyStack/SummarySection/MuseumOfTruthPanel/Margin/Stack/Cards
 @onready var dialogue_label: RichTextLabel = $Panel/Margin/Content/BodyStack/SummarySection/DialogueList
 @onready var section_tabs: GridContainer = $Panel/Margin/Content/SectionTabs
 @onready var summary_button: Button = $Panel/Margin/Content/SectionTabs/SummaryButton
@@ -132,6 +137,7 @@ var _letter_entries: Array[String] = []
 var _alerts: Array[String] = []
 var _dialogue_entries: Array[String] = []
 var _presentation_cards: Array[Dictionary] = []
+var _museum_data: Dictionary = {}
 var _active_section: String = SECTION_SUMMARY
 var _selected_party_index: int = -1
 var _section_badges: Dictionary = {}
@@ -188,6 +194,7 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     _alerts = _variant_to_string_array(payload.get("alerts", []))
     _dialogue_entries = _variant_to_string_array(payload.get("dialogue_entries", []))
     _presentation_cards = _variant_to_dictionary_array(payload.get("presentation_cards", []))
+    _museum_data = payload.get("museum_data", {})
     _section_badges = payload.get("section_badges", {})
     _deployment_limit = int(payload.get("deployment_limit", 2))
     _deployed_party_unit_ids = _variant_to_string_array(payload.get("deployed_party_unit_ids", []))
@@ -234,6 +241,7 @@ func show_state(mode: String, title_text: String, body_text: String, button_text
     section_hint_label.visible = not uses_choice_panel
     _sync_section_button_text()
     _rebuild_presentation_cards()
+    _render_museum_panel()
     _render_choice_panel()
 
     _rebuild_party_roster()
@@ -260,6 +268,7 @@ func hide_panel() -> void:
     _alerts.clear()
     _dialogue_entries.clear()
     _presentation_cards.clear()
+    _museum_data.clear()
     _section_badges.clear()
     _deployment_limit = 2
     _deployed_party_unit_ids.clear()
@@ -286,6 +295,13 @@ func hide_panel() -> void:
     body_label.text = ""
     presentation_heading_label.text = "Handoff"
     for child in presentation_cards.get_children():
+        child.queue_free()
+    museum_panel.visible = false
+    museum_heading_label.text = "Museum of Truth"
+    museum_status_label.text = ""
+    museum_badge_label.visible = false
+    museum_badge_label.text = ""
+    for child in museum_cards.get_children():
         child.queue_free()
     dialogue_label.text = ""
     party_name_label.text = ""
@@ -352,6 +368,12 @@ func get_snapshot() -> Dictionary:
         "alerts": _alerts.duplicate(),
         "dialogue_entries": _dialogue_entries.duplicate(),
         "presentation_cards": _presentation_cards.duplicate(true),
+        "museum_visible": museum_panel.visible if museum_panel != null else false,
+        "museum_title": museum_heading_label.text if museum_heading_label != null else "",
+        "museum_status": museum_status_label.text if museum_status_label != null else "",
+        "museum_badge": museum_badge_label.text if museum_badge_label != null and museum_badge_label.visible else "",
+        "museum_card_count": museum_cards.get_child_count() if museum_cards != null else 0,
+        "museum_card_titles": _get_museum_card_titles(),
         "choice_stage_id": _choice_stage_id,
         "choice_prompt": _choice_prompt,
         "choice_options": _choice_options.duplicate(true),
@@ -637,12 +659,13 @@ func _render_choice_panel() -> void:
         var hint := _choice_option_hint_labels[index]
         if index < _choice_options.size():
             var option: Dictionary = _choice_options[index]
+            var base_hint := String(option.get("hint", ""))
             button.visible = true
             button.disabled = bool(option.get("disabled", false))
             button.text = String(option.get("label", "Choose"))
-            button.tooltip_text = String(option.get("hint", ""))
+            button.tooltip_text = _build_choice_tooltip_text(option)
             hint.visible = true
-            hint.text = String(option.get("hint", ""))
+            hint.text = base_hint
         else:
             button.visible = false
             button.disabled = true
@@ -650,6 +673,22 @@ func _render_choice_panel() -> void:
             button.tooltip_text = ""
             hint.visible = false
             hint.text = ""
+
+func _build_choice_tooltip_text(option: Dictionary) -> String:
+    var hint := String(option.get("hint", "")).strip_edges()
+    if not _is_world_timeline_warning_option(String(option.get("id", ""))):
+        return hint
+    if hint.is_empty():
+        return "!경고: 세계관이 변경됩니다"
+    return "%s\n!경고: 세계관이 변경됩니다" % hint
+
+func _is_world_timeline_warning_option(option_id: String) -> bool:
+    var normalized_option_id := option_id.strip_edges().to_lower()
+    if normalized_option_id.is_empty():
+        return false
+    return normalized_option_id == "ch05_save_enoch" \
+        or normalized_option_id.contains("destroy") \
+        or normalized_option_id.contains("reject")
 
 func _on_choice_button_pressed(index: int) -> void:
     if index < 0 or index >= _choice_options.size():
@@ -739,6 +778,77 @@ func _rebuild_presentation_cards() -> void:
         margin.add_child(stack)
         card.add_child(margin)
         presentation_cards.add_child(card)
+
+func _render_museum_panel() -> void:
+    if museum_panel == null or museum_cards == null:
+        return
+    for child in museum_cards.get_children():
+        child.queue_free()
+
+    var visible_museum := bool(_museum_data.get("visible", false))
+    museum_panel.visible = visible_museum
+    if not visible_museum:
+        museum_status_label.text = ""
+        museum_badge_label.visible = false
+        museum_badge_label.text = ""
+        return
+
+    museum_heading_label.text = String(_museum_data.get("title", "Museum of Truth"))
+    museum_status_label.text = String(_museum_data.get("status", "")).strip_edges()
+    var badge_text := String(_museum_data.get("badge", "")).strip_edges()
+    museum_badge_label.visible = not badge_text.is_empty()
+    museum_badge_label.text = badge_text
+
+    var complete := bool(_museum_data.get("complete", false))
+    var card_entries := _variant_to_dictionary_array(_museum_data.get("cards", []))
+    for card_entry in card_entries:
+        var card := PanelContainer.new()
+        card.custom_minimum_size = Vector2(0.0, 164.0)
+        var panel_style := StyleBoxFlat.new()
+        panel_style.bg_color = Color(0.12, 0.14, 0.18, 0.92) if complete else Color(0.09, 0.1, 0.14, 0.88)
+        panel_style.border_width_left = 2
+        panel_style.border_width_top = 2
+        panel_style.border_width_right = 2
+        panel_style.border_width_bottom = 2
+        panel_style.border_color = Color(0.87, 0.74, 0.43, 1.0) if complete else Color(0.4, 0.46, 0.56, 0.9)
+        panel_style.corner_radius_top_left = 8
+        panel_style.corner_radius_top_right = 8
+        panel_style.corner_radius_bottom_right = 8
+        panel_style.corner_radius_bottom_left = 8
+        card.add_theme_stylebox_override("panel", panel_style)
+
+        var margin := MarginContainer.new()
+        margin.add_theme_constant_override("margin_left", 12)
+        margin.add_theme_constant_override("margin_top", 12)
+        margin.add_theme_constant_override("margin_right", 12)
+        margin.add_theme_constant_override("margin_bottom", 12)
+
+        var stack := VBoxContainer.new()
+        stack.add_theme_constant_override("separation", 6)
+
+        var header := Label.new()
+        header.text = "%s — %s" % [String(card_entry.get("speaker", "Witness")), String(card_entry.get("name", "Fragment"))]
+        header.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        header.add_theme_font_size_override("font_size", 18)
+
+        var body := Label.new()
+        body.text = "%s\n\n%s" % [
+            String(card_entry.get("description", "")).strip_edges(),
+            String(card_entry.get("dialogue", "")).strip_edges()
+        ]
+        body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        body.add_theme_font_size_override("font_size", 15)
+
+        stack.add_child(header)
+        if complete and museum_badge_label.visible:
+            var badge := Label.new()
+            badge.text = museum_badge_label.text
+            badge.add_theme_font_size_override("font_size", 13)
+            stack.add_child(badge)
+        stack.add_child(body)
+        margin.add_child(stack)
+        card.add_child(margin)
+        museum_cards.add_child(card)
 
 func _rebuild_party_roster() -> void:
     for child in party_roster_buttons.get_children():
@@ -1136,6 +1246,7 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
     _compact_layout = viewport_size.x <= COMPACT_WIDTH_THRESHOLD
 
     section_tabs.columns = 2 if _compact_layout else 4
+    museum_cards.columns = 1 if _compact_layout else 3
     party_content.vertical = _compact_layout
     var tab_button_height := COMPACT_TAB_BUTTON_HEIGHT if _compact_layout else REGULAR_TAB_BUTTON_HEIGHT
     for button in [summary_button, party_button, inventory_button, records_button]:
@@ -1174,3 +1285,13 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
 
 func _get_party_button_height() -> float:
     return COMPACT_PARTY_BUTTON_HEIGHT if _compact_layout else REGULAR_PARTY_BUTTON_HEIGHT
+
+func _get_museum_card_titles() -> Array[String]:
+    var titles: Array[String] = []
+    if museum_cards == null:
+        return titles
+    for card in museum_cards.get_children():
+        var label := card.get_node_or_null("Margin/Stack")
+        if label is VBoxContainer and label.get_child_count() > 0 and label.get_child(0) is Label:
+            titles.append((label.get_child(0) as Label).text)
+    return titles

@@ -8,6 +8,9 @@ const TILE_CARD_DIR := "assets/ui/tile_cards_generated/"
 const TERRAIN_OVERLAY_CONTRACTS := {
     &"plain": {"family": "plain", "card": "plain.png", "card_alpha": 0.05, "icon": ""},
     &"forest": {"family": "forest", "card": "forest.png", "card_alpha": 0.16, "icon": "forest.png"},
+    &"water": {"family": "water", "card": "plain.png", "card_alpha": 0.08, "icon": ""},
+    &"flooded": {"family": "water", "card": "plain.png", "card_alpha": 0.1, "icon": ""},
+    &"flood": {"family": "water", "card": "plain.png", "card_alpha": 0.12, "icon": ""},
     &"wall": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"},
     &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.14, "icon": "battery.png"},
     &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.12, "icon": "cathedral.png"},
@@ -21,9 +24,20 @@ const TERRAIN_OVERLAY_CONTRACTS := {
 var stage_data: StageData
 var _tile_icon_cache: Dictionary = {}
 var _tile_card_cache: Dictionary = {}
+var _flood_zone_lookup: Dictionary = {}
+var _flood_margin_lookup: Dictionary = {}
 
 func set_stage(data: StageData) -> void:
     stage_data = data
+    queue_redraw()
+
+func set_flood_state(flood_cells: Array[Vector2i], margin_cells: Array[Vector2i]) -> void:
+    _flood_zone_lookup.clear()
+    _flood_margin_lookup.clear()
+    for cell in flood_cells:
+        _flood_zone_lookup[cell] = true
+    for cell in margin_cells:
+        _flood_margin_lookup[cell] = true
     queue_redraw()
 
 func _draw() -> void:
@@ -64,6 +78,7 @@ func _draw() -> void:
             var rect := Rect2(Vector2(x * stage_data.cell_size.x, y * stage_data.cell_size.y), cell_size)
             draw_rect(rect, _get_tile_color(cell, x + y), true)
             _draw_tile_detail(cell, rect)
+            _draw_flood_combined_effect(cell, rect)
             _draw_terrain_advantage_marker(cell, rect)
 
             if stage_data.ally_spawns.has(cell):
@@ -96,6 +111,12 @@ func _get_tile_color(cell: Vector2i, parity: int) -> Color:
     match terrain_type:
         &"forest":
             return palette.forest_a if parity % 2 == 0 else palette.forest_b
+        &"water":
+            return Color(0.180392, 0.286275, 0.380392, 1.0) if parity % 2 == 0 else Color(0.14902, 0.247059, 0.337255, 1.0)
+        &"flooded":
+            return Color(0.164706, 0.301961, 0.423529, 1.0) if parity % 2 == 0 else Color(0.137255, 0.262745, 0.384314, 1.0)
+        &"flood":
+            return Color(0.133333, 0.278431, 0.447059, 1.0) if parity % 2 == 0 else Color(0.109804, 0.235294, 0.403922, 1.0)
         &"wall":
             return palette.wall_a if parity % 2 == 0 else palette.wall_b
         &"tunnel":
@@ -229,6 +250,23 @@ func _draw_stage_backdrop_signature(backdrop_rect: Rect2, board_rect: Rect2, pal
 func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
     var terrain_type: StringName = stage_data.get_terrain_type(cell)
     var stage_key: String = String(stage_data.stage_id)
+    if terrain_type == &"water" or terrain_type == &"flooded" or terrain_type == &"flood":
+        _draw_contract_tile_card(rect, terrain_type)
+        var inset := rect.grow(-10.0)
+        var fill_color := Color(0.278431, 0.603922, 0.858824, 0.18)
+        var ripple_color := Color(0.760784, 0.929412, 1.0, 0.18)
+        if terrain_type == &"flooded":
+            fill_color = Color(0.247059, 0.556863, 0.827451, 0.2)
+        elif terrain_type == &"flood":
+            fill_color = Color(0.211765, 0.52549, 0.870588, 0.24)
+            ripple_color = Color(0.984314, 0.47451, 0.47451, 0.16)
+        draw_rect(inset, fill_color, true)
+        draw_line(rect.position + Vector2(10.0, 18.0), rect.position + Vector2(rect.size.x - 10.0, 18.0), ripple_color, 2.0)
+        draw_line(rect.position + Vector2(14.0, rect.size.y - 16.0), rect.position + Vector2(rect.size.x - 14.0, rect.size.y - 16.0), Color(0.776471, 0.952941, 1.0, 0.14), 2.0)
+        draw_arc(rect.get_center() + Vector2(-8.0, 6.0), 9.0, PI * 1.05, PI * 1.9, 14, Color(0.866667, 0.976471, 1.0, 0.16), 1.0)
+        draw_arc(rect.get_center() + Vector2(10.0, -4.0), 7.0, PI * 1.02, PI * 1.86, 14, Color(0.866667, 0.976471, 1.0, 0.14), 1.0)
+        return
+
     if terrain_type == &"forest":
         _draw_contract_tile_card(rect, terrain_type)
         draw_rect(rect.grow(-11.0), Color(0.145098, 0.270588, 0.219608, 0.42), true)
@@ -485,6 +523,14 @@ func _draw_terrain_advantage_marker(cell: Vector2i, rect: Rect2) -> void:
     draw_circle(anchor, 7.0, Color(0.658824, 0.854902, 1.0, 0.14))
     draw_line(anchor + Vector2(0.0, -4.0), anchor + Vector2(0.0, 4.0), Color(0.878431, 0.960784, 1.0, 0.78), 2.0)
     draw_line(anchor + Vector2(-4.0, 0.0), anchor + Vector2(4.0, 0.0), Color(0.878431, 0.960784, 1.0, 0.78), 2.0)
+
+func _draw_flood_combined_effect(cell: Vector2i, rect: Rect2) -> void:
+    if not _flood_zone_lookup.has(cell):
+        return
+    draw_arc(rect.get_center() + Vector2(0.0, 8.0), 16.0, PI * 1.08, PI * 1.92, 18, Color(0.780392, 0.952941, 1.0, 0.14), 1.0)
+    draw_arc(rect.get_center() + Vector2(-10.0, -6.0), 10.0, PI * 0.96, PI * 1.84, 14, Color(0.858824, 0.976471, 1.0, 0.12), 1.0)
+    if _flood_margin_lookup.has(cell):
+        draw_circle(rect.position + Vector2(rect.size.x - 10.0, 10.0), 4.0, Color(0.972549, 0.356863, 0.356863, 0.74))
 
 func _draw_enemy_corner_brackets(rect: Rect2, color: Color) -> void:
     var inset: float = 6.0
