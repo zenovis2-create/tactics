@@ -313,6 +313,12 @@ const TRUTH_ANNOTATION_DIALOGUE_TIMELINE_B: Array[String] = [
 	"Truth Record B: The record survives, but the world still reads around what was truly lost."
 ]
 
+const CHRONICLE_REFERENCE_DIALOGUE: Array[String] = [
+	"역사의 기록을 참조하며, 방금의 전황을 다시 더듬는다.",
+	"연대기의 한 줄을 펼치며, 아직 식지 않은 전장의 숨을 헤아린다.",
+	"chronicles reference: 남겨진 기록을 따라 지금의 말을 잇는다."
+]
+
 const WORLDVIEW_FRAGMENT_LIBRARY: Array[Dictionary] = [
 	{
 		"id": "복수의_순수함",
@@ -654,6 +660,8 @@ static func get_special_dialogue(entry_type: StringName, world_timeline_id: Stri
 			return MUSEUM_OF_TRUTH_DIALOGUE_TIMELINE_B.duplicate() if normalized_timeline_id == "B" else MUSEUM_OF_TRUTH_DIALOGUE_TIMELINE_A.duplicate()
 		&"truth_annotation":
 			return TRUTH_ANNOTATION_DIALOGUE_TIMELINE_B.duplicate() if normalized_timeline_id == "B" else TRUTH_ANNOTATION_DIALOGUE_TIMELINE_A.duplicate()
+		&"chronicle_reference":
+			return CHRONICLE_REFERENCE_DIALOGUE.duplicate()
 		_:
 			return []
 

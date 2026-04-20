@@ -56,6 +56,12 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if stage_id == &"CH09A_05" and String(stage_snapshot.get("mode", "")) == "choice":
+            main.campaign_controller._make_choice("ch09a_public_testimony")
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
+
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)

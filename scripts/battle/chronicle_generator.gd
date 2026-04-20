@@ -25,18 +25,74 @@ const STYLE_PRIORITY := {
 
 var chronicle_templates := {
 	ChronicleEntry.ChronicleStyle.POETIC: {
-		"quiet_strategy": "{chapter_title} ended with no ally laid low; {enemy_phrase} fell before a patient design, and {choice_phrase} left the field quieter than it began.",
-		"weather_master": "At {chapter_title}, {weather_phrase} bent around the company while {action_phrase}; {enemy_phrase} broke like reeds beneath a river's mind.",
-		"default": "{chapter_title} passed beneath a softer light; {enemy_phrase} yielded after {turn_phrase}, and {action_phrase}."
+		"quiet_strategy": [
+			"{chapter_title}에서는 아군의 이름이 하나도 꺾이지 않았다. {enemy_phrase}는 오래 준비된 포위 속에 잠잠히 무너졌고, {choice_phrase}는 전장을 처음보다 더 고요하게 남겼다.",
+			"{chapter_title}의 끝은 조용했다. {enemy_phrase}는 서두르지 않는 진형 앞에 스러졌고, {action_phrase}; 그 뒤에 남은 것은 {choice_phrase}뿐이었다.",
+			"{chapter_title}의 기록은 피 대신 침묵을 먼저 적는다. {enemy_phrase}는 빈틈없이 조여 온 흐름에 밀렸고, {choice_phrase}는 마지막까지 흔들리지 않았다."
+		],
+		"weather_master": [
+			"{chapter_title}에선 {weather_phrase}마저 아군의 편에 섰다. {action_phrase}; 그 사이 {enemy_phrase}는 젖은 갈대처럼 꺾였다.",
+			"{chapter_title}의 하늘은 {weather_phrase}로 뒤집혔고, 그 틈마다 {action_phrase}. 결국 {enemy_phrase}는 날씨와 진형을 함께 버티지 못했다.",
+			"{weather_phrase}가 {chapter_title}의 전황을 덮는 동안, {action_phrase}. 그 물결 끝에서 {enemy_phrase}는 더는 전열을 세우지 못했다."
+		],
+		"default": [
+			"{chapter_title}에는 한 겹 부드러운 빛이 내려앉았다. {enemy_phrase}는 {turn_phrase} 물러났고, {action_phrase}.",
+			"{chapter_title}의 마지막 장면은 날카롭기보다 길게 남았다. {enemy_phrase}는 {turn_phrase} 무너졌고, 그 자리를 {action_phrase}가 채웠다.",
+			"{chapter_title}의 기록은 소란보다 여운을 남긴다. {enemy_phrase}는 {turn_phrase} 힘을 잃었고, {action_phrase}."
+		]
 	},
 	ChronicleEntry.ChronicleStyle.CONCISE: {
-		"overwhelming_force": "{chapter_title} was secured in {turn_phrase}. Our line faced {enemy_count} hostiles with only {ally_count} allies committed, and {enemy_phrase} were cleared in deliberate order.",
-		"default": "{chapter_title} concluded after {turn_phrase}. {enemy_phrase} were defeated, {casualty_phrase}, and {action_phrase}."
+		"overwhelming_force": [
+			"{chapter_title}은 {turn_phrase} 확보되었다. 투입 아군은 {ally_count}명, 확인된 적은 {enemy_count}개체였으며, {enemy_phrase}는 계획된 순서대로 정리되었다.",
+			"{chapter_title} 공략은 {turn_phrase} 끝났다. 아군 {ally_count}명이 적 {enemy_count}개체를 상대했고, {enemy_phrase}는 우선순위에 따라 차례로 제거되었다.",
+			"{chapter_title} 전투는 {turn_phrase} 매듭지어졌다. 수적으로 불리했지만 {enemy_phrase}는 단계적으로 격파되었고, 전열은 끝까지 통제되었다."
+		],
+		"default": [
+			"{chapter_title} 전투는 {turn_phrase} 종료되었다. {enemy_phrase}가 제압되었고, {casualty_phrase}. 또한 {action_phrase}.",
+			"{chapter_title}은 {turn_phrase} 결론이 났다. {enemy_phrase}는 모두 무너졌고, {casualty_phrase}; 전장에선 {action_phrase}가 기록되었다.",
+			"{chapter_title}의 야전 기록은 단순하다. {turn_phrase} {enemy_phrase}를 정리했고, {casualty_phrase}. 결정적 국면에서는 {action_phrase}."
+		]
 	},
 	ChronicleEntry.ChronicleStyle.BATTLE: {
-		"desperate_victory": "{chapter_title} was taken on the final exchange. {casualty_phrase}; {final_turn_loss} held long enough for {action_phrase}, and the enemy line finally broke.",
-		"default": "{chapter_title} ended by force of arms after {turn_phrase}. {enemy_phrase} were cut down, {casualty_phrase}, and {action_phrase}."
+		"desperate_victory": [
+			"{chapter_title}은 마지막 공방 끝에 간신히 열렸다. {casualty_phrase}; {final_turn_loss} {action_phrase}, 그제야 적 전열이 갈라졌다.",
+			"{chapter_title}의 승부는 최후의 한 수에서 갈렸다. {final_turn_loss}, 그러나 {action_phrase}가 이어졌고, 끝내 {enemy_phrase}가 무너졌다.",
+			"{chapter_title}은 마지막 턴에야 손에 들어왔다. {casualty_phrase}; {final_turn_loss} 생긴 틈을 파고들어 {action_phrase}, 적은 더는 버티지 못했다."
+		],
+		"default": [
+			"{chapter_title}은 {turn_phrase} 무력으로 돌파되었다. {enemy_phrase}는 차례로 베어졌고, {casualty_phrase}; 이어서 {action_phrase}.",
+			"{chapter_title}의 결말은 병장기의 힘으로 쓰였다. {turn_phrase} {enemy_phrase}를 눌렀고, {casualty_phrase}. 승부를 기울인 것은 {action_phrase}였다.",
+			"{chapter_title} 전투는 힘으로 밀어붙여 끝냈다. {enemy_phrase}는 무너졌고 {casualty_phrase}; 마지막까지 전열을 지탱한 것은 {action_phrase}였다."
+		]
 	},
+}
+
+const STYLE_TEXT_VARIANTS := {
+	"annals": [
+		"연대기는 이렇게 적는다.",
+		"후일의 기록자는 이 장면을 이렇게 남긴다.",
+		"남겨진 장부의 첫 줄은 이렇게 시작된다."
+	],
+	"field_report": [
+		"야전 보고는 전황부터 세운다.",
+		"남은 병사들의 보고서는 먼저 사실을 적는다.",
+		"전장 정리는 짧고 단단한 문장으로 남았다."
+	],
+	"witness": [
+		"생존자들의 증언은 한 문장으로 겹쳐졌다.",
+		"전장을 건넌 이들은 이렇게 입을 모았다.",
+		"목격자들의 숨이 가라앉은 뒤 남은 말은 이것이었다."
+	],
+	"prayer": [
+		"기도문처럼 낮은 숨결이 기록의 첫머리를 적신다.",
+		"사라지지 않기를 바라는 마음이 문장 앞에 먼저 놓였다.",
+		"누군가의 침묵 어린 기도가 이 기록의 머리글이 되었다."
+	],
+	"embers": [
+		"식지 않은 재가 문장 끝마다 달라붙어 있었다.",
+		"전투가 끝난 뒤에도 열기는 기록 바깥으로 새어 나왔다.",
+		"마지막 충돌의 잔열이 아직 문장 속에 남아 있었다."
+	],
 }
 
 func generate_entry(chapter_id: String, battle_log: Array, choices_made: Array) -> ChronicleEntry:
@@ -140,9 +196,9 @@ func _build_template_context(chapter_id: String, summary: Dictionary, choices_ma
 	var weather_events: Array = summary.get("weather_events", [])
 	var key_moments: Array = summary.get("key_moments", [])
 	var final_turn_loss := _describe_final_turn_loss(summary)
-	var casualty_phrase := "no ally was lost"
+	var casualty_phrase := "아군 피해는 없었다"
 	if not allies_lost.is_empty():
-		casualty_phrase = "%d allies fell" % allies_lost.size()
+		casualty_phrase = "아군 %d명이 쓰러졌다" % allies_lost.size()
 	return {
 		"chapter_id": chapter_id,
 		"chapter_title": chapter_title,
@@ -159,12 +215,33 @@ func _build_template_context(chapter_id: String, summary: Dictionary, choices_ma
 
 func _build_narrative_text(style: ChronicleEntry.ChronicleStyle, trigger_events: Array[String], context: Dictionary) -> String:
 	var template_group: Dictionary = chronicle_templates.get(style, chronicle_templates[DEFAULT_STYLE])
-	var template := String(template_group.get("default", "{chapter_title} was recorded without a field note."))
+	var template_variants := _variant_to_string_array(template_group.get("default", ["{chapter_title}의 전장은 기록만 남겼다."]))
 	for trigger_event in trigger_events:
 		if template_group.has(trigger_event):
-			template = String(template_group.get(trigger_event, template))
+			template_variants = _variant_to_string_array(template_group.get(trigger_event, template_variants))
 			break
-	return template.format(context)
+	var seed := "%s|%s|%s" % [String(context.get("chapter_id", "")), str(style), ",".join(trigger_events)]
+	var template := _choose_variant(template_variants, seed)
+	var style_text := choose_style_text(style, trigger_events, context)
+	return "%s %s" % [style_text, template.format(context)]
+
+func choose_style_text(style: ChronicleEntry.ChronicleStyle, trigger_events: Array[String], context: Dictionary = {}) -> String:
+	var style_key := "annals"
+	if trigger_events.has("weather_master"):
+		style_key = "prayer"
+	elif trigger_events.has("desperate_victory"):
+		style_key = "embers"
+	elif trigger_events.has("overwhelming_force"):
+		style_key = "field_report"
+	elif trigger_events.has("quiet_strategy"):
+		style_key = "witness"
+	elif style == ChronicleEntry.ChronicleStyle.BATTLE:
+		style_key = "embers"
+	elif style == ChronicleEntry.ChronicleStyle.POETIC:
+		style_key = "prayer"
+	var style_variants := _variant_to_string_array(STYLE_TEXT_VARIANTS.get(style_key, STYLE_TEXT_VARIANTS["annals"]))
+	var seed := "%s|%s|%s" % [String(context.get("chapter_id", "")), style_key, String(context.get("chapter_title", ""))]
+	return _choose_variant(style_variants, seed)
 
 func _resolve_stage_title(chapter_id: String) -> String:
 	var stage_path := "res://data/stages/%s_stage.tres" % chapter_id.to_lower()
@@ -256,18 +333,18 @@ func _describe_final_turn_loss(summary: Dictionary) -> String:
 			continue
 		var loss := raw_loss as Dictionary
 		if int(loss.get("turn", -1)) == final_turn:
-			return "%s fell on the final turn" % _humanize_identifier(String(loss.get("unit_id", "ally")))
+			return "%s이 마지막 공방을 버티다 쓰러진 뒤" % _humanize_identifier(String(loss.get("unit_id", "아군")))
 	for raw_moment in summary.get("key_moments", []):
 		if typeof(raw_moment) != TYPE_DICTIONARY:
 			continue
 		var moment := raw_moment as Dictionary
 		if int(moment.get("turn", -1)) == final_turn and bool(moment.get("actor_died", false)):
-			return "%s fell on the final turn" % _humanize_identifier(String(moment.get("actor_id", "ally")))
-	return "an ally fell on the final turn"
+			return "%s이 마지막 공방을 버티다 쓰러진 뒤" % _humanize_identifier(String(moment.get("actor_id", "아군")))
+	return "마지막 공방에서 아군 하나가 쓰러진 뒤"
 
 func _describe_enemy_types(enemies_defeated: Array) -> String:
 	if enemies_defeated.is_empty():
-		return "the enemy line"
+		return "적 전열"
 	var names: Array[String] = []
 	for enemy_id in enemies_defeated:
 		var humanized := _humanize_identifier(String(enemy_id))
@@ -277,54 +354,54 @@ func _describe_enemy_types(enemies_defeated: Array) -> String:
 	if names.size() == 1:
 		return names[0]
 	if names.size() == 2:
-		return "%s and %s" % [names[0], names[1]]
-	return "%s, and %s" % [", ".join(names.slice(0, names.size() - 1)), names[-1]]
+		return "%s와 %s" % [names[0], names[1]]
+	return "%s, 그리고 %s" % [", ".join(names.slice(0, names.size() - 1)), names[-1]]
 
 func _describe_weather(weather_events: Array) -> String:
 	if weather_events.is_empty():
-		return "the sky stayed plain"
+		return "하늘은 잠잠했다"
 	var phrases: Array[String] = []
 	for event_id in weather_events:
 		phrases.append(_humanize_identifier(String(event_id)))
 	if phrases.size() == 1:
 		return phrases[0]
 	if phrases.size() == 2:
-		return "%s and %s" % [phrases[0], phrases[1]]
-	return "%s, and %s" % [", ".join(phrases.slice(0, phrases.size() - 1)), phrases[-1]]
+		return "%s와 %s" % [phrases[0], phrases[1]]
+	return "%s, 그리고 %s" % [", ".join(phrases.slice(0, phrases.size() - 1)), phrases[-1]]
 
 func _describe_key_actions(key_moments: Array) -> String:
 	if key_moments.is_empty():
-		return "the line held without ornament"
+		return "대오는 끝내 무너지지 않았다"
 	var phrases: Array[String] = []
 	for raw_moment in key_moments:
 		if typeof(raw_moment) != TYPE_DICTIONARY:
 			continue
 		var moment := raw_moment as Dictionary
 		var moment_type := String(moment.get("type", "")).strip_edges()
-		var actor_id := _humanize_identifier(String(moment.get("actor_id", "the squad")))
+		var actor_id := _humanize_identifier(String(moment.get("actor_id", "아군")))
 		match moment_type:
 			"attack":
-				var target_id := _humanize_identifier(String(moment.get("target_id", "the enemy")))
-				phrases.append("%s struck at %s" % [actor_id, target_id])
+				var target_id := _humanize_identifier(String(moment.get("target_id", "적")))
+				phrases.append("%s이 %s을 몰아붙였다" % [actor_id, target_id])
 			"sacrifice_play":
-				var protected_id := _humanize_identifier(String(moment.get("protected_unit_id", "the wounded")))
-				phrases.append("%s gave their place to shield %s" % [actor_id, protected_id])
+				var protected_id := _humanize_identifier(String(moment.get("protected_unit_id", "동료")))
+				phrases.append("%s이 %s을 지키려 몸을 던졌다" % [actor_id, protected_id])
 			"weather":
-				phrases.append("the weather turned with %s" % _humanize_identifier(String(moment.get("weather_effect_id", "storm pressure"))))
+				phrases.append("%s의 기세로 기상이 흔들렸다" % _humanize_identifier(String(moment.get("weather_effect_id", "폭풍"))))
 			_:
 				continue
 		if phrases.size() >= 2:
 			break
 	if phrases.is_empty():
-		return "the line held without ornament"
+		return "대오는 끝내 무너지지 않았다"
 	if phrases.size() == 1:
 		return phrases[0]
-	return "%s while %s" % [phrases[0], phrases[1]]
+	return "%s, 그리고 %s" % [phrases[0], phrases[1]]
 
 func _describe_choice_trace(choices_made: Array) -> String:
 	if choices_made.is_empty():
-		return "no disputed order remained"
-	return "the last standing choice was %s" % _humanize_identifier(String(choices_made[-1]))
+		return "끝내 흔들리는 명령은 없었다"
+	return "마지막에 남은 결단은 %s였다" % _humanize_identifier(String(choices_made[-1]))
 
 func _resolve_adaptive_pattern(summary: Dictionary, choices_made: Array, trigger_events: Array[String]) -> String:
 	if _has_merciful_pattern(summary, choices_made):
@@ -392,21 +469,38 @@ func _count_stall_moments(summary: Dictionary, trigger_events: Array[String]) ->
 func _describe_adaptive_pattern(pattern: String, summary: Dictionary, choices_made: Array, trigger_events: Array[String]) -> String:
 	match pattern:
 		ADAPTIVE_PATTERN_AGGRESSIVE:
-			return "rush pattern after %d turns with %d finishing exchanges" % [int(summary.get("turn_count", 1)), _count_rush_moments(summary, trigger_events)]
+			return "%d턴 동안 마무리 공세 %d회를 밀어붙인 돌파형 전개" % [int(summary.get("turn_count", 1)), _count_rush_moments(summary, trigger_events)]
 		ADAPTIVE_PATTERN_DEFENSIVE:
-			return "stall pattern anchored by %d patient moments" % _count_stall_moments(summary, trigger_events)
+			return "인내의 국면 %d회로 버텨 낸 방어형 전개" % _count_stall_moments(summary, trigger_events)
 		ADAPTIVE_PATTERN_MERCIFUL:
-			return "mercy pattern after %s" % _describe_choice_trace(choices_made)
+			return "%s 끝에 남은 자비의 전개" % _describe_choice_trace(choices_made)
 		_:
-			return "balanced field record"
+			return "공세와 수비가 맞물린 균형형 전개"
 
 func _format_turn_phrase(turn_count: int) -> String:
-	return "%d turns" % maxi(1, turn_count)
+	return "%d턴 만에" % maxi(1, turn_count)
+
+func _variant_to_string_array(value: Variant) -> Array[String]:
+	var lines: Array[String] = []
+	if typeof(value) != TYPE_ARRAY and typeof(value) != TYPE_PACKED_STRING_ARRAY:
+		return lines
+	for entry in value:
+		var text := String(entry).strip_edges()
+		if text.is_empty():
+			continue
+		lines.append(text)
+	return lines
+
+func _choose_variant(options: Array[String], seed: String) -> String:
+	if options.is_empty():
+		return ""
+	var index := int(abs(seed.hash())) % options.size()
+	return options[index]
 
 func _humanize_identifier(raw_value: String) -> String:
 	var normalized := raw_value.strip_edges().replace("-", "_")
 	if normalized.is_empty():
-		return "unknown"
+		return "알 수 없음"
 	var parts := normalized.split("_", false)
 	for index in range(parts.size()):
 		parts[index] = String(parts[index]).capitalize()

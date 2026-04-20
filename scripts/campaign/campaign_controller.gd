@@ -1705,11 +1705,23 @@ func _make_choice(option_id: String) -> void:
 
     match resolved_choice_stage_id:
         CHOICE_CH05_CAMP:
-            _show_chapter_five_camp_panel()
+            if resolved_stage_index >= 0:
+                _active_stage_index = resolved_stage_index
+                _enter_stage(_active_stage_index)
+            else:
+                _show_chapter_five_camp_panel()
         CHOICE_CH07_INTERLUDE:
-            _show_chapter_seven_camp_panel()
+            if resolved_stage_index >= 0:
+                _active_stage_index = resolved_stage_index
+                _enter_stage(_active_stage_index)
+            else:
+                _show_chapter_seven_camp_panel()
         CHOICE_CH09A_CAMP:
-            _show_chapter_nine_a_camp_panel()
+            if resolved_stage_index >= 0:
+                _active_stage_index = resolved_stage_index
+                _enter_stage(_active_stage_index)
+            else:
+                _show_chapter_nine_a_camp_panel()
         CHOICE_CH08_PRE_BOSS, CHOICE_CH10_PRE_FINALE:
             if resolved_stage_index >= 0:
                 _active_stage_index = resolved_stage_index
