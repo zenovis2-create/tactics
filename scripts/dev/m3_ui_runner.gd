@@ -322,7 +322,7 @@ func _advance_campaign_to_camp(main) -> bool:
         if mode == "camp":
             return true
 
-        if mode == "cutscene":
+        if mode == "cutscene" or mode == "briefing":
             main.advance_campaign_step()
             await process_frame
             await process_frame
@@ -451,6 +451,9 @@ func _assert_campaign_panel_snapshot(campaign_panel) -> bool:
     if String(section_badges.get("party", "")).is_empty():
         return _fail("CampaignPanel party badge should not be empty in camp mode.")
 
+    if String(section_badges.get("dialogue_history", "")).is_empty():
+        return _fail("CampaignPanel dialogue_history badge should not be empty in camp mode.")
+
     var alerts: Array = snapshot.get("alerts", [])
     var joined_alerts := "\n".join(alerts)
     if joined_alerts.find("Burden") == -1 or joined_alerts.find("Fragments") == -1:
@@ -459,6 +462,24 @@ func _assert_campaign_panel_snapshot(campaign_panel) -> bool:
     var records_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/SectionTabs/RecordsButton")
     if records_button == null or records_button.text.find("NEW") == -1:
         return _fail("CampaignPanel records button should surface a NEW badge.")
+
+    var dialogue_history_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/SectionTabs/DialogueHistoryButton")
+    if dialogue_history_button == null or dialogue_history_button.text.find("신규") == -1:
+        return _fail("CampaignPanel dialogue history button should surface a dialogue badge.")
+
+    var dialogue_history_section: Control = campaign_panel.get_node_or_null("Panel/Margin/Content/BodyStack/DialogueHistorySection")
+    if dialogue_history_section == null:
+        return _fail("CampaignPanel should expose a dedicated DialogueHistorySection surface in camp mode.")
+
+    campaign_panel._select_section("dialogue_history")
+
+    var recent_heading: Label = campaign_panel.get_node_or_null("Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack/RecentHeading")
+    if recent_heading == null or recent_heading.text.find("(") == -1:
+        return _fail("CampaignPanel dialogue history recent heading should expose the recent dialogue count.")
+
+    var recent_list: RichTextLabel = campaign_panel.get_node_or_null("Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack/RecentList")
+    if recent_list == null or recent_list.text.find("Empire") == -1:
+        return _fail("CampaignPanel dialogue history should render recent camp dialogue entries.")
 
     var summary_button: Button = campaign_panel.get_node_or_null("Panel/Margin/Content/SectionTabs/SummaryButton")
     if summary_button == null or summary_button.tooltip_text.find("Start here") == -1:
