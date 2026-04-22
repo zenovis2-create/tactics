@@ -43,6 +43,12 @@ run_step "AI service contracts" \
 run_step "Status service contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/status_service_runner.gd
 
+run_step "Combat service contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/combat_service_runner.gd
+
+run_step "Skill levelup service contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/skill_levelup_service_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
