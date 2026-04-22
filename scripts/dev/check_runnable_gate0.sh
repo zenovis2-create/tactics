@@ -22,8 +22,17 @@ done
 
 missing_count=0
 while IFS= read -r path; do
+  if [[ "$path" == *"%"* ]]; then
+    continue
+  fi
   local_path="${path#res://}"
-  if [[ ! -f "$local_path" ]]; then
+  if [[ -f "$local_path" || -d "$local_path" ]]; then
+    continue
+  fi
+  if [[ "${local_path}" == */ && -d "${local_path%/}" ]]; then
+    continue
+  fi
+  if [[ ! -f "$local_path" && ! -d "$local_path" ]]; then
     echo "[FAIL] Broken reference: $path"
     missing_count=$((missing_count + 1))
   fi
