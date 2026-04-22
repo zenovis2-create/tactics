@@ -72,6 +72,12 @@ func _run() -> void:
 	await _assert_commander_support_retargets_next_objective_after_resolution()
 	if _failed:
 		return
+	await _assert_runtime_context_exposes_last_seen_cells_for_stealth_targets()
+	if _failed:
+		return
+	await _assert_enemy_uses_runtime_context_last_seen_cell_in_battle()
+	if _failed:
+		return
 	await _assert_final_attack_triggers_victory_immediately()
 	if _failed:
 		return
@@ -529,6 +535,44 @@ func _assert_commander_support_retargets_next_objective_after_resolution() -> vo
 
 	await _despawn_node(battle)
 
+func _assert_runtime_context_exposes_last_seen_cells_for_stealth_targets() -> void:
+	var battle = await _spawn_battle(_make_last_seen_stealth_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var ally = battle.ally_units[0]
+	ally.set_status_visual_state({"stealth_turns": 2})
+	battle._last_visible_ally_cells_by_unit_id[String(ally.unit_data.unit_id)] = Vector2i(4, 2)
+
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	var last_seen_cells: Dictionary = runtime_context.get("last_seen_cells", {})
+	if last_seen_cells.get(String(ally.unit_data.unit_id), Vector2i(-1, -1)) != Vector2i(4, 2):
+		_fail("Battle runtime context should expose the cached last-seen ally cell for stealth-aware AI.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_enemy_uses_runtime_context_last_seen_cell_in_battle() -> void:
+	var battle = await _spawn_battle(_make_last_seen_stealth_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var ally = battle.ally_units[0]
+	ally.set_status_visual_state({"stealth_turns": 2})
+	battle._last_visible_ally_cells_by_unit_id[String(ally.unit_data.unit_id)] = Vector2i(4, 2)
+
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Enemy AI should fall back to a guarded move when only the cached last-seen stealth cell is available.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != Vector2i(4, 2):
+		_fail("Enemy AI should advance to the cached last-seen stealth attack tile in live battle context.")
+		return
+
+	await _despawn_node(battle)
+
 func _assert_final_attack_triggers_victory_immediately() -> void:
 	var battle = await _spawn_battle(_make_final_attack_victory_stage())
 	if battle == null:
@@ -743,6 +787,19 @@ func _make_guard_objective_approach_stage():
 	stage.ally_units.append(_make_unit_data(&"contract_far_ally", "Far Ally", "ally", 8, 2, 0, 3, 2))
 	stage.ally_spawns.clear()
 	stage.ally_spawns.append(Vector2i(6, 2))
+	return stage
+
+func _make_last_seen_stealth_stage():
+	var stage = STAGE_DATA_SCRIPT.new()
+	stage.stage_id = &"last_seen_stealth_stage"
+	stage.stage_title = "Last Seen Stealth Contract"
+	stage.grid_size = Vector2i(7, 5)
+	stage.cell_size = Vector2i(64, 64)
+	stage.ally_units.append(_make_unit_data(&"contract_stealth_ally", "Stealth Ally", "ally", 8, 3, 0, 3, 1))
+	stage.enemy_units.append(_make_unit_data(&"enemy_raider_contract", "Enemy Raider", "enemy", 12, 4, 0, 4, 1))
+	stage.ally_spawns.append(Vector2i(5, 2))
+	stage.enemy_spawns.append(Vector2i(0, 2))
+	stage.win_condition = &"defeat_all_enemies"
 	return stage
 
 func _make_final_attack_victory_stage():
