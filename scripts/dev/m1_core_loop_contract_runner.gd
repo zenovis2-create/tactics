@@ -84,6 +84,12 @@ func _run() -> void:
 	await _assert_sealed_commander_reduces_commitment_in_live_battle()
 	if _failed:
 		return
+	await _assert_feared_enemy_advances_cautiously_in_live_battle()
+	if _failed:
+		return
+	await _assert_wake_caution_enemy_advances_cautiously_in_live_battle()
+	if _failed:
+		return
 	await _assert_final_attack_triggers_victory_immediately()
 	if _failed:
 		return
@@ -607,6 +613,40 @@ func _assert_sealed_commander_reduces_commitment_in_live_battle() -> void:
 		return
 	if action.get("move_to", Vector2i(-1, -1)) != enemy.grid_position:
 		_fail("Sealed commander-support should hold position instead of committing to an attack tile.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_feared_enemy_advances_cautiously_in_live_battle() -> void:
+	var battle = await _spawn_battle(_make_status_response_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	enemy.set_status_visual_state({"fear_turns": 1})
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Feared enemy should switch to cautious movement in live battle context.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != Vector2i(1, 2):
+		_fail("Feared enemy should stop one tile short of the attack commitment in live battle context.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_wake_caution_enemy_advances_cautiously_in_live_battle() -> void:
+	var battle = await _spawn_battle(_make_status_response_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	enemy.set_status_visual_state({"wake_caution_turns": 1})
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Recently awakened enemy should switch to cautious movement in live battle context.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != Vector2i(1, 2):
+		_fail("Recently awakened enemy should stop one tile short of the attack commitment in live battle context.")
 		return
 
 	await _despawn_node(battle)
