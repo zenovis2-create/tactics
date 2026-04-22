@@ -64,6 +64,12 @@ run_step "Camp hub contracts" \
 run_step "UI screens contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ui_screens_runner.gd
 
+run_step "Hunt reward contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/hunt_reward_runner.gd
+
+run_step "Stage resolution contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/stage_resolution_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
