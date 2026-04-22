@@ -112,6 +112,12 @@ run_step "NG+ campaign save to title load" \
 run_step "NG+ recommended load" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_recommended_load_runner.gd
 
+run_step "NG+ defeat autosave" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_defeat_autosave_runner.gd
+
+run_step "Campaign save/load core loop" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/campaign_save_load_core_loop_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
