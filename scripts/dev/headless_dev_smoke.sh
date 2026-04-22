@@ -85,6 +85,15 @@ run_step "Defeat retry recovery" \
 run_step "Defeat autosave recovery" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/defeat_autosave_recovery_runner.gd
 
+run_step "Title load panel recovery" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/title_load_panel_runner.gd
+
+run_step "Campaign save panel roundtrip" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/campaign_save_panel_roundtrip_runner.gd
+
+run_step "Manual save recovery" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/manual_save_recovery_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
