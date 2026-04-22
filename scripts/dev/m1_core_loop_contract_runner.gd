@@ -93,6 +93,9 @@ func _run() -> void:
 	await _assert_silenced_healer_holds_position_in_live_battle()
 	if _failed:
 		return
+	await _assert_black_hound_detects_stealth_in_live_battle()
+	if _failed:
+		return
 	await _assert_final_attack_triggers_victory_immediately()
 	if _failed:
 		return
@@ -673,6 +676,25 @@ func _assert_silenced_healer_holds_position_in_live_battle() -> void:
 		return
 	if action.get("move_to", Vector2i(-1, -1)) != enemy.grid_position:
 		_fail("Silenced healer should hold position instead of committing to an attack tile.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_black_hound_detects_stealth_in_live_battle() -> void:
+	var battle = await _spawn_battle(_make_status_response_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var ally = battle.ally_units[0]
+	enemy.unit_data.unit_id = &"enemy_black_hound_contract"
+	ally.set_status_visual_state({"stealth_turns": 2})
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_attack" and String(action.get("type", "")) != "attack":
+		_fail("Black-hound should keep an offensive action when a stealthed target is detectable in live battle context.")
+		return
+	if action.get("target", null) != ally:
+		_fail("Black-hound should detect and target the stealthed ally in live battle context.")
 		return
 
 	await _despawn_node(battle)
