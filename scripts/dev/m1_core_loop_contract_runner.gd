@@ -72,6 +72,9 @@ func _run() -> void:
 	await _assert_commander_support_retargets_next_objective_after_resolution()
 	if _failed:
 		return
+	await _assert_shield_guard_retargets_next_objective_after_resolution()
+	if _failed:
+		return
 	await _assert_runtime_context_exposes_last_seen_cells_for_stealth_targets()
 	if _failed:
 		return
@@ -549,6 +552,23 @@ func _assert_commander_support_retargets_next_objective_after_resolution() -> vo
 	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
 	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(5, 2):
 		_fail("Commander-support should retarget the next unresolved interaction objective after the first resolves.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_shield_guard_retargets_next_objective_after_resolution() -> void:
+	var battle = await _spawn_battle(_make_guard_objective_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var ally = battle.ally_units[0]
+	battle._resolve_interaction(ally, battle.interactive_objects[0])
+	await process_frame
+
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(5, 2):
+		_fail("Shield-guard should retarget the next unresolved interaction objective after the first resolves.")
 		return
 
 	await _despawn_node(battle)
