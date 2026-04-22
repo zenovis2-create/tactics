@@ -103,6 +103,15 @@ run_step "NG+ save/load" \
 run_step "NG+ title load panel" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_title_load_panel_runner.gd
 
+run_step "NG+ defeat to title load" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_defeat_to_title_load_runner.gd
+
+run_step "NG+ campaign save to title load" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_campaign_save_to_title_load_runner.gd
+
+run_step "NG+ recommended load" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ng_plus_recommended_load_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
