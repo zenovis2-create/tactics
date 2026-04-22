@@ -78,6 +78,12 @@ func _run() -> void:
 	await _assert_enemy_uses_runtime_context_last_seen_cell_in_battle()
 	if _failed:
 		return
+	await _assert_sleeping_enemy_waits_in_live_battle()
+	if _failed:
+		return
+	await _assert_sealed_commander_reduces_commitment_in_live_battle()
+	if _failed:
+		return
 	await _assert_final_attack_triggers_victory_immediately()
 	if _failed:
 		return
@@ -573,6 +579,38 @@ func _assert_enemy_uses_runtime_context_last_seen_cell_in_battle() -> void:
 
 	await _despawn_node(battle)
 
+func _assert_sleeping_enemy_waits_in_live_battle() -> void:
+	var battle = await _spawn_battle(_make_status_response_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	enemy.set_status_visual_state({"sleep_turns": 1})
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "wait":
+		_fail("Sleeping enemy should always wait in live battle context.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_sealed_commander_reduces_commitment_in_live_battle() -> void:
+	var battle = await _spawn_battle(_make_status_response_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	enemy.unit_data.unit_id = &"enemy_commander_contract"
+	enemy.set_status_visual_state({"seal_turns": 1})
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Sealed commander-support should reduce offensive commitment in live battle context.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != enemy.grid_position:
+		_fail("Sealed commander-support should hold position instead of committing to an attack tile.")
+		return
+
+	await _despawn_node(battle)
+
 func _assert_final_attack_triggers_victory_immediately() -> void:
 	var battle = await _spawn_battle(_make_final_attack_victory_stage())
 	if battle == null:
@@ -798,6 +836,19 @@ func _make_last_seen_stealth_stage():
 	stage.ally_units.append(_make_unit_data(&"contract_stealth_ally", "Stealth Ally", "ally", 8, 3, 0, 3, 1))
 	stage.enemy_units.append(_make_unit_data(&"enemy_raider_contract", "Enemy Raider", "enemy", 12, 4, 0, 4, 1))
 	stage.ally_spawns.append(Vector2i(5, 2))
+	stage.enemy_spawns.append(Vector2i(0, 2))
+	stage.win_condition = &"defeat_all_enemies"
+	return stage
+
+func _make_status_response_stage():
+	var stage = STAGE_DATA_SCRIPT.new()
+	stage.stage_id = &"status_response_stage"
+	stage.stage_title = "Status Response Contract"
+	stage.grid_size = Vector2i(6, 5)
+	stage.cell_size = Vector2i(64, 64)
+	stage.ally_units.append(_make_unit_data(&"contract_status_ally", "Status Ally", "ally", 8, 3, 0, 3, 1))
+	stage.enemy_units.append(_make_unit_data(&"enemy_raider_contract", "Enemy Raider", "enemy", 12, 4, 0, 4, 1))
+	stage.ally_spawns.append(Vector2i(2, 2))
 	stage.enemy_spawns.append(Vector2i(0, 2))
 	stage.win_condition = &"defeat_all_enemies"
 	return stage
