@@ -37,6 +37,11 @@ func _run() -> void:
 
     for stage_id in EXPECTED_STAGE_ORDER:
         var snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if String(snapshot.get("mode", "")) == "briefing":
+            main.advance_campaign_step()
+            await process_frame
+            await process_frame
+            snapshot = main.get_campaign_state_snapshot()
         if String(snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode before stage %s, got %s." % [stage_id, snapshot.get("mode", "")])
             quit(1)
