@@ -58,6 +58,12 @@ run_step "Save/load UI contracts" \
 run_step "Save/load core loop" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/save_load_core_loop_runner.gd
 
+run_step "Camp hub contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/camp_runner.gd
+
+run_step "UI screens contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ui_screens_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
