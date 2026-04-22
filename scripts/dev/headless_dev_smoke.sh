@@ -118,6 +118,15 @@ run_step "NG+ defeat autosave" \
 run_step "Campaign save/load core loop" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/campaign_save_load_core_loop_runner.gd
 
+run_step "Defeat to title load" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/defeat_to_title_load_runner.gd
+
+run_step "Campaign save defeat title load" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/campaign_save_defeat_title_load_runner.gd
+
+run_step "Camp save tab" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s3_camp_save_tab_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
