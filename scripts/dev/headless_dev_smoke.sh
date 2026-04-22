@@ -127,6 +127,15 @@ run_step "Campaign save defeat title load" \
 run_step "Camp save tab" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s3_camp_save_tab_runner.gd
 
+run_step "M4 progression" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m4_progression_runner.gd
+
+run_step "M5 reward" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m5_reward_runner.gd
+
+run_step "M6 telemetry" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m6_telemetry_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
