@@ -37,6 +37,12 @@ run_step "M3 UI" \
 run_step "Status visuals" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/status_visual_runner.gd
 
+run_step "AI service contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ai_service_runner.gd
+
+run_step "Core loop contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
+
 run_step "Battle integration asset load" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/battle_integration_preview_runner.gd
 
