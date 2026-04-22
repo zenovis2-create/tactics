@@ -76,6 +76,15 @@ run_step "Bonus EXP pool contracts" \
 run_step "Battle result contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/battle_result_runner.gd
 
+run_step "Hunt battle contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/hunt_battle_runner.gd
+
+run_step "Defeat retry recovery" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/defeat_retry_recovery_runner.gd
+
+run_step "Defeat autosave recovery" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/defeat_autosave_recovery_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
