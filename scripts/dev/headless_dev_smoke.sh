@@ -70,6 +70,12 @@ run_step "Hunt reward contracts" \
 run_step "Stage resolution contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/stage_resolution_runner.gd
 
+run_step "Bonus EXP pool contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/bonus_exp_pool_runner.gd
+
+run_step "Battle result contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/battle_result_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
