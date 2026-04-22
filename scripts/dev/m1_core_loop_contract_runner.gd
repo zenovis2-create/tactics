@@ -10,6 +10,7 @@ const ALLY_VANGUARD = preload("res://data/units/ally_vanguard.tres")
 const ALLY_SCOUT = preload("res://data/units/ally_scout.tres")
 const ENEMY_RAIDER = preload("res://data/units/enemy_raider.tres")
 const BASIC_ATTACK = preload("res://data/skills/basic_attack.tres")
+const CLASS_DATA_SCRIPT = preload("res://scripts/data/class_data.gd")
 
 var _failed := false
 
@@ -54,6 +55,21 @@ func _run() -> void:
 	if _failed:
 		return
 	await _assert_ai_move_attack_targets_remain_in_range()
+	if _failed:
+		return
+	await _assert_commander_support_holds_interaction_objective()
+	if _failed:
+		return
+	await _assert_commander_support_approaches_interaction_objective()
+	if _failed:
+		return
+	await _assert_shield_guard_holds_interaction_objective()
+	if _failed:
+		return
+	await _assert_shield_guard_approaches_interaction_objective()
+	if _failed:
+		return
+	await _assert_commander_support_retargets_next_objective_after_resolution()
 	if _failed:
 		return
 	await _assert_final_attack_triggers_victory_immediately()
@@ -418,6 +434,101 @@ func _assert_ai_move_attack_targets_remain_in_range() -> void:
 
 	await _despawn_node(battle)
 
+func _assert_commander_support_holds_interaction_objective() -> void:
+	var battle = await _spawn_battle(_make_commander_objective_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Commander-support runtime context should bind the nearest unresolved interaction objective cell.")
+		return
+
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "wait":
+		_fail("Commander-support should hold a claimed interaction objective instead of leaving it.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_commander_support_approaches_interaction_objective() -> void:
+	var battle = await _spawn_battle(_make_commander_objective_approach_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Commander-support approach stage should still bind the nearest unresolved interaction objective cell.")
+		return
+
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Commander-support should approach an unclaimed interaction objective before chasing distant targets.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Commander-support should bias movement toward the interaction objective cell.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_shield_guard_holds_interaction_objective() -> void:
+	var battle = await _spawn_battle(_make_guard_objective_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Shield-guard runtime context should bind the nearest unresolved interaction objective cell.")
+		return
+
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "wait":
+		_fail("Shield-guard should hold a claimed interaction objective instead of leaving it.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_shield_guard_approaches_interaction_objective() -> void:
+	var battle = await _spawn_battle(_make_guard_objective_approach_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Shield-guard approach stage should still bind the nearest unresolved interaction objective cell.")
+		return
+
+	var action: Dictionary = battle._pick_enemy_action(enemy)
+	if String(action.get("type", "")) != "move_wait":
+		_fail("Shield-guard should approach an unclaimed interaction objective before chasing distant targets.")
+		return
+	if action.get("move_to", Vector2i(-1, -1)) != Vector2i(3, 2):
+		_fail("Shield-guard should bias movement toward the interaction objective cell.")
+		return
+
+	await _despawn_node(battle)
+
+func _assert_commander_support_retargets_next_objective_after_resolution() -> void:
+	var battle = await _spawn_battle(_make_commander_objective_stage())
+	if battle == null:
+		return
+
+	var enemy = battle.enemy_units[0]
+	var ally = battle.ally_units[0]
+	battle._resolve_interaction(ally, battle.interactive_objects[0])
+	await process_frame
+
+	var runtime_context: Dictionary = battle._build_enemy_ai_runtime_context(enemy)
+	if runtime_context.get("objective_cell", Vector2i(-1, -1)) != Vector2i(5, 2):
+		_fail("Commander-support should retarget the next unresolved interaction objective after the first resolves.")
+		return
+
+	await _despawn_node(battle)
+
 func _assert_final_attack_triggers_victory_immediately() -> void:
 	var battle = await _spawn_battle(_make_final_attack_victory_stage())
 	if battle == null:
@@ -566,6 +677,74 @@ func _make_move_attack_stage():
 	stage.win_condition = &"defeat_all_enemies"
 	return stage
 
+func _make_commander_objective_stage():
+	var stage = STAGE_DATA_SCRIPT.new()
+	stage.stage_id = &"commander_objective_stage"
+	stage.stage_title = "Commander Objective Contract"
+	stage.grid_size = Vector2i(7, 5)
+	stage.cell_size = Vector2i(64, 64)
+	stage.ally_units.append(_make_unit_data(&"contract_ally_objective", "Contract Ally", "ally", 10, 3, 1, 3, 1))
+	stage.enemy_units.append(_make_unit_data(&"enemy_commander_contract", "Enemy Commander", "enemy", 12, 4, 1, 3, 1))
+	stage.ally_spawns.append(Vector2i(1, 2))
+	stage.enemy_spawns.append(Vector2i(3, 2))
+	stage.win_condition = &"resolve_all_interactions"
+	stage.interaction_objective_texts = PackedStringArray([
+		"Hold both objective points. (0/2)",
+		"One objective point is lost. (1/2)",
+		"All objective points are resolved. (2/2)"
+	])
+
+	var first_objective = INTERACTIVE_OBJECT_DATA_SCRIPT.new()
+	first_objective.object_id = &"contract_objective_a"
+	first_objective.display_name = "Objective A"
+	first_objective.object_type = "lever"
+	first_objective.grid_position = Vector2i(3, 2)
+	first_objective.interaction_range = 1
+	first_objective.one_time_use = true
+	stage.interactive_objects.append(first_objective)
+
+	var second_objective = INTERACTIVE_OBJECT_DATA_SCRIPT.new()
+	second_objective.object_id = &"contract_objective_b"
+	second_objective.display_name = "Objective B"
+	second_objective.object_type = "lever"
+	second_objective.grid_position = Vector2i(5, 2)
+	second_objective.interaction_range = 1
+	second_objective.one_time_use = true
+	stage.interactive_objects.append(second_objective)
+	return stage
+
+func _make_commander_objective_approach_stage():
+	var stage = _make_commander_objective_stage()
+	stage.stage_id = &"commander_objective_approach_stage"
+	stage.stage_title = "Commander Objective Approach Contract"
+	stage.enemy_spawns.clear()
+	stage.enemy_spawns.append(Vector2i(0, 2))
+	stage.ally_units.clear()
+	stage.ally_units.append(_make_unit_data(&"contract_far_ally", "Far Ally", "ally", 8, 2, 0, 3, 2))
+	stage.ally_spawns.clear()
+	stage.ally_spawns.append(Vector2i(6, 2))
+	return stage
+
+func _make_guard_objective_stage():
+	var stage = _make_commander_objective_stage()
+	stage.stage_id = &"guard_objective_stage"
+	stage.stage_title = "Guard Objective Contract"
+	stage.enemy_units.clear()
+	stage.enemy_units.append(_make_unit_data(&"enemy_guard_contract", "Enemy Guard", "enemy", 13, 4, 1, 3, 1))
+	return stage
+
+func _make_guard_objective_approach_stage():
+	var stage = _make_guard_objective_stage()
+	stage.stage_id = &"guard_objective_approach_stage"
+	stage.stage_title = "Guard Objective Approach Contract"
+	stage.enemy_spawns.clear()
+	stage.enemy_spawns.append(Vector2i(0, 2))
+	stage.ally_units.clear()
+	stage.ally_units.append(_make_unit_data(&"contract_far_ally", "Far Ally", "ally", 8, 2, 0, 3, 2))
+	stage.ally_spawns.clear()
+	stage.ally_spawns.append(Vector2i(6, 2))
+	return stage
+
 func _make_final_attack_victory_stage():
 	var stage = STAGE_DATA_SCRIPT.new()
 	stage.stage_id = &"final_attack_victory_stage"
@@ -627,18 +806,23 @@ func _make_one_action_package_stage():
 	stage.win_condition = &"defeat_all_enemies"
 	return stage
 
-func _make_unit_data(unit_id: StringName, display_name: String, faction: String, max_hp: int, attack: int, defense: int, movement: int, attack_range: int):
-	var unit_data = UNIT_DATA_SCRIPT.new()
-	unit_data.unit_id = unit_id
-	unit_data.display_name = display_name
-	unit_data.faction = faction
-	unit_data.max_hp = max_hp
-	unit_data.attack = attack
-	unit_data.defense = defense
-	unit_data.movement = movement
-	unit_data.attack_range = attack_range
-	unit_data.default_skill = BASIC_ATTACK
-	return unit_data
+func _make_unit_data(unit_id: StringName, display_name: String, faction: String, hp: int, attack: int, defense: int, movement: int, attack_range: int) -> Resource:
+	var unit = UNIT_DATA_SCRIPT.new()
+	unit.unit_id = unit_id
+	unit.display_name = display_name
+	unit.faction = faction
+	unit.max_hp = hp
+	unit.attack = attack
+	unit.defense = defense
+	unit.movement = movement
+	unit.attack_range = attack_range
+	unit.default_skill = BASIC_ATTACK
+	if String(unit_id).find("commander") != -1 or String(unit_id).find("guard") != -1:
+		var class_data = CLASS_DATA_SCRIPT.new()
+		class_data.class_id = &"cls_knight"
+		class_data.display_name = "Knight"
+		unit.class_data = class_data
+	return unit
 
 func _despawn_node(node: Node) -> void:
 	if node == null or not is_instance_valid(node):
