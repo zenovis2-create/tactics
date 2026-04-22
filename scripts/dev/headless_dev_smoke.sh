@@ -49,6 +49,15 @@ run_step "Combat service contracts" \
 run_step "Skill levelup service contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/skill_levelup_service_runner.gd
 
+run_step "Meta progression" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/meta_progression_runner.gd
+
+run_step "Save/load UI contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/save_load_runner.gd
+
+run_step "Save/load core loop" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/save_load_core_loop_runner.gd
+
 run_step "Core loop contracts" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m1_core_loop_contract_runner.gd
 
