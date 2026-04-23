@@ -48,30 +48,15 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(intro_snapshot.get("panel_body", "")).find("Ellyor") == -1:
-        push_error("CH07 intro body did not mention Ellyor.")
+    var intro_body: String = String(intro_snapshot.get("panel_body", ""))
+    if intro_body.find("엘리오르") == -1 and intro_body.find("Ellyor") == -1:
+        push_error("CH07 intro body did not mention 엘리오르/Ellyor.")
         quit(1)
         return
 
     for stage_id in EXPECTED_CH07_ORDER:
-        main.advance_campaign_step()
-        await process_frame
-        await process_frame
-
-        var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
-        if String(stage_snapshot.get("mode", "")) != "battle":
-            push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot.get("chapter_id", &"")) != &"CH07":
-            push_error("Expected CH07 chapter id, got %s." % [stage_snapshot.get("chapter_id", &"")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot.get("current_stage_id", &"")) != stage_id:
-            push_error("Expected %s stage id, got %s." % [stage_id, stage_snapshot.get("current_stage_id", &"")])
-            quit(1)
+        var stage_snapshot: Dictionary = await _advance_to_stage_battle(main, stage_id, &"CH07")
+        if stage_snapshot.is_empty():
             return
 
         var battle = main.battle_controller
@@ -103,13 +88,13 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("black-hound orders") == -1 and panel_body.find("Black-hound orders") == -1:
-        push_error("CH07 camp body did not mention the black-hound orders.")
+    if panel_body.find("흑견") == -1 and panel_body.find("black-hound") == -1 and panel_body.find("black hound") == -1:
+        push_error("CH07 camp body did not mention the 흑견 handoff.")
         quit(1)
         return
 
-    if panel_body.find("forest") == -1 and panel_body.find("Forest") == -1:
-        push_error("CH07 camp body did not point back toward the forest.")
+    if panel_body.find("레테") == -1 and panel_body.find("숲") == -1 and panel_body.find("forest") == -1:
+        push_error("CH07 camp body did not point back toward Lete's forest route.")
         quit(1)
         return
 
@@ -119,13 +104,42 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(presentation_cards[0].get("title", "")).find("Black-Hound") == -1:
-        push_error("CH07 camp presentation cards did not expose the black-hound orders.")
+    if String(presentation_cards[0].get("title", "")).find("흑견") == -1 and String(presentation_cards[0].get("title", "")).find("Black-Hound") == -1:
+        push_error("CH07 camp presentation cards did not expose the 흑견 handoff.")
         quit(1)
         return
 
     print("[PASS] CH07 shell runner reached CH07 intro, CH07_01~05 flow, and CH07 camp handoff.")
     quit(0)
+
+func _advance_to_stage_battle(main: Node, stage_id: StringName, chapter_id: StringName) -> Dictionary:
+    main.advance_campaign_step()
+    await process_frame
+    await process_frame
+
+    var snapshot: Dictionary = main.get_campaign_state_snapshot()
+    if String(snapshot.get("mode", "")) == "briefing":
+        main.advance_campaign_step()
+        await process_frame
+        await process_frame
+        snapshot = main.get_campaign_state_snapshot()
+
+    if String(snapshot.get("mode", "")) != "battle":
+        push_error("Expected battle mode for %s, got %s." % [stage_id, snapshot.get("mode", "")])
+        quit(1)
+        return {}
+
+    if StringName(snapshot.get("chapter_id", &"")) != chapter_id:
+        push_error("Expected %s chapter id, got %s." % [String(chapter_id), snapshot.get("chapter_id", &"")])
+        quit(1)
+        return {}
+
+    if StringName(snapshot.get("current_stage_id", &"")) != stage_id:
+        push_error("Expected %s stage id, got %s." % [stage_id, snapshot.get("current_stage_id", &"")])
+        quit(1)
+        return {}
+
+    return snapshot
 
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
     var win_condition: String = String(battle.stage_data.win_condition)

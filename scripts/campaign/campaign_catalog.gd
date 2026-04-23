@@ -6,9 +6,17 @@ const AccessoryData = preload("res://scripts/data/accessory_data.gd")
 const WeaponData = preload("res://scripts/data/weapon_data.gd")
 const ArmorData = preload("res://scripts/data/armor_data.gd")
 
-const WEAPON_FALLBACK_PREVIEW := "res://artifacts/ash36/ash36_weapon_sword_cutout_v1.png"
+const WEAPON_FALLBACK_PREVIEW := "res://assets/props/field_sword_01/runtime/field_sword_01_equipment_v01.png"
 const ARMOR_FALLBACK_PREVIEW := "res://artifacts/ash36/ash36_armor_heavy_cutout_v1.png"
 const ACCESSORY_FALLBACK_PREVIEW := "res://artifacts/ash37/ash37_accessory_memory_seal_variants_v1.png"
+
+const UNIT_ID_ALIASES := {
+    &"ally_kyle": &"ally_karl",
+    &"enemy_karuon": &"enemy_karon",
+    &"enemy_karuon_final": &"enemy_karon_final",
+    &"enemy_barten": &"enemy_varten",
+    &"enemy_kyle_1": &"enemy_karl_1",
+}
 
 const PARTY_ROSTER_ORDER: Array[StringName] = [
     &"ally_rian",
@@ -16,18 +24,33 @@ const PARTY_ROSTER_ORDER: Array[StringName] = [
     &"ally_bran",
     &"ally_tia",
     &"ally_enoch",
-    &"ally_karl",
-    &"ally_noah"
+    &"ally_kyle",
+    &"ally_noah",
+    &"ally_mira",
+    &"ally_lete",
+    &"ally_melkion_ally"
+]
+
+const HIDDEN_RECRUIT_IDS: Array[StringName] = [
+    &"ally_mira",
+    &"ally_lete",
+    &"ally_melkion_ally"
 ]
 
 const UNIT_BY_ID := {
     &"ally_rian": preload("res://data/units/ally_rian.tres"),
     &"ally_serin": preload("res://data/units/ally_serin.tres"),
+    &"ally_vanguard": preload("res://data/units/ally_vanguard.tres"),
+    &"ally_scout": preload("res://data/units/ally_scout.tres"),
     &"ally_bran": preload("res://data/units/ally_bran.tres"),
     &"ally_tia": preload("res://data/units/ally_tia.tres"),
     &"ally_enoch": preload("res://data/units/ally_enoch.tres"),
-    &"ally_karl": preload("res://data/units/ally_karl.tres"),
-    &"ally_noah": preload("res://data/units/ally_noah.tres")
+    &"ally_kyle": preload("res://data/units/ally_kyle.tres"),
+    &"ally_karl": preload("res://data/units/ally_kyle.tres"),
+    &"ally_noah": preload("res://data/units/ally_noah.tres"),
+    &"ally_mira": preload("res://data/units/ally_mira.tres"),
+    &"ally_lete": preload("res://data/units/ally_lete.tres"),
+    &"ally_melkion_ally": preload("res://data/units/ally_melkion_ally.tres")
 }
 
 const ACCESSORY_BY_ID := {
@@ -88,14 +111,14 @@ const ARMOR_BY_ID := {
 }
 
 const WEAPON_PREVIEW_BY_ID := {
-    &"wp_archive_ashblade": "res://artifacts/ash36/ash36_weapon_sword_cutout_v1.png",
+    &"wp_archive_ashblade": "res://assets/props/field_sword_01/runtime/field_sword_01_equipment_v01.png",
     &"wp_zero_trace_staff": "res://artifacts/ash36/ash36_weapon_staff_cutout_v1.png",
     &"wp_valtor_command_lance": "res://artifacts/ash36/ash36_weapon_lance_cutout_v1.png",
     &"wp_saria_mercy_staff": "res://artifacts/ash36/ash36_weapon_staff_cutout_v1.png",
     &"wp_houndline_bow": "res://artifacts/ash36/ash36_weapon_bow_cutout_v1.png",
-    &"wp_standard_breaker_blade": "res://artifacts/ash36/ash36_weapon_sword_cutout_v1.png",
+    &"wp_standard_breaker_blade": "res://assets/props/field_sword_01/runtime/field_sword_01_equipment_v01.png",
     &"wp_keeper_root_staff": "res://artifacts/ash36/ash36_weapon_staff_cutout_v1.png",
-    &"wp_eclipse_resonance_blade": "res://artifacts/ash36/ash36_weapon_sword_cutout_v1.png"
+    &"wp_eclipse_resonance_blade": "res://assets/props/field_sword_01/runtime/field_sword_01_equipment_v01.png"
 }
 
 const ARMOR_PREVIEW_BY_ID := {
@@ -112,8 +135,20 @@ const ARMOR_PREVIEW_BY_ID := {
 static func get_party_roster_order() -> Array[StringName]:
     return PARTY_ROSTER_ORDER.duplicate()
 
+static func get_hidden_recruit_ids() -> Array[StringName]:
+    return HIDDEN_RECRUIT_IDS.duplicate()
+
+static func is_hidden_recruit(unit_id: StringName) -> bool:
+    return HIDDEN_RECRUIT_IDS.has(canonicalize_unit_id(unit_id))
+
+static func canonicalize_unit_id(unit_id: StringName) -> StringName:
+    return StringName(UNIT_ID_ALIASES.get(unit_id, unit_id))
+
 static func get_unit_data(unit_id: StringName) -> UnitData:
-    return UNIT_BY_ID.get(unit_id, null) as UnitData
+    var canonical_unit_id: StringName = canonicalize_unit_id(unit_id)
+    if UNIT_BY_ID.has(unit_id):
+        return UNIT_BY_ID.get(unit_id, null) as UnitData
+    return UNIT_BY_ID.get(canonical_unit_id, null) as UnitData
 
 static func get_accessory_data(accessory_id: StringName) -> AccessoryData:
     return ACCESSORY_BY_ID.get(accessory_id, null) as AccessoryData

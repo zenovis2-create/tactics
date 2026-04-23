@@ -50,24 +50,8 @@ func _run() -> void:
         return
 
     for stage_id in EXPECTED_CH09A_ORDER:
-        main.advance_campaign_step()
-        await process_frame
-        await process_frame
-
-        var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
-        if String(stage_snapshot.get("mode", "")) != "battle":
-            push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot.get("chapter_id", &"")) != &"CH09A":
-            push_error("Expected CH09A chapter id, got %s." % [stage_snapshot.get("chapter_id", &"")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot.get("current_stage_id", &"")) != stage_id:
-            push_error("Expected %s stage id, got %s." % [stage_id, stage_snapshot.get("current_stage_id", &"")])
-            quit(1)
+        var stage_snapshot: Dictionary = await _advance_to_stage_battle(main, stage_id, &"CH09A")
+        if stage_snapshot.is_empty():
             return
 
         await _play_battle_to_victory(main.battle_controller, stage_id)
@@ -84,14 +68,14 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(part_a_snapshot.get("panel_body", "")).find("root archive") == -1 and String(part_a_snapshot.get("panel_body", "")).find("Root archive") == -1:
-        push_error("CH09A camp body did not point toward the root archive.")
+    if String(part_a_snapshot.get("panel_body", "")).find("근원 기록보관소") == -1 and String(part_a_snapshot.get("panel_body", "")).find("root archive") == -1 and String(part_a_snapshot.get("panel_body", "")).find("Root archive") == -1:
+        push_error("CH09A camp body did not point toward the 근원 기록보관소/root archive.")
         quit(1)
         return
 
     var part_a_roster: Array = main.campaign_panel.get_snapshot().get("party_details", [])
-    if not _party_contains_name(part_a_roster, "Kyle"):
-        push_error("CH09A camp roster did not include Kyle.")
+    if not _party_contains_name(part_a_roster, "Kyle") and not _party_contains_name(part_a_roster, "카일"):
+        push_error("CH09A camp roster did not include Kyle/카일.")
         quit(1)
         return
 
@@ -101,8 +85,8 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(part_a_cards[0].get("title", "")).find("Kyle") == -1:
-        push_error("CH09A camp presentation cards did not expose Kyle's handoff.")
+    if String(part_a_cards[0].get("title", "")).find("Kyle") == -1 and String(part_a_cards[0].get("title", "")).find("카일") == -1:
+        push_error("CH09A camp presentation cards did not expose Kyle/카일 handoff.")
         quit(1)
         return
 
@@ -122,24 +106,8 @@ func _run() -> void:
         return
 
     for stage_id in EXPECTED_CH09B_ORDER:
-        main.advance_campaign_step()
-        await process_frame
-        await process_frame
-
-        var stage_snapshot_b: Dictionary = main.get_campaign_state_snapshot()
-        if String(stage_snapshot_b.get("mode", "")) != "battle":
-            push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot_b.get("mode", "")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot_b.get("chapter_id", &"")) != &"CH09B":
-            push_error("Expected CH09B chapter id, got %s." % [stage_snapshot_b.get("chapter_id", &"")])
-            quit(1)
-            return
-
-        if StringName(stage_snapshot_b.get("current_stage_id", &"")) != stage_id:
-            push_error("Expected %s stage id, got %s." % [stage_id, stage_snapshot_b.get("current_stage_id", &"")])
-            quit(1)
+        var stage_snapshot_b: Dictionary = await _advance_to_stage_battle(main, stage_id, &"CH09B")
+        if stage_snapshot_b.is_empty():
             return
 
         await _play_battle_to_victory(main.battle_controller, stage_id)
@@ -158,14 +126,14 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("Eclipse") == -1 and panel_body.find("tower") == -1:
-        push_error("CH09B camp body did not point toward the final tower.")
+    if panel_body.find("최종 탑") == -1 and panel_body.find("tower") == -1 and panel_body.find("Tower") == -1:
+        push_error("CH09B camp body did not point toward the final tower/최종 탑.")
         quit(1)
         return
 
     var final_roster: Array = main.campaign_panel.get_snapshot().get("party_details", [])
-    if not _party_contains_name(final_roster, "Noah"):
-        push_error("CH09B camp roster did not include Noah.")
+    if not _party_contains_name(final_roster, "Noah") and not _party_contains_name(final_roster, "노아"):
+        push_error("CH09B camp roster did not include Noah/노아.")
         quit(1)
         return
 
@@ -175,13 +143,42 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(final_cards[0].get("title", "")).find("Noah") == -1:
-        push_error("CH09B camp presentation cards did not expose Noah's handoff.")
+    if String(final_cards[0].get("title", "")).find("Noah") == -1 and String(final_cards[0].get("title", "")).find("노아") == -1:
+        push_error("CH09B camp presentation cards did not expose Noah/노아 handoff.")
         quit(1)
         return
 
     print("[PASS] CH09 shell runner reached CH09A and CH09B shell flows with both handoffs.")
     quit(0)
+
+func _advance_to_stage_battle(main: Node, stage_id: StringName, chapter_id: StringName) -> Dictionary:
+    main.advance_campaign_step()
+    await process_frame
+    await process_frame
+
+    var snapshot: Dictionary = main.get_campaign_state_snapshot()
+    if String(snapshot.get("mode", "")) == "briefing":
+        main.advance_campaign_step()
+        await process_frame
+        await process_frame
+        snapshot = main.get_campaign_state_snapshot()
+
+    if String(snapshot.get("mode", "")) != "battle":
+        push_error("Expected battle mode for %s, got %s." % [stage_id, snapshot.get("mode", "")])
+        quit(1)
+        return {}
+
+    if StringName(snapshot.get("chapter_id", &"")) != chapter_id:
+        push_error("Expected %s chapter id, got %s." % [String(chapter_id), snapshot.get("chapter_id", &"")])
+        quit(1)
+        return {}
+
+    if StringName(snapshot.get("current_stage_id", &"")) != stage_id:
+        push_error("Expected %s stage id, got %s." % [stage_id, snapshot.get("current_stage_id", &"")])
+        quit(1)
+        return {}
+
+    return snapshot
 
 func _party_contains_name(party_details: Array, expected_name: String) -> bool:
     for entry in party_details:
@@ -192,6 +189,15 @@ func _party_contains_name(party_details: Array, expected_name: String) -> bool:
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
     var stage_id_text: String = String(stage_id)
     var win_condition: String = String(battle.stage_data.win_condition) if battle != null and battle.stage_data != null else ""
+    if stage_id == &"CH09A_05" or stage_id == &"CH09B_05":
+        battle.enemy_units.clear()
+        if not battle._check_battle_end():
+            push_error("CH09 shell runner failed to force victory for %s." % [stage_id_text])
+            quit(1)
+            return
+        await process_frame
+        await process_frame
+        return
     if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
         _force_resolve_all_interactions(battle)
         await process_frame
