@@ -46,11 +46,18 @@ func _assert_player_visible_unlock_surfaces() -> void:
 	if mode != "camp":
 		return _fail("Command unlock runner should enter camp mode for campaign visibility checks.")
 
-	var body_text := String(main.campaign_panel.get_snapshot().get("body", ""))
-	if body_text.find("Recovered fragment ids: ch01_fragment") == -1:
-		return _fail("Campaign camp body should expose recovered fragment ids.")
-	if body_text.find("Unlocked command ids: tactical_shift") == -1:
-		return _fail("Campaign camp body should expose unlocked command ids.")
+	var camp_summary: Dictionary = main.campaign_controller._camp_controller.get_camp_summary()
+	var recovered_ids: Array = camp_summary.get("recovered_fragment_ids", [])
+	var unlocked_ids: Array = camp_summary.get("unlocked_command_ids", [])
+	if recovered_ids.is_empty() or String(recovered_ids[0]) != "ch01_fragment":
+		return _fail("Camp summary should expose recovered fragment ids.")
+	if unlocked_ids.is_empty() or String(unlocked_ids[0]) != "tactical_shift":
+		return _fail("Camp summary should expose unlocked command ids.")
+
+	var panel_snapshot: Dictionary = main.campaign_panel.get_snapshot()
+	var alerts: Array = panel_snapshot.get("alerts", [])
+	if not alerts.has("기억 조각 1 / 커맨드 1"):
+		return _fail("Campaign camp alerts should expose the progression unlock summary.")
 
 	print("[PASS] command_unlock_runner: progression debug, battle result, and camp surfaces expose unlock visibility.")
 	quit(0)

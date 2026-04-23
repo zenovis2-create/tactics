@@ -133,11 +133,26 @@ run_step "S1 battle feedback" \
 run_step "S2 result and bond" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s2_result_and_bond_runner.gd
 
+run_step "S3 boss phase" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s3_boss_phase_runner.gd
+
+run_step "Command unlock visibility" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/command_unlock_runner.gd
+
+run_step "Bond contracts" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/bond_runner.gd
+
 run_step "S4A unlock visibility" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s4a_unlock_visibility_runner.gd
 
 run_step "S4B skill unlock" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s4b_skill_unlock_runner.gd
+
+run_step "S7 unit progression" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s7_unit_progression_runner.gd
+
+run_step "Three-star progression" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/three_star_runner.gd
 
 run_step "M4 progression" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m4_progression_runner.gd
