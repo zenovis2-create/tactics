@@ -127,6 +127,18 @@ run_step "Campaign save defeat title load" \
 run_step "Camp save tab" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s3_camp_save_tab_runner.gd
 
+run_step "S1 battle feedback" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s1_battle_feedback_runner.gd
+
+run_step "S2 result and bond" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s2_result_and_bond_runner.gd
+
+run_step "S4A unlock visibility" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s4a_unlock_visibility_runner.gd
+
+run_step "S4B skill unlock" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/s4b_skill_unlock_runner.gd
+
 run_step "M4 progression" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m4_progression_runner.gd
 
