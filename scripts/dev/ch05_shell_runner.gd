@@ -48,7 +48,7 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(intro_snapshot.get("panel_body", "")).find("Archive") == -1 and String(intro_snapshot.get("panel_body", "")).find("archive") == -1:
+    if String(intro_snapshot.get("panel_body", "")).find("기록보관소") == -1:
         push_error("CH05 intro body did not mention the archive.")
         quit(1)
         return
@@ -59,6 +59,11 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if String(stage_snapshot.get("mode", "")) == "briefing":
+            main.advance_campaign_step()
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)
@@ -103,12 +108,12 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("Enoch joins") == -1:
+    if panel_body.find("에녹이 현역 전열에 합류한다.") == -1:
         push_error("CH05 camp body did not mention Enoch joining.")
         quit(1)
         return
 
-    if panel_body.find("Valtor") == -1:
+    if panel_body.find("발토르") == -1:
         push_error("CH05 camp body did not point toward Valtor.")
         quit(1)
         return
@@ -125,7 +130,7 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(presentation_cards[0].get("title", "")).find("Enoch") == -1:
+    if not _presentation_cards_contain_text(presentation_cards, "Enoch") and not _presentation_cards_contain_text(presentation_cards, "에녹"):
         push_error("CH05 camp presentation cards did not expose Enoch's handoff.")
         quit(1)
         return
@@ -136,6 +141,16 @@ func _run() -> void:
 func _party_contains_name(party_details: Array, expected_name: String) -> bool:
     for entry in party_details:
         if typeof(entry) == TYPE_DICTIONARY and String(entry.get("name", "")) == expected_name:
+            return true
+    return false
+
+func _presentation_cards_contain_text(cards: Array, needle: String) -> bool:
+    for entry in cards:
+        if typeof(entry) != TYPE_DICTIONARY:
+            continue
+        var title := String(entry.get("title", ""))
+        var body := String(entry.get("body", ""))
+        if title.find(needle) != -1 or body.find(needle) != -1:
             return true
     return false
 

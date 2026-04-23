@@ -154,6 +154,15 @@ run_step "S7 unit progression" \
 run_step "Three-star progression" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/three_star_runner.gd
 
+run_step "CH02 shell flow" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch02_shell_runner.gd
+
+run_step "CH03 shell flow" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch03_shell_runner.gd
+
+run_step "CH05 shell flow" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch05_shell_runner.gd
+
 run_step "M4 progression" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m4_progression_runner.gd
 
