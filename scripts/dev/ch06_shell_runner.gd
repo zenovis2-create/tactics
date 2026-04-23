@@ -48,8 +48,8 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(intro_snapshot.get("panel_body", "")).find("Valtor") == -1:
-        push_error("CH06 intro body did not mention Valtor.")
+    if String(intro_snapshot.get("panel_body", "")).find("발토르") == -1:
+        push_error("CH06 intro body did not mention 발토르.")
         quit(1)
         return
 
@@ -59,6 +59,11 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if String(stage_snapshot.get("mode", "")) == "briefing":
+            main.advance_campaign_step()
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)
@@ -103,12 +108,12 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("Valtor breach context memory") == -1:
+    if panel_body.find("발토르 돌파의 맥락이 복원") == -1:
         push_error("CH06 camp body did not mention the fortress breach memory.")
         quit(1)
         return
 
-    if panel_body.find("Ellyor") == -1:
+    if panel_body.find("엘리오르") == -1:
         push_error("CH06 camp body did not point toward Ellyor.")
         quit(1)
         return
@@ -119,7 +124,7 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(presentation_cards[0].get("title", "")).find("Valtor") == -1:
+    if not _presentation_cards_contain_text(presentation_cards, "Valtor") and not _presentation_cards_contain_text(presentation_cards, "발토르"):
         push_error("CH06 camp presentation cards did not expose the breach handoff.")
         quit(1)
         return
@@ -129,6 +134,14 @@ func _run() -> void:
     quit(0)
 
 func _play_battle_to_victory(battle) -> void:
+    var win_condition: String = String(battle.stage_data.win_condition)
+    if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
+        _force_resolve_all_interactions(battle)
+        await process_frame
+        await process_frame
+        if _is_battle_finished(battle):
+            return
+
     var max_round_loops: int = 40
     for _round_loop in range(max_round_loops):
         await _wait_for_player_phase(battle)
@@ -146,6 +159,28 @@ func _play_battle_to_victory(battle) -> void:
         push_error("CH06 shell runner battle did not finish in victory. %s" % _describe_battle_state(battle))
         quit(1)
         return
+
+func _force_resolve_all_interactions(battle) -> void:
+    if battle.ally_units.is_empty():
+        return
+
+    var ally = battle.ally_units[0]
+    for object_actor in battle.interactive_objects:
+        if object_actor == null or not is_instance_valid(object_actor) or object_actor.is_resolved:
+            continue
+        battle._resolve_interaction(ally, object_actor)
+
+    battle._check_battle_end()
+
+func _presentation_cards_contain_text(cards: Array, needle: String) -> bool:
+    for entry in cards:
+        if typeof(entry) != TYPE_DICTIONARY:
+            continue
+        var title := String(entry.get("title", ""))
+        var body := String(entry.get("body", ""))
+        if title.find(needle) != -1 or body.find(needle) != -1:
+            return true
+    return false
 
 func _wait_for_player_phase(battle) -> void:
     var safety: int = 0

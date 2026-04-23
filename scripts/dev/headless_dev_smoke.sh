@@ -160,8 +160,14 @@ run_step "CH02 shell flow" \
 run_step "CH03 shell flow" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch03_shell_runner.gd
 
+run_step "CH04 shell flow" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch04_shell_runner.gd
+
 run_step "CH05 shell flow" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch05_shell_runner.gd
+
+run_step "CH06 shell flow" \
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/ch06_shell_runner.gd
 
 run_step "M4 progression" \
   "$GODOT_BIN" --headless --path "$ROOT_DIR" --script res://scripts/dev/m4_progression_runner.gd

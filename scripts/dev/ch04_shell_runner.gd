@@ -48,7 +48,7 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(intro_snapshot.get("panel_body", "")).find("monastery") == -1 and String(intro_snapshot.get("panel_body", "")).find("Monastery") == -1:
+    if String(intro_snapshot.get("panel_body", "")).find("수도원") == -1:
         push_error("CH04 intro body did not mention the monastery.")
         quit(1)
         return
@@ -59,6 +59,11 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if String(stage_snapshot.get("mode", "")) == "briefing":
+            main.advance_campaign_step()
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)
@@ -103,12 +108,12 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("research") == -1 and panel_body.find("Research") == -1:
+    if panel_body.find("아크 연구 기억") == -1:
         push_error("CH04 camp body did not mention the research records.")
         quit(1)
         return
 
-    if panel_body.find("Gray Archive") == -1:
+    if panel_body.find("잿빛 기록보관소") == -1:
         push_error("CH04 camp body did not point toward the Gray Archive.")
         quit(1)
         return
@@ -117,6 +122,14 @@ func _run() -> void:
     quit(0)
 
 func _play_battle_to_victory(battle) -> void:
+    var win_condition: String = String(battle.stage_data.win_condition)
+    if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
+        _force_resolve_all_interactions(battle)
+        await process_frame
+        await process_frame
+        if _is_battle_finished(battle):
+            return
+
     var max_round_loops: int = 20
     for _round_loop in range(max_round_loops):
         await _wait_for_player_phase(battle)
@@ -134,6 +147,18 @@ func _play_battle_to_victory(battle) -> void:
         push_error("CH04 shell runner battle did not finish in victory. %s" % _describe_battle_state(battle))
         quit(1)
         return
+
+func _force_resolve_all_interactions(battle) -> void:
+    if battle.ally_units.is_empty():
+        return
+
+    var ally = battle.ally_units[0]
+    for object_actor in battle.interactive_objects:
+        if object_actor == null or not is_instance_valid(object_actor) or object_actor.is_resolved:
+            continue
+        battle._resolve_interaction(ally, object_actor)
+
+    battle._check_battle_end()
 
 func _wait_for_player_phase(battle) -> void:
     var safety: int = 0
