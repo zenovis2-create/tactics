@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch02_04_inner_gate_control"
 display_name = "Inner Gate Control"
-object_type = "lever"
+object_type = "gate_control"
 grid_position = Vector2i(4, 4)
 interaction_range = 1
 reward_text = "Inner gate control aligned: the last lock opens toward Hardren's banner hall."

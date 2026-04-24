@@ -61,8 +61,8 @@ Vector2i(3, 4): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Vent the western pressure valve and release the upper stack seal to stabilize the Burning Stair. (0/2)", "One archive-pressure control is resolved. Release the remaining seal. (1/2)", "Archive pressure broken. The Burning Stair is stabilized. (2/2)")
+interaction_objective_texts = PackedStringArray("서쪽 압력 밸브를 열고 상층 서고 봉인을 해제해 불타는 계단을 안정시킨다. (0/2)", "기록보관소 압력 제어점 하나를 해결했다. 남은 봉인을 해제한다. (1/2)", "기록보관소 압력이 해소되었다. 불타는 계단이 안정되었다. (2/2)")
 interaction_objective_state_ids = [&"archive_pressure_locked", &"archive_pressure_partial", &"archive_pressure_released"]
 start_cutscene_id = &"ch05_03_intro"
 clear_cutscene_id = &"ch05_03_outro"
-next_destination_summary = "The archive pressure breaks, the upper reading halls crack open, and the final sealed records point toward the truth behind Zero."
+next_destination_summary = "기록보관소 압력이 무너지며 상층 열람실이 열린다. 마지막 봉인 기록이 제로의 진실을 가리킨다."

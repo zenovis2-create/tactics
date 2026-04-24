@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch04_05_south_research_log"
+display_name = "South Research Log"
+object_type = "chest"
+grid_position = Vector2i(6, 2)
+interaction_range = 1
+reward_text = "South research log recovered: the drowned reliquary route is fully reconstructed."
+interaction_text = "South research log recovered."

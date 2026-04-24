@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"burden_share"
+display_name = "짐 나누기"
+description = "아군이 받을 피해를 분산시킨다."
+skill_type = "tactical"
+range = 2
+power_modifier = 0
+targeting_rule = &"adjacent_ally"
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &""

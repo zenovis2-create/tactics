@@ -46,6 +46,8 @@ Vector2i(8, 2): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "설교 도르래 두 개를 끊어 기도실 진입로를 연다."
+landmark_labels = PackedStringArray("서쪽 설교 도르래", "중앙 회중석", "동쪽 설교 도르래")
 start_cutscene_id = &"ch07_04_intro"
 clear_cutscene_id = &"ch07_04_outro"
-next_destination_summary = "The hymn channels break, and the last route into Saria's prayer hall is exposed."
+next_destination_summary = "다음: 끊어진 찬가 수로를 지나 기도실로 들어간다."

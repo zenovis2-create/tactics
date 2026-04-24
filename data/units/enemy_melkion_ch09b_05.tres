@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/skills/melkion_rewrite.tres" id="3_skill"]
+[ext_resource type="Resource" path="res://data/skills/erase_truth.tres" id="4_skill"]
+[ext_resource type="Resource" path="res://data/skills/true_read.tres" id="5_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"enemy_melkion"
+display_name = "Melkion"
+faction = "enemy"
+max_hp = 15
+attack = 5
+defense = 2
+movement = 3
+attack_range = 1
+default_skill = ExtResource("2_skill")
+skills = [ExtResource("2_skill"), ExtResource("3_skill"), ExtResource("4_skill"), ExtResource("5_skill")]
+is_boss = true
+boss_pattern = &"melkion_ch09b_05"
+boss_phase_thresholds = {
+50: &"archive_mode"
+}

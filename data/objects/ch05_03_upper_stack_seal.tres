@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch05_03_upper_stack_seal"
 display_name = "Upper Stack Seal"
-object_type = "altar"
+object_type = "evidence"
 grid_position = Vector2i(8, 2)
 interaction_range = 1
 reward_text = "Upper stack seal released: the burning stair pressure breaks and the reading hall opens."

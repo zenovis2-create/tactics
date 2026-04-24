@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"shield_break"
+display_name = "방패 격쇄"
+range = 1
+power_modifier = 2
+targeting_rule = &"adjacent_enemy"
+unlock_condition = {"fragment": "mem_frag_ch01_first_order"}
+skill_level = 1
+skill_exp = 0
+power_modifier_by_level = {}
+status_effect = {"type": &"fear", "stacks": 1, "duration": 1, "power": 0}
+status_chance = 1.0

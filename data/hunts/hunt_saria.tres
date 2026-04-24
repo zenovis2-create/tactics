@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="HuntData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/hunt_data.gd" id="1_hunt"]
+
+[resource]
+script = ExtResource("1_hunt")
+hunt_id = &"hunt_saria"
+display_name = "사리아 회상 토벌전"
+description = "사리아의 강화된 형태와 결판을 내는 회상 토벌전."
+unlock_condition_flag = "flag_ch07_complete"
+stage_id = &"HUNT_SARIA"
+difficulty = 4
+recommended_level = 12
+reward_memory_fragment = "mem_frag_saria_hunt"
+reward_evidence = Array[String](["flag_evidence_saria_choir_register"])
+reward_materials = Array[Dictionary]([{
+"material_id": &"mat_saria_hymnal_thread",
+"count": 3
+}])
+reward_gold = 750

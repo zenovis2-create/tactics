@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"name_return"
+display_name = "이름 돌려주기"
+description = "망각을 완전 해제하고 버프를 부여한다."
+skill_type = "heal"
+range = 2
+power_modifier = 0
+targeting_rule = &"adjacent_ally"
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &""

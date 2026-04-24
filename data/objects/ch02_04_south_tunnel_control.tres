@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch02_04_south_tunnel_control"
 display_name = "South Tunnel Control"
-object_type = "lever"
+object_type = "gate_control"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
 reward_text = "South tunnel control aligned: runoff pressure clears and the gate frame locks into place."

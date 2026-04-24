@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"shield_slam"
+display_name = "방패 격쇄"
+description = "적을 밀쳐내고 행동을 약화시킨다."
+skill_type = "attack"
+range = 1
+power_modifier = 2
+status_type = &"fear"
+status_stacks = 1
+status_duration = 1
+status_chance = 0.7
+status_power = 0
+unlock_flag = &""

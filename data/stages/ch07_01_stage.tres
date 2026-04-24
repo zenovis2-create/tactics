@@ -34,8 +34,10 @@ Vector2i(5, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Read the market route board and silence the queue bell to open the square. (0/2)", "One procession control point is secured. Resolve the remaining route control. (1/2)", "Both market controls are secured. The silence-square route is open. (2/2)")
+stage_objective_hint = "행선판을 읽고 대기열 종을 멈춘다."
+interaction_objective_texts = PackedStringArray("시장 행선판을 확인하고 대기열 종을 멈춰 광장 길을 연다. (0/2)", "행렬 제어 지점 하나를 확보했다. 남은 경로 제어 지점을 해결한다. (1/2)", "시장 제어 지점 두 곳을 모두 확보했다. 침묵 광장 진입로가 열렸다. (2/2)")
 interaction_objective_state_ids = [&"market_route_locked", &"market_route_partial", &"market_route_open"]
+landmark_labels = PackedStringArray("행선판", "시장 좌판", "대기열 종")
 start_cutscene_id = &"ch07_01_intro"
 clear_cutscene_id = &"ch07_01_outro"
-next_destination_summary = "The market controls are secured, and the route now bends cleanly into the silence square."
+next_destination_summary = "다음: 열린 시장 길을 따라 침묵 광장으로 이동한다."

@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch03_01_west_trail_marker"
 display_name = "West Trail Marker"
-object_type = "altar"
+object_type = "shrine"
 grid_position = Vector2i(3, 6)
 interaction_range = 1
 reward_text = "West trail marker surveyed: the hunter path confirms one safe turn through Greenwood."

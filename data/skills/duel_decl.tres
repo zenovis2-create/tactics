@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"duel_decl"
+display_name = "결투 선언"
+description = "대상과 1대1 상태를 만든다."
+skill_type = "tactical"
+range = 2
+power_modifier = 1
+status_type = &"mark"
+status_stacks = 1
+status_duration = 2
+status_chance = 1.0
+status_power = 0
+unlock_flag = &""

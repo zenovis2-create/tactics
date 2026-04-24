@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch03_01_east_trail_marker"
 display_name = "East Trail Marker"
-object_type = "altar"
+object_type = "shrine"
 grid_position = Vector2i(9, 5)
 interaction_range = 1
 reward_text = "East trail marker surveyed: the lost-forest split is mapped and the snare line route is exposed."

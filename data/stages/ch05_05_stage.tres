@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_hes.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_ash_archivist_ch05_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -29,9 +29,37 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "fire",
+"position": Vector2i(2, 2),
+"radius": 1,
+"effect": "Archive ashfires keep spreading through the stacks."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "Charred shelves can be smashed into rubble."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "The stairwell funnels the escape route."
+}]
+optional_objectives = [{
+"id": "defeat_boss_without_noah_dying",
+"description": "노아가 쓰러지지 않은 채 보스를 쓰러뜨린다.",
+"condition": "flag:defeat_boss_without_noah_dying",
+"star_value": 2
+}, {
+"id": "collect_3_ledger_entries",
+"description": "불타는 기록보관소에서 장부 기록 3개를 회수한다.",
+"condition": "flag:collect_3_ledger_entries",
+"star_value": 2
+}]
+turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch05_05_intro"
 clear_cutscene_id = &"ch05_05_outro"
-next_destination_summary = "Valtor siege ledgers and surviving-knight rolls point the squad toward the iron fortress."
+next_destination_summary = "발토르 공성 장부와 생존 기사 명단이 부대를 철성 요새로 이끈다."

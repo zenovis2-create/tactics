@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"saria_oblivion_zone"
+display_name = "망각의 장판"
+description = "매턴 망각 장판을 생성한다."
+skill_type = "attack"
+range = 3
+power_modifier = 1
+status_type = &"oblivion"
+status_stacks = 1
+status_duration = 3
+status_chance = 1.0
+status_power = 0
+unlock_flag = &""

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"imperial_edict"
+display_name = "황실 칙령"
+description = "적의 능력을 저하시키는 공포 상태를 부여한다."
+skill_type = "support"
+range = 3
+power_modifier = 0
+status_type = &"fear"
+status_stacks = 1
+status_duration = 2
+status_chance = 1.0
+status_power = 0
+unlock_flag = &"flag_memory_ch09b_final_restored"
+skill_level = 1

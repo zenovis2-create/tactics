@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/skills/memory_burn.tres" id="3_skill"]
+[ext_resource type="Resource" path="res://data/skills/seal_script.tres" id="4_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"enemy_ash_archivist"
+display_name = "Ash Archivist"
+faction = "enemy"
+max_hp = 15
+attack = 4
+defense = 2
+movement = 3
+attack_range = 1
+default_skill = ExtResource("2_skill")
+skills = [ExtResource("2_skill"), ExtResource("3_skill"), ExtResource("4_skill")]
+is_boss = true
+boss_pattern = &"ash_escape_ch05_05"
+boss_phase_thresholds = {
+75: &"ash_screen",
+50: &"stack_collapse",
+25: &"record_burn"
+}

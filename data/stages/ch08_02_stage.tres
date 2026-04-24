@@ -34,8 +34,10 @@ Vector2i(6, 4): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Break the black-hound route pressure by surveying the moon-scent post and seizing the split-line cache. (0/2)", "One ambush route point is secured. Resolve the remaining black-hound signal. (1/2)", "Black-hound route pressure is broken. The ambush lane is charted. (2/2)")
+stage_objective_hint = "달 향기 초소와 분기 보관함을 확보해 하층 폐허로 가는 묻힌 길을 드러낸다."
+interaction_objective_texts = PackedStringArray("달 향기 초소를 조사하고 분기 보관함을 확보해 흑견의 경로 압박을 끊는다. (0/2)", "매복 경로 지점 하나를 확보했다. 남은 흑견 신호를 해결한다. (1/2)", "흑견 경로 압박이 무너졌다. 매복 통로가 확보되었다. (2/2)")
 interaction_objective_state_ids = [&"black_hound_route_locked", &"black_hound_route_partial", &"black_hound_route_broken"]
+landmark_labels = PackedStringArray("달 향기 초소", "매복 갈림길", "분기 보관함")
 start_cutscene_id = &"ch08_02_intro"
 clear_cutscene_id = &"ch08_02_outro"
-next_destination_summary = "The ambush line reveals a buried route into the lower ruin."
+next_destination_summary = "다음: 묻힌 길을 따라 하층 폐허로 내려간다."

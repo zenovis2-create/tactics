@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch07_01_queue_bell"
 display_name = "Queue Bell"
-object_type = "lever"
+object_type = "bell"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
 reward_text = "Queue bell silenced: the square route opens without drawing the next wave inward."

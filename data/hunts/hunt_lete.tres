@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="HuntData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/hunt_data.gd" id="1_hunt"]
+
+[resource]
+script = ExtResource("1_hunt")
+hunt_id = &"hunt_lete"
+display_name = "레테 회상 토벌전"
+description = "레테의 강화된 형태와 결판을 내는 회상 토벌전."
+unlock_condition_flag = "flag_ch08_complete"
+stage_id = &"HUNT_LETE"
+difficulty = 5
+recommended_level = 15
+reward_memory_fragment = "mem_frag_lete_hunt"
+reward_evidence = Array[String](["flag_evidence_lete_hunt_route"])
+reward_materials = Array[Dictionary]([{
+"material_id": &"mat_lete_black_hound_fang",
+"count": 4
+}])
+reward_gold = 1000

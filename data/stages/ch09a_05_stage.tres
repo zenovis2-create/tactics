@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_varten_ch09a_05.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_kyle_ch09a_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -47,12 +47,12 @@ terrain_features = [{
 }]
 optional_objectives = [{
 "id": "karl_testifies",
-"description": "Trigger Kyle's testimony before the line collapses.",
+"description": "전선이 무너지기 전에 카일의 증언을 이끌어낸다.",
 "condition": "flag:karl_testifies",
 "star_value": 2
 }, {
 "id": "no_ally_casualties",
-"description": "Win the battle without ally casualties.",
+"description": "아군 사망 없이 전투에서 승리한다.",
 "condition": "no_ally_casualties",
 "star_value": 2
 }]
@@ -60,8 +60,8 @@ turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
-stage_objective_hint = "Win the spearhead clash and secure the root-route ledger at the far gate."
-landmark_labels = PackedStringArray("South Entry", "Censor Court", "Root Access Gate")
+stage_objective_hint = "창끝 대치를 돌파하고 먼 관문의 근원 경로 장부를 확보한다."
+landmark_labels = PackedStringArray("남쪽 진입로", "검열 안뜰", "근원 접근문")
 start_cutscene_id = &"ch09a_05_intro"
 clear_cutscene_id = &"ch09a_05_outro"
-next_destination_summary = "Next: Use the captured sigil to enter the inner archive."
+next_destination_summary = "다음: 확보한 인장을 사용해 내부 기록보관소로 들어간다."

@@ -34,8 +34,10 @@ Vector2i(5, 2): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Recover the oath roll and inspect the censor mark to expose the discarded-officer route. (0/2)", "One oath-hall clue is secured. Find the remaining officer-trail proof. (1/2)", "Both oath-hall clues are secured. The discarded-officer route is confirmed. (2/2)")
+stage_objective_hint = "서쪽 맹세 두루마리를 읽고 동쪽 검열 표식을 조사해 장교들의 이동 경로를 추적한다."
+interaction_objective_texts = PackedStringArray("맹세 두루마리를 회수하고 검열 표식을 조사해 버려진 장교 경로를 드러낸다. (0/2)", "맹세 전당 단서 하나를 확보했다. 남은 장교 흔적을 찾는다. (1/2)", "맹세 전당 단서 두 개를 모두 확보했다. 버려진 장교 경로가 확정되었다. (2/2)")
 interaction_objective_state_ids = [&"oath_hall_unread", &"oath_hall_partial", &"oath_hall_confirmed"]
+landmark_labels = PackedStringArray("맹세 두루마리", "맹세 전당 바닥", "검열 표식")
 start_cutscene_id = &"ch09a_03_intro"
 clear_cutscene_id = &"ch09a_03_outro"
-next_destination_summary = "The oath records expose where Karl's discarded officers were taken."
+next_destination_summary = "다음: 드러난 장교 경로를 따라 버려진 숙소로 들어간다."

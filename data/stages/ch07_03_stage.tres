@@ -34,8 +34,10 @@ Vector2i(5, 2): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Recover the procession roll and witness mark to trace the cathedral route. (0/2)", "One procession clue is secured. Find the remaining witness point. (1/2)", "Both procession clues are secured. The cathedral route is confirmed. (2/2)")
+stage_objective_hint = "행렬 두루마리를 회수하고 성당 진입 경로를 추적한다."
+interaction_objective_texts = PackedStringArray("행렬 두루마리와 목격 표식을 회수해 성당 경로를 추적한다. (0/2)", "행렬 단서 하나를 확보했다. 남은 목격 지점을 찾는다. (1/2)", "행렬 단서 두 개를 모두 확보했다. 성당 경로가 확정되었다. (2/2)")
 interaction_objective_state_ids = [&"procession_route_unread", &"procession_route_partial", &"procession_route_confirmed"]
+landmark_labels = PackedStringArray("행렬 두루마리", "사당 대로", "목격 표식")
 start_cutscene_id = &"ch07_03_intro"
 clear_cutscene_id = &"ch07_03_outro"
-next_destination_summary = "The procession records confirm the road toward the cathedral and the source of the hymn."
+next_destination_summary = "다음: 사당 대로를 따라 성당 앞마당으로 올라간다."

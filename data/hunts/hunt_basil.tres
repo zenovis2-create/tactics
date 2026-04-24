@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="HuntData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/hunt_data.gd" id="1_hunt"]
+
+[resource]
+script = ExtResource("1_hunt")
+hunt_id = &"hunt_basil"
+display_name = "바실 회상 토벌전"
+description = "바실의 강화된 형태와 결판을 내는 회상 토벌전."
+unlock_condition_flag = "flag_ch04_complete"
+stage_id = &"HUNT_BASIL"
+difficulty = 3
+recommended_level = 8
+reward_memory_fragment = "mem_frag_basil_hunt"
+reward_evidence = Array[String](["flag_evidence_basil_reliquary_route"])
+reward_materials = Array[Dictionary]([{
+"material_id": &"mat_basil_reliquary_ash",
+"count": 2
+}])
+reward_gold = 500

@@ -52,8 +52,10 @@ Vector2i(8, 5): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Read the silence plaque and cut the queue release post to break the square. (0/2)", "One square control is secured. Resolve the remaining queue control. (1/2)", "Both square controls are secured. The procession line is broken. (2/2)")
+stage_objective_hint = "광장 제어점을 무너뜨려 행렬 대열을 흩트린다."
+interaction_objective_texts = PackedStringArray("침묵 명판을 읽고 대기열 해제 기둥을 끊어 광장 통제를 깨뜨린다. (0/2)", "광장 제어 지점 하나를 확보했다. 남은 대기열 제어를 해결한다. (1/2)", "광장 제어 지점 두 곳을 확보했다. 행렬 대열이 무너졌다. (2/2)")
 interaction_objective_state_ids = [&"silence_square_locked", &"silence_square_partial", &"silence_square_broken"]
+landmark_labels = PackedStringArray("침묵 명판", "행렬 통로", "해제 기둥")
 start_cutscene_id = &"ch07_02_intro"
 clear_cutscene_id = &"ch07_02_outro"
-next_destination_summary = "The square breaks open, but Mira and Neri are still moving with the nameless procession."
+next_destination_summary = "다음: 무너진 행렬 길을 따라 사당 진입로까지 추격한다."

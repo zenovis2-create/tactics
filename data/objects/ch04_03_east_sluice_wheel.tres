@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch04_03_east_sluice_wheel"
 display_name = "East Sluice Wheel"
-object_type = "lever"
+object_type = "floodgate"
 grid_position = Vector2i(7, 5)
 interaction_range = 1
 reward_text = "East sluice wheel aligned: the eastern channel drains and the cloister route stops surging."

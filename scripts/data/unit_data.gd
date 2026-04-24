@@ -14,6 +14,7 @@ const JobData = preload("res://scripts/data/job_data.gd")
 @export var movement: int = 3
 @export var attack_range: int = 1
 @export var default_skill: SkillData
+@export var skills: Array[SkillData] = []
 @export var class_data: ClassData
 @export var job_data: JobData
 @export var weapon_types_allowed: PackedStringArray = PackedStringArray(["Sword", "Lance", "Bow", "Staff", "Tome"])
@@ -44,6 +45,19 @@ func get_class_data() -> ClassData:
     if job_data != null and job_data.class_data != null:
         return job_data.class_data
     return class_data
+
+func get_all_skills() -> Array[SkillData]:
+    if not skills.is_empty():
+        return skills.duplicate()
+    if default_skill != null:
+        return [default_skill]
+    return []
+
+func get_skill_by_id(target_skill_id: StringName) -> SkillData:
+    for skill in get_all_skills():
+        if skill != null and skill.skill_id == target_skill_id:
+            return skill
+    return null
 
 func get_allowed_weapon_types() -> PackedStringArray:
     if job_data != null:

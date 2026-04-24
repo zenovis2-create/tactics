@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch06_02_east_battery_winch"
 display_name = "East Battery Winch"
-object_type = "lever"
+object_type = "battery"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
 reward_text = "East battery winch collapsed: the right firing lane loses its line of control."

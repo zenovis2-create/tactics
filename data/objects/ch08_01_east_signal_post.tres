@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch08_01_east_signal_post"
 display_name = "East Signal Post"
-object_type = "lever"
+object_type = "route_marker"
 grid_position = Vector2i(5, 5)
 interaction_range = 1
 reward_text = "East signal post cut: the hound route forks collapse into a single tracked lane."

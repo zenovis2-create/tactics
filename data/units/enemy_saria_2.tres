@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/skills/charm_gaze.tres" id="3_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"enemy_saria_2"
+display_name = "Saria II"
+faction = "enemy"
+max_hp = 16
+attack = 5
+defense = 3
+movement = 3
+attack_range = 1
+default_skill = ExtResource("2_skill")
+skills = [ExtResource("2_skill"), ExtResource("3_skill")]
+is_boss = true
+boss_pattern = &"saria_ch07_01"
+boss_phase_thresholds = {
+75: &"civilian_unrest",
+50: &"mind_control",
+25: &"final_purge"
+}

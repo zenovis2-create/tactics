@@ -4,7 +4,7 @@
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
-[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="5_enemy_b"]
 [ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
 
 [resource]
@@ -61,4 +61,4 @@ win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"tutorial_intro"
 clear_cutscene_id = &"tutorial_outro"
-next_destination_summary = "The first breach line holds just long enough to recover supplies and form the opening route."
+next_destination_summary = "첫 돌파선이 가까스로 유지되어 보급을 회수하고 초반 진입 경로를 만든다."

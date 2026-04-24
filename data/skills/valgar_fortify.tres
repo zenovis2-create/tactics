@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"valgar_fortify"
+display_name = "요새 강화"
+description = "주변 적의 방어력을 증가시킨다."
+skill_type = "tactical"
+range = 2
+power_modifier = 0
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &""

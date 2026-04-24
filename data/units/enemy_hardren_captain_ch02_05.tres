@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/skills/shield_break.tres" id="3_skill"]
+[ext_resource type="Resource" path="res://data/skills/trap_lure.tres" id="4_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"enemy_hardren_captain"
+display_name = "Hardren Captain"
+faction = "enemy"
+max_hp = 14
+attack = 4
+defense = 2
+movement = 4
+attack_range = 1
+default_skill = ExtResource("2_skill")
+skills = [ExtResource("2_skill"), ExtResource("3_skill"), ExtResource("4_skill")]
+is_boss = true
+boss_pattern = &"hardren_banner_ch02_05"
+boss_phase_thresholds = {
+75: &"banner_call",
+50: &"trap_pressure",
+25: &"collapse_order"
+}

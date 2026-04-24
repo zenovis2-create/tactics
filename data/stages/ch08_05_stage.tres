@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_lete_ch08_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch08_05_transfer_gate_latch.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -47,21 +48,33 @@ terrain_features = [{
 }]
 optional_objectives = [{
 "id": "lete_defects_alive",
-"description": "Let Lete defect and leave the field alive.",
+"description": "레테를 전향시켜 생존한 채 전장을 이탈하게 한다.",
 "condition": "flag:lete_defects_alive",
 "star_value": 2
 }, {
 "id": "no_black_hound_casualties",
-"description": "Keep the black hounds alive through the clash.",
+"description": "교전이 끝날 때까지 흑견 부대를 살려 둔다.",
 "condition": "flag:no_black_hound_casualties",
 "star_value": 2
 }]
 turn_limit = 12
-interactive_objects = []
+interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
-stage_objective_hint = "Break through the hound yard and hold the north transfer gate to finish the pursuit."
-landmark_labels = PackedStringArray("South Pursuit Lane", "Hound Yard", "North Transfer Gate")
+rule_template_id = &"lete_route_cut"
+rule_template_modifiers = {
+"control_object_id": "ch08_05_transfer_gate_latch",
+"relief_flag": "lete_escape_route_cut",
+"relief_tracking_flag": "lete_hunt_collapsing",
+"relief_state_id": &"lete_route_cut_relief",
+"objective_after_relief": "표식 재설정 차단선을 유지하며 전면 추격만 관리한다.",
+"hint_after_relief": "깊은 추격선은 약화되었다. 전면 shadow lane만 경계하며 표식 재설정을 끊는다.",
+"open_cells": [Vector2i(4, 3)],
+"boss_cooldowns": {"smoke_bomb": 2},
+"clear_statuses": [&"mark", &"fear"]
+}
+stage_objective_hint = "흑견 마당을 돌파하고 북쪽 이송문을 장악해 추격을 끝낸다."
+landmark_labels = PackedStringArray("남쪽 추격로", "흑견 마당", "북쪽 이송문")
 start_cutscene_id = &"ch08_05_intro"
 clear_cutscene_id = &"ch08_05_outro"
-next_destination_summary = "Next: March from the hound checkpoint to Kyle's outer defense line."
+next_destination_summary = "다음: 흑견 검문지를 넘어 카일의 외곽 방어선으로 향한다."

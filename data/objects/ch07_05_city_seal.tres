@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch07_05_city_seal"
+display_name = "City Seal"
+object_type = "chest"
+grid_position = Vector2i(10, 2)
+interaction_range = 1
+reward_text = "City seal secured: the prayer hall's civic authority passes to the squad."
+interaction_text = "City seal secured."

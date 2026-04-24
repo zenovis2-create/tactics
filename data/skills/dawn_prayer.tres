@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"dawn_prayer"
+display_name = "새벽의 기도"
+range = 3
+power_modifier = 0
+mp_cost = 4
+sp_cost = 2
+targeting_rule = &"adjacent_ally"
+unlock_condition = {"trust_min": 4}
+skill_level = 1
+skill_exp = 0
+power_modifier_by_level = {}
+status_effect = {}
+status_chance = 1.0

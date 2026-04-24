@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"shadow_trace"
+display_name = "그림자 추적"
+range = 3
+power_modifier = 0
+targeting_rule = &"adjacent_enemy"
+unlock_condition = {"trust_min": 3}
+skill_level = 1
+skill_exp = 0
+power_modifier_by_level = {}
+status_effect = {"type": &"mark", "stacks": 1, "duration": 2, "power": 0}
+status_chance = 1.0

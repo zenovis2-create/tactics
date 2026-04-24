@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_basil.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch04_05_north_research_log.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch04_05_south_research_log.tres" id="7_object_b"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -32,9 +34,40 @@ Vector2i(1, 1): 1,
 Vector2i(5, 2): 2,
 Vector2i(6, 6): 1
 }
-interactive_objects = []
-win_condition = &"defeat_all_enemies"
+terrain_features = [{
+"type": "water",
+"position": Vector2i(1, 1),
+"radius": 1,
+"effect": "Floodwater drags movement through the altar floor."
+}, {
+"type": "sacred_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The altar still heals those who hold the dais."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 1),
+"radius": 0,
+"effect": "Raised reliquary steps favor defenders."
+}]
+optional_objectives = [{
+"id": "ark_survives_flooded_section",
+"description": "침수 구역을 지나 아크를 생존시킨다.",
+"condition": "flag:ark_survives_flooded_section",
+"star_value": 2
+}, {
+"id": "collect_2_research_logs",
+"description": "제단이 무너지기 전에 연구 기록 2개를 회수한다.",
+"condition": "flag:collect_2_research_logs",
+"star_value": 2
+}]
+turn_limit = 12
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
+win_condition = &"resolve_all_interactions_and_defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "바실을 쓰러뜨리고 제단 바닥의 연구 기록 두 개를 회수한다."
+interaction_objective_texts = PackedStringArray("연구 기록 두 개를 회수하고 바실을 쓰러뜨려 침수 성소를 드러낸다. (0/2)", "연구 기록 하나를 확보했다. 마지막 기록을 회수하고 바실을 마무리한다. (1/2)", "연구 기록 두 개를 모두 확보했다. 바실의 침수 성소가 완전히 드러났다. (2/2)")
+interaction_objective_state_ids = [&"basil_logs_missing", &"basil_logs_partial", &"basil_logs_complete"]
 start_cutscene_id = &"ch04_05_intro"
 clear_cutscene_id = &"ch04_05_outro"
-next_destination_summary = "The research seals and transfer ledgers point the squad toward the Gray Archive."
+next_destination_summary = "연구 봉인과 이송 장부가 다음 목적지를 잿빛 기록보관소로 가리킨다."

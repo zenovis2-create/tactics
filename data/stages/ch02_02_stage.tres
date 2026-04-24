@@ -33,6 +33,7 @@ Vector2i(6, 5): 1
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+weather_type = "rain"
 start_cutscene_id = &"ch02_02_intro"
 clear_cutscene_id = &"ch02_02_outro"
-next_destination_summary = "The wall breach reveals stranded knights deeper inside Hardren."
+next_destination_summary = "무너진 성벽 너머로 하드렌 깊숙한 곳에 고립된 기사들이 드러난다."

@@ -34,8 +34,11 @@ Vector2i(5, 2): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Break both resonance crest controls to collapse the outer tower ring. (0/2)", "One crest control is down. Collapse the remaining outer tower crest. (1/2)", "Both crest controls are down. The outer tower ring is broken. (2/2)")
+stage_objective_hint = "문장 제어점 두 곳을 무너뜨려 외곽 고리에서 내부 회랑으로 이어지는 안정 경로를 만든다."
+interaction_objective_texts = PackedStringArray("공명 문장 제어점 두 곳을 부숴 외곽 탑 고리를 무너뜨린다. (0/2)", "문장 제어점 하나를 무너뜨렸다. 남은 외곽 탑 문장을 붕괴시킨다. (1/2)", "문장 제어점 두 곳이 모두 무너졌다. 외곽 탑 고리가 붕괴되었다. (2/2)")
 interaction_objective_state_ids = [&"tower_crest_locked", &"tower_crest_partial", &"tower_crest_broken"]
+landmark_labels = PackedStringArray("서쪽 문장 제어", "외곽 탑 고리", "동쪽 문장 제어")
+weather_type = "night"
 start_cutscene_id = &"ch10_02_intro"
 clear_cutscene_id = &"ch10_02_outro"
-next_destination_summary = "Two outer towers fall and the inner corridor begins to change shape."
+next_destination_summary = "다음: 무너진 외곽 고리를 지나 무명의 회랑으로 들어간다."

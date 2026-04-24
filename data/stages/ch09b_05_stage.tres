@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_melkion.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_melkion_ch09b_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch09b_05_archive_lectern.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -29,9 +30,51 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
-interactive_objects = []
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(5, 1),
+"radius": 0,
+"effect": "The abyss rim favors defenders who hold the record edge."
+}, {
+"type": "destructible",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "Root seals can be shattered to unmake the archive line."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(6, 2),
+"radius": 0,
+"effect": "The eclipse lane narrows movement into the abyss."
+}]
+optional_objectives = [{
+"id": "melkion_truth_revealed",
+"description": "기록이 닫히기 전에 멜키온의 진실을 드러낸다.",
+"condition": "flag:melkion_truth_revealed",
+"star_value": 2
+}, {
+"id": "noah_survives",
+"description": "심연 전투에서 노아를 생존시킨다.",
+"condition": "flag:noah_survives",
+"star_value": 2
+}]
+turn_limit = 12
+interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+rule_template_id = &"melkion_archive_relief"
+rule_template_modifiers = {
+"control_object_id": "ch09b_05_archive_lectern",
+"relief_flag": "melkion_archive_stabilized",
+"relief_tracking_flag": "melkion_archive_destabilized",
+"relief_state_id": &"archive_stable_relief",
+"objective_after_relief": "archive center 유지를 우선하고 flank revision만 정리한다.",
+"hint_after_relief": "중앙 archive tile은 안정화되었다. flank revision lane만 경계하며 rewrite를 늦춘다.",
+"boss_cooldowns": {"truth_rewrite": 3, "true_read": 3},
+"clear_terrain_cells": [Vector2i(4, 2)],
+"clear_statuses": [&"mark"]
+}
+stage_objective_hint = "심연 가장자리를 돌파하고 최종 탑으로 이어지는 식경 경로를 확보한다."
+landmark_labels = PackedStringArray("남쪽 기록 절벽", "기록 심연", "식경 경유점")
 start_cutscene_id = &"ch09b_05_intro"
 clear_cutscene_id = &"ch09b_05_outro"
-next_destination_summary = "The eclipse coordinates, tower lattice, and last decree point the march to the final tower."
+next_destination_summary = "다음: 식경 격자를 따라 심연에서 최종 탑으로 향한다."

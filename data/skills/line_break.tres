@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"line_break"
+display_name = "반열 파쇄"
+description = "일직선 관통 공격."
+skill_type = "attack"
+range = 2
+power_modifier = 3
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &""

@@ -58,8 +58,8 @@ Vector2i(8, 2): 2
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Read the refugee sign and cut the snare post to secure the lower trail. (0/2)", "One route point is secured. Resolve the remaining trail hazard. (1/2)", "Both route points are secured. The refugee trail is stabilized. (2/2)")
+interaction_objective_texts = PackedStringArray("난민 표식을 확인하고 덫 말뚝을 끊어 하단 산길을 확보한다. (0/2)", "경로 지점 하나를 확보했다. 남은 산길 위협을 처리한다. (1/2)", "경로 지점 두 곳을 모두 확보했다. 난민 산길이 안정되었다. (2/2)")
 interaction_objective_state_ids = [&"refugee_trail_unsecured", &"refugee_trail_partial", &"refugee_trail_stabilized"]
 start_cutscene_id = &"ch03_02_intro"
 clear_cutscene_id = &"ch03_02_outro"
-next_destination_summary = "The refugee trail is stabilized, and the next route points toward the moving column deeper in Greenwood."
+next_destination_summary = "난민 산길이 안정되었고, 다음 경로는 그린우드 깊숙한 이동 대열로 이어진다."

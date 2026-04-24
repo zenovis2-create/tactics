@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"transfer_gate"
+display_name = "전이문"
+range = 3
+power_modifier = 0
+targeting_rule = &"adjacent_ally"
+unlock_condition = {"trust_min": 3}
+skill_level = 1
+skill_exp = 0
+power_modifier_by_level = {}
+status_effect = {}
+status_chance = 1.0

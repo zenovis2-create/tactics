@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
+[ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+
+[resource]
+script = ExtResource("1_unit")
+unit_id = &"enemy_valgar_2"
+display_name = "Valgar II"
+faction = "enemy"
+max_hp = 18
+attack = 5
+defense = 4
+movement = 3
+attack_range = 1
+default_skill = ExtResource("2_skill")
+is_boss = true
+boss_pattern = &"valgar_ch06_01"
+boss_phase_thresholds = {
+75: &"siege_mode",
+50: &"wall_breaker",
+25: &"final_stand"
+}

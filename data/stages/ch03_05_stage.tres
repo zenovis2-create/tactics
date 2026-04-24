@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_roderic.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_resin_warden_ch03_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -29,9 +29,37 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(1, 1),
+"radius": 0,
+"effect": "The resin shrine steadies allies who stand within it."
+}, {
+"type": "fire",
+"position": Vector2i(4, 2),
+"radius": 1,
+"effect": "Resin basins flare and spread through the grove."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 1),
+"radius": 0,
+"effect": "Hunter perches command the clearing."
+}]
+optional_objectives = [{
+"id": "tia_defeats_enemy_boss",
+"description": "티아로 적 보스에게 마지막 일격을 가한다.",
+"condition": "flag:tia_defeats_enemy_boss",
+"star_value": 2
+}, {
+"id": "no_structures_destroyed",
+"description": "사당 구조물을 파괴하지 않고 유지한다.",
+"condition": "flag:no_structures_destroyed",
+"star_value": 2
+}]
+turn_limit = 10
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch03_05_intro"
 clear_cutscene_id = &"ch03_05_outro"
-next_destination_summary = "The purification manifests recovered here point toward the drowned monastery."
+next_destination_summary = "여기서 회수한 정화 장부는 침수 수도원 쪽을 가리킨다."

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"rescue"
+display_name = "민간인 구조"
+description = "위기에 처한 시민을 안전한 곳으로 이동시킨다."
+skill_type = "tactical"
+range = 1
+power_modifier = 0
+targeting_rule = &"adjacent_ally"
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &""
+skill_level = 1

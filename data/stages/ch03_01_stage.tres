@@ -73,8 +73,8 @@ Vector2i(10, 7): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Survey both forest trail markers to map a safe Greenwood route. (0/2)", "One forest trail marker is surveyed. Check the remaining marker. (1/2)", "Both forest trail markers are surveyed. The Lost Forest route is mapped. (2/2)")
+interaction_objective_texts = PackedStringArray("숲길 표식 두 곳을 조사해 안전한 그린우드 경로를 확보한다. (0/2)", "숲길 표식 하나를 조사했다. 남은 표식을 확인한다. (1/2)", "숲길 표식 두 곳을 모두 조사했다. 잃어버린 숲 경로가 완성되었다. (2/2)")
 interaction_objective_state_ids = [&"greenwood_route_unmapped", &"greenwood_route_partial", &"greenwood_route_mapped"]
 start_cutscene_id = &"ch03_01_intro"
 clear_cutscene_id = &"ch03_01_outro"
-next_destination_summary = "Both forest markers are read, and the mapped route leads directly into the snare line."
+next_destination_summary = "숲 표식 두 곳을 모두 읽었다. 확보된 경로는 덫 지대로 곧장 이어진다."

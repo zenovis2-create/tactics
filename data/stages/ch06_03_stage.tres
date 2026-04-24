@@ -33,6 +33,8 @@ Vector2i(5, 2): 1
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "군수 저장고 심층부를 정리하고 내부 성채로 이어지는 길을 확보한다."
+landmark_labels = PackedStringArray("군수 금고", "감옥 교차로", "성채 관문")
 start_cutscene_id = &"ch06_03_intro"
 clear_cutscene_id = &"ch06_03_outro"
-next_destination_summary = "Freed quartermaster routes and prison rolls point toward the inner citadel."
+next_destination_summary = "다음: 감옥 교차로를 지나 내부 성채 쪽으로 올라간다."

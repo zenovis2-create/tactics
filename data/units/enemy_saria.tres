@@ -1,7 +1,10 @@
-[gd_resource type="Resource" script_class="UnitData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="UnitData" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/unit_data.gd" id="1_unit"]
 [ext_resource type="Resource" path="res://data/skills/basic_attack.tres" id="2_skill"]
+[ext_resource type="Resource" path="res://data/skills/saria_oblivion_zone.tres" id="3_skill"]
+[ext_resource type="Resource" path="res://data/skills/memory_burn.tres" id="4_skill"]
+[ext_resource type="Resource" path="res://data/skills/charm_gaze.tres" id="5_skill"]
 
 [resource]
 script = ExtResource("1_unit")
@@ -14,9 +17,11 @@ defense = 2
 movement = 3
 attack_range = 1
 default_skill = ExtResource("2_skill")
+skills = [ExtResource("2_skill"), ExtResource("3_skill"), ExtResource("4_skill"), ExtResource("5_skill")]
 is_boss = true
-boss_pattern = &"roderic_ch01_05"
+boss_pattern = &"saria_ch07_05"
 boss_phase_thresholds = {
-50: &"enrage",
-25: &"despair"
+75: &"civilian_unrest",
+50: &"mind_control",
+25: &"final_purge"
 }

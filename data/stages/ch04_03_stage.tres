@@ -46,8 +46,13 @@ Vector2i(6, 4): 1
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
-interaction_objective_texts = PackedStringArray("Stabilize the monastery flood route by aligning both sluice wheels. (0/2)", "One sluice wheel is aligned. Stabilize the remaining channel. (1/2)", "Both sluice wheels are aligned. The relic vault route is stable. (2/2)")
+rule_template_id = &"monastery_flood_route"
+rule_template_modifiers = {
+"template_family": "interaction_pair"
+}
+interaction_objective_texts = PackedStringArray("두 개의 수문 바퀴를 맞춰 수도원 침수 경로를 안정화한다. (0/2)", "수문 바퀴 하나를 맞췄다. 남은 수로를 안정화한다. (1/2)", "두 수문 바퀴를 모두 맞췄다. 성유물 금고 진입로가 안정되었다. (2/2)")
 interaction_objective_state_ids = [&"monastery_flood_route_locked", &"monastery_flood_route_partial", &"monastery_flood_route_stable"]
+weather_type = "rain"
 start_cutscene_id = &"ch04_03_intro"
 clear_cutscene_id = &"ch04_03_outro"
-next_destination_summary = "The pressure stabilizes, and the relic vault can finally be entered."
+next_destination_summary = "수압이 안정되며 성유물 금고에 마침내 진입할 수 있게 된다."

@@ -29,9 +29,37 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(1, 1),
+"radius": 0,
+"effect": "Cliff lookout grants superior defense."
+}, {
+"type": "fire",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "Burning wreckage scorches nearby units."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "The breach lane only admits one fighter at a time."
+}]
+optional_objectives = [{
+"id": "serin_defeats_enemy_commander",
+"description": "세린으로 적 지휘관에게 마지막 일격을 가한다.",
+"condition": "flag:serin_defeats_enemy_commander",
+"star_value": 2
+}, {
+"id": "no_ally_casualties",
+"description": "아군 사망 없이 전투를 끝낸다.",
+"condition": "no_ally_casualties",
+"star_value": 2
+}]
+turn_limit = 8
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch01_05_intro"
 clear_cutscene_id = &"ch01_05_outro"
-next_destination_summary = "Camp interlude unlocks, Serin joins fully, and the next destination points toward the border evidence trail."
+next_destination_summary = "캠프 교대 구간이 해금되고 세린이 정식 합류한다. 다음 목적지는 국경 단서 추적선으로 이어진다."

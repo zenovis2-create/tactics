@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InteractiveObjectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/interactive_object_data.gd" id="1_object"]
+
+[resource]
+script = ExtResource("1_object")
+object_id = &"ch10_05_anchor_chain"
+display_name = "Anchor Chain"
+object_type = "chain_control"
+grid_position = Vector2i(10, 6)
+interaction_range = 1
+reward_text = "Anchor chain broken: the bell choke loosens."
+interaction_text = "Anchor chain broken."

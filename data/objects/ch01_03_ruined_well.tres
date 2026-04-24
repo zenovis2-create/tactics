@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch01_03_ruined_well"
 display_name = "Ruined Well"
-object_type = "altar"
+object_type = "well"
 grid_position = Vector2i(6, 6)
 interaction_range = 1
 reward_text = "Ruined Well surveyed: the waterline memory ripple was logged."

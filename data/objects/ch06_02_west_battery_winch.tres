@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch06_02_west_battery_winch"
 display_name = "West Battery Winch"
-object_type = "lever"
+object_type = "battery"
 grid_position = Vector2i(1, 2)
 interaction_range = 1
 reward_text = "West battery winch collapsed: the left firing lane drops out of Valtor's line."

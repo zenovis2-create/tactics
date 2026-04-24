@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"tactical_shift"
+display_name = "전술 전환"
+description = "인접 아군과 위치를 교체하고 둘 다 짧은 버프를 받는다."
+skill_type = "tactical"
+range = 1
+power_modifier = 0
+mp_cost = 1
+sp_cost = 1
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &"flag_memory_ch01_first_order_seen"
+skill_level = 1

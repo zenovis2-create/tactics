@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_roderic.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_hardren_captain_ch02_05.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
 
 [resource]
@@ -29,9 +29,37 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(6, 1),
+"radius": 0,
+"effect": "Rampart stones harden the command post."
+}, {
+"type": "destructible",
+"position": Vector2i(3, 3),
+"radius": 0,
+"effect": "Barricades splinter under sustained fire."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 2),
+"radius": 0,
+"effect": "The fortress gate constricts the approach."
+}]
+optional_objectives = [{
+"id": "lete_survives",
+"description": "공성전이 끝날 때까지 레테를 생존시킨다.",
+"condition": "flag:lete_survives",
+"star_value": 2
+}, {
+"id": "activate_3_traps",
+"description": "요새가 무너지기 전에 함정 3개를 발동시킨다.",
+"condition": "flag:activate_3_traps",
+"star_value": 2
+}]
+turn_limit = 10
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch02_05_intro"
 clear_cutscene_id = &"ch02_05_outro"
-next_destination_summary = "Hardren falls, Bran joins the march, and the chase orders point toward Greenwood."
+next_destination_summary = "하드렌이 무너지고 브란이 행군에 합류한다. 추적 명령은 그린우드로 이어진다."

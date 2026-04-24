@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
-[ext_resource type="Resource" path="res://data/units/enemy_karon.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_karuon.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch10_04_edict_throne.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -29,9 +30,14 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
-interactive_objects = []
-win_condition = &"defeat_all_enemies"
+interactive_objects = [ExtResource("6_object_a")]
+win_condition = &"resolve_all_interactions_and_defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "왕의 전당 전투에서 승리하고 칙령의 옥좌를 장악해 종의 방 계단을 연다."
+interaction_objective_texts = PackedStringArray("카르온을 물리치고 칙령의 옥좌를 점거해 종의 방 계단을 강제로 연다. (0/1)", "칙령의 옥좌를 장악했다. 종의 방 계단이 열렸다. (1/1)")
+interaction_objective_state_ids = [&"edict_throne_closed", &"edict_throne_open"]
+landmark_labels = PackedStringArray("왕의 전당", "칙령의 옥좌", "종의 방 계단")
+weather_type = "rain"
 start_cutscene_id = &"ch10_04_intro"
 clear_cutscene_id = &"ch10_04_outro"
-next_destination_summary = "The royal hall breaks open, and the bell chamber below becomes the last road left."
+next_destination_summary = "다음: 열린 계단을 따라 종의 방으로 내려간다."

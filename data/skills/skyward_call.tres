@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+skill_id = &"skyward_call"
+display_name = "하늘의 부름"
+description = "위에서 돌진하는 아군을 소환한다."
+skill_type = "support"
+range = 3
+power_modifier = 0
+status_type = &""
+status_stacks = 0
+status_duration = 0
+status_chance = 0.0
+status_power = 0
+unlock_flag = &"flag_memory_ch08_north_corridor_context_seen"
+skill_level = 1
