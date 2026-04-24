@@ -12,7 +12,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var progression := ProgressionData.new()
-	progression.unlocked_hunt_ids = [&"hunt_basil", &"hunt_saria", &"hunt_lete"]
+	progression.unlocked_hunt_ids = [&"hunt_basil", &"hunt_saria", &"hunt_lete", &"hunt_karuon"]
 
 	var camp := CampController.new()
 	root.add_child(camp)
@@ -23,6 +23,7 @@ func _run() -> void:
 		{"hunt_id": &"hunt_basil", "stage_id": &"HUNT_BASIL", "title": "회상 토벌전: 바실", "objective_id": "hunt_basil_flood_rise_survived", "start_cutscene_id": &"hunt_basil_launch", "clear_cutscene_id": &"hunt_basil_return", "min_enemy_count": 3, "required_blocked": Vector2i(6, 2), "required_terrain": {"cell": Vector2i(4, 2), "type": "flooded"}, "required_object_id": "hunt_basil_sluice_wheel"},
 		{"hunt_id": &"hunt_saria", "stage_id": &"HUNT_SARIA", "title": "회상 토벌전: 사리아", "objective_id": "hunt_saria_queue_preserved", "start_cutscene_id": &"hunt_saria_launch", "clear_cutscene_id": &"hunt_saria_return", "min_enemy_count": 3, "required_blocked": Vector2i(9, 4), "required_terrain": {"cell": Vector2i(8, 2), "type": "hymn"}, "required_object_id": "hunt_saria_choir_lectern"},
 		{"hunt_id": &"hunt_lete", "stage_id": &"HUNT_LETE", "title": "회상 토벌전: 레테", "objective_id": "hunt_lete_black_hounds_preserved", "start_cutscene_id": &"hunt_lete_launch", "clear_cutscene_id": &"hunt_lete_return", "min_enemy_count": 3, "required_blocked": Vector2i(7, 4), "required_terrain": {"cell": Vector2i(6, 2), "type": "shadow"}, "required_object_id": "hunt_lete_gate_latch"},
+		{"hunt_id": &"hunt_karuon", "stage_id": &"HUNT_KARUON", "title": "기억 시험: 카르온", "objective_id": "hunt_karuon_anchor_chain_memory", "start_cutscene_id": &"hunt_karuon_launch", "clear_cutscene_id": &"hunt_karuon_return", "min_enemy_count": 2, "required_blocked": Vector2i(10, 4), "required_terrain": {"cell": Vector2i(8, 9), "type": "memory_bell"}, "required_object_id": "ch10_05_bell_dais"},
 	]:
 		if not camp.select_hunt(hunt_case.hunt_id):
 			return _fail("CampController should allow selecting unlocked hunt %s." % String(hunt_case.hunt_id))

@@ -7,6 +7,7 @@ const HUNT_STAGE_BY_ID := {
 	&"HUNT_BASIL": preload("res://data/stages/hunt_basil_stage.tres"),
 	&"HUNT_SARIA": preload("res://data/stages/hunt_saria_stage.tres"),
 	&"HUNT_LETE": preload("res://data/stages/hunt_lete_stage.tres"),
+	&"HUNT_KARUON": preload("res://data/stages/hunt_karuon_stage.tres"),
 }
 
 static func get_stage(stage_id: StringName) -> StageData:

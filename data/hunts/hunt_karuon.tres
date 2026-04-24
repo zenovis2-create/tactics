@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="HuntData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/hunt_data.gd" id="1_hunt"]
+
+[resource]
+script = ExtResource("1_hunt")
+hunt_id = &"hunt_karuon"
+display_name = "카르온 기억 시험"
+description = "최종 종길을 별도 회상 전장으로 다시 읽는 첫 기억 시험."
+unlock_condition_flag = "flag_ch10_complete"
+stage_id = &"HUNT_KARUON"
+difficulty = 5
+recommended_level = 16
+reward_memory_fragment = "mem_frag_karuon_trial"
+reward_evidence = Array[String](["flag_evidence_karuon_bell_resonance"])
+reward_materials = Array[Dictionary]([{
+"material_id": &"memory_thread",
+"count": 2
+}, {
+"material_id": &"command_plate",
+"count": 1
+}])
+reward_gold = 1000

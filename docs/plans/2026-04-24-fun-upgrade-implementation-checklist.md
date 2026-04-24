@@ -266,14 +266,14 @@ Verification:
 
 ### 7.1 First memory trial
 
-- [ ] Pick one target boss first: recommended Saria or Karuon.
-- [ ] Add recall/memory trial entry using existing recall/hunt infrastructure.
-- [ ] Ensure it cannot corrupt main campaign progression.
+- [x] Pick one target boss first: recommended Saria or Karuon.
+- [x] Add recall/memory trial entry using existing recall/hunt infrastructure.
+- [x] Ensure it cannot corrupt main campaign progression.
 
 Verification:
 
-- [ ] `recall_hunt_runner.gd` or related recall runner passes.
-- [ ] `save_load_core_loop_runner.gd` passes.
+- [x] `recall_hunt_runner.gd` or related recall runner passes.
+- [x] `save_load_core_loop_runner.gd` passes.
 
 ### 7.2 Expand to major bosses
 
