@@ -16,7 +16,7 @@ func _run() -> void:
 	var progression := ProgressionData.new()
 	progression.flags["flag_ch08_complete"] = true
 	progression.flags["flag_ch10_complete"] = true
-	progression.unlocked_hunt_ids = [&"hunt_basil", &"hunt_lete", &"hunt_karuon"]
+	progression.unlocked_hunt_ids = [&"hunt_basil", &"hunt_lete", &"hunt_melkion", &"hunt_karuon"]
 
 	var controller := CampController.new()
 	root.add_child(controller)
@@ -27,15 +27,15 @@ func _run() -> void:
 		return _fail("Recall hunt runner expected CampData from enter_camp.")
 	if not camp_data.unlocked_axes.has(&"recall"):
 		return _fail("Recall axis should unlock from ch08 onward.")
-	if camp_data.recall_hunt_entries.size() != 4:
-		return _fail("Recall hunt snapshot should expose all configured hunt entries including first Karuon memory trial.")
+	if camp_data.recall_hunt_entries.size() != 5:
+		return _fail("Recall hunt snapshot should expose all configured major boss memory trials.")
 
 	var unlocked_ids: Array[String] = []
 	for entry in camp_data.recall_hunt_entries:
 		if bool(entry.get("unlocked", false)):
 			unlocked_ids.append(String(entry.get("hunt_id", "")))
-	if not unlocked_ids.has("hunt_basil") or not unlocked_ids.has("hunt_lete") or not unlocked_ids.has("hunt_karuon"):
-		return _fail("Recall hunt snapshot should mark unlocked hunts from progression, including Karuon memory trial.")
+	if not unlocked_ids.has("hunt_basil") or not unlocked_ids.has("hunt_lete") or not unlocked_ids.has("hunt_melkion") or not unlocked_ids.has("hunt_karuon"):
+		return _fail("Recall hunt snapshot should mark unlocked major boss memory trials from progression.")
 	if unlocked_ids.has("hunt_saria"):
 		return _fail("Recall hunt snapshot should keep locked hunts hidden until unlocked.")
 
@@ -43,10 +43,10 @@ func _run() -> void:
 	if controller.get_camp_data().active_axis != &"recall":
 		return _fail("CampController should switch active axis to recall.")
 
-	if not controller.select_hunt(&"hunt_karuon"):
-		return _fail("CampController should allow selecting the unlocked Karuon memory trial.")
-	if controller.get_selected_hunt_stage_id() != &"HUNT_KARUON":
-		return _fail("Selected Karuon memory trial should expose its target stage id without reusing campaign CH10_05.")
+	if not controller.select_hunt(&"hunt_melkion"):
+		return _fail("CampController should allow selecting the unlocked Melkion memory trial.")
+	if controller.get_selected_hunt_stage_id() != &"HUNT_MELKION":
+		return _fail("Selected Melkion memory trial should expose its target stage id without reusing campaign CH09B_05.")
 	if controller.select_hunt(&"hunt_saria"):
 		return _fail("CampController should reject selecting a locked hunt.")
 
@@ -58,7 +58,7 @@ func _run() -> void:
 	await process_frame
 
 	var hud_snapshot: Dictionary = hud.get_layout_snapshot()
-	if int(hud_snapshot.get("recall_entry_count", 0)) != 4:
+	if int(hud_snapshot.get("recall_entry_count", 0)) != 5:
 		return _fail("CampHud snapshot should expose recall entry count.")
 	if String(hud_snapshot.get("active_tab", "")) != "recall":
 		return _fail("CampHud should switch to recall tab.")
@@ -67,11 +67,11 @@ func _run() -> void:
 	if recall_panel == null or not recall_panel.has_method("get_layout_snapshot"):
 		return _fail("CampHud should host a recall panel with snapshot support.")
 	var recall_snapshot: Dictionary = recall_panel.get_layout_snapshot()
-	if int(recall_snapshot.get("entry_count", 0)) != 4:
-		return _fail("Recall panel should render all configured hunts including Karuon memory trial.")
+	if int(recall_snapshot.get("entry_count", 0)) != 5:
+		return _fail("Recall panel should render all configured major boss memory trials.")
 	var recall_unlocked: Array = recall_snapshot.get("unlocked_ids", [])
-	if not recall_unlocked.has("hunt_basil") or not recall_unlocked.has("hunt_lete") or not recall_unlocked.has("hunt_karuon"):
-		return _fail("Recall panel should mark the unlocked hunts as selectable including Karuon memory trial.")
+	if not recall_unlocked.has("hunt_basil") or not recall_unlocked.has("hunt_lete") or not recall_unlocked.has("hunt_melkion") or not recall_unlocked.has("hunt_karuon"):
+		return _fail("Recall panel should mark the unlocked major boss memory trials as selectable.")
 
 	print("[PASS] recall_hunt_runner: recall hunt unlock, selection, and UI snapshot checks passed.")
 	quit(0)

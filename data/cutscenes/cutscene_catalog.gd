@@ -72,6 +72,8 @@ const HUNT_TEXT_CUTSCENES := {
     &"hunt_saria_return": {"header": "", "lines": ["기도실의 마지막 합창이 꺼지고, 남은 이름들은 더 이상 줄 속에서 지워지지 않는다."]},
     &"hunt_lete_launch": {"header": "회상 토벌전 — 레테.", "lines": ["흑견 추격대가 사라지기 전에 마지막 사냥길을 끊는다.", "레테는 이번에도 추격을 마당 전체에 흩뿌리려 한다."]},
     &"hunt_lete_return": {"header": "", "lines": ["사냥의 마지막 흔적이 회수되고, 흑견 마당은 더 이상 누구의 발자국도 재촉하지 못한다."]},
+    &"hunt_melkion_launch": {"header": "기억 시험 — 멜키온.", "lines": ["본편의 심연 전투가 아니라, 기록 개정 압박만 떼어 낸 회상 시험이다.", "Archive Lectern을 먼저 안정화하고 멜키온의 rewrite 흐름을 다시 읽는다."]},
+    &"hunt_melkion_return": {"header": "", "lines": ["개정 문장이 닫히고, 사라지던 기록은 다시 읽을 수 있는 이름으로 남는다."]},
     &"hunt_karuon_launch": {"header": "기억 시험 — 카르온.", "lines": ["본편의 마지막 전투가 아니라, 종길 압박만 떼어 낸 회상 시험이다.", "카르온의 종소리를 다시 읽고 Anchor Chain과 Bell Dais의 의미를 확인한다."]},
     &"hunt_karuon_return": {"header": "", "lines": ["종길의 잔향이 낮아지고, 마지막 이름을 잃지 않는 법만 기록으로 남는다."]},
 }

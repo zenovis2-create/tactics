@@ -1,0 +1,78 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
+[ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
+[ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
+[ext_resource type="Resource" path="res://data/units/enemy_melkion_ch09b_05.tres" id="4_enemy_a"]
+[ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
+[ext_resource type="Resource" path="res://data/objects/ch09b_05_archive_lectern.tres" id="6_object_a"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_id = &"HUNT_MELKION"
+stage_title = "기억 시험: 멜키온"
+grid_size = Vector2i(9, 8)
+cell_size = Vector2i(64, 64)
+ally_units = [ExtResource("2_ally_a"), ExtResource("3_ally_b")]
+enemy_units = [ExtResource("4_enemy_a"), ExtResource("5_enemy_b")]
+ally_spawns = [Vector2i(1, 6), Vector2i(2, 6)]
+enemy_spawns = [Vector2i(6, 1), Vector2i(7, 1)]
+blocked_cells = [Vector2i(2, 2), Vector2i(3, 3), Vector2i(4, 3), Vector2i(5, 4)]
+terrain_move_costs = {
+Vector2i(1, 1): 2,
+Vector2i(4, 2): 2,
+Vector2i(6, 6): 2
+}
+terrain_types = {
+Vector2i(1, 1): &"memory_abyss",
+Vector2i(4, 2): &"archive_core",
+Vector2i(6, 6): &"memory_abyss"
+}
+terrain_defense_bonuses = {
+Vector2i(1, 1): 1,
+Vector2i(4, 2): 1,
+Vector2i(6, 6): 1
+}
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(6, 1),
+"radius": 0,
+"effect": "회상 심연의 가장자리가 멜키온의 기록 사선을 늘린다."
+}, {
+"type": "destructible",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "개정 봉인을 부수면 archive rewrite 압박이 느려진다."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(6, 2),
+"radius": 0,
+"effect": "식경 통로가 좁아져 기억 시험의 진입 순서를 고정한다."
+}]
+optional_objectives = [{
+"id": "hunt_melkion_truth_revealed",
+"description": "기록 심연이 닫히기 전에 멜키온의 개정 기억을 드러낸다.",
+"condition": "flag:hunt_melkion_truth_revealed",
+"star_value": 2
+}]
+turn_limit = 12
+interactive_objects = [ExtResource("6_object_a")]
+win_condition = &"defeat_all_enemies"
+loss_condition = &"all_allies_defeated"
+rule_template_id = &"melkion_archive_relief"
+rule_template_modifiers = {
+"control_object_id": "ch09b_05_archive_lectern",
+"relief_flag": "hunt_melkion_archive_stabilized",
+"relief_tracking_flag": "hunt_melkion_archive_destabilized",
+"relief_state_id": &"hunt_archive_stable_relief",
+"objective_after_relief": "memory archive center 유지를 우선하고 남은 rewrite lane만 정리한다.",
+"hint_after_relief": "회상 archive tile은 안정화되었다. flank revision lane만 경계하며 멜키온의 rewrite를 늦춘다.",
+"boss_cooldowns": {"truth_rewrite": 3, "true_read": 3},
+"clear_terrain_cells": [Vector2i(4, 2)],
+"clear_statuses": [&"mark"]
+}
+stage_objective_hint = "멜키온 기억 시험은 본편 CH09B_05가 아닌 별도 회상 전장이다. Archive Lectern으로 개정 압박을 먼저 안정화한다."
+landmark_labels = PackedStringArray("남쪽 기억 절벽", "회상 기록 심연", "식경 기록 통로")
+start_cutscene_id = &"hunt_melkion_launch"
+clear_cutscene_id = &"hunt_melkion_return"
+next_destination_summary = ""

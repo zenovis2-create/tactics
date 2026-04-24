@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="HuntData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/hunt_data.gd" id="1_hunt"]
+
+[resource]
+script = ExtResource("1_hunt")
+hunt_id = &"hunt_melkion"
+display_name = "멜키온 기억 시험"
+description = "기록 심연의 개정 압박을 별도 회상 전장으로 다시 읽는 기억 시험."
+unlock_condition_flag = "flag_ch09b_complete"
+stage_id = &"HUNT_MELKION"
+difficulty = 5
+recommended_level = 15
+reward_memory_fragment = "mem_frag_melkion_trial"
+reward_evidence = Array[String](["flag_evidence_melkion_archive_resonance"])
+reward_materials = Array[Dictionary]([{
+"material_id": &"archive_ash",
+"count": 2
+}, {
+"material_id": &"memory_thread",
+"count": 1
+}])
+reward_gold = 900

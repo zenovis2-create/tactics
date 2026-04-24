@@ -277,16 +277,16 @@ Verification:
 
 ### 7.2 Expand to major bosses
 
-- [ ] Basil memory trial.
-- [ ] Saria memory trial.
-- [ ] Lete memory trial.
-- [ ] Melkion memory trial.
-- [ ] Karuon memory trial.
+- [x] Basil memory trial.
+- [x] Saria memory trial.
+- [x] Lete memory trial.
+- [x] Melkion memory trial.
+- [x] Karuon memory trial.
 
 Verification:
 
-- [ ] Recall runner covers all entries.
-- [ ] Final gate passes.
+- [x] Recall runner covers all entries.
+- [x] Final gate passes.
 
 ---
 

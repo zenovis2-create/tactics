@@ -10,6 +10,7 @@ const HuntCatalog = {
     &"hunt_basil": preload("res://data/hunts/hunt_basil.tres"),
     &"hunt_saria": preload("res://data/hunts/hunt_saria.tres"),
     &"hunt_lete": preload("res://data/hunts/hunt_lete.tres"),
+    &"hunt_melkion": preload("res://data/hunts/hunt_melkion.tres"),
     &"hunt_karuon": preload("res://data/hunts/hunt_karuon.tres"),
 }
 
