@@ -14,14 +14,14 @@
 
 ## Phase 0 — Baseline and guardrails
 
-- [ ] Confirm current branch state.
+- [x] Confirm current branch state.
   - Command: `git status --short --branch`
-- [ ] Confirm final gate starts green.
+- [x] Confirm final gate starts green.
   - Command: `python3 /tmp/tactics_final_gate.py`
   - Expected: `TOTAL=37 PASS=37 FAIL=0`
-- [ ] Create or confirm a safety branch/tag before implementation.
+- [x] Create or confirm a safety branch/tag before implementation.
   - Current known backup: `backup/pre-release-split-20260424-142928`
-- [ ] Confirm target files for first slice.
+- [x] Confirm target files for first slice.
   - Likely files:
     - `scripts/battle/battle_controller.gd`
     - `scripts/battle/battle_hud.gd`
@@ -35,37 +35,37 @@
 
 ### 1.1 Runtime state model
 
-- [ ] Add minimal boss lock state storage.
+- [x] Add minimal boss lock state storage.
   - File: `scripts/battle/battle_controller.gd`
   - Add dictionary like `boss_lock_state_by_unit`.
-- [ ] Add helper to create lock state.
+- [x] Add helper to create lock state.
   - Candidate function: `_start_boss_lock(unit, action_id, display_name, countdown, locks_required, failure_text, break_text)`
-- [ ] Add helper to clear lock state on battle end/stage reset.
-- [ ] Add snapshot helper for runner/HUD.
+- [x] Add helper to clear lock state on battle end/stage reset.
+- [x] Add snapshot helper for runner/HUD.
   - Candidate: `get_boss_lock_state_snapshot()`
 
 Verification:
 
-- [ ] Run parse check for changed scripts.
-- [ ] Add initial runner assertion that lock state can be created and read.
+- [x] Run parse check for changed scripts.
+- [x] Add initial runner assertion that lock state can be created and read.
 
 ### 1.2 Lock progress events
 
-- [ ] Add helper to increment lock progress.
+- [x] Add helper to increment lock progress.
   - Candidate: `_progress_boss_lock(unit, lock_type, amount := 1)`
-- [ ] Support first lock types:
+- [x] Support first lock types:
   - `strike`
   - `skill`
   - `object`
   - `name`
   - `cleanse`
-- [ ] Mark `broken = true` when all requirements are met.
-- [ ] Ensure excess progress is capped at required amount.
+- [x] Mark `broken = true` when all requirements are met.
+- [x] Ensure excess progress is capped at required amount.
 
 Verification:
 
-- [ ] Runner asserts partial progress.
-- [ ] Runner asserts completed lock becomes broken.
+- [x] Runner asserts partial progress.
+- [x] Runner asserts completed lock becomes broken.
 
 ### 1.3 Hook strike/skill/object/name/cleanse into progress
 

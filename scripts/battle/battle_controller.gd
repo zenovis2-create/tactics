@@ -144,6 +144,7 @@ var enemy_attack_bonus_by_unit: Dictionary = {}
 var enemy_movement_bonus_by_unit: Dictionary = {}  ## boss phase movement bonuses
 var boss_event_history: Array[String] = []
 var boss_phase_by_unit: Dictionary = {}  ## unit instance_id → current phase StringName
+var boss_lock_state_by_unit: Dictionary = {}  ## unit instance_id → boss lock break runtime state
 var last_support_attack_details: Dictionary = {}
 var last_damage_share_details: Dictionary = {}
 var last_charm_forced_details: Dictionary = {}
@@ -230,6 +231,7 @@ func bootstrap_battle() -> void:
     enemy_movement_bonus_by_unit.clear()
     boss_event_history.clear()
     boss_phase_by_unit.clear()
+    boss_lock_state_by_unit.clear()
     last_support_attack_details.clear()
     last_damage_share_details.clear()
     enemy_damage_multiplier_by_unit.clear()
@@ -4652,6 +4654,82 @@ func _apply_boss_command_buff(boss_unit: UnitActor) -> void:
 
 func _record_boss_event(event_name: String) -> void:
     boss_event_history.append(event_name)
+
+func _start_boss_lock(boss_unit: UnitActor, action_id: StringName, display_name: String, countdown: int, locks_required: Dictionary, failure_text: String = "", break_text: String = "") -> Dictionary:
+    if boss_unit == null or not is_instance_valid(boss_unit):
+        return {}
+    var unit_instance_id: int = boss_unit.get_instance_id()
+    var progress: Dictionary = {}
+    for lock_type in locks_required.keys():
+        progress[String(lock_type)] = 0
+    var state: Dictionary = {
+        "unit_instance_id": unit_instance_id,
+        "unit_id": boss_unit.unit_data.unit_id if boss_unit.unit_data != null else &"",
+        "action_id": action_id,
+        "display_name": display_name,
+        "countdown": max(0, countdown),
+        "locks_required": locks_required.duplicate(true),
+        "locks_progress": progress,
+        "failure_text": failure_text,
+        "break_text": break_text,
+        "broken": false
+    }
+    boss_lock_state_by_unit[unit_instance_id] = state
+    _record_boss_event("boss_lock_started_%s" % String(action_id))
+    return state.duplicate(true)
+
+func _clear_boss_lock(boss_unit: UnitActor) -> void:
+    if boss_unit == null or not is_instance_valid(boss_unit):
+        return
+    boss_lock_state_by_unit.erase(boss_unit.get_instance_id())
+
+func _clear_all_boss_locks() -> void:
+    boss_lock_state_by_unit.clear()
+
+func get_boss_lock_state_snapshot() -> Dictionary:
+    var snapshot: Dictionary = {}
+    for unit_instance_id in boss_lock_state_by_unit.keys():
+        var state: Dictionary = boss_lock_state_by_unit.get(unit_instance_id, {})
+        snapshot[unit_instance_id] = state.duplicate(true)
+    return snapshot
+
+func _get_boss_lock_state(boss_unit: UnitActor) -> Dictionary:
+    if boss_unit == null or not is_instance_valid(boss_unit):
+        return {}
+    return boss_lock_state_by_unit.get(boss_unit.get_instance_id(), {}).duplicate(true)
+
+func _progress_boss_lock(boss_unit: UnitActor, lock_type: StringName, amount: int = 1) -> Dictionary:
+    if boss_unit == null or not is_instance_valid(boss_unit):
+        return {}
+    var unit_instance_id: int = boss_unit.get_instance_id()
+    if not boss_lock_state_by_unit.has(unit_instance_id):
+        return {}
+    var state: Dictionary = boss_lock_state_by_unit.get(unit_instance_id, {})
+    var type_key: String = String(lock_type)
+    var locks_required: Dictionary = state.get("locks_required", {})
+    if not locks_required.has(type_key):
+        return state.duplicate(true)
+    var locks_progress: Dictionary = state.get("locks_progress", {})
+    var required_amount: int = max(0, int(locks_required.get(type_key, 0)))
+    var current_amount: int = max(0, int(locks_progress.get(type_key, 0)))
+    locks_progress[type_key] = min(required_amount, current_amount + max(0, amount))
+    state["locks_progress"] = locks_progress
+    state["broken"] = _is_boss_lock_complete(state)
+    boss_lock_state_by_unit[unit_instance_id] = state
+    if bool(state.get("broken", false)):
+        _record_boss_event("boss_lock_broken_%s" % String(state.get("action_id", &"")))
+    return state.duplicate(true)
+
+func _is_boss_lock_complete(state: Dictionary) -> bool:
+    var locks_required: Dictionary = state.get("locks_required", {})
+    var locks_progress: Dictionary = state.get("locks_progress", {})
+    if locks_required.is_empty():
+        return false
+    for lock_type in locks_required.keys():
+        var type_key: String = String(lock_type)
+        if int(locks_progress.get(type_key, 0)) < int(locks_required.get(type_key, 0)):
+            return false
+    return true
 
 func _check_boss_phase_transitions() -> void:
     ## Check all boss units for HP-threshold phase transitions.
