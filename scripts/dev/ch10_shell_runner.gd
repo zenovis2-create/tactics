@@ -63,6 +63,9 @@ func _run() -> void:
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
         if String(stage_snapshot.get("mode", "")) == "briefing":
+            if stage_id == &"CH10_05" and not _assert_ch10_final_briefing_planning_text(stage_snapshot):
+                quit(1)
+                return
             main.advance_campaign_step()
             await process_frame
             await process_frame
@@ -144,6 +147,18 @@ func _run() -> void:
     await _cleanup_root_children()
     print("[PASS] CH10 shell runner reached CH10 intro, CH10_01~05 flow, final resolution, and postgame return-to-title NG+ unlock.")
     quit(0)
+
+func _assert_ch10_final_briefing_planning_text(snapshot: Dictionary) -> bool:
+    var body: String = String(snapshot.get("panel_body", ""))
+    var required_keywords: Array[String] = ["전장 위협", "배치 힌트", "첫 턴 경고", "대응 힌트"]
+    for keyword in required_keywords:
+        if body.find(keyword) == -1:
+            push_error("CH10_05 briefing body is missing planning keyword: %s" % keyword)
+            return false
+    if body.length() < 80:
+        push_error("CH10_05 briefing body should include enough planning copy, got %d chars." % body.length())
+        return false
+    return true
 
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
     var stage_id_text: String = String(stage_id)

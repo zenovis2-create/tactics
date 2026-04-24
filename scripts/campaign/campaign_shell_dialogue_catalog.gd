@@ -168,6 +168,10 @@ const CH06_BRIEFING := {
 		"Valtor's civilian escapes",
 		"Reduce fort resistance to 0"
 	],
+	"primary_threat": "발토르가 중앙 성문을 기준으로 광역 압박을 고정한다.",
+	"formation_hint": "방패 유닛을 성문 전열에 세우고, 회복/원거리 유닛은 화로 밖 후열에 둔다.",
+	"first_turn_warning": "첫 턴 무리한 중앙 진입은 포위와 화로 피해를 동시에 받는다.",
+	"useful_counterplay": "측면 포대선을 먼저 낮추면 보스 접근 전 피해 교환을 줄일 수 있다.",
 	"brief_text": "Valtor's iron keep is the last wall between the campaign and Ellyor. The siege math is simple — break it before it breaks you."
 }
 
@@ -209,6 +213,10 @@ const CH07_BRIEFING := {
 		"Recruit Mira",
 		"Collect city seal"
 	],
+	"primary_threat": "검열대가 시장 접근로를 덮고 이름 말소 압박을 누적시킨다.",
+	"formation_hint": "리안을 전열 중앙에 두고, 미라 접근선에는 기동 유닛을 남겨 둔다.",
+	"first_turn_warning": "첫 턴부터 시장 중앙으로 벌어지면 척후병 사격선이 후열을 끊는다.",
+	"useful_counterplay": "이름 부름과 시민 경로 확보를 먼저 처리하면 보스 압박이 늦어진다.",
 	"brief_text": "Ellyor does not look like a battlefield until the squad steps into the queue. Forgetting has become city policy, and the gate is where that policy starts biting back."
 }
 
@@ -230,6 +238,10 @@ const CH08_BRIEFING := {
 		"Lete defects alive",
 		"No black-hound casualties"
 	],
+	"primary_threat": "검은 사냥개가 폐허 엄폐를 타고 후열을 추적한다.",
+	"formation_hint": "중앙에 방어선을 세우고, 은신/기동 유닛은 측면 시야를 끊는 데 쓴다.",
+	"first_turn_warning": "첫 턴 산개가 과하면 레테가 약한 유닛을 고립시킨다.",
+	"useful_counterplay": "레테를 죽이지 않고 압박을 낮추려면 중앙 결투선과 생존 루트를 같이 관리한다.",
 	"brief_text": "This is not a march anymore. It is Lete's last hunt, and every ruined wall in the forest is part of the trap she wants the squad to spring."
 }
 
@@ -251,6 +263,10 @@ const CH09A_BRIEFING := {
 		"카일의 증언 확보",
 		"아군 사망 없음"
 	],
+	"primary_threat": "검열 안뜰의 중첩 압박이 증언 확보 전 접근선을 끊는다.",
+	"formation_hint": "전열은 남쪽 병목을 막고, 기동 유닛은 증언문 쪽으로 짧게 진입한다.",
+	"first_turn_warning": "첫 턴 중앙 노출은 척후병과 보스 압박을 동시에 부른다.",
+	"useful_counterplay": "증언 확보를 우선하면 최종 병목에서 선택지가 늘어난다.",
 	"brief_text": "카일의 방어선은 아직 서 있지만, 이제는 무엇이 살아남을 수 있는지를 가르는 필터가 되었다. 이 전투에서 부수는 것은 방어선 하나가 아니라, 사람을 지우는 기준 그 자체다."
 }
 
@@ -272,6 +288,10 @@ const CH09B_BRIEFING := {
 		"Melkion's truth revealed",
 		"Noah survives"
 	],
+	"primary_threat": "멜키온이 장거리 기록선과 재배치 압박으로 전투 흐름을 바꾼다.",
+	"formation_hint": "노아를 보호 가능한 후열에 두고, 전열은 루트 선반의 긴 사선을 끊는다.",
+	"first_turn_warning": "첫 턴 직선 진입은 기록선 사격과 보스 재편성에 걸린다.",
+	"useful_counterplay": "중앙 핵심 노드를 먼저 흔들면 멜키온의 전장 편집 압박이 낮아진다.",
 	"brief_text": "The root archive is not trying to kill the squad quickly. It is trying to decide which version of the battle is allowed to remain when it ends."
 }
 
@@ -314,6 +334,10 @@ const CH10_05_BRIEFING := {
 		"모든 아군 이름 부름",
 		"아군 사망 없음"
 	],
+	"primary_threat": "종단과 카르온이 최종 접근로를 길게 묶어 후열까지 압박한다.",
+	"formation_hint": "방패 유닛은 중앙 성채 입구에, 이름 부름 담당은 닻 사슬 접근선에 둔다.",
+	"first_turn_warning": "첫 턴 종길로 곧장 밀면 사정거리 노출과 망각 압박이 겹친다.",
+	"useful_counterplay": "닻 사슬을 먼저 확보하고 이름 부름을 순서대로 쓰면 최종 상승로가 안정된다.",
 	"brief_text": "닻 사슬은 마지막 진입의 형태를 결정한다. 이 제어점을 확보해야 종의 압박선을 끊고 최종 상승을 자기 흐름으로 바꿀 수 있다."
 }
 

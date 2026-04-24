@@ -181,27 +181,27 @@ Verification:
 
 ### 4.1 Briefing threat fields
 
-- [ ] Add or reuse briefing payload fields:
+- [x] Add or reuse briefing payload fields:
   - `primary_threat`
   - `formation_hint`
   - `first_turn_warning`
   - `useful_counterplay`
-- [ ] Add copy for CH06_05 through CH10_05 first.
+- [x] Add copy for CH06_05 through CH10_05 first.
 
 Verification:
 
-- [ ] Shell runners CH06 through CH10 pass.
-- [ ] CH10_05 briefing still advances to battle.
+- [x] Shell runners CH06 through CH10 pass.
+- [x] CH10_05 briefing still advances to battle.
 
 ### 4.2 Briefing UI assertion
 
-- [ ] Runner asserts briefing body includes at least one threat/counterplay hint for CH10_05.
-- [ ] No overflow/empty body regression.
+- [x] Runner asserts briefing body includes at least one threat/counterplay hint for CH10_05.
+- [x] No overflow/empty body regression.
 
 Verification:
 
-- [ ] `ch10_shell_runner.gd` passes.
-- [ ] `campaign_save_to_title_load_runner.gd` passes if campaign panel payload changed.
+- [x] `ch10_shell_runner.gd` passes.
+- [x] `campaign_save_to_title_load_runner.gd` passes if campaign panel payload changed.
 
 ---
 

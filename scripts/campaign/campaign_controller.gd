@@ -330,6 +330,10 @@ func _build_briefing_body(briefing: Dictionary) -> String:
     if not brief_text.is_empty():
         lines.append(brief_text)
     lines.append("턴 제한: %d" % int(briefing.get("turn_limit", 20)))
+    _append_briefing_planning_line(lines, "전장 위협", briefing.get("primary_threat", ""))
+    _append_briefing_planning_line(lines, "배치 힌트", briefing.get("formation_hint", ""))
+    _append_briefing_planning_line(lines, "첫 턴 경고", briefing.get("first_turn_warning", ""))
+    _append_briefing_planning_line(lines, "대응 힌트", briefing.get("useful_counterplay", ""))
     var optional_objectives: Array[String] = _variant_to_string_array(briefing.get("optional_objectives", []))
     if not optional_objectives.is_empty():
         lines.append("선택 목표:")
@@ -337,11 +341,21 @@ func _build_briefing_body(briefing: Dictionary) -> String:
             lines.append("- %s" % objective)
     return "\n".join(lines)
 
+func _append_briefing_planning_line(lines: Array[String], label: String, value: Variant) -> void:
+    var text: String = String(value).strip_edges()
+    if text.is_empty():
+        return
+    lines.append("%s: %s" % [label, text])
+
 func _build_briefing_payload(briefing: Dictionary) -> Dictionary:
     return {
         "enemy_intel": _variant_to_string_array(briefing.get("enemy_intel", [])),
         "terrain_summary": _variant_to_string_array(briefing.get("terrain_summary", [])),
         "optional_objectives": _variant_to_string_array(briefing.get("optional_objectives", [])),
+        "primary_threat": String(briefing.get("primary_threat", "")),
+        "formation_hint": String(briefing.get("formation_hint", "")),
+        "first_turn_warning": String(briefing.get("first_turn_warning", "")),
+        "useful_counterplay": String(briefing.get("useful_counterplay", "")),
         "turn_limit": int(briefing.get("turn_limit", 20))
     }
 
@@ -1061,6 +1075,10 @@ func _build_panel_payload(mode: String) -> Dictionary:
             "enemy_intel": briefing_payload.get("enemy_intel", []),
             "terrain_summary": briefing_payload.get("terrain_summary", []),
             "optional_objectives": briefing_payload.get("optional_objectives", []),
+            "primary_threat": briefing_payload.get("primary_threat", ""),
+            "formation_hint": briefing_payload.get("formation_hint", ""),
+            "first_turn_warning": briefing_payload.get("first_turn_warning", ""),
+            "useful_counterplay": briefing_payload.get("useful_counterplay", ""),
             "turn_limit": briefing_payload.get("turn_limit", 20)
         }
     if mode == CampaignState.MODE_CAMP:
