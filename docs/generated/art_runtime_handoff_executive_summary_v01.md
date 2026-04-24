@@ -215,6 +215,8 @@ Current `Rian` constrained follow-up:
 - Asset Engine + ComfyUI verification found the imported `*_anchor_derived`
   sheets are useful concept/layer-intent sources, but not runtime-ready alpha
   layers
+- existing layer alpha proof found alpha separation alone is not enough because
+  generated equipment sheets do not align to the accepted Rian body/reference
 
 Current review:
 
@@ -224,6 +226,7 @@ Current review:
 - [rian_masked_overlay_baseline_review_v01.md](/Volumes/AI/tactics/docs/generated/rian_masked_overlay_baseline_review_v01.md)
 - [rian_weapon_overlay_cleanup_checkpoint_v01.md](/Volumes/AI/tactics/docs/generated/rian_weapon_overlay_cleanup_checkpoint_v01.md)
 - [rian_asset_engine_comfy_verification_v01.md](/Volumes/AI/tactics/docs/generated/rian_asset_engine_comfy_verification_v01.md)
+- [rian_existing_layer_alpha_proof_review_v01.md](/Volumes/AI/tactics/docs/generated/rian_existing_layer_alpha_proof_review_v01.md)
 
 Current `Serin` pilot status:
 

@@ -153,6 +153,16 @@ The correct next step is:
 3. validate alignment by recompositing over the accepted Rian base/reference
 4. only then decide whether any layer is production-ready
 
+Follow-up alpha proof:
+
+- [rian_existing_layer_alpha_proof_review_v01.md](/Volumes/AI/tactics/docs/generated/rian_existing_layer_alpha_proof_review_v01.md)
+
+Result:
+
+- alpha cleanup works technically
+- recomposite alignment fails for current production use
+- existing generated layer sheets remain concept sources, not runtime overlays
+
 ## Production Rule
 
 Do not promote any current `*_anchor_derived.png` source as runtime truth

@@ -1,0 +1,47 @@
+{
+  "reference": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/legacy_reference/rian_8dir_sheet_source_v02.png",
+  "layers": {
+    "weapon_overlay": {
+      "source": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/weapon_overlay/rian_weapon_overlay_8dir_sheet_source_v02_anchor_derived.png",
+      "alpha_sheet": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/rian_weapon_overlay_concept_alpha_sheet_v01.png",
+      "runtime_frames": [
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_00.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_01.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_02.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_03.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_04.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_05.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_06.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/weapon_overlay/rian_weapon_overlay_concept_alpha_07.png"
+      ],
+      "alpha_bbox": [
+        235,
+        63,
+        1300,
+        953
+      ]
+    },
+    "upper_armor_overlay": {
+      "source": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/upper_armor_overlay/rian_upper_armor_overlay_8dir_sheet_source_v03_lighter.png",
+      "alpha_sheet": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/rian_upper_armor_overlay_concept_alpha_sheet_v01.png",
+      "runtime_frames": [
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_00.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_01.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_02.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_03.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_04.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_05.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_06.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/runtime_frames/upper_armor_overlay/rian_upper_armor_overlay_concept_alpha_07.png"
+      ],
+      "alpha_bbox": [
+        58,
+        101,
+        1453,
+        890
+      ]
+    }
+  },
+  "recomposite": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/existing_layer_alpha_proof_v01/rian_existing_layer_alpha_recomposite_v01.png",
+  "board": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/composite_preview/rian_existing_layer_alpha_proof_board_v01.png"
+}

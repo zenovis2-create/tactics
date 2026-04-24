@@ -661,6 +661,7 @@ This is the current SSOT entry point for new art-production work.
 - [rian_masked_overlay_baseline_review_v01.md](/Volumes/AI/tactics/docs/generated/rian_masked_overlay_baseline_review_v01.md)
 - [rian_weapon_overlay_cleanup_checkpoint_v01.md](/Volumes/AI/tactics/docs/generated/rian_weapon_overlay_cleanup_checkpoint_v01.md)
 - [rian_asset_engine_comfy_verification_v01.md](/Volumes/AI/tactics/docs/generated/rian_asset_engine_comfy_verification_v01.md)
+- [rian_existing_layer_alpha_proof_review_v01.md](/Volumes/AI/tactics/docs/generated/rian_existing_layer_alpha_proof_review_v01.md)
 - [serin_battle_state_pilot_design_v01.md](/Volumes/AI/tactics/docs/generated/serin_battle_state_pilot_design_v01.md)
 - [serin_battle_state_pilot_plan_v01.md](/Volumes/AI/tactics/docs/generated/serin_battle_state_pilot_plan_v01.md)
 - [serin_battle_state_pilot_review_v01.md](/Volumes/AI/tactics/docs/generated/serin_battle_state_pilot_review_v01.md)
