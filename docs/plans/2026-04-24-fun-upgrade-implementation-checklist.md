@@ -81,26 +81,26 @@ Verification:
 
 ### 1.4 Boss-specific lock definitions
 
-- [ ] CH06_05 Valgar lock:
+- [x] CH06_05 Valgar lock:
   - `strike` x1
   - `object` x1
-- [ ] CH07_05 Saria lock:
+- [x] CH07_05 Saria lock:
   - `name` x1
   - `cleanse` x1
-- [ ] CH08_05 Lete lock:
+- [x] CH08_05 Lete lock:
   - `object` x1
   - `skill` x1
-- [ ] CH09B_05 Melkion lock:
+- [x] CH09B_05 Melkion lock:
   - `object` x1
   - `name` or `skill` x1
-- [ ] CH10_05 Karuon lock:
+- [x] CH10_05 Karuon lock:
   - `object` x2
   - `name` x1
 
 Verification:
 
-- [ ] `boss_lock_break_runner.gd` covers all target bosses.
-- [ ] Existing boss runners still pass.
+- [x] `boss_lock_break_runner.gd` covers all target bosses.
+- [x] Existing boss runners still pass.
 
 ### 1.5 Broken/failure outcome
 

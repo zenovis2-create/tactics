@@ -269,6 +269,7 @@ func bootstrap_battle() -> void:
     if status_service != null:
         status_service.reset()
     _initialize_stage_specific_runtime_flags()
+    _initialize_boss_lock_definitions()
     _initialize_secret_hint_contract()
     if reward_service != null and stage_data != null:
         reward_service.record_stage_entry(stage_data.stage_id)
@@ -485,6 +486,32 @@ func _initialize_stage_specific_runtime_flags() -> void:
             battle_objective_flags["noah_survives"] = true
         _:
             pass
+
+func _initialize_boss_lock_definitions() -> void:
+    if stage_data == null:
+        return
+    var boss_unit: UnitActor = _find_primary_stage_boss()
+    if boss_unit == null:
+        return
+    match stage_data.stage_id:
+        &"CH06_05":
+            _start_boss_lock(boss_unit, &"valgar_iron_oath", "Iron Oath Break", 2, {"strike": 1, "object": 1}, "Valgar keeps the fort line locked.", "Valgar's fort line weakens.")
+        &"CH07_05":
+            _start_boss_lock(boss_unit, &"saria_forgetting_hymn", "Forgetting Hymn", 2, {"name": 1, "cleanse": 1}, "Saria's hymn keeps names blurred.", "The hymn loses its hold.")
+        &"CH08_05":
+            _start_boss_lock(boss_unit, &"lete_hound_pincer", "Hound Pincer", 2, {"object": 1, "skill": 1}, "Lete keeps the chase line closed.", "The pursuit line opens.")
+        &"CH09B_05":
+            _start_boss_lock(boss_unit, &"melkion_archive_rewrite", "Archive Rewrite", 2, {"object": 1, "name": 1}, "Melkion keeps rewriting the field.", "The archive rewrite stutters.")
+        &"CH10_05":
+            _start_boss_lock(boss_unit, &"karon_final_toll", "Final Toll", 3, {"object": 2, "name": 1}, "Every ally answers the bell.", "The bell line breaks.")
+        _:
+            pass
+
+func _find_primary_stage_boss() -> UnitActor:
+    for enemy in enemy_units:
+        if is_instance_valid(enemy) and not enemy.is_defeated() and enemy.unit_data != null and enemy.unit_data.is_boss:
+            return enemy
+    return null
 
 func _spawn_interactive_objects(objects: Array) -> void:
     for object_data in objects:

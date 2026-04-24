@@ -1,6 +1,10 @@
 extends SceneTree
 
 const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn")
+const CH06_05_STAGE = preload("res://data/stages/ch06_05_stage.tres")
+const CH07_05_STAGE = preload("res://data/stages/ch07_05_stage.tres")
+const CH08_05_STAGE = preload("res://data/stages/ch08_05_stage.tres")
+const CH09B_05_STAGE = preload("res://data/stages/ch09b_05_stage.tres")
 const CH10_05_STAGE = preload("res://data/stages/ch10_05_stage.tres")
 
 var _failed: bool = false
@@ -13,7 +17,9 @@ func _run() -> void:
         return
     if not await _assert_boss_lock_event_hooks():
         return
-    print("[PASS] boss_lock_break_runner: boss lock runtime state, progress, and event hooks are covered.")
+    if not await _assert_stage_lock_definitions():
+        return
+    print("[PASS] boss_lock_break_runner: boss lock runtime state, progress, event hooks, and stage definitions are covered.")
     quit(0)
 
 func _assert_boss_lock_state_lifecycle() -> bool:
@@ -88,8 +94,12 @@ func _assert_boss_lock_state_lifecycle() -> bool:
     battle.bootstrap_battle()
     await process_frame
     await process_frame
-    if not battle.get_boss_lock_state_snapshot().is_empty():
-        return _fail("bootstrap_battle should clear all boss lock state.")
+    if battle.get_boss_lock_state_snapshot().is_empty():
+        return _fail("bootstrap_battle should clear manual locks and then register the stage boss lock.")
+    var reset_boss = _find_boss(battle)
+    var reset_state: Dictionary = battle._get_boss_lock_state(reset_boss)
+    if StringName(reset_state.get("action_id", &"")) != &"karon_final_toll":
+        return _fail("bootstrap_battle should replace manual lock state with the stage boss lock definition.")
 
     battle.queue_free()
     await process_frame
@@ -144,6 +154,33 @@ func _assert_boss_lock_event_hooks() -> bool:
 
     battle.queue_free()
     await process_frame
+    return true
+
+func _assert_stage_lock_definitions() -> bool:
+    var cases: Array[Dictionary] = [
+        {"stage": CH06_05_STAGE, "stage_id": "CH06_05", "action_id": &"valgar_iron_oath", "locks": {"strike": 1, "object": 1}},
+        {"stage": CH07_05_STAGE, "stage_id": "CH07_05", "action_id": &"saria_forgetting_hymn", "locks": {"name": 1, "cleanse": 1}},
+        {"stage": CH08_05_STAGE, "stage_id": "CH08_05", "action_id": &"lete_hound_pincer", "locks": {"object": 1, "skill": 1}},
+        {"stage": CH09B_05_STAGE, "stage_id": "CH09B_05", "action_id": &"melkion_archive_rewrite", "locks": {"object": 1, "name": 1}},
+        {"stage": CH10_05_STAGE, "stage_id": "CH10_05", "action_id": &"karon_final_toll", "locks": {"object": 2, "name": 1}}
+    ]
+    for case in cases:
+        var battle = await _spawn_battle(case.get("stage"))
+        var boss = _find_boss(battle)
+        if boss == null:
+            return _fail("%s should spawn a boss for lock definition coverage." % String(case.get("stage_id", "unknown")))
+        var state: Dictionary = battle._get_boss_lock_state(boss)
+        if state.is_empty():
+            return _fail("%s should auto-register a boss lock definition." % String(case.get("stage_id", "unknown")))
+        if StringName(state.get("action_id", &"")) != StringName(case.get("action_id", &"")):
+            return _fail("%s boss lock action_id mismatch." % String(case.get("stage_id", "unknown")))
+        var required: Dictionary = state.get("locks_required", {})
+        var expected: Dictionary = case.get("locks", {})
+        for lock_type in expected.keys():
+            if int(required.get(String(lock_type), 0)) != int(expected.get(lock_type, 0)):
+                return _fail("%s boss lock should require %s x%d." % [String(case.get("stage_id", "unknown")), String(lock_type), int(expected.get(lock_type, 0))])
+        battle.queue_free()
+        await process_frame
     return true
 
 func _spawn_battle(stage) -> Node:
