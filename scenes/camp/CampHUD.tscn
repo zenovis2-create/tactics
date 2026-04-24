@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/camp/camp_hud.gd" id="1_camphud"]
 [ext_resource type="Script" path="res://scripts/camp/records_panel.gd" id="2_records"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadPanel.tscn" id="3_saveload"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hunt_board_panel.tscn" id="4_recall"]
 
 [node name="CampHUD" type="Control"]
 layout_mode = 3
@@ -28,6 +29,52 @@ custom_minimum_size = Vector2(0, 48)
 [node name="PanelArea" type="Control" parent="VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="forge" type="Control" parent="VBox/PanelArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="Stack" type="VBoxContainer" parent="VBox/PanelArea/forge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Heading" type="Label" parent="VBox/PanelArea/forge/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Forge"
+
+[node name="MaterialsHeading" type="Label" parent="VBox/PanelArea/forge/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Materials"
+
+[node name="MaterialsList" type="RichTextLabel" parent="VBox/PanelArea/forge/Stack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = ""
+
+[node name="RecipesHeading" type="Label" parent="VBox/PanelArea/forge/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Recipes"
+
+[node name="RecipeList" type="RichTextLabel" parent="VBox/PanelArea/forge/Stack"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = ""
 
 [node name="records" type="Control" parent="VBox/PanelArea"]
 layout_mode = 1
@@ -85,6 +132,15 @@ text = "닫기"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
 text = "다음 전투"
+
+[node name="recall" parent="VBox/PanelArea" instance=ExtResource("4_recall")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
 
 [node name="save" parent="VBox/PanelArea" instance=ExtResource("3_saveload")]
 layout_mode = 1

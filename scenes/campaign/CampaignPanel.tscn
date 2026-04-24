@@ -167,7 +167,7 @@ text = "0 new"
 
 [node name="SectionTabs" type="GridContainer" parent="Panel/Margin/Content"]
 layout_mode = 2
-columns = 4
+columns = 6
 theme_override_constants/separation = 10
 
 [node name="SummaryButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
@@ -180,10 +180,25 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Party"
 
+[node name="SkillsButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Skills"
+
 [node name="InventoryButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Inventory"
+
+[node name="ForgeButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Forge"
+
+[node name="DialogueHistoryButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Dialogue"
 
 [node name="RecordsButton" type="Button" parent="Panel/Margin/Content/SectionTabs"]
 layout_mode = 2
@@ -291,6 +306,38 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 2
 
+[node name="SupportCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
+visible = false
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SupportCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SupportCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Preview" type="TextureRect" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SupportCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+stretch_mode = 5
+expand_mode = 1
+
+[node name="HeadingLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SupportCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Support Surface"
+
+[node name="BodyLabel" type="Label" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SupportCard/Margin/Stack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = ""
+
 [node name="SlotCards" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
 layout_mode = 2
 theme_override_constants/separation = 10
@@ -338,6 +385,18 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Cycle Weapon"
 
+[node name="WeaponUnequipButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Unequip"
+
+[node name="WeaponSellButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/WeaponCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Sell"
+
 [node name="ArmorCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards"]
 layout_mode = 2
 
@@ -380,6 +439,18 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Cycle Armor"
+
+[node name="ArmorUnequipButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Unequip"
+
+[node name="ArmorSellButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/ArmorCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Sell"
 
 [node name="AccessoryCard" type="PanelContainer" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards"]
 layout_mode = 2
@@ -424,11 +495,53 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Cycle Accessory"
 
+[node name="AccessoryUnequipButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Unequip"
+
+[node name="AccessorySellButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Sell"
+
+[node name="AccessoryReforgeButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack/SlotCards/AccessoryCard/Margin/Stack"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Correct Accessory"
+
 [node name="AssignmentButton" type="Button" parent="Panel/Margin/Content/BodyStack/PartySection/PartyContent/DetailCard/Margin/DetailStack"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Assign to Sortie"
+
+[node name="SkillsSection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="SkillsHeading" type="Label" parent="Panel/Margin/Content/BodyStack/SkillsSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Skill Review"
+
+[node name="SelectedUnitLabel" type="Label" parent="Panel/Margin/Content/BodyStack/SkillsSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+text = "No party member selected."
+
+[node name="SkillList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/SkillsSection"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 
 [node name="InventorySection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
 visible = false
@@ -440,6 +553,110 @@ theme_override_font_sizes/font_size = 20
 text = "Inventory Updates"
 
 [node name="InventoryList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/InventorySection"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="InventorySellButtons" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/InventorySection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InventoryWeaponSellButton" type="Button" parent="Panel/Margin/Content/BodyStack/InventorySection/InventorySellButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "미장착 무기 판매"
+
+[node name="InventoryArmorSellButton" type="Button" parent="Panel/Margin/Content/BodyStack/InventorySection/InventorySellButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "미장착 방어구 판매"
+
+[node name="InventoryAccessorySellButton" type="Button" parent="Panel/Margin/Content/BodyStack/InventorySection/InventorySellButtons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "미장착 장신구 판매"
+
+[node name="ForgeSection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ForgeHeading" type="Label" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Forge"
+
+[node name="ForgeMaterialsLabel" type="Label" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Materials"
+
+[node name="ForgeMaterialsList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="ForgeRecipeButtons" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ForgeRecipeDetail" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="ForgeCraftButton" type="Button" parent="Panel/Margin/Content/BodyStack/ForgeSection"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Craft Selected Recipe"
+
+[node name="DialogueHistorySection" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DialogueHistoryHeading" type="Label" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Dialogue History"
+
+[node name="DialogueHistoryStack" type="VBoxContainer" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RecentHeading" type="Label" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Recent"
+
+[node name="RecentList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="SupportHeading" type="Label" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Support"
+
+[node name="SupportList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="HandoffHeading" type="Label" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Handoff"
+
+[node name="HandoffList" type="RichTextLabel" parent="Panel/Margin/Content/BodyStack/DialogueHistorySection/DialogueHistoryStack"]
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
@@ -502,3 +719,20 @@ custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Continue"
+
+[node name="WeaponSelectPopup" type="PopupMenu" parent="."]
+
+[node name="ArmorSelectPopup" type="PopupMenu" parent="."]
+
+[node name="AccessorySelectPopup" type="PopupMenu" parent="."]
+
+[node name="InventoryWeaponSelectPopup" type="PopupMenu" parent="."]
+
+[node name="InventoryArmorSelectPopup" type="PopupMenu" parent="."]
+
+[node name="InventoryAccessorySelectPopup" type="PopupMenu" parent="."]
+
+[node name="SellConfirmDialog" type="ConfirmationDialog" parent="."]
+title = "판매 확인"
+ok_button_text = "판매"
+dialog_text = "이 장비를 판매할까요?"

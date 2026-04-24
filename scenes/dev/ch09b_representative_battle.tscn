@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3]
 
-[ext_resource type="Script" path="res://scripts/dev/ch07_representative_battle_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/dev/ch09b_representative_battle_controller.gd" id="1_controller"]
 [ext_resource type="Script" path="res://scripts/battle/turn_manager.gd" id="2_turn"]
 [ext_resource type="Script" path="res://scripts/battle/path_service.gd" id="3_path"]
 [ext_resource type="Script" path="res://scripts/battle/range_service.gd" id="4_range"]
@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://scripts/battle/input_controller.gd" id="7_input"]
 [ext_resource type="PackedScene" path="res://scenes/battle/GridCursor.tscn" id="8_cursor"]
 [ext_resource type="PackedScene" path="res://scenes/battle/BattleHUD.tscn" id="9_hud"]
-[ext_resource type="Resource" path="res://data/stages/ch07_05_stage.tres" id="10_stage"]
+[ext_resource type="Resource" path="res://data/stages/ch09b_05_stage.tres" id="10_stage"]
 [ext_resource type="Script" path="res://scripts/battle/battle_board.gd" id="11_board"]
 
 [node name="BattleScene" type="Node2D"]

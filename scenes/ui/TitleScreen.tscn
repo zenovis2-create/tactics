@@ -36,13 +36,35 @@ text = "잿빛의 기억"
 layout_mode = 2
 text = "Ashen Bell"
 
+[node name="PostgameBadgeLabel" type="Label" parent="Panel/Content"]
+visible = false
+layout_mode = 2
+text = "POSTGAME"
+
+[node name="PostgameSummaryLabel" type="Label" parent="Panel/Content"]
+visible = false
+layout_mode = 2
+autowrap_mode = 2
+text = "마지막 결말과 NG+ 상태가 여기에 요약된다."
+
 [node name="NewGameButton" type="Button" parent="Panel/Content"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 text = "새 게임"
+
+[node name="NewGamePlusButton" type="Button" parent="Panel/Content"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+text = "New Game+"
 
 [node name="LoadButton" type="Button" parent="Panel/Content"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 text = "이어하기"
 disabled = true
+
+[node name="NGPlusSummaryDialog" type="ConfirmationDialog" parent="."]
+title = "NG+ Bonus Summary"
+ok_button_text = "Start New Game+"
+dialog_text = "All bond levels preserved.\nAlly roster unlocked.\nMemory fragments reset."

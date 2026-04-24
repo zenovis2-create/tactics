@@ -104,6 +104,16 @@ offset_right = 22.0
 offset_bottom = 20.0
 color = Color(0.2, 0.32549, 0.52549, 0.95)
 
+[node name="CharacterVisualRoot" type="Node2D" parent="."]
+visible = false
+
+[node name="CharacterSprite" type="Sprite2D" parent="CharacterVisualRoot"]
+position = Vector2(2, 2)
+centered = true
+scale = Vector2(0.42, 0.42)
+
+[node name="CharacterAnimationPlayer" type="AnimationPlayer" parent="CharacterVisualRoot"]
+
 [node name="TokenArt" type="TextureRect" parent="."]
 offset_left = -16.0
 offset_top = -12.0
@@ -150,6 +160,36 @@ offset_right = 12.0
 offset_bottom = -66.0
 stretch_mode = 5
 expand_mode = 1
+
+[node name="StatusBadgeBack" type="ColorRect" parent="."]
+offset_left = 14.0
+offset_top = -60.0
+offset_right = 48.0
+offset_bottom = -38.0
+visible = false
+color = Color(0.121569, 0.141176, 0.184314, 0.92)
+
+[node name="StatusBadgeIcon" type="TextureRect" parent="."]
+offset_left = 16.0
+offset_top = -58.0
+offset_right = 28.0
+offset_bottom = -46.0
+visible = false
+stretch_mode = 5
+expand_mode = 1
+
+[node name="StatusBadgeLabel" type="Label" parent="."]
+offset_left = 24.0
+offset_top = -62.0
+offset_right = 52.0
+offset_bottom = -36.0
+visible = false
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.968627, 0.972549, 0.992157, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+text = ""
 
 [node name="MarkCrosshairH" type="ColorRect" parent="."]
 offset_left = -26.0

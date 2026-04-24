@@ -47,6 +47,9 @@ script = ExtResource("11_board")
 
 [node name="Effects" type="Node2D" parent="."]
 
+[node name="BattleCamera" type="Camera2D" parent="."]
+enabled = true
+
 [node name="GridCursor" parent="." instance=ExtResource("8_cursor")]
 
 [node name="TurnManager" type="Node" parent="."]

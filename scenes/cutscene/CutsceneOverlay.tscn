@@ -29,11 +29,27 @@ anchor_right = 0.9
 anchor_bottom = 0.8
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="HeaderLabel" type="Label" parent="Content"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.788235, 0.827451, 0.929412, 0.9)
+theme_override_font_sizes/font_size = 20
+text = ""
+
+[node name="MetaLabel" type="Label" parent="Content"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.627451, 0.682353, 0.807843, 0.85)
+theme_override_font_sizes/font_size = 15
+text = ""
 
 [node name="BeatLabel" type="RichTextLabel" parent="Content"]
 layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
+fit_content = true
 text = ""
 
 [node name="SkipButton" type="Button" parent="Content"]

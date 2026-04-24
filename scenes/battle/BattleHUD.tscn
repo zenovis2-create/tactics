@@ -50,11 +50,25 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 11
 text = "PLAYER SELECT"
 
+[node name="WeatherIcon" type="Label" parent="TopBar/Margin/TopRow/MetaRow"]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+text = "☀️"
+
 [node name="ObjectiveLabel" type="Label" parent="TopBar/Margin/TopRow"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 autowrap_mode = 2
 text = "Defeat all enemies."
+
+[node name="LandmarkLabel" type="Label" parent="TopBar/Margin/TopRow"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+autowrap_mode = 2
+text = "Landmarks: West Gate • Bell Chamber"
 
 [node name="StageChip" type="PanelContainer" parent="TopBar/Margin/TopRow"]
 layout_mode = 2
@@ -127,11 +141,25 @@ theme_override_font_sizes/font_size = 9
 autowrap_mode = 2
 text = "Select a ready ally to inspect movement, attack range, and nearby objectives."
 
+[node name="ResourceCostLabel" type="Label" parent="BottomPanel/Margin/Content/SelectionCard/Padding/Stack"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 2
+text = "Skills: MP 0 / SP 0"
+
 [node name="HintLabel" type="Label" parent="BottomPanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 autowrap_mode = 2
 text = "Tap a ready ally to act."
+
+[node name="ObjectiveHintLabel" type="Label" parent="BottomPanel/Margin/Content"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 2
+text = "Hint: Secure the tower controls before pushing north."
 
 [node name="TransitionReasonLabel" type="Label" parent="BottomPanel/Margin/Content"]
 layout_mode = 2

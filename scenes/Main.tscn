@@ -1,38 +1,264 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://dhg81akwvjbq"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c6d76sdv6ndyu" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/battle/BattleScene.tscn" id="2_battle"]
-[ext_resource type="Script" path="res://scripts/campaign/campaign_controller.gd" id="3_campaign_controller"]
+[ext_resource type="Script" uid="uid://jyy5nj4yhrol" path="res://scripts/campaign/campaign_controller.gd" id="3_campaign_controller"]
 [ext_resource type="PackedScene" path="res://scenes/campaign/CampaignPanel.tscn" id="4_campaign_panel"]
-[ext_resource type="Script" path="res://scripts/audio/audio_event_router.gd" id="5_audio_router"]
-[ext_resource type="Script" path="res://scripts/audio/bgm_router.gd" id="9_bgm_router"]
+[ext_resource type="Script" uid="uid://b054w2ekd0ckp" path="res://scripts/audio/audio_event_router.gd" id="5_audio_router"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TitleScreen.tscn" id="6_title"]
 [ext_resource type="PackedScene" path="res://scenes/ui/DefeatScreen.tscn" id="7_defeat"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadPanel.tscn" id="8_saveload"]
+[ext_resource type="Script" uid="uid://ckwabp36ctl7p" path="res://scripts/audio/bgm_router.gd" id="9_bgm_router"]
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=29136758]
 script = ExtResource("1_main")
 
-[node name="BattleScene" parent="." instance=ExtResource("2_battle")]
+[node name="BattleScene" parent="." unique_id=2095175925 instance=ExtResource("2_battle")]
 
-[node name="CampaignController" type="Node" parent="."]
+[node name="CampaignController" type="Node" parent="." unique_id=1266566134]
 script = ExtResource("3_campaign_controller")
 
-[node name="AudioEventRouter" type="Node" parent="."]
+[node name="AudioEventRouter" type="Node" parent="." unique_id=1066266927]
 script = ExtResource("5_audio_router")
 
-[node name="BgmRouter" type="Node" parent="."]
+[node name="BgmRouter" type="Node" parent="." unique_id=2135354944]
 script = ExtResource("9_bgm_router")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1604308077]
 
-[node name="CampaignPanel" parent="CanvasLayer" instance=ExtResource("4_campaign_panel")]
+[node name="CampaignPanel" parent="CanvasLayer" unique_id=543446688 instance=ExtResource("4_campaign_panel")]
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=1909791533]
 layer = 64
 
-[node name="TitleScreen" parent="UILayer" instance=ExtResource("6_title")]
+[node name="TitleScreen" parent="UILayer" unique_id=989909316 instance=ExtResource("6_title")]
+offset_left = -5.0
+offset_top = 8.0
+offset_right = -5.0
+offset_bottom = 8.0
 
-[node name="DefeatScreen" parent="UILayer" instance=ExtResource("7_defeat")]
+[node name="EndingOverlay" type="Control" parent="UILayer" unique_id=40155392]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="SaveLoadPanel" parent="UILayer" instance=ExtResource("8_saveload")]
+[node name="Fade" type="ColorRect" parent="UILayer/EndingOverlay" unique_id=703342937]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.88)
+
+[node name="EndingAfterglow" type="ColorRect" parent="UILayer/EndingOverlay" unique_id=405745031]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.08, 0.04, 0.14)
+
+[node name="Center" type="CenterContainer" parent="UILayer/EndingOverlay" unique_id=772333971]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EndingStack" type="VBoxContainer" parent="UILayer/EndingOverlay/Center" unique_id=2037088185]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EndingAccent" type="ColorRect" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=1630252012]
+custom_minimum_size = Vector2(220, 4)
+layout_mode = 2
+color = Color(0.92, 0.78, 0.58, 0.94)
+
+[node name="EndingEyebrowLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=1900056689]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="TheEndLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=1037897169]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "The End"
+horizontal_alignment = 1
+
+[node name="EndingSigilLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=724152204]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="EndingPipRow" type="HBoxContainer" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=48000067]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Pip1" type="ColorRect" parent="UILayer/EndingOverlay/Center/EndingStack/EndingPipRow" unique_id=830413731]
+custom_minimum_size = Vector2(28, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="Pip2" type="ColorRect" parent="UILayer/EndingOverlay/Center/EndingStack/EndingPipRow" unique_id=1955721265]
+custom_minimum_size = Vector2(28, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="EndingMemoryRail" type="ColorRect" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=204281187]
+custom_minimum_size = Vector2(220, 3)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="EndingPhaseLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=548917696]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="EndingSourceStampLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=1280342593]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="EndingProgressLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=284237745]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="EndingOutcomeLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=631375229]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="EndingSubtitleLabel" type="Label" parent="UILayer/EndingOverlay/Center/EndingStack" unique_id=1985977064]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="CreditsOverlay" type="Control" parent="UILayer" unique_id=1284578194]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Fade" type="ColorRect" parent="UILayer/CreditsOverlay" unique_id=102546772]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.92)
+
+[node name="CreditsAfterglow" type="ColorRect" parent="UILayer/CreditsOverlay" unique_id=1667577678]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.1, 0.08, 0.14)
+
+[node name="Center" type="CenterContainer" parent="UILayer/CreditsOverlay" unique_id=776289243]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreditsStack" type="VBoxContainer" parent="UILayer/CreditsOverlay/Center" unique_id=1213042721]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CreditsAccent" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=1043288559]
+custom_minimum_size = Vector2(260, 4)
+layout_mode = 2
+color = Color(0.72, 0.78, 0.96, 0.94)
+
+[node name="CreditsTierLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=1281812649]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="CreditsEyebrow" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=971226869]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="CreditsProgressLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=116056367]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="CreditsPipRow" type="HBoxContainer" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=790283672]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Pip1" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack/CreditsPipRow" unique_id=1512022741]
+custom_minimum_size = Vector2(22, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="Pip2" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack/CreditsPipRow" unique_id=1640757540]
+custom_minimum_size = Vector2(22, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="Pip3" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack/CreditsPipRow" unique_id=1474367282]
+custom_minimum_size = Vector2(22, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="Pip4" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack/CreditsPipRow" unique_id=139916259]
+custom_minimum_size = Vector2(22, 6)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="CreditsMemoryRail" type="ColorRect" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=1547499510]
+custom_minimum_size = Vector2(260, 3)
+layout_mode = 2
+color = Color(0.25, 0.28, 0.34, 0.92)
+
+[node name="CreditsPhaseLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=166023948]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="CreditsSourceStampLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=860989042]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="CreditsRowLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=1938631242]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="CreditsOutcomeLabel" type="Label" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=1417917486]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="CreditsLabel" type="RichTextLabel" parent="UILayer/CreditsOverlay/Center/CreditsStack" unique_id=188593954]
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+horizontal_alignment = 1
+
+[node name="DefeatScreen" parent="UILayer" unique_id=1962936886 instance=ExtResource("7_defeat")]
+
+[node name="SaveLoadPanel" parent="UILayer" unique_id=759177798 instance=ExtResource("8_saveload")]

@@ -1,0 +1,106 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/meta_system_menu.gd" id="1_meta"]
+
+[node name="MetaSystemMenu" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_meta")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -240.0
+offset_right = 320.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/Content"]
+layout_mode = 2
+text = "메타 시스템"
+
+[node name="TabContainer" type="TabContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Forge" type="VBoxContainer" parent="Panel/Margin/Content/TabContainer"]
+layout_mode = 2
+name = "Forge"
+
+[node name="Label" type="Label" parent="Panel/Margin/Content/TabContainer/Forge"]
+layout_mode = 2
+text = "대장간 — 장비 강화"
+
+[node name="UpgradeBtn" type="Button" parent="Panel/Margin/Content/TabContainer/Forge"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "강화実行"
+
+[node name="EnchantTab" type="VBoxContainer" parent="Panel/Margin/Content/TabContainer"]
+layout_mode = 2
+name = "Enchant"
+
+[node name="Label" type="Label" parent="Panel/Margin/Content/TabContainer/EnchantTab"]
+layout_mode = 2
+text = "인챈트 — 속성 부여"
+
+[node name="EnchantBtn" type="Button" parent="Panel/Margin/Content/TabContainer/EnchantTab"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "인챈트実行"
+
+[node name="ReforgeTab" type="VBoxContainer" parent="Panel/Margin/Content/TabContainer"]
+layout_mode = 2
+name = "Reforge"
+
+[node name="Label" type="Label" parent="Panel/Margin/Content/TabContainer/ReforgeTab"]
+layout_mode = 2
+text = "재련 — 능력 재배분"
+
+[node name="ReforgeBtn" type="Button" parent="Panel/Margin/Content/TabContainer/ReforgeTab"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "재련実行"
+
+[node name="SigilTab" type="VBoxContainer" parent="Panel/Margin/Content/TabContainer"]
+layout_mode = 2
+name = "Sigil"
+
+[node name="Label" type="Label" parent="Panel/Margin/Content/TabContainer/SigilTab"]
+layout_mode = 2
+text = "인장 — 축복 부여"
+
+[node name="SigilBtn" type="Button" parent="Panel/Margin/Content/TabContainer/SigilTab"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "인장実行"
+
+[node name="ResultLabel" type="Label" parent="Panel/Margin/Content"]
+layout_mode = 2
+text = ""
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+text = "닫기"
