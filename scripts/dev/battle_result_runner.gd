@@ -29,11 +29,15 @@ func _run() -> void:
 		"objective",
 		"reward_entries",
 		"unit_exp_results",
+		"bonus_exp_pool",
+		"bonus_exp_results",
 		"memory_entries",
 		"evidence_entries",
 		"letter_entries",
 		"fragment_id",
 		"command_unlocked",
+		"telemetry",
+		"telemetry_summary",
 		"burden_delta",
 		"trust_delta"
 	]:
@@ -60,6 +64,15 @@ func _run() -> void:
 		if not first_exp.has(key):
 			return _fail("Unit EXP result is missing key: %s" % key)
 
+	var telemetry: Dictionary = summary.get("telemetry", {})
+	if telemetry.is_empty():
+		return _fail("Result summary should expose telemetry payload.")
+	if not telemetry.has("objective_completion_rate"):
+		return _fail("Telemetry payload should expose objective_completion_rate.")
+	var telemetry_summary: Array = summary.get("telemetry_summary", [])
+	if telemetry_summary.is_empty():
+		return _fail("Result summary should expose telemetry_summary lines.")
+
 	var dialog_text := String(battle.hud.result_popup.dialog_text)
 	if String(battle.hud.result_popup.title) != "Victory":
 		return _fail("Battle result popup title should promote the victory outcome heading.")
@@ -69,6 +82,8 @@ func _run() -> void:
 		"Memory Fragment: ch01_fragment",
 		"Command Unlocked: tactical_shift",
 		"Unit EXP:",
+		"Bonus EXP:",
+		"Telemetry:",
 		"Memory:",
 		"Evidence:",
 		"Letters:"

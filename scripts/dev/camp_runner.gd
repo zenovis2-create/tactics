@@ -11,6 +11,7 @@ extends SceneTree
 
 const CampData = preload("res://scripts/data/camp_data.gd")
 const CampController = preload("res://scripts/camp/camp_controller.gd")
+const ProgressionData = preload("res://scripts/data/progression_data.gd")
 
 var _failed: bool = false
 
@@ -25,6 +26,7 @@ func _run() -> void:
     if not _assert_camp_data_fields(): return
     if not _assert_enter_camp_returns_data(ctrl): return
     if not _assert_summary_keys(ctrl): return
+    if not _assert_narrative_axis_entries(ctrl): return
     if not _assert_notification_count(ctrl): return
     if not _assert_base_axes(ctrl): return
     if not _assert_extended_axes(ctrl): return
@@ -60,9 +62,31 @@ func _assert_enter_camp_returns_data(ctrl: CampController) -> bool:
 
 func _assert_summary_keys(ctrl: CampController) -> bool:
     var summary: Dictionary = ctrl.get_camp_summary()
-    for key: String in ["chapter", "burden", "trust", "ending_tendency", "recovered_fragments", "unlocked_commands", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries"]:
+    for key: String in ["chapter", "burden", "trust", "ending_tendency", "narrative_axis_entries", "recovered_fragments", "unlocked_commands", "unlocked_axes", "pending_notifications", "has_new_records", "memory_entries", "evidence_entries", "letter_entries"]:
         if not summary.has(key):
             return _fail("get_camp_summary() missing key: %s" % key)
+    return true
+
+func _assert_narrative_axis_entries(ctrl: CampController) -> bool:
+    var progression := ProgressionData.new()
+    progression.trust = 6
+    progression.burden = 2
+    progression.recovered_fragments[&"ch01_fragment"] = true
+    progression.narrative_axis_values["memory"] = 4
+    progression.narrative_axis_values["truth"] = 7
+    var result: CampData = ctrl.enter_camp(&"ch02", {}, progression)
+    if result.narrative_axis_entries.size() != 4:
+        return _fail("CampData should expose 4 narrative axis entries.")
+    var summary: Dictionary = ctrl.get_camp_summary()
+    var entries: Array = summary.get("narrative_axis_entries", [])
+    if entries.size() != 4:
+        return _fail("Camp summary should surface 4 narrative axis entries.")
+    var truth_band := ""
+    for entry in entries:
+        if String(entry.get("axis_id", "")) == "truth":
+            truth_band = String(entry.get("band", ""))
+    if truth_band != "strong":
+        return _fail("Narrative truth axis should resolve to the strong band for value 7.")
     return true
 
 func _assert_notification_count(ctrl: CampController) -> bool:

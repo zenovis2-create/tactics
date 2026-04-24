@@ -11,10 +11,10 @@ const BATTERY_EXPECTED_OBJECTS := [
 ]
 
 const BATTERY_EXPECTED_TEXTS := [
-    "Cut the Valtor battery line by collapsing both flank winches and releasing the center chain-lift gate. (0/3)",
-    "One line-control point is secured. Collapse the remaining battery controls. (1/3)",
-    "Two line-control points are secured. Release the final chain-lift gate control. (2/3)",
-    "Battery line broken. The chain-lift gate is open. (3/3)"
+    "양측 윈치를 무너뜨리고 중앙 사슬 승강문을 해제해 발토르 포대선을 끊는다. (0/3)",
+    "전선 제어점 하나를 확보했다. 남은 포대 제어점을 무너뜨린다. (1/3)",
+    "전선 제어점 두 곳을 확보했다. 마지막 사슬 승강문 제어를 해제한다. (2/3)",
+    "포대선이 무너졌다. 사슬 승강문이 열렸다. (3/3)"
 ]
 
 const BATTERY_EXPECTED_STATES := [
@@ -24,6 +24,9 @@ const BATTERY_EXPECTED_STATES := [
     &"valtor_line_control_open"
 ]
 
+const BATTERY_TEMPLATE_ID := &"valtor_line_control"
+const OATH_HALL_TEMPLATE_ID := &"oath_hall_records"
+
 const OATH_HALL_EXPECTED_OBJECTS := [
     &"ch06_04_west_archive_case",
     &"ch06_04_ceremonial_seal",
@@ -31,10 +34,10 @@ const OATH_HALL_EXPECTED_OBJECTS := [
 ]
 
 const OATH_HALL_EXPECTED_TEXTS := [
-    "Seize both oath archives and break the ceremonial seal to expose Valgar's ramp. (0/3)",
-    "One oath-hall record point is secured. Seize the remaining archive controls. (1/3)",
-    "Two oath-hall record points are secured. Break the ceremonial seal. (2/3)",
-    "Oath-hall records seized. The ceremonial seal is broken. (3/3)"
+    "두 개의 맹세 기록고를 확보하고 의식 봉인을 파괴해 발가르의 경사로를 드러낸다. (0/3)",
+    "맹세 전당 기록 지점 하나를 확보했다. 남은 기록고 제어점을 장악한다. (1/3)",
+    "맹세 전당 기록 지점 둘을 확보했다. 의식 봉인을 파괴한다. (2/3)",
+    "맹세 전당 기록을 모두 확보했다. 의식 봉인이 파괴되었다. (3/3)"
 ]
 
 const OATH_HALL_EXPECTED_STATES := [
@@ -81,6 +84,10 @@ func _assert_stage_progression(stage_data, expected_object_ids: Array, expected_
     await process_frame
     await process_frame
 
+    _assert_equal(StringName(stage_data.rule_template_id), BATTERY_TEMPLATE_ID if StringName(stage_data.stage_id) == &"CH06_02" else OATH_HALL_TEMPLATE_ID, "%s should declare the expected rule template." % stage_data.stage_id)
+    if _failed:
+        return
+
     _assert_equal(battle.interactive_objects.size(), expected_object_ids.size(), "%s should author the expected interaction count." % stage_data.stage_id)
     if _failed:
         return
@@ -88,6 +95,14 @@ func _assert_stage_progression(stage_data, expected_object_ids: Array, expected_
     for index in range(expected_object_ids.size()):
         var object_actor = battle.interactive_objects[index]
         _assert_equal(StringName(object_actor.object_data.object_id), expected_object_ids[index], "%s object order drifted." % stage_data.stage_id)
+        if _failed:
+            return
+
+    if StringName(stage_data.stage_id) == &"CH06_02":
+        _assert_equal(String(battle.interactive_objects[0].object_data.object_type), "battery", "%s west battery control should route through the battery family." % stage_data.stage_id)
+        if _failed:
+            return
+        _assert_equal(String(battle.interactive_objects[2].object_data.object_type), "battery", "%s east battery control should route through the battery family." % stage_data.stage_id)
         if _failed:
             return
 

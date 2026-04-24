@@ -6,6 +6,8 @@ func _init() -> void:
 func _run() -> void:
 	var suite = load("res://tests/test_status_service.gd").new()
 	var result: Dictionary = suite.run_tests()
+	suite.free()
+	suite = null
 	if int(result.get("failed", 0)) > 0:
 		push_error("test_status_service failed: %s" % str(result.get("messages", [])))
 		quit(1)

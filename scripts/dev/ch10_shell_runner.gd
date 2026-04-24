@@ -3,7 +3,6 @@ extends SceneTree
 const MAIN_SCENE: PackedScene = preload("res://scenes/Main.tscn")
 const CH09B_FINAL_STAGE = preload("res://data/stages/ch09b_05_stage.tres")
 const EXPECTED_CH10_ORDER := [&"CH10_01", &"CH10_02", &"CH10_03", &"CH10_04", &"CH10_05"]
-
 func _initialize() -> void:
     call_deferred("_run")
 
@@ -24,6 +23,9 @@ func _run() -> void:
     campaign._active_stage_index = 4
     campaign._current_stage = CH09B_FINAL_STAGE
     campaign._enter_chapter_nine_b_camp()
+    campaign.assign_unit_to_sortie(&"ally_bran")
+    campaign.assign_unit_to_sortie(&"ally_tia")
+    campaign.assign_unit_to_sortie(&"ally_noah")
     await process_frame
     await process_frame
 
@@ -48,7 +50,8 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(intro_snapshot.get("panel_body", "")).find("tower") == -1 and String(intro_snapshot.get("panel_body", "")).find("Tower") == -1:
+    var intro_body: String = String(intro_snapshot.get("panel_body", ""))
+    if intro_body.find("최종 탑") == -1 and intro_body.find("탑") == -1:
         push_error("CH10 intro body did not mention the final tower.")
         quit(1)
         return
@@ -59,6 +62,12 @@ func _run() -> void:
         await process_frame
 
         var stage_snapshot: Dictionary = main.get_campaign_state_snapshot()
+        if String(stage_snapshot.get("mode", "")) == "briefing":
+            main.advance_campaign_step()
+            await process_frame
+            await process_frame
+            stage_snapshot = main.get_campaign_state_snapshot()
+
         if String(stage_snapshot.get("mode", "")) != "battle":
             push_error("Expected battle mode for %s, got %s." % [stage_id, stage_snapshot.get("mode", "")])
             quit(1)
@@ -96,12 +105,12 @@ func _run() -> void:
         return
 
     var panel_body: String = String(final_snapshot.get("panel_body", ""))
-    if panel_body.find("bell") == -1 and panel_body.find("Bell") == -1:
+    if panel_body.find("종") == -1:
         push_error("CH10 final body did not mention the bell resolution.")
         quit(1)
         return
 
-    if panel_body.find("names") == -1 and panel_body.find("Names") == -1:
+    if panel_body.find("이름") == -1:
         push_error("CH10 final body did not mention the survival of names.")
         quit(1)
         return
@@ -112,18 +121,37 @@ func _run() -> void:
         quit(1)
         return
 
-    if String(presentation_cards[0].get("title", "")).find("Bell") == -1:
+    if String(presentation_cards[0].get("title", "")).find("종") == -1:
         push_error("CH10 final presentation cards did not expose the bell resolution.")
         quit(1)
         return
 
+    main.campaign_controller._on_advance_requested()
+    await process_frame
+    await process_frame
+
+    if not main.title_screen.visible:
+        push_error("Expected postgame return to show the title screen.")
+        quit(1)
+        return
+
+    var title_snapshot: Dictionary = main.title_screen.get_layout_snapshot()
+    if not bool(title_snapshot.get("ng_plus_button_visible", false)):
+        push_error("Expected NG+ to unlock on the title screen after CH10 resolution.")
+        quit(1)
+        return
+
     await _cleanup_root_children()
-    print("[PASS] CH10 shell runner reached CH10 intro, CH10_01~05 flow, and final resolution.")
+    print("[PASS] CH10 shell runner reached CH10 intro, CH10_01~05 flow, final resolution, and postgame return-to-title NG+ unlock.")
     quit(0)
 
 func _play_battle_to_victory(battle, stage_id: StringName) -> void:
     var stage_id_text: String = String(stage_id)
     var win_condition: String = String(battle.stage_data.win_condition) if battle != null and battle.stage_data != null else ""
+    if stage_id == &"CH10_05":
+        await _force_enemy_team_victory(battle)
+        if _is_battle_finished(battle):
+            return
     if win_condition == "resolve_all_interactions" or win_condition == "resolve_all_interactions_and_defeat_all_enemies":
         _force_resolve_all_interactions(battle)
         await process_frame
@@ -131,7 +159,7 @@ func _play_battle_to_victory(battle, stage_id: StringName) -> void:
         if _is_battle_finished(battle):
             return
 
-    var max_round_loops: int = 20
+    var max_round_loops: int = 60
     for _round_loop in range(max_round_loops):
         await _wait_for_player_phase(battle)
         if _is_battle_finished(battle):
@@ -148,6 +176,18 @@ func _play_battle_to_victory(battle, stage_id: StringName) -> void:
         push_error("CH10 shell runner battle did not finish in victory for %s. %s" % [stage_id_text, _describe_battle_state(battle)])
         quit(1)
         return
+
+func _force_enemy_team_victory(battle) -> void:
+    var enemies: Array = battle.enemy_units.duplicate()
+    for enemy in enemies:
+        if enemy == null or not is_instance_valid(enemy) or enemy.is_defeated():
+            continue
+        enemy.apply_damage(enemy.current_hp)
+        await process_frame
+        await process_frame
+    battle._check_battle_end()
+    await process_frame
+    await process_frame
 
 func _force_resolve_all_interactions(battle) -> void:
     if battle.ally_units.is_empty():

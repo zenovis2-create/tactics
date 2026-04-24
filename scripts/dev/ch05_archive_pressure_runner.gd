@@ -4,9 +4,9 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const CH05_ARCHIVE_PRESSURE_STAGE = preload("res://data/stages/ch05_03_stage.tres")
 
 const EXPECTED_OBJECTIVE_TEXTS := [
-	"Vent the western pressure valve and release the upper stack seal to stabilize the Burning Stair. (0/2)",
-	"One archive-pressure control is resolved. Release the remaining seal. (1/2)",
-	"Archive pressure broken. The Burning Stair is stabilized. (2/2)"
+	"서쪽 압력 밸브를 열고 상층 서고 봉인을 해제해 불타는 계단을 안정시킨다. (0/2)",
+	"기록보관소 압력 제어점 하나를 해결했다. 남은 봉인을 해제한다. (1/2)",
+	"기록보관소 압력이 해소되었다. 불타는 계단이 안정되었다. (2/2)"
 ]
 
 const EXPECTED_STATE_IDS := [
@@ -34,6 +34,17 @@ func _run() -> void:
 
 	_assert_equal(battle.interactive_objects.size(), 2, "CH05 archive pressure stage should author two pressure controls.")
 	if _failed:
+		return
+
+	var found_evidence := false
+	for object_actor in battle.interactive_objects:
+		if StringName(object_actor.object_data.object_id) == &"ch05_03_upper_stack_seal":
+			found_evidence = true
+			_assert_equal(String(object_actor.object_data.object_type), "evidence", "CH05 upper stack seal should route through the evidence family.")
+			if _failed:
+				return
+	if not found_evidence:
+		_fail("CH05 archive pressure stage should include the upper stack seal object.")
 		return
 
 	_assert_objective_state(battle, 0)

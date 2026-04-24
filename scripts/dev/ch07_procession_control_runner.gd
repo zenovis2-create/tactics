@@ -4,6 +4,7 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const CH07_MARKET = preload("res://data/stages/ch07_01_stage.tres")
 const CH07_SQUARE = preload("res://data/stages/ch07_02_stage.tres")
 const CH07_PROCESSION = preload("res://data/stages/ch07_03_stage.tres")
+const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 
 const STAGE_CASES := [
 	{
@@ -80,6 +81,18 @@ func _run_stage_case(case_data: Dictionary) -> void:
 	if _failed:
 		return
 
+	if StringName(case_data["stage"].stage_id) == &"CH07_01":
+		var found_queue_bell := false
+		for object_actor in battle.interactive_objects:
+			if StringName(object_actor.object_data.object_id) == &"ch07_01_queue_bell":
+				found_queue_bell = true
+				_assert_equal(String(object_actor.object_data.object_type), "bell", "%s queue bell should route through the bell family." % case_data["stage"].stage_id)
+				if _failed:
+					return
+		if not found_queue_bell:
+			_fail("CH07_01 should include the queue bell object.")
+			return
+
 	_assert_objective_state(battle, case_data, 0)
 	if _failed:
 		return
@@ -100,8 +113,7 @@ func _run_stage_case(case_data: Dictionary) -> void:
 		_fail("%s should finish in BattlePhase.VICTORY after the final control resolves." % case_data["stage"].stage_id)
 		return
 
-	battle.queue_free()
-	await process_frame
+	await _cleanup_battle(battle)
 
 func _assert_objective_state(battle, case_data: Dictionary, resolved_count: int) -> void:
 	var expected_text: String = case_data["objective_texts"][resolved_count]
@@ -129,3 +141,11 @@ func _fail(message: String) -> void:
 	_failed = true
 	push_error(message)
 	quit(1)
+
+func _cleanup_battle(battle: Node) -> void:
+	if battle == null or not is_instance_valid(battle):
+		return
+	battle.queue_free()
+	await process_frame
+	await process_frame
+	BattleArtCatalog.clear_cache()

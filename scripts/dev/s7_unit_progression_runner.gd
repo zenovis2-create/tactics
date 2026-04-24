@@ -23,9 +23,17 @@ func _run() -> void:
 	var victory_results: Array = svc.grant_victory_exp([&"ally_rian", &"ally_serin"])
 	if victory_results.size() != 2:
 		return _fail("grant_victory_exp should return one result per ally.")
+	var bonus_result: Dictionary = svc.grant_bonus_exp_pool([&"ally_rian", &"ally_serin"], {"ally_rian": 2, "ally_serin": 0}, &"CH01_05")
+	if int(bonus_result.get("pool", 0)) <= 0:
+		return _fail("grant_bonus_exp_pool should return a positive pool for participating allies.")
+	var bonus_results: Array = bonus_result.get("results", [])
+	if bonus_results.size() != 2:
+		return _fail("grant_bonus_exp_pool should return one result per ally.")
 	var serin: Dictionary = svc.get_unit_progress(&"ally_serin")
-	if int(serin.get("level", 0)) != 2 or int(serin.get("exp", -1)) != 0:
-		return _fail("Flat victory EXP should level a fresh ally from 1 to 2.")
+	if int(serin.get("level", 0)) != 2 or int(serin.get("exp", -1)) <= 0:
+		return _fail("Bonus EXP should increase a fresh ally beyond the flat victory reward.")
+	if svc.get_data().bonus_exp_history.is_empty():
+		return _fail("Bonus EXP distribution should be persisted into bonus_exp_history.")
 
 	var data := svc.get_data()
 	if data.burden != 0 or data.trust != 0:

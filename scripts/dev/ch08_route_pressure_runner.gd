@@ -4,6 +4,7 @@ const BATTLE_SCENE: PackedScene = preload("res://scenes/battle/BattleScene.tscn"
 const CH08_VANISHED_TRAIL = preload("res://data/stages/ch08_01_stage.tres")
 const CH08_MOONLIT_AMBUSH = preload("res://data/stages/ch08_02_stage.tres")
 const CH08_RUIN_VENT = preload("res://data/stages/ch08_03_stage.tres")
+const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 
 const STAGE_CASES := [
 	{
@@ -80,6 +81,12 @@ func _run_stage_case(case_data: Dictionary) -> void:
 	if _failed:
 		return
 
+	if StringName(case_data["stage"].stage_id) == &"CH08_01":
+		var east_signal_post = battle.interactive_objects[1]
+		_assert_equal(String(east_signal_post.object_data.object_type), "route_marker", "CH08_01 east signal post should route through the route_marker family.")
+		if _failed:
+			return
+
 	_assert_objective_state(battle, case_data, 0)
 	if _failed:
 		return
@@ -100,8 +107,7 @@ func _run_stage_case(case_data: Dictionary) -> void:
 		_fail("%s should finish in BattlePhase.VICTORY after the final control resolves." % case_data["stage"].stage_id)
 		return
 
-	battle.queue_free()
-	await process_frame
+	await _cleanup_battle(battle)
 
 func _assert_objective_state(battle, case_data: Dictionary, resolved_count: int) -> void:
 	var expected_text: String = case_data["objective_texts"][resolved_count]
@@ -129,3 +135,11 @@ func _fail(message: String) -> void:
 	_failed = true
 	push_error(message)
 	quit(1)
+
+func _cleanup_battle(battle: Node) -> void:
+	if battle == null or not is_instance_valid(battle):
+		return
+	battle.queue_free()
+	await process_frame
+	await process_frame
+	BattleArtCatalog.clear_cache()

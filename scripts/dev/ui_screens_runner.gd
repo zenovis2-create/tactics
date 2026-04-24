@@ -5,8 +5,8 @@ extends SceneTree
 ## - TitleScreen: 저장 없으면 load_button disabled
 ## - TitleScreen: 저장 있으면 load_button enabled
 ## - DefeatScreen.get_layout_snapshot() 키 확인
-## - DefeatScreen: 자동저장(슬롯0) 없으면 load_save_button disabled
-## - DefeatScreen: 자동저장 있으면 load_save_button enabled
+## - DefeatScreen: autosave 전용 슬롯 없으면 load_save_button disabled
+## - DefeatScreen: autosave 전용 슬롯 있으면 load_save_button enabled
 ## - 자동저장 → load_game_requested 시그널 발화 확인 (이벤트 기반)
 
 const TitleScreen = preload("res://scripts/ui/title_screen.gd")
@@ -46,6 +46,7 @@ func _run() -> void:
     if not _assert_title_snapshot(title): return
     if not _assert_title_no_save(title, svc): return
     if not _assert_title_with_save(title, svc): return
+    if not _assert_title_with_ng_plus_unlock(title, svc): return
     if not _assert_defeat_snapshot(defeat): return
     if not _assert_defeat_no_autosave(defeat, svc): return
     if not _assert_defeat_with_autosave(defeat, svc): return
@@ -58,7 +59,7 @@ func _run() -> void:
 
 func _assert_title_snapshot(title: TitleScreen) -> bool:
     var snap: Dictionary = title.get_layout_snapshot()
-    for key: String in ["visible", "load_button_enabled", "save_service_connected"]:
+    for key: String in ["visible", "load_button_enabled", "ng_plus_available", "ng_plus_button_visible", "save_service_connected"]:
         if not snap.has(key):
             return _fail("TitleScreen snapshot missing key: %s" % key)
     return true
@@ -67,10 +68,13 @@ func _assert_title_no_save(title: TitleScreen, svc: SaveService) -> bool:
     svc.delete_slot(0)
     svc.delete_slot(1)
     svc.delete_slot(2)
+    svc.delete_slot(SaveService.AUTOSAVE_SLOT)
     title.setup_save_service(svc)
     var snap: Dictionary = title.get_layout_snapshot()
     if bool(snap.get("load_button_enabled", true)):
         return _fail("load_button should be disabled when no saves exist")
+    if bool(snap.get("ng_plus_button_visible", true)):
+        return _fail("ng_plus_button should be hidden when no NG+ save exists")
     return true
 
 func _assert_title_with_save(title: TitleScreen, svc: SaveService) -> bool:
@@ -84,6 +88,21 @@ func _assert_title_with_save(title: TitleScreen, svc: SaveService) -> bool:
     var snap: Dictionary = title.get_layout_snapshot()
     if not bool(snap.get("load_button_enabled", false)):
         return _fail("load_button should be enabled when a save exists")
+    if bool(snap.get("ng_plus_button_visible", true)):
+        return _fail("ng_plus_button should stay hidden until NG+ is unlocked")
+    svc.delete_slot(0)
+    return true
+
+func _assert_title_with_ng_plus_unlock(title: TitleScreen, svc: SaveService) -> bool:
+    var data: ProgressionData = ProgressionData.new()
+    data.ng_plus_available = true
+    svc.save_progression(data, 0)
+    title.setup_save_service(svc)
+    var snap: Dictionary = title.get_layout_snapshot()
+    if not bool(snap.get("ng_plus_available", false)):
+        return _fail("ng_plus_available should become true when an NG+ save exists")
+    if not bool(snap.get("ng_plus_button_visible", false)):
+        return _fail("ng_plus_button should be visible when an NG+ save exists")
     svc.delete_slot(0)
     return true
 
@@ -95,7 +114,7 @@ func _assert_defeat_snapshot(defeat: DefeatScreen) -> bool:
     return true
 
 func _assert_defeat_no_autosave(defeat: DefeatScreen, svc: SaveService) -> bool:
-    svc.delete_slot(0)
+    svc.delete_slot(SaveService.AUTOSAVE_SLOT)
     defeat.setup_save_service(svc)
     defeat.show_defeat(5)
     var snap: Dictionary = defeat.get_layout_snapshot()
@@ -108,24 +127,26 @@ func _assert_defeat_with_autosave(defeat: DefeatScreen, svc: SaveService) -> boo
     var data: ProgressionData = ProgressionData.new()
     data.burden = 2
     data.ending_tendency = &"bad_ending"
-    svc.save_progression(data, 0)
-    if not _assert_slot_metadata_contract(svc.peek_slot(0), 2, 0, "bad_ending"):
+    svc.save_progression(data, SaveService.AUTOSAVE_SLOT, {"autosave_reason": "CH04 수도원 교대"})
+    if not _assert_slot_metadata_contract(svc.peek_slot(SaveService.AUTOSAVE_SLOT), 2, 0, "bad_ending"):
         return false
     defeat.setup_save_service(svc)
     defeat.show_defeat(3)
     var snap: Dictionary = defeat.get_layout_snapshot()
     if not bool(snap.get("load_save_button_enabled", false)):
         return _fail("load_save_button should be enabled when autosave exists")
+    if String(snap.get("autosave_reason", "")) != "CH04 수도원 교대":
+        return _fail("Defeat screen should surface the autosave checkpoint reason.")
     defeat.hide()
-    svc.delete_slot(0)
+    svc.delete_slot(SaveService.AUTOSAVE_SLOT)
     return true
 
 func _assert_load_signal_title(title: TitleScreen, panel: SaveLoadPanel, svc: SaveService) -> bool:
     var data: ProgressionData = ProgressionData.new()
     data.trust = 3
     data.ending_tendency = &"true_ending"
-    svc.save_progression(data, 0)
-    if not _assert_slot_metadata_contract(svc.peek_slot(0), 0, 3, "true_ending"):
+    svc.save_progression(data, SaveService.AUTOSAVE_SLOT)
+    if not _assert_slot_metadata_contract(svc.peek_slot(SaveService.AUTOSAVE_SLOT), 0, 3, "true_ending"):
         return false
     title.setup_save_service(svc)
 
@@ -139,8 +160,10 @@ func _assert_load_signal_title(title: TitleScreen, panel: SaveLoadPanel, svc: Sa
     var panel_snapshot: Dictionary = panel.get_layout_snapshot()
     if String(panel_snapshot.get("mode", "")) != "load":
         return _fail("TitleScreen load flow should open SaveLoadPanel in load mode.")
+    if not bool(panel_snapshot.get("autosave_available", false)):
+        return _fail("SaveLoadPanel load mode should surface autosave availability.")
     panel.close()
-    svc.delete_slot(0)
+    svc.delete_slot(SaveService.AUTOSAVE_SLOT)
     return true
 
 func _assert_slot_metadata_contract(info: Dictionary, burden: int, trust: int, ending_tendency: String) -> bool:

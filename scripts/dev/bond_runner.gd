@@ -32,7 +32,10 @@ func _run() -> void:
     if not _assert_bond_delta_clamp(svc): return
     if not _assert_trust_average(svc): return
     if not _assert_support_attack_bond_gate(svc): return
+    if not await _assert_support_ready_visuals(): return
+    if not await _assert_bond_connection_lines(): return
     if not await _assert_support_attack_feedback(): return
+    if not await _assert_damage_share_feedback(): return
     if not _assert_name_anchor_eligible(svc): return
     if not _assert_snapshot_keys(svc): return
     if not _assert_event_log(svc): return
@@ -165,6 +168,141 @@ func _assert_support_attack_feedback() -> bool:
         return _fail("Battle result surface should expose the support attack count with aligned wording.")
     if result_body.find("Support Bond: 3") == -1:
         return _fail("Battle result surface should expose the support bond level.")
+
+    battle.queue_free()
+    return true
+
+func _assert_damage_share_feedback() -> bool:
+    var battle = BATTLE_SCENE.instantiate()
+    root.add_child(battle)
+    await process_frame
+    await process_frame
+
+    var stage := StageData.new()
+    stage.stage_id = &"bond_damage_share_stage"
+    stage.stage_title = "Bond Damage Share"
+    stage.grid_size = Vector2i(4, 4)
+    stage.cell_size = Vector2i(64, 64)
+    stage.win_condition = &"defeat_all_enemies"
+    stage.ally_units = [
+        _make_unit_data(&"ally_rian", "Rian", "ally", 10, 2, 0, 3, 1),
+        _make_unit_data(&"ally_serin", "Serin", "ally", 10, 2, 0, 3, 1)
+    ]
+    stage.enemy_units = [
+        _make_unit_data(&"enemy_raider", "Raider", "enemy", 10, 6, 0, 3, 1)
+    ]
+    stage.ally_spawns = [Vector2i(1, 1), Vector2i(1, 2)]
+    stage.enemy_spawns = [Vector2i(2, 1)]
+
+    battle.set_stage(stage)
+    await process_frame
+    await process_frame
+
+    battle.bond_service.reset()
+    battle.bond_service.apply_bond_delta(&"ally_serin", 5, "bond_damage_share_contract")
+
+    var enemy = battle.enemy_units[0]
+    var defender = battle.ally_units[0]
+    var defender_hp_before: int = defender.current_hp
+    var sharer_hp_before: int = battle.ally_units[1].current_hp
+    battle._resolve_attack(enemy, defender)
+    await process_frame
+    await process_frame
+
+    if battle.hud.telegraph_label.text.find("Bond Share") == -1 and battle.hud.telegraph_detail_label.text.find("bond 5") == -1:
+        return _fail("Bond 5 damage share should expose a dedicated HUD surface.")
+    if defender.current_hp >= defender_hp_before:
+        return _fail("Defender should still take some damage after bond share.")
+    if battle.ally_units[1].current_hp >= sharer_hp_before:
+        return _fail("Sharer should absorb part of the damage.")
+
+    battle.queue_free()
+    return true
+
+func _assert_support_ready_visuals() -> bool:
+    var battle = BATTLE_SCENE.instantiate()
+    root.add_child(battle)
+    await process_frame
+    await process_frame
+
+    var stage := StageData.new()
+    stage.stage_id = &"bond_visual_stage"
+    stage.stage_title = "Bond Visuals"
+    stage.grid_size = Vector2i(4, 4)
+    stage.cell_size = Vector2i(64, 64)
+    stage.win_condition = &"defeat_all_enemies"
+    stage.ally_units = [
+        _make_unit_data(&"ally_rian", "Rian", "ally", 10, 2, 0, 3, 1),
+        _make_unit_data(&"ally_serin", "Serin", "ally", 10, 2, 0, 3, 1)
+    ]
+    stage.enemy_units = [
+        _make_unit_data(&"enemy_raider", "Raider", "enemy", 6, 1, 0, 3, 1)
+    ]
+    stage.ally_spawns = [Vector2i(1, 1), Vector2i(1, 2)]
+    stage.enemy_spawns = [Vector2i(2, 1)]
+
+    battle.set_stage(stage)
+    await process_frame
+    await process_frame
+
+    battle.bond_service.reset()
+    battle.bond_service.apply_bond_delta(&"ally_serin", 5, "bond_visual_contract")
+    battle._on_world_cell_pressed(battle.ally_units[0].grid_position)
+    await process_frame
+
+    var supporter_snapshot: Dictionary = battle.ally_units[1].get_status_visual_snapshot()
+    if not bool(supporter_snapshot.get("bond_support_ready", false)):
+        return _fail("Adjacent bond-3+ ally should surface support-ready visuals when the attacker is selected.")
+    if not bool(supporter_snapshot.get("bond_guard_ready", false)):
+        return _fail("Adjacent bond-5 ally should surface guard-ready visuals when the attacker is selected.")
+    if String(supporter_snapshot.get("telegraph_text", "")) != "GUARD":
+        return _fail("Bond-5 ally should prioritize GUARD bond telegraph text.")
+
+    battle.queue_free()
+    return true
+
+func _assert_bond_connection_lines() -> bool:
+    var battle = BATTLE_SCENE.instantiate()
+    root.add_child(battle)
+    await process_frame
+    await process_frame
+
+    var stage := StageData.new()
+    stage.stage_id = &"bond_line_stage"
+    stage.stage_title = "Bond Line Visuals"
+    stage.grid_size = Vector2i(4, 4)
+    stage.cell_size = Vector2i(64, 64)
+    stage.win_condition = &"defeat_all_enemies"
+    stage.ally_units = [
+        _make_unit_data(&"ally_rian", "Rian", "ally", 10, 2, 0, 3, 1),
+        _make_unit_data(&"ally_serin", "Serin", "ally", 10, 2, 0, 3, 1)
+    ]
+    stage.enemy_units = [
+        _make_unit_data(&"enemy_raider", "Raider", "enemy", 6, 1, 0, 3, 1)
+    ]
+    stage.ally_spawns = [Vector2i(1, 1), Vector2i(1, 2)]
+    stage.enemy_spawns = [Vector2i(2, 1)]
+
+    battle.set_stage(stage)
+    await process_frame
+    await process_frame
+
+    battle.bond_service.reset()
+    battle.bond_service.apply_bond_delta(&"ally_serin", 5, "bond_line_contract")
+    battle._on_world_cell_pressed(battle.ally_units[0].grid_position)
+    await process_frame
+
+    var board_snapshot: Dictionary = battle.battle_board.get_debug_snapshot()
+    var links: Array = board_snapshot.get("bond_links", [])
+    if links.size() != 1:
+        return _fail("Selecting an ally with one adjacent bond-5 companion should render one bond connection line.")
+    var entry: Dictionary = links[0]
+    if String(entry.get("kind", "")) != "guard":
+        return _fail("Bond-5 adjacent companion line should render as guard priority.")
+    if Vector2i(entry.get("from_cell", Vector2i.ZERO)) != Vector2i(1, 1):
+        return _fail("Bond line should start from the selected ally cell.")
+    if Vector2i(entry.get("to_cell", Vector2i.ZERO)) != Vector2i(1, 2):
+        return _fail("Bond line should end at the adjacent companion cell.")
 
     battle.queue_free()
     return true

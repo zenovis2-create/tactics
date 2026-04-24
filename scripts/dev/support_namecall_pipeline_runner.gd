@@ -46,6 +46,8 @@ func _run() -> void:
 		return
 	if not await _assert_support_persistence_round_trip():
 		return
+	if not await _assert_support_dialogue_camp_handoff():
+		return
 	if not await _assert_ch10_s_rank_name_call():
 		return
 
@@ -104,6 +106,12 @@ func _assert_support_rank_progression_and_result_screen() -> bool:
 		if battle_index + 1 == 3 and result_body.find("border trail") == -1:
 			_cleanup_nodes([campaign, panel, battle])
 			return _fail("The C-rank Serin conversation should appear on the result surface after battle 3")
+		if battle_index + 1 == 3 and battle.hud.telegraph_label.text.find("Support Rank Up") == -1:
+			_cleanup_nodes([campaign, panel, battle])
+			return _fail("The C-rank Serin conversation should also trigger a dedicated support-rank telegraph surface.")
+		if battle_index + 1 == 3 and battle.hud.telegraph_detail_label.text.find("Rian + Serin") == -1:
+			_cleanup_nodes([campaign, panel, battle])
+			return _fail("The support-rank telegraph should expose the pair label.")
 		if battle_index + 1 == 6 and result_body.find("worth protecting") == -1:
 			_cleanup_nodes([campaign, panel, battle])
 			return _fail("The B-rank Serin conversation should appear on the result surface after battle 6")
@@ -136,9 +144,101 @@ func _assert_support_persistence_round_trip() -> bool:
 	_assertions += 1
 	return true
 
+func _assert_support_dialogue_camp_handoff() -> bool:
+	var battle: BattleController = BATTLE_SCENE.instantiate() as BattleController
+	var panel = CAMPAIGN_PANEL_SCENE.instantiate()
+	var campaign := CampaignController.new()
+	root.add_child(battle)
+	root.add_child(panel)
+	root.add_child(campaign)
+	campaign.setup(battle, panel)
+	await process_frame
+	await process_frame
+
+	for battle_index in range(3):
+		var stage := _make_serin_stage(STAGE_IDS[battle_index])
+		battle.set_stage(stage)
+		await process_frame
+		await process_frame
+		battle.last_result_summary = _make_base_result_summary(stage.stage_id)
+		battle.hud.show_result_screen(battle.last_result_summary)
+		campaign._commit_stage_rewards(stage)
+		campaign.debug_queue_support_rolls([0.0 if battle_index == 2 else 0.99])
+		campaign._process_post_battle_supports(stage)
+
+	campaign._active_mode = "camp"
+	campaign._active_chapter_id = CampaignController.CHAPTER_CH01
+	var payload: Dictionary = campaign._build_panel_payload("camp")
+	var dialogue_entries: Array = payload.get("dialogue_entries", [])
+	var presentation_cards: Array = payload.get("presentation_cards", [])
+	var found_support_line: bool = false
+	for line in dialogue_entries:
+		var text := String(line)
+		if text.find("Support C Rank") != -1 and text.find("border trail") != -1:
+			found_support_line = true
+			break
+	if not found_support_line:
+		_cleanup_nodes([campaign, panel, battle])
+		return _fail("Camp payload should surface the latest unlocked support dialogue after a rank-up battle.")
+	var found_support_card: bool = false
+	for card in presentation_cards:
+		if typeof(card) != TYPE_DICTIONARY:
+			continue
+		if String(card.get("title", "")).find("Rian + Serin") != -1 and String(card.get("body", "")).find("border trail") != -1:
+			if String(card.get("style", "")) != "support_memory":
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should use the dedicated support_memory style.")
+			if Array(card.get("badges", [])).is_empty():
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should expose rank/pair badges.")
+			if String(card.get("quote", "")).find("border trail") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface a dedicated quote line.")
+			if String(card.get("memory_stamp", "")).find("CH03_05") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface the originating battle stamp.")
+			if Array(card.get("progress_rows", [])).is_empty():
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should expose a dedicated support progress row.")
+			if String(card.get("outcome_line", "")).find("캠프 대화") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface a dedicated outcome line.")
+			if String(card.get("source_label", "")).find("Camp Handoff") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface a dedicated source label.")
+			if String(card.get("eyebrow_label", "")).find("Support Memory") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface a dedicated eyebrow label.")
+			if String(card.get("memory_rail", "")).find("support") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should surface a dedicated memory rail marker.")
+			if not _card_stack_has(card, "rail:support") or not _card_stack_has(card, "outcome:support_memory"):
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should expose a compact memory stack.")
+			if not _card_stack_has(card, "eyebrow:support_memory") or not _card_stack_has(card, "progress:support_memory"):
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should summarize eyebrow/progress in its memory stack.")
+			if String(card.get("memory_signature", "")).find("support|camp_handoff|support_memory") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("Camp support presentation card should expose a compact memory signature.")
+			found_support_card = true
+			break
+	if not found_support_card:
+		_cleanup_nodes([campaign, panel, battle])
+		return _fail("Camp payload should surface the latest unlocked support dialogue as a presentation card after a rank-up battle.")
+
+	_cleanup_nodes([campaign, panel, battle])
+	_assertions += 1
+	return true
+
 func _assert_ch10_s_rank_name_call() -> bool:
 	var battle: BattleController = BATTLE_SCENE.instantiate() as BattleController
+	var panel = CAMPAIGN_PANEL_SCENE.instantiate()
+	var campaign := CampaignController.new()
 	root.add_child(battle)
+	root.add_child(panel)
+	root.add_child(campaign)
+	campaign.setup(battle, panel)
 	await process_frame
 	await process_frame
 	var stage := _make_serin_stage(&"CH10_05", true)
@@ -155,12 +255,68 @@ func _assert_ch10_s_rank_name_call() -> bool:
 	var name_call_snapshot: Dictionary = battle.get_last_name_call_snapshot()
 	var expected_line := SupportConversations.get_conversation("rian_serin", 4)
 	if String(name_call_snapshot.get("line", "")) != expected_line:
-		_cleanup_nodes([battle])
+		_cleanup_nodes([campaign, panel, battle])
 		return _fail("CH10 S-rank ally should fire the Serin-specific Name Call line")
 	if String(name_call_snapshot.get("speaker_id", "")) != "ally_serin":
-		_cleanup_nodes([battle])
+		_cleanup_nodes([campaign, panel, battle])
 		return _fail("CH10 S-rank Name Call should be attributed to ally_serin")
-	_cleanup_nodes([battle])
+	var progression := ProgressionData.new()
+	for flag_id in ["flag_resonance_serin", "flag_resonance_bran", "flag_resonance_tia", "flag_resonance_enoch", "flag_resonance_karl", "flag_resonance_noah"]:
+		progression.flags[String(flag_id)] = true
+	progression.flags["flag_name_anchors_held_2plus"] = true
+	progression.flags["all_allies_name_called"] = true
+	battle.progression_service.load_data(progression)
+	campaign._active_chapter_id = CampaignController.CHAPTER_CH10
+	campaign._enter_chapter_ten_resolution()
+	await process_frame
+	var cards: Array = panel.get_snapshot().get("presentation_cards", [])
+	var found_name_call_card := false
+	for card in cards:
+		if typeof(card) != TYPE_DICTIONARY:
+			continue
+		if String(card.get("title", "")).find("세린의 이름 부름") != -1 and String(card.get("body", "")).find("I remember your name") != -1:
+			if String(card.get("style", "")) != "name_call_memory":
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should use the dedicated name_call_memory style.")
+			if Array(card.get("badges", [])).is_empty():
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should expose badges.")
+			if String(card.get("callout", "")).find("마지막 이름") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated callout line.")
+			if String(card.get("memory_stamp", "")).find("CH10 Final") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated final-stage memory stamp.")
+			if Array(card.get("progress_rows", [])).is_empty():
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should expose a dedicated progress row.")
+			if String(card.get("outcome_line", "")).find("결말 presentation") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated outcome line.")
+			if String(card.get("source_label", "")).find("Resolution Surface") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated source label.")
+			if String(card.get("eyebrow_label", "")).find("Name-Call Memory") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated eyebrow label.")
+			if String(card.get("memory_rail", "")).find("name_call") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should surface a dedicated memory rail marker.")
+			if not _card_stack_has(card, "rail:name_call") or not _card_stack_has(card, "outcome:name_call_memory"):
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should expose a compact memory stack.")
+			if not _card_stack_has(card, "eyebrow:name_call_memory") or not _card_stack_has(card, "progress:name_call_memory"):
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should summarize eyebrow/progress in its memory stack.")
+			if String(card.get("memory_signature", "")).find("name_call|resolution_surface|name_call_memory") == -1:
+				_cleanup_nodes([campaign, panel, battle])
+				return _fail("CH10 name-call presentation card should expose a compact memory signature.")
+			found_name_call_card = true
+			break
+	if not found_name_call_card:
+		_cleanup_nodes([campaign, panel, battle])
+		return _fail("CH10 resolution should surface the S-rank name call as a dedicated presentation card.")
+	_cleanup_nodes([campaign, panel, battle])
 	_assertions += 1
 	return true
 
@@ -221,7 +377,7 @@ func _make_unit_data(unit_id: StringName, display_name: String, faction: String,
 	return unit_data
 
 func _make_karon_boss_data() -> UnitData:
-	var unit_data := _make_unit_data(&"enemy_karon_final", "Karuon", "enemy", 30, 8, 3, 4, 1)
+	var unit_data := _make_unit_data(&"enemy_karuon_final", "Karuon", "enemy", 30, 8, 3, 4, 1)
 	unit_data.is_boss = true
 	unit_data.boss_pattern = &"karon_final_ch10_05"
 	return unit_data
@@ -236,4 +392,10 @@ func _fail(message: String) -> bool:
 	print("[FAIL] %s" % message)
 	_failed = true
 	quit(1)
+	return false
+
+func _card_stack_has(card: Dictionary, needle: String) -> bool:
+	for entry in card.get("memory_stack", []):
+		if String(entry).find(needle) != -1:
+			return true
 	return false

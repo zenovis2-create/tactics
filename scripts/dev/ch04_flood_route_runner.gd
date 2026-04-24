@@ -10,9 +10,9 @@ const FLOODGATE_EXPECTED_OBJECTS := [
 ]
 
 const FLOODGATE_EXPECTED_TEXTS := [
-    "Stabilize the monastery flood route by aligning both sluice wheels. (0/2)",
-    "One sluice wheel is aligned. Stabilize the remaining channel. (1/2)",
-    "Both sluice wheels are aligned. The relic vault route is stable. (2/2)"
+    "두 개의 수문 바퀴를 맞춰 수도원 침수 경로를 안정화한다. (0/2)",
+    "수문 바퀴 하나를 맞췄다. 남은 수로를 안정화한다. (1/2)",
+    "두 수문 바퀴를 모두 맞췄다. 성유물 금고 진입로가 안정되었다. (2/2)"
 ]
 
 const FLOODGATE_EXPECTED_STATES := [
@@ -21,15 +21,18 @@ const FLOODGATE_EXPECTED_STATES := [
     &"monastery_flood_route_stable"
 ]
 
+const FLOODGATE_TEMPLATE_ID := &"monastery_flood_route"
+const RELIQUARY_TEMPLATE_ID := &"monastery_reliquary_route"
+
 const RELIQUARY_EXPECTED_OBJECTS := [
     &"ch04_04_north_reliquary_seal",
     &"ch04_04_south_reliquary_seal"
 ]
 
 const RELIQUARY_EXPECTED_TEXTS := [
-    "Restore both reliquary seals to purify the chamber. (0/2)",
-    "One reliquary seal is restored. Purify the final ward. (1/2)",
-    "Both reliquary seals are restored. Basil's sanctuary stands exposed. (2/2)"
+    "성유물 봉인 두 개를 복원해 성소를 정화한다. (0/2)",
+    "성유물 봉인 하나를 복원했다. 마지막 결계를 정화한다. (1/2)",
+    "성유물 봉인 두 개를 모두 복원했다. 바실의 성소가 드러났다. (2/2)"
 ]
 
 const RELIQUARY_EXPECTED_STATES := [
@@ -73,6 +76,10 @@ func _assert_stage_progression(stage_data, expected_object_ids: Array, expected_
     await process_frame
     await process_frame
 
+    _assert_equal(StringName(stage_data.rule_template_id), FLOODGATE_TEMPLATE_ID if StringName(stage_data.stage_id) == &"CH04_03" else RELIQUARY_TEMPLATE_ID, "%s should declare the expected rule template." % stage_data.stage_id)
+    if _failed:
+        return
+
     _assert_equal(battle.interactive_objects.size(), expected_object_ids.size(), "%s should author the expected interaction count." % stage_data.stage_id)
     if _failed:
         return
@@ -80,6 +87,14 @@ func _assert_stage_progression(stage_data, expected_object_ids: Array, expected_
     for index in range(expected_object_ids.size()):
         var object_actor = battle.interactive_objects[index]
         _assert_equal(StringName(object_actor.object_data.object_id), expected_object_ids[index], "%s object order drifted." % stage_data.stage_id)
+        if _failed:
+            return
+
+    if StringName(stage_data.stage_id) == &"CH04_03":
+        _assert_equal(String(battle.interactive_objects[0].object_data.object_type), "floodgate", "%s west sluice wheel should route through the floodgate family." % stage_data.stage_id)
+        if _failed:
+            return
+        _assert_equal(String(battle.interactive_objects[1].object_data.object_type), "floodgate", "%s east sluice wheel should route through the floodgate family." % stage_data.stage_id)
         if _failed:
             return
 

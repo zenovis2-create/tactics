@@ -20,6 +20,8 @@ func _run() -> void:
 	if not _assert_record_enemy_death(svc): return
 	if not _assert_oblivion_counts(svc): return
 	if not _assert_command_usage(svc): return
+	if not _assert_objective_summary(svc): return
+	if not _assert_boss_phase_timings(svc): return
 	if not _assert_battle_end_emits_complete_payload(svc): return
 	if not _assert_balance_report_top_causes(svc): return
 
@@ -80,10 +82,37 @@ func _assert_command_usage(svc: TelemetryService) -> bool:
 		return _fail("cover_advance should have 1 use")
 	return true
 
+func _assert_objective_summary(svc: TelemetryService) -> bool:
+	svc.record_battle_start(&"ch03")
+	svc.record_objective_summary(1, 2)
+	var snap := svc.get_session_snapshot()
+	if int(snap.get(TelemetryService.KEY_OPTIONAL_OBJECTIVES_COMPLETED, 0)) != 1:
+		return _fail("optional_objectives_completed should be 1")
+	if int(snap.get(TelemetryService.KEY_OPTIONAL_OBJECTIVES_TOTAL, 0)) != 2:
+		return _fail("optional_objectives_total should be 2")
+	if absf(float(snap.get(TelemetryService.KEY_OBJECTIVE_COMPLETION_RATE, 0.0)) - 0.5) > 0.001:
+		return _fail("objective_completion_rate should be 0.5")
+	return true
+
+func _assert_boss_phase_timings(svc: TelemetryService) -> bool:
+	svc.record_battle_start(&"ch10")
+	svc.record_boss_phase(&"royal_edict", 2)
+	svc.record_boss_phase(&"royal_edict", 4)
+	svc.record_boss_phase(&"name_severance", 5)
+	var snap := svc.get_session_snapshot()
+	var timings: Dictionary = snap.get(TelemetryService.KEY_BOSS_PHASE_TIMINGS, {})
+	if int(timings.get("royal_edict", 0)) != 2:
+		return _fail("royal_edict should preserve its first recorded round")
+	if int(timings.get("name_severance", 0)) != 5:
+		return _fail("name_severance should record round 5")
+	return true
+
 func _assert_battle_end_emits_complete_payload(svc: TelemetryService) -> bool:
 	svc.record_battle_start(&"ch04")
 	svc.record_ally_death("oblivion_sealed")
 	svc.record_oblivion_applied(3)
+	svc.record_objective_summary(2, 3)
+	svc.record_boss_phase(&"archive_mode", 4)
 	svc.record_round_complete(4)
 	var payload := svc.record_battle_end(&"victory", 4)
 
@@ -97,6 +126,11 @@ func _assert_battle_end_emits_complete_payload(svc: TelemetryService) -> bool:
 		TelemetryService.KEY_ENEMY_DEATHS,
 		TelemetryService.KEY_COMMAND_USAGE,
 		TelemetryService.KEY_FAILURE_CAUSES,
+		TelemetryService.KEY_OPTIONAL_OBJECTIVES_COMPLETED,
+		TelemetryService.KEY_OPTIONAL_OBJECTIVES_TOTAL,
+		TelemetryService.KEY_OBJECTIVE_COMPLETION_RATE,
+		TelemetryService.KEY_BOSS_PHASE_TIMINGS,
+		TelemetryService.KEY_STATUS_COUNTS,
 		TelemetryService.KEY_STARTED_AT,
 		TelemetryService.KEY_ENDED_AT,
 	]
@@ -105,6 +139,14 @@ func _assert_battle_end_emits_complete_payload(svc: TelemetryService) -> bool:
 			return _fail("Battle end payload missing key: %s" % k)
 	if payload.get(TelemetryService.KEY_RESULT) != "victory":
 		return _fail("result should be 'victory'")
+	if absf(float(payload.get(TelemetryService.KEY_OBJECTIVE_COMPLETION_RATE, 0.0)) - 0.67) > 0.01:
+		return _fail("objective_completion_rate should round to 0.67")
+	var status_counts: Dictionary = payload.get(TelemetryService.KEY_STATUS_COUNTS, {})
+	if int(status_counts.get("oblivion_applied", 0)) != 3:
+		return _fail("status_counts should include oblivion_applied = 3")
+	var boss_phase_timings: Dictionary = payload.get(TelemetryService.KEY_BOSS_PHASE_TIMINGS, {})
+	if int(boss_phase_timings.get("archive_mode", 0)) != 4:
+		return _fail("battle end payload should include archive_mode phase timing")
 	return true
 
 func _assert_balance_report_top_causes(svc: TelemetryService) -> bool:
@@ -117,11 +159,20 @@ func _assert_balance_report_top_causes(svc: TelemetryService) -> bool:
 		fresh.record_ally_death("boss_charge")
 		fresh.record_ally_death("boss_charge")
 		fresh.record_ally_death("oblivion_stack")
+		fresh.record_objective_summary(1, 2)
+		fresh.record_boss_phase(&"record_burn", 2)
 		fresh.record_battle_end(&"defeat", 3)
 
 	var report := fresh.get_balance_report()
 	if int(report.get("total_battles", 0)) != 3:
 		return _fail("Balance report should count 3 battles")
+	if absf(float(report.get("avg_objective_rate", 0.0)) - 0.5) > 0.001:
+		return _fail("Balance report should expose avg_objective_rate = 0.5")
+	var stage_summaries: Array = report.get("stage_summaries", [])
+	if stage_summaries.size() != 3:
+		return _fail("Balance report should expose 3 stage_summaries")
+	if int(Dictionary(stage_summaries[0]).get("boss_phase_count", 0)) != 1:
+		return _fail("Stage summary should count recorded boss phases")
 	var top: Array = report.get("top_failure_causes", [])
 	if top.is_empty():
 		return _fail("Balance report should have top failure causes")

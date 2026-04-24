@@ -35,7 +35,7 @@ func _run() -> void:
     await process_frame
     campaign.assign_unit_to_sortie(&"ally_tia")
     await process_frame
-    campaign.assign_unit_to_sortie(&"ally_karl")
+    campaign.assign_unit_to_sortie(&"ally_kyle")
     await process_frame
     campaign.assign_unit_to_sortie(&"ally_noah")
     await process_frame
@@ -47,7 +47,7 @@ func _run() -> void:
         quit(1)
         return
 
-    for expected_id in ["ally_rian", "ally_bran", "ally_tia", "ally_karl", "ally_noah"]:
+    for expected_id in ["ally_rian", "ally_bran", "ally_tia", "ally_kyle", "ally_noah"]:
         if not deployed_ids.has(expected_id):
             push_error("Five-person sortie runner expected %s in deployed ids, got %s." % [expected_id, deployed_ids])
             quit(1)
