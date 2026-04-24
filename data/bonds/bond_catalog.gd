@@ -5,6 +5,10 @@ extends RefCounted
 
 const BondData = preload("res://scripts/data/bond_data.gd")
 
+const COMPANION_ID_ALIASES := {
+    &"ally_karl": &"ally_kyle",
+}
+
 static func build_serin() -> BondData:
     var d: BondData = BondData.new()
     d.companion_id = &"ally_serin"
@@ -33,11 +37,11 @@ static func build_enoch() -> BondData:
     d.arc_flags_required = [&"ch05_enoch_arc_archive_recovered"]
     return d
 
-static func build_karl() -> BondData:
+static func build_kyle() -> BondData:
     var d: BondData = BondData.new()
-    d.companion_id = &"ally_karl"
+    d.companion_id = &"ally_kyle"
     d.bond_level = 0
-    d.arc_flags_required = [&"ch09a_karl_arc_outer_line_crossed"]
+    d.arc_flags_required = [&"ch09a_kyle_arc_outer_line_crossed"]
     return d
 
 static func build_noah() -> BondData:
@@ -53,16 +57,17 @@ static func get_all() -> Array[BondData]:
         build_bran(),
         build_tia(),
         build_enoch(),
-        build_karl(),
+        build_kyle(),
         build_noah()
     ]
 
 static func get_by_id(companion_id: StringName) -> BondData:
-    match companion_id:
+    var canonical_companion_id: StringName = StringName(COMPANION_ID_ALIASES.get(companion_id, companion_id))
+    match canonical_companion_id:
         &"ally_serin": return build_serin()
         &"ally_bran": return build_bran()
         &"ally_tia": return build_tia()
         &"ally_enoch": return build_enoch()
-        &"ally_karl": return build_karl()
+        &"ally_kyle": return build_kyle()
         &"ally_noah": return build_noah()
         _: return null
