@@ -11,7 +11,9 @@ func _initialize() -> void:
 func _run() -> void:
     if not await _assert_boss_lock_state_lifecycle():
         return
-    print("[PASS] boss_lock_break_runner: boss lock runtime state model is readable and resets on bootstrap.")
+    if not await _assert_boss_lock_event_hooks():
+        return
+    print("[PASS] boss_lock_break_runner: boss lock runtime state, progress, and event hooks are covered.")
     quit(0)
 
 func _assert_boss_lock_state_lifecycle() -> bool:
@@ -93,6 +95,57 @@ func _assert_boss_lock_state_lifecycle() -> bool:
     await process_frame
     return true
 
+func _assert_boss_lock_event_hooks() -> bool:
+    var battle = await _spawn_battle(CH10_05_STAGE)
+    if battle == null:
+        return false
+    var boss = _find_boss(battle)
+    var ally = _find_ally(battle)
+    if boss == null or ally == null:
+        return _fail("CH10_05 should spawn both an ally and a boss for lock hook coverage.")
+
+    battle._start_boss_lock(
+        boss,
+        &"hook_check",
+        "Hook Check",
+        2,
+        {"strike": 1, "skill": 1, "object": 1, "name": 1, "cleanse": 1},
+        "압박 유지",
+        "압박 약화"
+    )
+
+    battle._progress_boss_lock_from_player_attack(ally, boss, ally.get_default_skill(), {"transition_reason": "attack_resolved"})
+    var state: Dictionary = battle._get_boss_lock_state(boss)
+    if int(Dictionary(state.get("locks_progress", {})).get("strike", 0)) != 1:
+        return _fail("Player direct attack hook should progress strike lock.")
+
+    battle._progress_boss_lock_from_player_attack(ally, boss, ally.get_default_skill(), {"transition_reason": "attack_resolved"}, ally.get_default_skill())
+    state = battle._get_boss_lock_state(boss)
+    if int(Dictionary(state.get("locks_progress", {})).get("skill", 0)) != 1:
+        return _fail("Player skill hook should progress skill lock.")
+
+    battle._progress_boss_lock_for_event(&"object")
+    state = battle._get_boss_lock_state(boss)
+    if int(Dictionary(state.get("locks_progress", {})).get("object", 0)) != 1:
+        return _fail("Interaction event hook should progress object lock.")
+
+    battle._progress_boss_lock_for_event(&"name")
+    state = battle._get_boss_lock_state(boss)
+    if int(Dictionary(state.get("locks_progress", {})).get("name", 0)) != 1:
+        return _fail("Name event hook should progress name lock.")
+
+    battle._progress_boss_lock_for_event(&"cleanse")
+    state = battle._get_boss_lock_state(boss)
+    var hook_progress: Dictionary = state.get("locks_progress", {})
+    if int(hook_progress.get("cleanse", 0)) != 1:
+        return _fail("Cleanse event hook should progress cleanse lock.")
+    if not bool(state.get("broken", false)):
+        return _fail("Boss lock should break after all hook progress types are complete.")
+
+    battle.queue_free()
+    await process_frame
+    return true
+
 func _spawn_battle(stage) -> Node:
     var battle = BATTLE_SCENE.instantiate()
     root.add_child(battle)
@@ -105,6 +158,12 @@ func _find_boss(battle):
     for enemy in battle.enemy_units:
         if is_instance_valid(enemy) and enemy.unit_data != null and enemy.unit_data.is_boss:
             return enemy
+    return null
+
+func _find_ally(battle):
+    for ally in battle.ally_units:
+        if is_instance_valid(ally) and ally.unit_data != null and not ally.is_defeated():
+            return ally
     return null
 
 func _fail(message: String) -> bool:

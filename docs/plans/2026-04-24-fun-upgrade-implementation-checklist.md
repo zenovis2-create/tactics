@@ -69,15 +69,15 @@ Verification:
 
 ### 1.3 Hook strike/skill/object/name/cleanse into progress
 
-- [ ] Direct attack hook progresses `strike` when target is locked boss.
-- [ ] Skill hook progresses `skill` when target is locked boss.
-- [ ] Interaction hook progresses `object` for relevant boss lock.
-- [ ] Name command/name-call hook progresses `name`.
-- [ ] Cleanse/status reduction hook progresses `cleanse`.
+- [x] Direct attack hook progresses `strike` when target is locked boss.
+- [x] Skill hook progresses `skill` when target is locked boss.
+- [x] Interaction hook progresses `object` for relevant boss lock.
+- [x] Name command/name-call hook progresses `name`.
+- [x] Cleanse/status reduction hook progresses `cleanse`.
 
 Verification:
 
-- [ ] `boss_lock_break_runner.gd` covers at least one hook per lock type using controlled calls.
+- [x] `boss_lock_break_runner.gd` covers at least one hook per lock type using controlled calls.
 
 ### 1.4 Boss-specific lock definitions
 

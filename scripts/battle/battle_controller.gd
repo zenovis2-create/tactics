@@ -1380,6 +1380,7 @@ func _resolve_attack(attacker: UnitActor, defender: UnitActor, extra_context: Di
         "oblivion_skills_sealed": attack_context.get("oblivion_skills_sealed", false)
     })
     _apply_visual_status_from_skill(defender, resolved_skill, result)
+    _progress_boss_lock_from_player_attack(attacker, defender, resolved_skill, result, skill_override)
     var reason: String = String(result.get("transition_reason", "attack_resolved"))
     _play_attack_feedback(reason)
 
@@ -1566,6 +1567,7 @@ func _resolve_interaction(unit: UnitActor, object_actor: InteractiveObjectActor)
         return
 
     _handle_stage_interaction_flags(result.get("object_id", &"interactive_object"))
+    _progress_boss_lock_for_event(&"object")
     var reward_detail: String = _format_interaction_detail(result)
     var objective_state: Dictionary = get_objective_state_snapshot()
     _record_reward_entry(reward_detail)
@@ -2698,10 +2700,12 @@ func try_apply_charm_counterplay(caster: UnitActor, target: UnitActor, skill: Sk
         &"never_forget", &"name_restore", &"name_return":
             _clear_unit_visual_status(target, &"charm")
             _clear_unit_visual_status(target, &"fear")
+            _progress_boss_lock_for_event(&"name")
             if status_service != null:
                 var oblivion_stack: int = status_service.get_oblivion_stack(target)
                 if oblivion_stack > 0:
                     status_service.cleanse_stack(target, oblivion_stack, "charm_counterplay")
+                    _progress_boss_lock_for_event(&"cleanse", null, oblivion_stack)
                     if telemetry_service != null:
                         telemetry_service.record_oblivion_cleansed(oblivion_stack)
             hud.set_transition_reason("charm_cleansed", {
@@ -4712,13 +4716,36 @@ func _progress_boss_lock(boss_unit: UnitActor, lock_type: StringName, amount: in
     var locks_progress: Dictionary = state.get("locks_progress", {})
     var required_amount: int = max(0, int(locks_required.get(type_key, 0)))
     var current_amount: int = max(0, int(locks_progress.get(type_key, 0)))
+    var was_broken: bool = bool(state.get("broken", false))
     locks_progress[type_key] = min(required_amount, current_amount + max(0, amount))
     state["locks_progress"] = locks_progress
     state["broken"] = _is_boss_lock_complete(state)
     boss_lock_state_by_unit[unit_instance_id] = state
-    if bool(state.get("broken", false)):
+    if bool(state.get("broken", false)) and not was_broken:
         _record_boss_event("boss_lock_broken_%s" % String(state.get("action_id", &"")))
     return state.duplicate(true)
+
+func _progress_boss_lock_for_event(lock_type: StringName, boss_unit: UnitActor = null, amount: int = 1) -> Dictionary:
+    if boss_unit != null and is_instance_valid(boss_unit):
+        return _progress_boss_lock(boss_unit, lock_type, amount)
+    for unit_instance_id in boss_lock_state_by_unit.keys():
+        var candidate: UnitActor = instance_from_id(int(unit_instance_id)) as UnitActor
+        if candidate == null or not is_instance_valid(candidate) or candidate.is_defeated():
+            continue
+        var progressed: Dictionary = _progress_boss_lock(candidate, lock_type, amount)
+        if not progressed.is_empty():
+            return progressed
+    return {}
+
+func _progress_boss_lock_from_player_attack(attacker: UnitActor, defender: UnitActor, resolved_skill: SkillData, result: Dictionary, skill_override: SkillData = null) -> void:
+    if attacker == null or defender == null or not is_instance_valid(attacker) or not is_instance_valid(defender):
+        return
+    if attacker.faction != "ally" or defender.faction != "enemy" or defender.unit_data == null or not defender.unit_data.is_boss:
+        return
+    if String(result.get("transition_reason", "")) == "attack_missed":
+        return
+    var is_skill_use: bool = skill_override != null or (resolved_skill != null and resolved_skill.has_resource_cost())
+    _progress_boss_lock(defender, &"skill" if is_skill_use else &"strike")
 
 func _is_boss_lock_complete(state: Dictionary) -> bool:
     var locks_required: Dictionary = state.get("locks_required", {})
