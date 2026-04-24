@@ -60,6 +60,7 @@ turn_limit = 12
 interactive_objects = []
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
+stage_objective_hint = "기록보관소 장치는 망각 압박을 줄인다. 불타는 장부선보다 기록 장치 확보를 우선한다."
 start_cutscene_id = &"ch05_05_intro"
 clear_cutscene_id = &"ch05_05_outro"
 next_destination_summary = "발토르 공성 장부와 생존 기사 명단이 부대를 철성 요새로 이끈다."

@@ -84,7 +84,9 @@ func _run() -> void:
             push_error("CH03 battle shell did not load %s stage data." % [stage_id])
             quit(1)
             return
-
+        if stage_id == &"CH03_05" and not _assert_terrain_identity_surface(battle):
+            quit(1)
+            return
         await _play_battle_to_victory(battle, stage_id)
         await process_frame
         await process_frame
@@ -137,6 +139,24 @@ func _run() -> void:
 
     print("[PASS] CH03 shell runner reached CH03 intro, CH03_01~05 flow, and CH03 camp handoff.")
     quit(0)
+
+func _assert_terrain_identity_surface(battle) -> bool:
+    var snapshot: Dictionary = battle.get_player_interface_snapshot()
+    var objective_hint: String = String(snapshot.get("objective_hint", ""))
+    if objective_hint.find("궁병") == -1 or objective_hint.find("은신") == -1:
+        push_error("CH03 terrain identity hint should mention archer/stealth forest advantage.")
+        return false
+    var party_details: Array = snapshot.get("party_details", [])
+    if party_details.is_empty():
+        push_error("CH03 terrain identity assertion could not inspect party details.")
+        return false
+    for entry in party_details:
+        if typeof(entry) != TYPE_DICTIONARY:
+            continue
+        if String(entry.get("role_label", "")).is_empty() or String(entry.get("role_glyph", "")).is_empty():
+            push_error("Party detail entries should expose role_label and role_glyph.")
+            return false
+    return true
 
 func _party_contains_name(party_details: Array, expected_name: String) -> bool:
     for entry in party_details:

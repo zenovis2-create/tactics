@@ -3373,6 +3373,7 @@ func get_player_interface_snapshot() -> Dictionary:
     return {
         "stage_title": _get_inventory_panel_title(),
         "objective": _get_objective_text(),
+        "objective_hint": _get_objective_hint(),
         "objective_state": get_objective_state_snapshot(),
         "transition_surface": hud.get_transition_surface_snapshot() if hud != null and hud.has_method("get_transition_surface_snapshot") else {},
         "party_entries": get_party_summary_lines(),
@@ -3406,9 +3407,13 @@ func get_party_detail_entries() -> Array[Dictionary]:
         if equipped_accessory != null:
             accessory_name = equipped_accessory.display_name
 
+        var role_label: String = _get_unit_role_label(unit)
+        var role_glyph: String = _get_unit_role_glyph(unit)
         details.append({
             "name": unit.unit_data.display_name,
             "unit_id": String(unit.unit_data.unit_id),
+            "role_label": role_label,
+            "role_glyph": role_glyph,
             "hp_text": "%d/%d" % [unit.current_hp, unit.unit_data.max_hp],
             "status": String(turn_manager.get_unit_state(unit)).capitalize(),
             "attack": unit.get_attack(),
@@ -3423,6 +3428,28 @@ func get_party_detail_entries() -> Array[Dictionary]:
         })
 
     return details
+
+func _get_unit_role_label(unit: UnitActor) -> String:
+    if unit == null or not is_instance_valid(unit) or unit.unit_data == null:
+        return "Unknown"
+    var resolved_class: ClassData = unit.unit_data.get_class_data()
+    if resolved_class != null and not resolved_class.display_name.strip_edges().is_empty():
+        return resolved_class.display_name.strip_edges()
+    if unit.unit_data.attack_range >= 3:
+        return "Ranged"
+    if unit.unit_data.defense >= unit.unit_data.attack:
+        return "Defender"
+    return "Frontline"
+
+func _get_unit_role_glyph(unit: UnitActor) -> String:
+    var role_label: String = _get_unit_role_label(unit).to_lower()
+    if role_label.find("ranger") != -1 or role_label.find("ranged") != -1 or (unit != null and is_instance_valid(unit) and unit.unit_data != null and unit.unit_data.attack_range >= 3):
+        return "◇"
+    if role_label.find("mystic") != -1 or role_label.find("medic") != -1:
+        return "✦"
+    if role_label.find("knight") != -1 or role_label.find("defender") != -1:
+        return "▣"
+    return "◆"
 
 func _build_skill_detail_entries(skills: Array) -> Array[Dictionary]:
     var entries: Array[Dictionary] = []

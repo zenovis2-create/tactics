@@ -137,7 +137,7 @@ rule_template_modifiers = {
 "boss_cooldowns": {"name_severance": 3, "all_out_attack": 3},
 "clear_statuses": [&"mark"]
 }
-stage_objective_hint = "남쪽 종길에서 전진해 중앙 성채를 돌파하고 종단을 장악해 탑을 끝낸다."
+stage_objective_hint = "Anchor Chain과 Bell Dais가 최종 압박을 약화한다. 종길 진입 전 닻 사슬과 고지대를 먼저 읽는다."
 interaction_objective_texts = PackedStringArray("종단과 닻 사슬을 장악하고 카르온을 쓰러뜨린다. (0/2)", "최종 제어점 하나를 확보했다. 나머지 하나를 장악해 종의 압박을 끊는다. (1/2)", "모든 최종 제어점을 확보했다. 탑의 마지막 방어선이 무너졌다. (2/2)")
 interaction_objective_state_ids = [&"bell_dais_unheld", &"bell_dais_partial", &"bell_dais_held"]
 landmark_labels = PackedStringArray("남쪽 종길", "중앙 성채", "북쪽 종단")

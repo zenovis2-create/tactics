@@ -238,8 +238,8 @@ Verification:
 
 ### 6.1 Terrain identity hints
 
-- [ ] Add chapter-specific terrain hint copy without changing formulas.
-- [ ] Prioritize:
+- [x] Add chapter-specific terrain hint copy without changing formulas.
+- [x] Prioritize:
   - CH03 forest
   - CH04 flooded monastery
   - CH05 archive
@@ -247,18 +247,18 @@ Verification:
 
 Verification:
 
-- [ ] Relevant shell runners pass.
-- [ ] Visual/HUD runners pass if text surface changed.
+- [x] Relevant shell runners pass.
+- [x] Visual/HUD runners pass if text surface changed.
 
 ### 6.2 Unit role readability
 
-- [ ] Expose role/type labels in unit snapshot or HUD if already available.
-- [ ] Avoid damage formula changes in this phase.
+- [x] Expose role/type labels in unit snapshot or HUD if already available.
+- [x] Avoid damage formula changes in this phase.
 
 Verification:
 
-- [ ] `ui_screens_runner.gd` passes.
-- [ ] `ch02_ch05_boss_pattern_runner.gd` passes.
+- [x] `ui_screens_runner.gd` passes.
+- [x] `ch02_ch05_boss_pattern_runner.gd` passes.
 
 ---
 
