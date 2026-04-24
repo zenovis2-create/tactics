@@ -19,7 +19,9 @@ func _run() -> void:
         return
     if not await _assert_stage_lock_definitions():
         return
-    print("[PASS] boss_lock_break_runner: boss lock runtime state, progress, event hooks, and stage definitions are covered.")
+    if not await _assert_boss_lock_outcomes():
+        return
+    print("[PASS] boss_lock_break_runner: boss lock runtime state, progress, event hooks, stage definitions, and outcomes are covered.")
     quit(0)
 
 func _assert_boss_lock_state_lifecycle() -> bool:
@@ -181,6 +183,44 @@ func _assert_stage_lock_definitions() -> bool:
                 return _fail("%s boss lock should require %s x%d." % [String(case.get("stage_id", "unknown")), String(lock_type), int(expected.get(lock_type, 0))])
         battle.queue_free()
         await process_frame
+    return true
+
+func _assert_boss_lock_outcomes() -> bool:
+    var unbroken_battle = await _spawn_battle(CH10_05_STAGE)
+    var unbroken_boss = _find_boss(unbroken_battle)
+    if unbroken_boss == null:
+        return _fail("CH10_05 should spawn a boss for unbroken outcome coverage.")
+    unbroken_battle._use_karon_final_toll(unbroken_boss)
+    if not bool(unbroken_battle.battle_objective_flags.get("karon_final_toll", false)):
+        return _fail("Unbroken Final Toll should apply existing pressure flag.")
+    if bool(unbroken_battle.battle_objective_flags.get("karon_final_toll_broken", false)):
+        return _fail("Unbroken Final Toll should not set broken flag.")
+    if not unbroken_battle.boss_event_history.has("karon_final_toll"):
+        return _fail("Unbroken Final Toll should record existing pressure event.")
+    if String(unbroken_battle.hud.transition_reason_label.text).find("Final Toll") < 0:
+        return _fail("Unbroken Final Toll transition text should name the charged action.")
+    unbroken_battle.queue_free()
+    await process_frame
+
+    var broken_battle = await _spawn_battle(CH10_05_STAGE)
+    var broken_boss = _find_boss(broken_battle)
+    if broken_boss == null:
+        return _fail("CH10_05 should spawn a boss for broken outcome coverage.")
+    broken_battle._progress_boss_lock(broken_boss, &"object", 2)
+    broken_battle._progress_boss_lock(broken_boss, &"name", 1)
+    if not broken_battle._is_boss_lock_broken(broken_boss):
+        return _fail("Final Toll lock should be broken before broken outcome assertion.")
+    broken_battle._use_karon_final_toll(broken_boss)
+    if bool(broken_battle.battle_objective_flags.get("karon_final_toll", false)):
+        return _fail("Broken Final Toll should cancel the full pressure flag.")
+    if not bool(broken_battle.battle_objective_flags.get("karon_final_toll_broken", false)):
+        return _fail("Broken Final Toll should record a downgraded/broken flag.")
+    if not broken_battle.boss_event_history.has("karon_final_toll_broken"):
+        return _fail("Broken Final Toll should record a broken outcome event.")
+    if String(broken_battle.hud.transition_reason_label.text).find("Final Toll") < 0:
+        return _fail("Broken Final Toll transition text should name the charged action.")
+    broken_battle.queue_free()
+    await process_frame
     return true
 
 func _spawn_battle(stage) -> Node:

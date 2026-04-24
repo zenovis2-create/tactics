@@ -104,14 +104,14 @@ Verification:
 
 ### 1.5 Broken/failure outcome
 
-- [ ] Broken lock downgrades or cancels charged action.
-- [ ] Failed lock applies existing pressure, not instant wipe.
-- [ ] Result/transition text records whether lock was broken.
+- [x] Broken lock downgrades or cancels charged action.
+- [x] Failed lock applies existing pressure, not instant wipe.
+- [x] Result/transition text records whether lock was broken.
 
 Verification:
 
-- [ ] Runner asserts broken lock changes action outcome.
-- [ ] Runner asserts unbroken lock still behaves predictably.
+- [x] Runner asserts broken lock changes action outcome.
+- [x] Runner asserts unbroken lock still behaves predictably.
 
 ---
 

@@ -1337,6 +1337,20 @@ func _use_karon_name_severance(enemy: UnitActor) -> void:
 func _use_karon_final_toll(enemy: UnitActor) -> void:
     if status_service == null:
         return
+    if _is_boss_lock_broken(enemy):
+        _set_enemy_skill_cooldown(enemy, &"all_out_attack", 1)
+        _record_boss_event("karon_final_toll_broken")
+        battle_objective_flags["karon_final_toll_broken"] = true
+        battle_objective_flags.erase("karon_final_toll")
+        _refresh_objective_surfaces()
+        hud.set_transition_reason("boss_lock_broken", {
+            "unit": enemy.unit_data.unit_id if enemy != null and enemy.unit_data != null else &"",
+            "action": "Final Toll",
+            "outcome": "downgraded",
+            "break_text": String(_get_boss_lock_state(enemy).get("break_text", "The charged action weakens."))
+        })
+        _play_battle_flash(Color(0.58, 0.86, 1.0, 0.18), 0.18)
+        return
     for ally in ally_units:
         if not is_instance_valid(ally) or ally.is_defeated():
             continue
@@ -1346,8 +1360,14 @@ func _use_karon_final_toll(enemy: UnitActor) -> void:
     _set_enemy_skill_cooldown(enemy, &"all_out_attack", 2)
     _record_boss_event("karon_final_toll")
     battle_objective_flags["karon_final_toll"] = true
+    battle_objective_flags.erase("karon_final_toll_broken")
     _refresh_objective_surfaces()
-    hud.set_transition_reason("karon_phase_two", _build_karon_phase_three_payload(enemy, "The bell tolls once more. Every name answers now."))
+    hud.set_transition_reason("boss_lock_unbroken", {
+        "unit": enemy.unit_data.unit_id if enemy != null and enemy.unit_data != null else &"",
+        "action": "Final Toll",
+        "outcome": "pressure_applied",
+        "failure_text": String(_get_boss_lock_state(enemy).get("failure_text", "The charged action lands."))
+    })
     _play_battle_flash(Color(1.0, 0.78, 0.62, 0.26), 0.26)
     _play_world_fx("hit_spark.png", enemy.grid_position, Color(1.0, 0.88, 0.72, 0.98), 0.48, 1.18)
 
@@ -4728,6 +4748,10 @@ func _get_boss_lock_state(boss_unit: UnitActor) -> Dictionary:
     if boss_unit == null or not is_instance_valid(boss_unit):
         return {}
     return boss_lock_state_by_unit.get(boss_unit.get_instance_id(), {}).duplicate(true)
+
+func _is_boss_lock_broken(boss_unit: UnitActor) -> bool:
+    var state: Dictionary = _get_boss_lock_state(boss_unit)
+    return bool(state.get("broken", false))
 
 func _progress_boss_lock(boss_unit: UnitActor, lock_type: StringName, amount: int = 1) -> Dictionary:
     if boss_unit == null or not is_instance_valid(boss_unit):
