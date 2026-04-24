@@ -134,6 +134,7 @@ var selected_unit: UnitActor
 var reachable_cells: Array = []
 var pending_move_origins: Dictionary = {}
 var battle_reward_log: Array[String] = []
+var battle_memory_recovery_log: Array[String] = []
 var last_result_summary: Dictionary = {}
 var equipped_accessory_by_unit_id: Dictionary = {}
 var equipped_weapon_by_unit_id: Dictionary = {}
@@ -224,6 +225,7 @@ func bootstrap_battle() -> void:
     current_phase = BattlePhase.BATTLE_INIT
     phase_transition_history.clear()
     battle_reward_log.clear()
+    battle_memory_recovery_log.clear()
     last_result_summary.clear()
     boss_marked_target_id = -1
     boss_charge_pending = false
@@ -1615,6 +1617,7 @@ func _resolve_interaction(unit: UnitActor, object_actor: InteractiveObjectActor)
 
     _handle_stage_interaction_flags(result.get("object_id", &"interactive_object"))
     _progress_boss_lock_for_event(&"object")
+    _record_memory_recovery_entry("Stage object relief: %s stabilized memory pressure." % String(result.get("object_id", &"interactive_object")))
     var reward_detail: String = _format_interaction_detail(result)
     var objective_state: Dictionary = get_objective_state_snapshot()
     _record_reward_entry(reward_detail)
@@ -2128,6 +2131,7 @@ func _on_battle_victory() -> void:
         "optional_objectives_completed": completed_objectives.duplicate(),
         "optional_objectives_failed": objective_result.get("failed", []).duplicate(),
         "control_relief_entries": _get_control_relief_result_entries(),
+        "memory_recovery_entries": battle_memory_recovery_log.duplicate(),
         "reward_entries": battle_reward_log.duplicate(),
         "unit_exp_results": [],
         "bonus_exp_pool": 0,
@@ -3590,6 +3594,9 @@ func _build_result_summary_text(summary: Dictionary) -> String:
     var control_relief_entries := _variant_to_string_array(summary.get("control_relief_entries", []))
     if not control_relief_entries.is_empty():
         _append_result_section(lines, "Control Relief", control_relief_entries)
+    var memory_recovery_entries := _variant_to_string_array(summary.get("memory_recovery_entries", []))
+    if not memory_recovery_entries.is_empty():
+        _append_result_section(lines, "Memory Recovery", memory_recovery_entries)
     var fragment_id := String(summary.get("fragment_id", ""))
     if not fragment_id.is_empty():
         lines.append("Memory Fragment: %s" % fragment_id)
@@ -4899,6 +4906,7 @@ func _check_boss_special_events(enemy: UnitActor, hp_percent: float) -> void:
                 var name_call_payload: Dictionary = _build_name_call_payload()
                 last_name_call_line = String(name_call_payload.get("line", "")).strip_edges()
                 last_name_call_speaker_id = StringName(name_call_payload.get("speaker_id", &""))
+                _apply_name_call_memory_relief(anchor)
                 var hud_payload := {"unit": enemy.unit_data.unit_id, "anchor": anchor.unit_data.unit_id}
                 if not last_name_call_line.is_empty():
                     hud_payload["speaker"] = last_name_call_speaker_id
@@ -4907,6 +4915,31 @@ func _check_boss_special_events(enemy: UnitActor, hp_percent: float) -> void:
                 hud.set_transition_reason("karon_name_call_anchor", hud_payload)
                 _play_battle_flash(Color(0.93, 0.79, 0.56, 0.18), 0.2)
                 _play_world_fx("mark_ring.png", anchor.grid_position, Color(1.0, 0.866667, 0.635294, 0.92), 0.32, 1.0)
+
+func _apply_name_call_memory_relief(anchor: UnitActor) -> void:
+    if status_service == null:
+        return
+    var cleansed_total: int = 0
+    for ally in ally_units:
+        if not is_instance_valid(ally) or ally.is_defeated():
+            continue
+        var stack_count: int = status_service.get_oblivion_stack(ally)
+        if stack_count <= 0:
+            continue
+        status_service.cleanse_stack(ally, 1, "name_call_memory_relief")
+        cleansed_total += 1
+    if cleansed_total > 0:
+        if telemetry_service != null:
+            telemetry_service.record_oblivion_cleansed(cleansed_total)
+        _record_memory_recovery_entry("Name Call memory relief: %d ally pressure reduced by one threshold." % cleansed_total)
+        battle_objective_flags["name_call_memory_relief"] = true
+
+func _record_memory_recovery_entry(entry_text: String) -> void:
+    var normalized_entry := entry_text.strip_edges()
+    if normalized_entry.is_empty():
+        return
+    if not battle_memory_recovery_log.has(normalized_entry):
+        battle_memory_recovery_log.append(normalized_entry)
 
 func _build_name_call_payload() -> Dictionary:
     if stage_data == null or stage_data.stage_id != &"CH10_05":

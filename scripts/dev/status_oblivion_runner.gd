@@ -21,6 +21,7 @@ func _run() -> void:
 
 	if not _assert_applies_oblivion_field(): return
 	if not _assert_stack_apply_clamp(svc): return
+	if not _assert_stack_threshold_labels(svc): return
 	if not _assert_stack_effects_per_level(svc): return
 	if not _assert_cleanse_reduces_stack(svc): return
 	if not _assert_skills_sealed_at_max(svc): return
@@ -52,6 +53,20 @@ func _assert_stack_apply_clamp(svc: StatusService) -> bool:
 	var result := svc.apply_stack(null, 2, "test")
 	if not result.is_empty():
 		return _fail("apply_stack(null) should return empty dict")
+	return true
+
+func _assert_stack_threshold_labels(svc: StatusService) -> bool:
+	var expected: Array[String] = ["normal", "warning", "restricted / unstable", "severe / recoverable"]
+	for index in range(expected.size()):
+		if svc.get_threshold_label_for_stack(index) != expected[index]:
+			return _fail("Stack %d threshold label should be '%s'" % [index, expected[index]])
+	if svc.get_threshold_label_for_stack(-9) != "normal":
+		return _fail("Negative stack threshold label should clamp to normal")
+	if svc.get_threshold_label_for_stack(99) != "severe / recoverable":
+		return _fail("High stack threshold label should clamp to severe / recoverable")
+	var snapshot: Dictionary = svc.get_status_snapshot(null)
+	if String(snapshot.get("threshold_label", "")) != "normal" or int(snapshot.get("oblivion_stack", -1)) != 0:
+		return _fail("Null status snapshot should expose normal threshold and stack 0")
 	return true
 
 func _assert_stack_effects_per_level(svc: StatusService) -> bool:

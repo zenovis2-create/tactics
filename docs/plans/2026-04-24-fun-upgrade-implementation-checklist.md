@@ -152,28 +152,28 @@ Verification:
 
 ### 3.1 Threshold copy
 
-- [ ] Define readable stack threshold labels:
+- [x] Define readable stack threshold labels:
   - 0: normal
   - 1: warning
   - 2: restricted / unstable
   - 3: severe / recoverable
-- [ ] Surface the label in HUD or status snapshot.
+- [x] Surface the label in HUD or status snapshot.
 
 Verification:
 
-- [ ] `status_service_runner.gd` or a new focused runner asserts threshold labels.
+- [x] `status_service_runner.gd` or a new focused runner asserts threshold labels.
 
 ### 3.2 Recovery hooks
 
-- [ ] Name command can reduce or block memory pressure where appropriate.
-- [ ] Stage object relief text explains memory pressure reduction.
-- [ ] Result screen can mention memory recovery when relevant.
+- [x] Name command can reduce or block memory pressure where appropriate.
+- [x] Stage object relief text explains memory pressure reduction.
+- [x] Result screen can mention memory recovery when relevant.
 
 Verification:
 
-- [ ] `true_ending_runner.gd` passes.
-- [ ] `ending_criteria_ui_runner.gd` passes.
-- [ ] `postgame_surface_runner.gd` passes.
+- [x] `true_ending_runner.gd` passes.
+- [x] `ending_criteria_ui_runner.gd` passes.
+- [x] `postgame_surface_runner.gd` passes.
 
 ---
 

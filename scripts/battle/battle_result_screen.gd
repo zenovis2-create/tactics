@@ -87,6 +87,12 @@ func show_result(result: Dictionary) -> void:
 			])
 
 	# 기억 조각
+	var memory_recovery_entries: Array = result.get("memory_recovery_entries", [])
+	if not memory_recovery_entries.is_empty():
+		body_lines.append("[b]Memory Recovery:[/b]")
+		for entry in memory_recovery_entries:
+			body_lines.append("  • %s" % str(entry))
+
 	var fragment_id: String = str(result.get("fragment_id", ""))
 	if not fragment_id.is_empty():
 		body_lines.append("[b]Memory Fragment:[/b] %s" % fragment_id)

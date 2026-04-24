@@ -14,6 +14,7 @@ const STACK_EFFECTS: Array[Dictionary] = [
 ]
 
 const MAX_STACK := 3
+const STACK_LABELS: Array[String] = ["normal", "warning", "restricted / unstable", "severe / recoverable"]
 
 # unit_instance_id -> stack count (0-3)
 var _stacks: Dictionary = {}
@@ -69,6 +70,20 @@ func get_oblivion_stack(unit: UnitActor) -> int:
 	if not is_instance_valid(unit):
 		return 0
 	return _stacks.get(unit.get_instance_id(), 0)
+
+func get_threshold_label_for_stack(stack: int) -> String:
+	return STACK_LABELS[clampi(stack, 0, MAX_STACK)]
+
+func get_threshold_label(unit: UnitActor) -> String:
+	return get_threshold_label_for_stack(get_oblivion_stack(unit))
+
+func get_status_snapshot(unit: UnitActor) -> Dictionary:
+	var stack: int = get_oblivion_stack(unit)
+	return {
+		"oblivion_stack": stack,
+		"threshold_label": get_threshold_label_for_stack(stack),
+		"effects": STACK_EFFECTS[clampi(stack, 0, MAX_STACK)].duplicate()
+	}
 
 ## Get the stat modifier dictionary for a unit's current stack level.
 func get_effects(unit: UnitActor) -> Dictionary:
