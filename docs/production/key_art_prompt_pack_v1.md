@@ -15,7 +15,7 @@ These prompts should stay within the same world and visual language as the curre
 - Do not reveal Zero identity
 - Do not reveal final tower truth
 - Do not reveal late-game memory twist details
-- Do not use Karon/Karuon endgame specifics
+- Do not use Karuon endgame specifics
 - Do not make the image look like a generic mobile gacha ad
 - Do not overuse bloom, lens flare, or glossy sci-fi light
 

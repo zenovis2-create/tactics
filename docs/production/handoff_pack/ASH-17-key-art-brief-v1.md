@@ -22,7 +22,7 @@ Create one spoiler-safe vertical slice hero image for Ashen Bell.
 - do not reveal Zero identity
 - do not reveal final tower truths
 - do not reveal late-game twist information
-- do not use Karon/Karuon endgame specifics
+- do not use Karuon endgame specifics
 
 ## Visual Anchors
 
