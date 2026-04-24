@@ -37,6 +37,94 @@ const OBJECT_VISUAL_CONTRACTS := {
         "inner_active": Color(0.129412, 0.356863, 0.266667, 0.95),
         "inner_resolved": Color(0.101961, 0.25098, 0.184314, 0.72),
         "accent": Color(0.615686, 0.952941, 0.784314, 0.98)
+    },
+    "gate_control": {
+        "icon": "gate_control.png",
+        "marker_active": Color(0.760784, 0.65098, 0.321569, 0.9),
+        "marker_resolved": Color(0.521569, 0.431373, 0.203922, 0.62),
+        "inner_active": Color(0.305882, 0.247059, 0.105882, 0.95),
+        "inner_resolved": Color(0.211765, 0.172549, 0.0823529, 0.76),
+        "accent": Color(1.0, 0.901961, 0.603922, 0.98)
+    },
+    "well": {
+        "icon": "memory_well.png",
+        "marker_active": Color(0.611765, 0.807843, 0.862745, 0.88),
+        "marker_resolved": Color(0.380392, 0.552941, 0.596078, 0.62),
+        "inner_active": Color(0.14902, 0.247059, 0.301961, 0.94),
+        "inner_resolved": Color(0.113725, 0.180392, 0.223529, 0.76),
+        "accent": Color(0.866667, 0.94902, 1.0, 0.98)
+    },
+    "battery": {
+        "icon": "battery_emplacement.png",
+        "marker_active": Color(0.811765, 0.556863, 0.254902, 0.9),
+        "marker_resolved": Color(0.52549, 0.337255, 0.141176, 0.64),
+        "inner_active": Color(0.266667, 0.176471, 0.0745098, 0.95),
+        "inner_resolved": Color(0.184314, 0.117647, 0.0588235, 0.76),
+        "accent": Color(0.996078, 0.807843, 0.529412, 0.98)
+    },
+    "shrine": {
+        "icon": "resin_shrine.png",
+        "marker_active": Color(0.752941, 0.65098, 0.313726, 0.88),
+        "marker_resolved": Color(0.486275, 0.396078, 0.180392, 0.62),
+        "inner_active": Color(0.211765, 0.184314, 0.0862745, 0.94),
+        "inner_resolved": Color(0.14902, 0.129412, 0.0666667, 0.76),
+        "accent": Color(0.913725, 0.819608, 0.556863, 0.98)
+    },
+    "floodgate": {
+        "icon": "floodgate_wheel.png",
+        "marker_active": Color(0.52549, 0.788235, 0.862745, 0.9),
+        "marker_resolved": Color(0.313726, 0.533333, 0.584314, 0.64),
+        "inner_active": Color(0.117647, 0.227451, 0.27451, 0.95),
+        "inner_resolved": Color(0.0901961, 0.164706, 0.2, 0.76),
+        "accent": Color(0.85098, 0.972549, 1.0, 0.98)
+    },
+    "evidence": {
+        "icon": "truth_dais.png",
+        "marker_active": Color(0.901961, 0.901961, 0.862745, 0.9),
+        "marker_resolved": Color(0.603922, 0.596078, 0.541176, 0.64),
+        "inner_active": Color(0.231373, 0.227451, 0.184314, 0.95),
+        "inner_resolved": Color(0.156863, 0.152941, 0.12549, 0.76),
+        "accent": Color(0.980392, 0.980392, 0.917647, 0.98)
+    },
+    "bell": {
+        "icon": "bell_frame.png",
+        "marker_active": Color(0.913725, 0.866667, 0.619608, 0.9),
+        "marker_resolved": Color(0.596078, 0.529412, 0.321569, 0.64),
+        "inner_active": Color(0.262745, 0.223529, 0.109804, 0.95),
+        "inner_resolved": Color(0.184314, 0.152941, 0.0823529, 0.76),
+        "accent": Color(1.0, 0.945098, 0.760784, 0.98)
+    },
+    "chain_control": {
+        "icon": "anchor_chain.png",
+        "marker_active": Color(0.854902, 0.854902, 0.815686, 0.9),
+        "marker_resolved": Color(0.552941, 0.545098, 0.505882, 0.64),
+        "inner_active": Color(0.227451, 0.219608, 0.188235, 0.95),
+        "inner_resolved": Color(0.156863, 0.14902, 0.12549, 0.76),
+        "accent": Color(0.956863, 0.937255, 0.843137, 0.98)
+    },
+    "keeper_lectern": {
+        "icon": "archive_lectern.png",
+        "marker_active": Color(0.780392, 0.890196, 0.941176, 0.9),
+        "marker_resolved": Color(0.501961, 0.603922, 0.639216, 0.64),
+        "inner_active": Color(0.164706, 0.219608, 0.258824, 0.95),
+        "inner_resolved": Color(0.113725, 0.156863, 0.184314, 0.76),
+        "accent": Color(0.909804, 0.968627, 1.0, 0.98)
+    },
+    "route_marker": {
+        "icon": "split_marker_post.png",
+        "marker_active": Color(0.858824, 0.819608, 0.592157, 0.9),
+        "marker_resolved": Color(0.556863, 0.505882, 0.313726, 0.64),
+        "inner_active": Color(0.25098, 0.211765, 0.105882, 0.95),
+        "inner_resolved": Color(0.176471, 0.145098, 0.0784314, 0.76),
+        "accent": Color(0.984314, 0.933333, 0.717647, 0.98)
+    },
+    "latch": {
+        "icon": "transfer_gate_latch.png",
+        "marker_active": Color(0.760784, 0.878431, 0.666667, 0.9),
+        "marker_resolved": Color(0.470588, 0.588235, 0.380392, 0.64),
+        "inner_active": Color(0.152941, 0.247059, 0.121569, 0.95),
+        "inner_resolved": Color(0.105882, 0.172549, 0.0862745, 0.76),
+        "accent": Color(0.909804, 0.984314, 0.8, 0.98)
     }
 }
 const DEFAULT_OBJECT_VISUAL_FAMILY := "altar"
@@ -216,6 +304,28 @@ func _get_object_visual_family(object_type: String) -> String:
     match object_type:
         "door", "gate":
             return "gate"
+        "gate_control":
+            return "gate_control"
+        "well":
+            return "well"
+        "battery":
+            return "battery"
+        "shrine":
+            return "shrine"
+        "floodgate":
+            return "floodgate"
+        "evidence":
+            return "evidence"
+        "bell":
+            return "bell"
+        "chain_control":
+            return "chain_control"
+        "keeper_lectern":
+            return "keeper_lectern"
+        "route_marker":
+            return "route_marker"
+        "latch":
+            return "latch"
         "lever":
             return "lever"
         "chest":

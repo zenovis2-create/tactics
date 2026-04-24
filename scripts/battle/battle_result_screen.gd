@@ -76,6 +76,16 @@ func show_result(result: Dictionary) -> void:
 				" LEVEL UP!" if bool(entry.get("leveled_up", false)) else ""
 			])
 
+	var bonus_exp_pool: int = int(result.get("bonus_exp_pool", 0))
+	var bonus_exp_results: Array = result.get("bonus_exp_results", [])
+	if bonus_exp_pool > 0 and not bonus_exp_results.is_empty():
+		body_lines.append("[b]Bonus EXP:[/b] %d" % bonus_exp_pool)
+		for entry in bonus_exp_results:
+			body_lines.append("  • %s +%d bonus EXP" % [
+				str(entry.get("display_name", entry.get("unit_id", "Unit"))),
+				int(entry.get("exp_gain", 0))
+			])
+
 	# 기억 조각
 	var fragment_id: String = str(result.get("fragment_id", ""))
 	if not fragment_id.is_empty():
@@ -115,13 +125,39 @@ func show_result(result: Dictionary) -> void:
 		if support_bond > 0:
 			body_lines.append("[b]Support Bond:[/b] %d" % support_bond)
 
+	var support_conversations: Array = result.get("support_conversations", [])
+	if not support_conversations.is_empty():
+		body_lines.append("[b]Support Rank Up![/b]")
+		for entry in support_conversations:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var pair_label: String = str(entry.get("pair_label", "Support"))
+			var rank_label: String = str(entry.get("rank_label", ""))
+			var conversation_text: String = str(entry.get("text", "")).strip_edges()
+			var header := "  • %s" % pair_label
+			if not rank_label.is_empty():
+				header += " (%s)" % rank_label
+			body_lines.append(header)
+			if not conversation_text.is_empty():
+				body_lines.append("    %s" % conversation_text)
+
+	var name_call_line: String = str(result.get("name_call_line", "")).strip_edges()
+	if not name_call_line.is_empty():
+		body_lines.append("[b]Name Call:[/b] %s" % name_call_line)
+
+	var telemetry_summary: Array = result.get("telemetry_summary", [])
+	if not telemetry_summary.is_empty():
+		body_lines.append("[b]Telemetry:[/b]")
+		for entry in telemetry_summary:
+			body_lines.append("  • %s" % str(entry))
+
 	if title_label != null:
 		title_label.text = title
 	if body_label != null:
 		body_label.text = "\n".join(body_lines)
 
 	# 버튼 포커스
-	if confirm_button != null:
+	if confirm_button != null and confirm_button.is_inside_tree():
 		confirm_button.grab_focus()
 
 func hide_result() -> void:

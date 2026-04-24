@@ -11,6 +11,27 @@ const STEP_STATUS_APPLY: StringName = &"status_apply"
 const STEP_DEFEAT_CHECK: StringName = &"defeat_check"
 const STEP_COUNTER_CHECK: StringName = &"counter_check"
 
+const WEATHER_EFFECTS: Dictionary = {
+    "clear": {"range_modifier": 0},
+    "rain": {"range_modifier": 0},
+    "night": {"range_modifier": -1}
+}
+
+var weather_type: String = "clear"
+
+func set_weather_type(new_weather_type: String) -> void:
+    weather_type = new_weather_type.strip_edges().to_lower()
+    if weather_type.is_empty() or not WEATHER_EFFECTS.has(weather_type):
+        weather_type = "clear"
+
+func _apply_weather_range_modifier(base_range: int, weather: String = "") -> int:
+    var normalized_weather := weather.strip_edges().to_lower()
+    if normalized_weather.is_empty() or not WEATHER_EFFECTS.has(normalized_weather):
+        normalized_weather = weather_type if WEATHER_EFFECTS.has(weather_type) else "clear"
+    if normalized_weather == "night":
+        return max(1, base_range + int(WEATHER_EFFECTS["night"].get("range_modifier", 0)))
+    return base_range
+
 func resolve_attack(attacker: UnitActor, defender: UnitActor, skill: SkillData = null, context: Dictionary = {}) -> Dictionary:
     var trace: Array = []
     var primary_result := {
@@ -79,7 +100,7 @@ func _resolve_counterattack(original_attacker: UnitActor, defender: UnitActor, c
         return counter_event
 
     var defender_skill: SkillData = defender.get_default_skill()
-    var defender_range: int = defender_skill.range if defender_skill != null else defender.get_attack_range()
+    var defender_range: int = _apply_weather_range_modifier(defender_skill.range if defender_skill != null else defender.get_attack_range())
     var distance: int = abs(original_attacker.grid_position.x - defender.grid_position.x) + abs(original_attacker.grid_position.y - defender.grid_position.y)
     if distance > defender_range:
         counter_event["reason"] = "counterattack_out_of_range"
@@ -143,6 +164,8 @@ func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData
     var terrain_defense_bonus := int(context.get("defense_bonus", 0))
     var defense_value: int = defender.get_defense() + terrain_defense_bonus
     var damage: int = max(1, attack_value - defense_value)
+    var damage_multiplier: float = float(context.get("damage_multiplier", 1.0))
+    damage = max(1, int(ceil(float(damage) * damage_multiplier)))
 
     return {
         "step": STEP_GUARD_CALC,
@@ -150,6 +173,7 @@ func _step_guard_calc(attacker: UnitActor, defender: UnitActor, skill: SkillData
         "defense_value": defense_value,
         "terrain_defense_bonus": terrain_defense_bonus,
         "terrain_type": context.get("terrain_type", "plain"),
+        "damage_multiplier": damage_multiplier,
         "damage": damage
     }
 

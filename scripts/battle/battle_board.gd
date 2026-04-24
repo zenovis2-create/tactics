@@ -5,26 +5,55 @@ const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 const StageData = preload("res://scripts/data/stage_data.gd")
 const TILE_ICON_DIR := "assets/ui/tile_icons_generated/"
 const TILE_CARD_DIR := "assets/ui/tile_cards_generated/"
+const TILE_CARD_INSET := 2.0
+const TILE_ICON_SIZE := 18.0
 const TERRAIN_OVERLAY_CONTRACTS := {
-    &"plain": {"family": "plain", "card": "plain.png", "card_alpha": 0.05, "icon": ""},
-    &"forest": {"family": "forest", "card": "forest.png", "card_alpha": 0.16, "icon": "forest.png"},
-    &"wall": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"},
-    &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.14, "icon": "battery.png"},
-    &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.12, "icon": "cathedral.png"},
-    &"bell": {"family": "bell", "card": "bell.png", "card_alpha": 0.12, "icon": "bell.png"},
-    &"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.14, "icon": "bridge.png"},
-    &"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.1, "icon": "bell.png"},
-    &"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.18, "icon": "highground.png"},
-    &"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.12, "icon": "wall.png"}
+    &"plain": {"family": "plain", "card": "plain.png", "card_alpha": 0.16, "icon": ""},
+    &"forest": {"family": "forest", "card": "forest.png", "card_alpha": 0.28, "icon": "forest.png"},
+    &"wall": {"family": "wall", "card": "wall.png", "card_alpha": 0.22, "icon": "wall.png"},
+    &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.2, "icon": "battery.png"},
+    &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.18, "icon": "cathedral.png"},
+    &"bell": {"family": "bell", "card": "bell.png", "card_alpha": 0.18, "icon": "bell.png"},
+    &"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.2, "icon": "bridge.png"},
+    &"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.16, "icon": "bell.png"},
+    &"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.24, "icon": "highground.png"},
+    &"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.2, "icon": "wall.png"}
 }
 
 var stage_data: StageData
 var _tile_icon_cache: Dictionary = {}
 var _tile_card_cache: Dictionary = {}
+var _bond_links: Array[Dictionary] = []
 
 func set_stage(data: StageData) -> void:
     stage_data = data
     queue_redraw()
+
+func set_bond_links(links: Array[Dictionary]) -> void:
+    _bond_links = []
+    for entry in links:
+        if entry is Dictionary:
+            _bond_links.append((entry as Dictionary).duplicate(true))
+    queue_redraw()
+
+func get_debug_snapshot() -> Dictionary:
+    return {
+        "bond_links": _bond_links.duplicate(true)
+    }
+
+func get_surface_contract_snapshot() -> Dictionary:
+    return {
+        "surface_family": _get_stage_surface_family(),
+        "backdrop_family": _get_backdrop_family(),
+        "backdrop_density": _get_backdrop_density(),
+        "tile_card_inset": TILE_CARD_INSET,
+        "tile_icon_size": TILE_ICON_SIZE,
+        "card_alphas": {
+            "plain": float(TERRAIN_OVERLAY_CONTRACTS[&"plain"].get("card_alpha", 0.0)),
+            "forest": float(TERRAIN_OVERLAY_CONTRACTS[&"forest"].get("card_alpha", 0.0)),
+            "wall": float(TERRAIN_OVERLAY_CONTRACTS[&"wall"].get("card_alpha", 0.0)),
+        }
+    }
 
 func _draw() -> void:
     if stage_data == null:
@@ -41,6 +70,7 @@ func _draw() -> void:
     draw_rect(Rect2(Vector2(backdrop_rect.position.x, backdrop_rect.position.y + backdrop_rect.size.y * 0.6), Vector2(backdrop_rect.size.x, backdrop_rect.size.y * 0.4)), palette.backdrop_bottom, true)
     draw_circle(Vector2(-120.0, board_size.y * 0.8), 240.0, palette.backdrop_glow_left)
     draw_circle(Vector2(board_size.x + 140.0, -40.0), 220.0, palette.backdrop_glow_right)
+    _draw_backdrop_family_overlay(backdrop_rect, board_rect, palette)
     _draw_stage_backdrop_signature(backdrop_rect, board_rect, palette)
 
     draw_rect(board_rect.grow(30.0), palette.frame_outer, true)
@@ -56,6 +86,7 @@ func _draw() -> void:
     draw_circle(board_rect.get_center() + Vector2(board_size.x * 0.18, -board_size.y * 0.22), board_size.x * 0.14, palette.board_glow_edge)
     _draw_corner_ornaments(board_rect, palette.frame_highlight)
     _draw_stage_signature(board_rect, palette)
+    _draw_surface_family_overlay(board_rect, palette)
     _draw_ambient_scene_accents(board_rect)
 
     for y in range(stage_data.grid_size.y):
@@ -88,7 +119,43 @@ func _draw() -> void:
         var y_pos := float(y * stage_data.cell_size.y)
         draw_line(Vector2(0.0, y_pos), Vector2(board_size.x, y_pos), Color(1, 1, 1, 0.08), 1.0)
 
+    _draw_bond_links()
     draw_rect(board_rect, palette.frame_highlight, false, 3.0)
+
+func _draw_bond_links() -> void:
+    if stage_data == null or _bond_links.is_empty():
+        return
+
+    for entry in _bond_links:
+        var from_cell: Vector2i = entry.get("from_cell", Vector2i.ZERO)
+        var to_cell: Vector2i = entry.get("to_cell", Vector2i.ZERO)
+        var bond_level: int = int(entry.get("bond_level", 0))
+        var kind: String = String(entry.get("kind", "support"))
+        var from_center := _get_cell_center(from_cell)
+        var to_center := _get_cell_center(to_cell)
+        var line_color := Color(0.576, 0.835, 1.0, 0.78)
+        var glow_color := Color(0.353, 0.675, 1.0, 0.18)
+        var width := 4.0
+
+        if kind == "guard":
+            line_color = Color(1.0, 0.835, 0.545, 0.86)
+            glow_color = Color(1.0, 0.667, 0.486, 0.22)
+            width = 5.0
+        elif bond_level >= 4:
+            line_color = Color(0.702, 0.906, 1.0, 0.84)
+            glow_color = Color(0.459, 0.78, 1.0, 0.2)
+
+        draw_line(from_center, to_center, glow_color, width + 6.0)
+        draw_line(from_center, to_center, line_color, width)
+        draw_circle(to_center, 11.0 if kind == "guard" else 9.0, glow_color)
+        draw_circle(to_center, 5.0 if kind == "guard" else 4.0, line_color)
+        draw_circle(from_center, 6.0, Color(line_color.r, line_color.g, line_color.b, 0.5))
+
+func _get_cell_center(cell: Vector2i) -> Vector2:
+    return Vector2(
+        (float(cell.x) + 0.5) * stage_data.cell_size.x,
+        (float(cell.y) + 0.5) * stage_data.cell_size.y
+    )
 
 func _get_tile_color(cell: Vector2i, parity: int) -> Color:
     var palette := _get_palette()
@@ -224,6 +291,68 @@ func _draw_stage_backdrop_signature(backdrop_rect: Rect2, board_rect: Rect2, pal
         for offset_x in [-34.0, 0.0, 38.0]:
             draw_rect(Rect2(Vector2(center.x + offset_x, backdrop_rect.position.y + 54.0), Vector2(16.0, backdrop_rect.size.y * 0.62)), Color(0.118, 0.102, 0.224, 0.56), true)
         draw_circle(center, 26.0, Color(0.824, 0.918, 1.0, 0.08))
+        return
+
+func _draw_backdrop_family_overlay(backdrop_rect: Rect2, board_rect: Rect2, palette: Dictionary) -> void:
+    var backdrop_family := _get_backdrop_family()
+    if backdrop_family == "forest":
+        var horizon_y: float = backdrop_rect.position.y + backdrop_rect.size.y * 0.42
+        var trunk_color := Color(0.0196078, 0.054902, 0.0392157, 0.78)
+        var canopy_color := Color(0.0705882, 0.211765, 0.141176, 0.36)
+        var mist_band := Color(0.803922, 0.980392, 0.866667, 0.055)
+        for x_pos in [backdrop_rect.position.x + 48.0, backdrop_rect.position.x + 118.0, backdrop_rect.position.x + 188.0, backdrop_rect.end.x - 216.0, backdrop_rect.end.x - 128.0]:
+            draw_rect(Rect2(Vector2(x_pos, horizon_y - 18.0), Vector2(20.0, backdrop_rect.size.y * 0.64)), trunk_color, true)
+            draw_circle(Vector2(x_pos + 10.0, horizon_y - 34.0), 78.0, canopy_color)
+            draw_circle(Vector2(x_pos + 40.0, horizon_y - 20.0), 62.0, Color(canopy_color.r, canopy_color.g, canopy_color.b, 0.24))
+        draw_rect(Rect2(Vector2(backdrop_rect.position.x, horizon_y + 22.0), Vector2(backdrop_rect.size.x, 46.0)), Color(0.0392157, 0.109804, 0.0745098, 0.24), true)
+        draw_line(Vector2(backdrop_rect.position.x + 24.0, horizon_y + 8.0), Vector2(backdrop_rect.end.x - 24.0, horizon_y + 8.0), mist_band, 10.0)
+        draw_line(Vector2(backdrop_rect.position.x + 52.0, horizon_y + 34.0), Vector2(backdrop_rect.end.x - 62.0, horizon_y + 34.0), Color(0.886275, 1.0, 0.92549, 0.035), 6.0)
+        return
+
+    if backdrop_family == "fortress":
+        var horizon_y: float = backdrop_rect.position.y + backdrop_rect.size.y * 0.28
+        var wall_color := Color(0.0823529, 0.0901961, 0.117647, 0.72)
+        var tower_color := Color(0.105882, 0.113725, 0.145098, 0.82)
+        var slit_color := Color(0.756863, 0.803922, 0.890196, 0.09)
+        draw_rect(Rect2(Vector2(backdrop_rect.position.x, horizon_y + 26.0), Vector2(backdrop_rect.size.x, 84.0)), wall_color, true)
+        for x_pos in [backdrop_rect.position.x + 42.0, backdrop_rect.position.x + 180.0, backdrop_rect.position.x + 352.0, backdrop_rect.end.x - 392.0, backdrop_rect.end.x - 212.0, backdrop_rect.end.x - 74.0]:
+            draw_rect(Rect2(Vector2(x_pos, horizon_y - 42.0), Vector2(48.0, 152.0)), tower_color, true)
+            draw_rect(Rect2(Vector2(x_pos + 20.0, horizon_y - 8.0), Vector2(8.0, 20.0)), slit_color, true)
+            draw_rect(Rect2(Vector2(x_pos + 20.0, horizon_y + 42.0), Vector2(8.0, 20.0)), slit_color, true)
+        draw_line(Vector2(backdrop_rect.position.x, horizon_y + 24.0), Vector2(backdrop_rect.end.x, horizon_y + 24.0), Color(0.85098, 0.878431, 0.92549, 0.06), 3.0)
+        draw_line(Vector2(backdrop_rect.position.x, horizon_y + 110.0), Vector2(backdrop_rect.end.x, horizon_y + 110.0), Color(0.184314, 0.219608, 0.286275, 0.18), 4.0)
+        return
+
+    if backdrop_family == "city":
+        var skyline_y: float = backdrop_rect.position.y + backdrop_rect.size.y * 0.34
+        var tower_color := Color(0.101961, 0.0705882, 0.141176, 0.78)
+        var roof_color := Color(0.356863, 0.215686, 0.462745, 0.28)
+        for x_pos in [backdrop_rect.position.x + 36.0, backdrop_rect.position.x + 128.0, backdrop_rect.position.x + 236.0, backdrop_rect.end.x - 312.0, backdrop_rect.end.x - 188.0, backdrop_rect.end.x - 84.0]:
+            draw_rect(Rect2(Vector2(x_pos, skyline_y - 28.0), Vector2(34.0, 136.0)), tower_color, true)
+            draw_arc(Vector2(x_pos + 17.0, skyline_y - 26.0), 22.0, PI, TAU, 20, roof_color, 3.0)
+        draw_line(Vector2(backdrop_rect.position.x, skyline_y + 92.0), Vector2(backdrop_rect.end.x, skyline_y + 92.0), Color(0.917647, 0.780392, 0.968627, 0.05), 4.0)
+        draw_line(Vector2(backdrop_rect.position.x + 18.0, skyline_y + 54.0), Vector2(backdrop_rect.end.x - 18.0, skyline_y + 54.0), Color(0.533333, 0.337255, 0.662745, 0.09), 2.0)
+        return
+
+    if backdrop_family == "archive":
+        var shelf_y: float = backdrop_rect.position.y + backdrop_rect.size.y * 0.30
+        var shelf_color := Color(0.129412, 0.0941176, 0.0784314, 0.72)
+        var spine_color := Color(0.65098, 0.564706, 0.403922, 0.08)
+        for row in [0.0, 86.0]:
+            draw_rect(Rect2(Vector2(backdrop_rect.position.x, shelf_y + row), Vector2(backdrop_rect.size.x, 16.0)), shelf_color, true)
+            for x_pos in range(0, int(backdrop_rect.size.x), 44):
+                draw_rect(Rect2(Vector2(backdrop_rect.position.x + x_pos + 10.0, shelf_y + row - 58.0), Vector2(22.0, 58.0)), Color(0.180392, 0.137255, 0.109804, 0.62), true)
+                draw_line(Vector2(backdrop_rect.position.x + x_pos + 14.0, shelf_y + row - 46.0), Vector2(backdrop_rect.position.x + x_pos + 28.0, shelf_y + row - 46.0), spine_color, 2.0)
+        draw_line(Vector2(backdrop_rect.position.x + 32.0, shelf_y + 164.0), Vector2(backdrop_rect.end.x - 32.0, shelf_y + 164.0), Color(0.839216, 0.756863, 0.627451, 0.05), 4.0)
+        return
+
+    if backdrop_family == "final_bell":
+        var center := Vector2(backdrop_rect.position.x + backdrop_rect.size.x * 0.72, backdrop_rect.position.y + backdrop_rect.size.y * 0.28)
+        draw_arc(center, 120.0, 0.0, TAU, 44, Color(0.72549, 0.858824, 1.0, 0.18), 4.0)
+        draw_arc(center, 168.0, PI * 0.08, PI * 1.92, 44, Color(1.0, 0.741176, 0.917647, 0.16), 3.0)
+        for x_pos in [center.x - 56.0, center.x, center.x + 62.0]:
+            draw_rect(Rect2(Vector2(x_pos, backdrop_rect.position.y + 42.0), Vector2(18.0, backdrop_rect.size.y * 0.7)), Color(0.101961, 0.0862745, 0.176471, 0.64), true)
+        draw_line(Vector2(backdrop_rect.position.x + 24.0, backdrop_rect.position.y + backdrop_rect.size.y * 0.76), Vector2(backdrop_rect.end.x - 24.0, backdrop_rect.position.y + backdrop_rect.size.y * 0.48), Color(0.85098, 0.917647, 1.0, 0.045), 6.0)
         return
 
 func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
@@ -402,7 +531,12 @@ func _draw_tile_icon(rect: Rect2, file_name: String) -> void:
     var texture: Texture2D = _load_tile_icon(file_name)
     if texture == null:
         return
-    draw_texture_rect(texture, Rect2(rect.position + Vector2(6.0, 6.0), Vector2(16.0, 16.0)), false, Color(1.0, 1.0, 1.0, 0.72))
+    draw_texture_rect(
+        texture,
+        Rect2(rect.position + Vector2(6.0, 6.0), Vector2(TILE_ICON_SIZE, TILE_ICON_SIZE)),
+        false,
+        Color(1.0, 1.0, 1.0, 0.72)
+    )
 
 func _load_tile_icon(file_name: String) -> Texture2D:
     if _tile_icon_cache.has(file_name):
@@ -417,7 +551,12 @@ func _draw_tile_card(rect: Rect2, file_name: String, alpha: float) -> void:
     var texture: Texture2D = _load_tile_card(file_name)
     if texture == null:
         return
-    draw_texture_rect(texture, Rect2(rect.position + Vector2(8.0, 8.0), Vector2(24.0, 24.0)), false, Color(1.0, 1.0, 1.0, alpha))
+    draw_texture_rect(
+        texture,
+        Rect2(rect.position + Vector2(TILE_CARD_INSET, TILE_CARD_INSET), rect.size - Vector2(TILE_CARD_INSET * 2.0, TILE_CARD_INSET * 2.0)),
+        false,
+        Color(1.0, 1.0, 1.0, alpha)
+    )
 
 func _load_tile_card(file_name: String) -> Texture2D:
     if _tile_card_cache.has(file_name):
@@ -437,6 +576,14 @@ func _draw_spawn_chevrons(rect: Rect2, color: Color, enemy: bool) -> void:
     draw_line(center + Vector2(8.0, 2.0 * y_dir), center + Vector2(0.0, -6.0 * y_dir), color, 2.0)
 
 func _draw_stage_cell_motif(stage_key: String, cell: Vector2i, rect: Rect2) -> void:
+    if stage_key.begins_with("CH02") or stage_key.begins_with("CH06"):
+        if cell.y % 2 == 0:
+            draw_line(rect.position + Vector2(10.0, rect.size.y * 0.32), rect.position + Vector2(rect.size.x - 10.0, rect.size.y * 0.32), Color(0.815686, 0.843137, 0.905882, 0.05), 1.0)
+            draw_line(rect.position + Vector2(10.0, rect.size.y * 0.68), rect.position + Vector2(rect.size.x - 10.0, rect.size.y * 0.68), Color(0.431373, 0.462745, 0.537255, 0.06), 1.0)
+        if cell.x % 3 == 0:
+            draw_line(rect.position + Vector2(rect.size.x * 0.48, 10.0), rect.position + Vector2(rect.size.x * 0.48, rect.size.y - 10.0), Color(0.756863, 0.780392, 0.839216, 0.04), 1.0)
+        return
+
     if stage_key.begins_with("CH03"):
         if (cell.x + cell.y) % 3 == 0:
             draw_circle(rect.get_center() + Vector2(-8.0, 6.0), 3.0, Color(0.615686, 0.905882, 0.713725, 0.08))
@@ -576,6 +723,108 @@ func _draw_stage_signature(board_rect: Rect2, palette: Dictionary) -> void:
         draw_line(board_rect.get_center() + Vector2(0.0, -140.0), board_rect.get_center() + Vector2(0.0, 140.0), Color(1.0, 0.823529, 0.945098, 0.05), 1.0)
         draw_circle(board_rect.get_center(), 18.0, secondary)
         return
+
+func _draw_surface_family_overlay(board_rect: Rect2, palette: Dictionary) -> void:
+    var surface_family := _get_stage_surface_family()
+    if surface_family == "fortress":
+        var pillar_color := Color(0.090196, 0.0980392, 0.129412, 0.34)
+        var slit_color := Color(0.756863, 0.807843, 0.901961, 0.08)
+        for x_ratio in [0.12, 0.34, 0.66, 0.88]:
+            var x_pos: float = board_rect.position.x + board_rect.size.x * x_ratio
+            draw_rect(Rect2(Vector2(x_pos - 12.0, board_rect.position.y - 18.0), Vector2(24.0, board_rect.size.y + 36.0)), pillar_color, true)
+            draw_rect(Rect2(Vector2(x_pos - 2.0, board_rect.position.y + board_rect.size.y * 0.16), Vector2(4.0, board_rect.size.y * 0.14)), slit_color, true)
+            draw_rect(Rect2(Vector2(x_pos - 2.0, board_rect.position.y + board_rect.size.y * 0.58), Vector2(4.0, board_rect.size.y * 0.14)), slit_color, true)
+        draw_line(board_rect.position + Vector2(24.0, board_rect.size.y * 0.2), board_rect.position + Vector2(board_rect.size.x - 24.0, board_rect.size.y * 0.2), Color(0.847059, 0.878431, 0.941176, 0.06), 2.0)
+        draw_line(board_rect.position + Vector2(24.0, board_rect.size.y * 0.8), board_rect.position + Vector2(board_rect.size.x - 24.0, board_rect.size.y * 0.8), Color(0.341176, 0.380392, 0.458824, 0.08), 2.0)
+        return
+
+    if surface_family == "forest":
+        var canopy_color := Color(0.0588235, 0.14902, 0.101961, 0.18)
+        var mist_color := Color(0.733333, 0.956863, 0.831373, 0.05)
+        draw_circle(board_rect.position + Vector2(board_rect.size.x * 0.18, board_rect.size.y * 0.18), 74.0, canopy_color)
+        draw_circle(board_rect.position + Vector2(board_rect.size.x * 0.76, board_rect.size.y * 0.22), 92.0, canopy_color)
+        draw_circle(board_rect.position + Vector2(board_rect.size.x * 0.34, board_rect.size.y * 0.72), 84.0, canopy_color)
+        draw_line(board_rect.position + Vector2(28.0, board_rect.size.y * 0.64), board_rect.position + Vector2(board_rect.size.x - 44.0, board_rect.size.y * 0.28), mist_color, 6.0)
+        draw_line(board_rect.position + Vector2(44.0, board_rect.size.y * 0.78), board_rect.position + Vector2(board_rect.size.x - 28.0, board_rect.size.y * 0.44), Color(0.862745, 1.0, 0.901961, 0.035), 4.0)
+        return
+
+    if surface_family == "city":
+        var lane_color := Color(0.823529, 0.701961, 0.905882, 0.05)
+        for y_ratio in [0.26, 0.5, 0.74]:
+            draw_line(
+                board_rect.position + Vector2(24.0, board_rect.size.y * y_ratio),
+                board_rect.position + Vector2(board_rect.size.x - 24.0, board_rect.size.y * y_ratio),
+                lane_color,
+                2.0
+            )
+        for x_ratio in [0.22, 0.5, 0.78]:
+            draw_line(
+                board_rect.position + Vector2(board_rect.size.x * x_ratio, 22.0),
+                board_rect.position + Vector2(board_rect.size.x * x_ratio, board_rect.size.y - 22.0),
+                Color(0.509804, 0.34902, 0.635294, 0.06),
+                1.0
+            )
+        return
+
+    if surface_family == "archive":
+        for x_ratio in [0.18, 0.5, 0.82]:
+            var x_pos: float = board_rect.position.x + board_rect.size.x * x_ratio
+            draw_rect(Rect2(Vector2(x_pos - 10.0, board_rect.position.y + 18.0), Vector2(20.0, board_rect.size.y - 36.0)), Color(0.14902, 0.113725, 0.0901961, 0.18), true)
+        for y_ratio in [0.32, 0.66]:
+            draw_line(
+                board_rect.position + Vector2(18.0, board_rect.size.y * y_ratio),
+                board_rect.position + Vector2(board_rect.size.x - 18.0, board_rect.size.y * y_ratio),
+                Color(0.760784, 0.678431, 0.541176, 0.06),
+                2.0
+            )
+        return
+
+    if surface_family == "final_bell":
+        var center := board_rect.get_center()
+        draw_arc(center, 96.0, 0.0, TAU, 28, Color(0.72549, 0.843137, 1.0, 0.08), 2.0)
+        draw_arc(center, 142.0, PI * 0.1, PI * 1.9, 34, Color(1.0, 0.756863, 0.917647, 0.07), 2.0)
+        draw_line(center + Vector2(-board_rect.size.x * 0.34, 0.0), center + Vector2(board_rect.size.x * 0.34, 0.0), Color(0.807843, 0.905882, 1.0, 0.04), 1.0)
+        draw_line(center + Vector2(0.0, -board_rect.size.y * 0.32), center + Vector2(0.0, board_rect.size.y * 0.32), Color(1.0, 0.811765, 0.952941, 0.04), 1.0)
+        return
+
+func _get_stage_surface_family() -> String:
+    if stage_data == null:
+        return "default"
+    var stage_key: String = String(stage_data.stage_id)
+    if stage_key.begins_with("CH02") or stage_key.begins_with("CH06"):
+        return "fortress"
+    if stage_key.begins_with("CH03") or stage_key.begins_with("CH08"):
+        return "forest"
+    if stage_key.begins_with("CH07"):
+        return "city"
+    if stage_key.begins_with("CH09A") or stage_key.begins_with("CH09B"):
+        return "archive"
+    if stage_key.begins_with("CH10"):
+        return "final_bell"
+    return "default"
+
+func _get_backdrop_family() -> String:
+    if stage_data == null:
+        return "default"
+    var stage_key: String = String(stage_data.stage_id)
+    if stage_key.begins_with("CH02") or stage_key.begins_with("CH06"):
+        return "fortress"
+    if stage_key.begins_with("CH03") or stage_key.begins_with("CH08"):
+        return "forest"
+    if stage_key.begins_with("CH07"):
+        return "city"
+    if stage_key.begins_with("CH09A") or stage_key.begins_with("CH09B"):
+        return "archive"
+    if stage_key.begins_with("CH10"):
+        return "final_bell"
+    return "default"
+
+func _get_backdrop_density() -> float:
+    match _get_backdrop_family():
+        "forest", "fortress", "city", "archive", "final_bell":
+            return 0.68
+        _:
+            return 0.34
 
 func _get_palette() -> Dictionary:
     var stage_key: String = String(stage_data.stage_id)

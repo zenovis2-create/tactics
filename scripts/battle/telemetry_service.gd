@@ -16,12 +16,18 @@ const KEY_COMMAND_USAGE := "command_usage"        # Dictionary: command_id -> us
 const KEY_FAILURE_CAUSES := "failure_causes"      # Array of reason strings
 const KEY_ALLY_DEATHS := "ally_deaths"
 const KEY_ENEMY_DEATHS := "enemy_deaths"
+const KEY_OPTIONAL_OBJECTIVES_COMPLETED := "optional_objectives_completed"
+const KEY_OPTIONAL_OBJECTIVES_TOTAL := "optional_objectives_total"
+const KEY_OBJECTIVE_COMPLETION_RATE := "objective_completion_rate"
+const KEY_BOSS_PHASE_TIMINGS := "boss_phase_timings"
+const KEY_STATUS_COUNTS := "status_counts"
 const KEY_STARTED_AT := "started_at"
 const KEY_ENDED_AT := "ended_at"
 
 var _session: Dictionary = {}
 var _command_usage: Dictionary = {}
 var _failure_causes: Array[String] = []
+var _boss_phase_timings: Dictionary = {}
 var _history: Array[Dictionary] = []    # Past completed battles this runtime session.
 
 var _active: bool = false
@@ -40,12 +46,18 @@ func record_battle_start(stage_id: StringName) -> void:
 		KEY_RESCUE_SUCCESS: 0,
 		KEY_ALLY_DEATHS: 0,
 		KEY_ENEMY_DEATHS: 0,
+		KEY_OPTIONAL_OBJECTIVES_COMPLETED: 0,
+		KEY_OPTIONAL_OBJECTIVES_TOTAL: 0,
+		KEY_OBJECTIVE_COMPLETION_RATE: 0.0,
+		KEY_BOSS_PHASE_TIMINGS: {},
+		KEY_STATUS_COUNTS: {},
 		KEY_STARTED_AT: Time.get_datetime_string_from_system(),
 		KEY_ENDED_AT: "",
 		KEY_FAILURE_CAUSES: []
 	}
 	_command_usage = {}
 	_failure_causes = []
+	_boss_phase_timings = {}
 	_active = true
 	print("[TelemetryService] Battle started: %s" % stage_id)
 
@@ -94,6 +106,22 @@ func record_command_use(command_id: StringName) -> void:
 	var key := String(command_id)
 	_command_usage[key] = int(_command_usage.get(key, 0)) + 1
 
+func record_objective_summary(completed_count: int, total_count: int) -> void:
+	if not _active:
+		return
+	var safe_completed: int = max(0, completed_count)
+	var safe_total: int = max(0, total_count)
+	_session[KEY_OPTIONAL_OBJECTIVES_COMPLETED] = safe_completed
+	_session[KEY_OPTIONAL_OBJECTIVES_TOTAL] = safe_total
+	_session[KEY_OBJECTIVE_COMPLETION_RATE] = snappedf((float(safe_completed) / float(safe_total)) if safe_total > 0 else 0.0, 0.01)
+
+func record_boss_phase(phase_id: StringName, round_index: int) -> void:
+	if not _active or phase_id == &"":
+		return
+	var key := String(phase_id)
+	if not _boss_phase_timings.has(key):
+		_boss_phase_timings[key] = round_index
+
 ## Call at battle end with the result ("victory" | "defeat") and round count.
 func record_battle_end(result: StringName, rounds: int) -> Dictionary:
 	if not _active:
@@ -104,6 +132,14 @@ func record_battle_end(result: StringName, rounds: int) -> Dictionary:
 	_session[KEY_TURNS_TO_CLEAR] = rounds
 	_session[KEY_COMMAND_USAGE] = _command_usage.duplicate()
 	_session[KEY_FAILURE_CAUSES] = _failure_causes.duplicate()
+	_session[KEY_BOSS_PHASE_TIMINGS] = _boss_phase_timings.duplicate(true)
+	_session[KEY_STATUS_COUNTS] = {
+		"oblivion_applied": int(_session.get(KEY_OBLIVION_APPLIED, 0)),
+		"oblivion_cleansed": int(_session.get(KEY_OBLIVION_CLEANSED, 0)),
+		"rescues": int(_session.get(KEY_RESCUE_SUCCESS, 0)),
+		"ally_deaths": int(_session.get(KEY_ALLY_DEATHS, 0)),
+		"enemy_deaths": int(_session.get(KEY_ENEMY_DEATHS, 0))
+	}
 	_session[KEY_ENDED_AT] = Time.get_datetime_string_from_system()
 
 	_history.append(_session.duplicate())
@@ -121,6 +157,14 @@ func get_session_snapshot() -> Dictionary:
 	var snap := _session.duplicate()
 	snap[KEY_COMMAND_USAGE] = _command_usage.duplicate()
 	snap[KEY_FAILURE_CAUSES] = _failure_causes.duplicate()
+	snap[KEY_BOSS_PHASE_TIMINGS] = _boss_phase_timings.duplicate(true)
+	snap[KEY_STATUS_COUNTS] = {
+		"oblivion_applied": int(snap.get(KEY_OBLIVION_APPLIED, 0)),
+		"oblivion_cleansed": int(snap.get(KEY_OBLIVION_CLEANSED, 0)),
+		"rescues": int(snap.get(KEY_RESCUE_SUCCESS, 0)),
+		"ally_deaths": int(snap.get(KEY_ALLY_DEATHS, 0)),
+		"enemy_deaths": int(snap.get(KEY_ENEMY_DEATHS, 0))
+	}
 	return snap
 
 ## Returns all completed battle records from this runtime session.
@@ -134,6 +178,8 @@ func get_balance_report() -> Dictionary:
 	var victories := 0
 	var defeats := 0
 	var avg_rounds := 0.0
+	var avg_objective_rate := 0.0
+	var stage_summaries: Array[Dictionary] = []
 
 	for record in _history:
 		if record.get(KEY_RESULT) == "victory":
@@ -141,11 +187,21 @@ func get_balance_report() -> Dictionary:
 		else:
 			defeats += 1
 		avg_rounds += float(record.get(KEY_ROUNDS, 0))
+		avg_objective_rate += float(record.get(KEY_OBJECTIVE_COMPLETION_RATE, 0.0))
+		stage_summaries.append({
+			"stage_id": String(record.get(KEY_STAGE_ID, "")),
+			"result": String(record.get(KEY_RESULT, "")),
+			"rounds": int(record.get(KEY_ROUNDS, 0)),
+			"objective_rate": float(record.get(KEY_OBJECTIVE_COMPLETION_RATE, 0.0)),
+			"ally_deaths": int(record.get(KEY_ALLY_DEATHS, 0)),
+			"boss_phase_count": Dictionary(record.get(KEY_BOSS_PHASE_TIMINGS, {})).size()
+		})
 		for cause in record.get(KEY_FAILURE_CAUSES, []):
 			cause_counts[cause] = int(cause_counts.get(cause, 0)) + 1
 
 	if total_battles > 0:
 		avg_rounds /= float(total_battles)
+		avg_objective_rate /= float(total_battles)
 
 	# Sort by count descending, take top 3.
 	var sorted_causes: Array = []
@@ -162,5 +218,7 @@ func get_balance_report() -> Dictionary:
 		"victories": victories,
 		"defeats": defeats,
 		"avg_rounds": snappedf(avg_rounds, 0.01),
-		"top_failure_causes": top_causes
+		"avg_objective_rate": snappedf(avg_objective_rate, 0.01),
+		"top_failure_causes": top_causes,
+		"stage_summaries": stage_summaries
 	}

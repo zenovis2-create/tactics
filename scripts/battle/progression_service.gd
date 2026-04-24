@@ -13,6 +13,7 @@ const TRUE_ENDING_BURDEN_MAX := 6
 const BAD_ENDING_BURDEN_MIN := 7
 const UNIT_EXP_PER_LEVEL := 10
 const UNIT_EXP_PER_VICTORY := 10
+const BONUS_EXP_PER_UNIT := 4
 
 # Burden band effect table: band -> stat modifier dictionary applied to Rian.
 # Effects are additive on top of base stats; hardcapped at ±30%.
@@ -58,6 +59,25 @@ const FRAGMENT_COMMAND_UNLOCKS: Dictionary = {
 	&"ch10_fragment": &"name_anchor_full",
 }
 
+const PASSIVE_CARD_DEFS: Dictionary = {
+	&"guard_share_plus": {
+		"card_id": &"guard_share_plus",
+		"title": "Guard Share+",
+		"eyebrow": "전투 번역 카드",
+		"body": "첫 명령 파편을 실제 전열 규칙으로 번역했다. bond 5 보호 분담은 이제 절반이 아니라 65%까지 대신 받아낸다.",
+		"effect_summary": "bond 5 damage share 65%",
+		"source_kind": "fragment",
+		"source_id": &"ch01_fragment",
+		"source_label": "기억 조각 / ch01_fragment",
+		"shared_ratio": 0.65,
+		"callout": "Guard Share 65%"
+		}
+}
+
+const FRAGMENT_PASSIVE_UNLOCKS: Dictionary = {
+	&"ch01_fragment": [&"guard_share_plus"]
+}
+
 var _data: ProgressionData = ProgressionData.new()
 var _log: Array[Dictionary] = []
 
@@ -96,6 +116,43 @@ func load_data(saved_data: ProgressionData) -> void:
 	_data = saved_data
 	_emit_log("loaded", {})
 
+func get_passive_card_definition(card_id: StringName) -> Dictionary:
+	if card_id == &"":
+		return {}
+	var definition: Dictionary = Dictionary(PASSIVE_CARD_DEFS.get(card_id, {}))
+	if definition.is_empty():
+		return {}
+	return definition.duplicate(true)
+
+func get_unlocked_passive_card_definitions() -> Array[Dictionary]:
+	var cards: Array[Dictionary] = []
+	for card_id in _data.unlocked_passive_card_ids:
+		var definition: Dictionary = get_passive_card_definition(StringName(card_id))
+		if definition.is_empty():
+			continue
+		cards.append(definition)
+	return cards
+
+func unlock_passive_card(card_id: StringName, source_kind: String = "", source_id: StringName = &"") -> Dictionary:
+	var definition: Dictionary = get_passive_card_definition(card_id)
+	if definition.is_empty():
+		return {"card_id": String(card_id), "already_known": true, "unlocked": false}
+	if not _data.unlock_passive_card(card_id):
+		return {"card_id": String(card_id), "already_known": true, "unlocked": false}
+	_emit_log("passive_card_unlocked", {
+		"card_id": String(card_id),
+		"source_kind": source_kind,
+		"source_id": String(source_id),
+		"unlocked_passive_card_count": _data.unlocked_passive_card_ids.size(),
+		"unlocked_passive_card_ids": _data.get_unlocked_passive_card_ids()
+	})
+	return {
+		"card_id": String(card_id),
+		"already_known": false,
+		"unlocked": true,
+		"definition": definition
+	}
+
 func apply_burden_delta(delta: int, reason: String) -> void:
 	var before := _data.burden
 	_data.burden = clampi(_data.burden + delta, 0, 9)
@@ -126,7 +183,7 @@ func recover_stage_fragment(stage_id: StringName) -> Dictionary:
 
 func recover_fragment(fragment_id: StringName) -> Dictionary:
 	if _data.has_fragment(fragment_id):
-		return {"fragment_id": String(fragment_id), "already_known": true, "command_unlocked": null}
+		return {"fragment_id": String(fragment_id), "already_known": true, "command_unlocked": null, "passive_cards_unlocked": []}
 
 	_data.recovered_fragments[fragment_id] = true
 	_emit_log("fragment_recovered", {
@@ -145,12 +202,19 @@ func recover_fragment(fragment_id: StringName) -> Dictionary:
 			"unlocked_command_ids": _data.get_unlocked_command_ids()
 		})
 
+	var passive_cards_unlocked: Array[String] = []
+	for raw_card_id in Array(FRAGMENT_PASSIVE_UNLOCKS.get(fragment_id, [])):
+		var passive_result: Dictionary = unlock_passive_card(StringName(raw_card_id), "fragment", fragment_id)
+		if bool(passive_result.get("unlocked", false)):
+			passive_cards_unlocked.append(String(passive_result.get("card_id", raw_card_id)))
+
 	_evaluate_ending_tendency()
 
 	return {
 		"fragment_id": String(fragment_id),
 		"already_known": false,
-		"command_unlocked": String(unlocked_command) if unlocked_command != &"" else null
+		"command_unlocked": String(unlocked_command) if unlocked_command != &"" else null,
+		"passive_cards_unlocked": passive_cards_unlocked
 	}
 
 func get_burden_effect() -> Dictionary:
@@ -223,6 +287,83 @@ func grant_victory_exp(unit_ids: Array) -> Array[Dictionary]:
 		var typed_id: StringName = unit_id
 		results.append(grant_unit_exp(typed_id, UNIT_EXP_PER_VICTORY, "battle_victory_exp"))
 	return results
+
+func grant_bonus_exp_pool(unit_ids: Array, contribution_by_unit: Dictionary = {}, stage_id: StringName = &"") -> Dictionary:
+	var normalized_ids: Array[StringName] = []
+	for raw_id in unit_ids:
+		var typed_id := StringName(raw_id)
+		if typed_id == &"" or normalized_ids.has(typed_id):
+			continue
+		normalized_ids.append(typed_id)
+	if normalized_ids.is_empty():
+		return {"stage_id": String(stage_id), "pool": 0, "results": []}
+
+	var pool: int = normalized_ids.size() * BONUS_EXP_PER_UNIT
+	var weights: Dictionary = {}
+	var total_weight: int = 0
+	for unit_id in normalized_ids:
+		var progress: Dictionary = _data.get_unit_progress(unit_id)
+		var level: int = int(progress.get("level", 1))
+		var contribution: int = int(contribution_by_unit.get(String(unit_id), contribution_by_unit.get(unit_id, 0)))
+		var low_level_weight: int = max(1, 6 - mini(level, 5))
+		var low_contribution_weight: int = 3 if contribution <= 0 else (2 if contribution == 1 else 1)
+		var weight: int = max(1, low_level_weight + low_contribution_weight)
+		weights[unit_id] = weight
+		total_weight += weight
+
+	var allocations: Dictionary = {}
+	var remainders: Array[Dictionary] = []
+	var allocated_total: int = 0
+	for unit_id in normalized_ids:
+		var weight: int = int(weights.get(unit_id, 1))
+		var scaled: int = pool * weight
+		var base_allocation: int = scaled / max(1, total_weight)
+		allocations[unit_id] = base_allocation
+		allocated_total += base_allocation
+		remainders.append({
+			"unit_id": unit_id,
+			"remainder": scaled % max(1, total_weight),
+			"weight": weight,
+		})
+
+	if allocated_total < pool:
+		remainders.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			if int(a.get("remainder", 0)) == int(b.get("remainder", 0)):
+				return String(a.get("unit_id", &"")) < String(b.get("unit_id", &""))
+			return int(a.get("remainder", 0)) > int(b.get("remainder", 0))
+		)
+		var remaining: int = pool - allocated_total
+		for index in range(remaining):
+			var entry: Dictionary = remainders[index % remainders.size()]
+			var unit_id: StringName = entry.get("unit_id", &"")
+			allocations[unit_id] = int(allocations.get(unit_id, 0)) + 1
+
+	var results: Array[Dictionary] = []
+	for unit_id in normalized_ids:
+		var gain: int = int(allocations.get(unit_id, 0))
+		var result: Dictionary = grant_unit_exp(unit_id, gain, "battle_bonus_exp")
+		result["bonus_pool"] = pool
+		result["weight"] = int(weights.get(unit_id, 1))
+		results.append(result)
+
+	_data.bonus_exp_history.append({
+		"stage_id": stage_id,
+		"pool": pool,
+		"results": results.duplicate(true)
+	})
+	if _data.bonus_exp_history.size() > 12:
+		_data.bonus_exp_history = _data.bonus_exp_history.slice(_data.bonus_exp_history.size() - 12, _data.bonus_exp_history.size())
+
+	_emit_log("bonus_exp_distributed", {
+		"stage_id": String(stage_id),
+		"pool": pool,
+		"unit_count": normalized_ids.size()
+	})
+	return {
+		"stage_id": String(stage_id),
+		"pool": pool,
+		"results": results
+	}
 
 # --- Internal ---
 

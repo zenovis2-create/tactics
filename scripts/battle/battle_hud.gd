@@ -21,10 +21,10 @@ const REGULAR_PANEL_HALF_HEIGHT := 220.0
 const COMPACT_ACTION_BUTTON_HEIGHT := 72.0
 const REGULAR_ACTION_BUTTON_HEIGHT := 28.0
 const REGULAR_TOPBAR_PADDING := 4.0
-const REGULAR_TOPBAR_HEIGHT := 54.0
+const REGULAR_TOPBAR_HEIGHT := 62.0
 const REGULAR_BOTTOMBAR_PADDING := 8.0
-const REGULAR_BOTTOMBAR_TOP := -64.0
-const REGULAR_TOPBAR_MAX_WIDTH := 440.0
+const REGULAR_BOTTOMBAR_HEIGHT := 88.0
+const REGULAR_TOPBAR_MAX_WIDTH := 760.0
 
 @onready var top_bar: PanelContainer = $TopBar
 @onready var bottom_panel: PanelContainer = $BottomPanel
@@ -38,6 +38,7 @@ const REGULAR_TOPBAR_MAX_WIDTH := 440.0
 @onready var selection_card: PanelContainer = $BottomPanel/Margin/Content/SelectionCard
 @onready var selection_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/SelectionLabel
 @onready var detail_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/DetailLabel
+@onready var resource_cost_label: Label = $BottomPanel/Margin/Content/SelectionCard/Padding/Stack/ResourceCostLabel
 @onready var hint_label: Label = $BottomPanel/Margin/Content/HintLabel
 @onready var objective_hint_label: Label = $BottomPanel/Margin/Content/ObjectiveHintLabel
 @onready var transition_reason_label: Label = $BottomPanel/Margin/Content/TransitionReasonLabel
@@ -73,6 +74,9 @@ var _last_result_body: String = ""
 var _current_phase_text: String = "PLAYER SELECT"
 var _current_round_number: int = 1
 var _current_weather_type: String = "clear"
+var _risk_forecast_cards: Array[Dictionary] = []
+var _preview_labels: Array[String] = []
+var _risk_forecast_root: VBoxContainer
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -84,6 +88,7 @@ func _ready() -> void:
     overlay_scrim.gui_input.connect(_on_overlay_scrim_gui_input)
     overlay_scrim.hide()
     inventory_panel.hide()
+    _ensure_risk_forecast_surface()
     # BattleResultScreen 동적 로드
     var ResultScreenScene = load("res://scenes/battle/BattleResultScreen.tscn")
     if ResultScreenScene != null:
@@ -146,10 +151,33 @@ func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     var formatted_reason: String = _format_reason(reason, payload)
     transition_reason_label.text = formatted_reason
     transition_reason_label.visible = not _should_hide_reason(reason)
-    _update_telegraph_surface(reason)
+    _update_telegraph_surface(reason, payload)
     _emit_battle_cue_for_reason(reason)
 
-func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0) -> void:
+func get_transition_surface_snapshot() -> Dictionary:
+    return {
+        "reason_text": transition_reason_label.text,
+        "reason_visible": transition_reason_label.visible,
+        "telegraph_visible": telegraph_card.visible,
+        "telegraph_label": telegraph_label.text,
+        "telegraph_detail": telegraph_detail_label.text
+    }
+
+func get_risk_forecast_snapshot() -> Dictionary:
+    return {
+        "visible": _risk_forecast_root != null and _risk_forecast_root.visible,
+        "cards": _risk_forecast_cards.duplicate(true)
+    }
+
+func get_selection_snapshot() -> Dictionary:
+    return {
+        "visible": selection_card.visible,
+        "unit_name": selection_label.text,
+        "detail": detail_label.text,
+        "preview_labels": _preview_labels.duplicate()
+    }
+
+func set_selection_summary(unit_name: String, hp_text: String, movement: int, attack_range: int, reachable_count: int, attackable_count: int, interactable_count: int, terrain_text: String = "", oblivion_stack: int = 0, skill_cost_lines: Array[String] = [], resource_pool_text: String = "", preview_labels: Array[String] = []) -> void:
     selection_card.visible = true
     var display_name: String = unit_name
     if oblivion_stack > 0:
@@ -165,11 +193,29 @@ func set_selection_summary(unit_name: String, hp_text: String, movement: int, at
     ]
     if not terrain_text.is_empty():
         detail_label.text += "  Tile:%s" % terrain_text
+    var resource_chunks: Array[String] = []
+    if not resource_pool_text.is_empty():
+        resource_chunks.append(resource_pool_text)
+    if not skill_cost_lines.is_empty():
+        resource_chunks.append("Skills: %s" % "  •  ".join(skill_cost_lines))
+    _preview_labels.clear()
+    for label in preview_labels:
+        var normalized_label := String(label).strip_edges()
+        if normalized_label.is_empty():
+            continue
+        _preview_labels.append(normalized_label)
+    if not _preview_labels.is_empty():
+        resource_chunks.append("Preview: %s" % "  •  ".join(_preview_labels))
+    resource_cost_label.visible = not resource_chunks.is_empty()
+    resource_cost_label.text = " | ".join(resource_chunks) if resource_cost_label.visible else ""
 
 func clear_selection() -> void:
     selection_card.visible = false
     selection_label.text = "No unit selected."
     detail_label.text = "Select a ready ally to inspect movement, attack range, and nearby objectives."
+    _preview_labels.clear()
+    resource_cost_label.visible = false
+    resource_cost_label.text = ""
 
 func set_action_hint(hint_text: String) -> void:
     hint_label.text = hint_text
@@ -192,6 +238,26 @@ func set_inventory_snapshot(title_text: String, objective_text: String, party_li
     inventory_heading_label.text = "Recovered Supplies (%d)" % inventory_lines.size()
     party_list.text = _format_lines_for_panel(party_lines, "No allies deployed.")
     inventory_list.text = _format_lines_for_panel(inventory_lines, "No recovered supplies yet.")
+
+func set_risk_forecast_cards(cards: Array[Dictionary]) -> void:
+    _risk_forecast_cards.clear()
+    _ensure_risk_forecast_surface()
+    if _risk_forecast_root == null:
+        return
+    for child in _risk_forecast_root.get_children():
+        child.queue_free()
+    for raw_card in cards:
+        var title := String(raw_card.get("title", "")).strip_edges()
+        var detail := String(raw_card.get("detail", "")).strip_edges()
+        if title.is_empty() and detail.is_empty():
+            continue
+        var normalized := {
+            "title": title,
+            "detail": detail,
+        }
+        _risk_forecast_cards.append(normalized)
+        _risk_forecast_root.add_child(_make_risk_card(normalized))
+    _risk_forecast_root.visible = not _risk_forecast_cards.is_empty()
 
 func open_inventory_panel() -> void:
     if inventory_panel.visible:
@@ -228,7 +294,14 @@ func get_layout_snapshot() -> Dictionary:
         "action_button_min_height": inventory_button.custom_minimum_size.y,
         "inventory_body_orientation": "vertical" if inventory_body.vertical else "horizontal",
         "inventory_panel_size": inventory_panel.size,
-        "oblivion_badge_visible": selection_label.text.contains("[망각")
+        "oblivion_badge_visible": selection_label.text.contains("[망각"),
+        "resource_cost_visible": resource_cost_label.visible,
+        "top_bar_width": top_bar.size.x,
+        "bottom_panel_width": bottom_panel.size.x,
+        "top_bar_y": top_bar.position.y,
+        "bottom_panel_y": bottom_panel.position.y,
+        "frame_origin_x": _board_origin.x,
+        "frame_width": _board_size.x
     }
 
 func apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
@@ -338,6 +411,30 @@ func _on_overlay_scrim_gui_input(event: InputEvent) -> void:
             get_viewport().set_input_as_handled()
 
 func _format_reason(reason: String, payload: Dictionary) -> String:
+    if reason == "karon_phase_two" and not String(payload.get("phase_callout", "")).is_empty():
+        var phase_callout := String(payload.get("phase_callout", "")).strip_edges()
+        var subtitle := String(payload.get("subtitle", payload.get("effect", ""))).strip_edges()
+        var line := String(payload.get("line", "")).strip_edges()
+        var stakes := String(payload.get("stakes", "")).strip_edges()
+        var segments: Array[String] = [phase_callout]
+        if not subtitle.is_empty():
+            segments.append(subtitle)
+        if not line.is_empty():
+            segments.append(line)
+        if not stakes.is_empty():
+            segments.append(stakes)
+        return " | ".join(segments)
+    if reason == "skill_targeting_active":
+        var skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+        return "%s | Select a highlighted target." % skill_name
+    if reason == "skill_telegraphed":
+        var skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+        var target_name := _get_payload_label(payload, ["target_name", "target", "target_id"], "Target")
+        return "%s | %s" % [skill_name, target_name]
+    if reason == "skill_insufficient_resource":
+        var blocked_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+        var cost_text := String(payload.get("cost", "")).strip_edges()
+        return "%s unavailable%s" % [blocked_skill_name, ": %s" % cost_text if not cost_text.is_empty() else ""]
     var normalized_reason := _to_title_words(reason)
     if payload.is_empty():
         return normalized_reason
@@ -349,6 +446,49 @@ func _format_reason(reason: String, payload: Dictionary) -> String:
         entries.append("%s %s" % [_to_title_words(str(key)), str(payload[key])])
 
     return "%s (%s)" % [normalized_reason, ", ".join(entries)]
+
+func _ensure_risk_forecast_surface() -> void:
+    if _risk_forecast_root != null and is_instance_valid(_risk_forecast_root):
+        return
+    var content: Control = $BottomPanel/Margin/Content
+    _risk_forecast_root = VBoxContainer.new()
+    _risk_forecast_root.name = "RiskForecastCards"
+    _risk_forecast_root.visible = false
+    _risk_forecast_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _risk_forecast_root.add_theme_constant_override("separation", 8)
+    content.add_child(_risk_forecast_root)
+    content.move_child(_risk_forecast_root, 0)
+
+func _make_risk_card(card: Dictionary) -> PanelContainer:
+    var panel := PanelContainer.new()
+    panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.145, 0.114, 0.177, 0.96), Color(0.925, 0.765, 0.404, 0.72), 14))
+
+    var margin := MarginContainer.new()
+    margin.add_theme_constant_override("margin_left", 12)
+    margin.add_theme_constant_override("margin_top", 10)
+    margin.add_theme_constant_override("margin_right", 12)
+    margin.add_theme_constant_override("margin_bottom", 10)
+    panel.add_child(margin)
+
+    var stack := VBoxContainer.new()
+    stack.add_theme_constant_override("separation", 4)
+    margin.add_child(stack)
+
+    var title_label := Label.new()
+    title_label.text = String(card.get("title", ""))
+    title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    title_label.add_theme_font_size_override("font_size", 17)
+    title_label.add_theme_color_override("font_color", Color(0.988, 0.949, 0.827, 0.98))
+    stack.add_child(title_label)
+
+    var detail_label_local := Label.new()
+    detail_label_local.text = String(card.get("detail", ""))
+    detail_label_local.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    detail_label_local.add_theme_font_size_override("font_size", 14)
+    detail_label_local.add_theme_color_override("font_color", Color(0.933, 0.898, 0.996, 0.94))
+    stack.add_child(detail_label_local)
+    return panel
 
 func _format_lines_for_panel(lines: Array[String], fallback: String) -> String:
     if lines.is_empty():
@@ -366,6 +506,14 @@ func _to_title_words(raw_text: String) -> String:
     for index in range(words.size()):
         words[index] = String(words[index]).capitalize()
     return " ".join(words)
+
+func _get_payload_label(payload: Dictionary, keys: Array[String], fallback: String = "") -> String:
+    for key in keys:
+        var raw_value := String(payload.get(key, "")).strip_edges()
+        if raw_value.is_empty():
+            continue
+        return _to_title_words(raw_value)
+    return fallback
 
 func _get_global_rect_for(control: Control) -> Rect2:
     return Rect2(control.global_position, control.size)
@@ -438,22 +586,26 @@ func _apply_layout_for_viewport_size(viewport_size: Vector2) -> void:
         var frame_right: float = frame_left + frame_width
 
         var top_width: float = minf(frame_width + REGULAR_TOPBAR_PADDING * 2.0, REGULAR_TOPBAR_MAX_WIDTH)
-        var top_left: float = frame_left
+        var top_left: float = frame_left + floor((frame_width - top_width) * 0.5)
         var top_right: float = top_left + top_width
+        var frame_top: float = _board_origin.y if _board_size.y > 0.0 else 40.0
+        var frame_bottom: float = _board_origin.y + _board_size.y if _board_size.y > 0.0 else viewport_size.y - 32.0
+        var top_bar_y: float = maxf(6.0, frame_top - REGULAR_TOPBAR_HEIGHT - 8.0)
+        var bottom_offset_bottom: float = -(viewport_size.y - frame_bottom + 12.0)
 
         top_bar.anchor_left = 0.0
         top_bar.anchor_right = 0.0
         top_bar.offset_left = top_left
         top_bar.offset_right = top_right
-        top_bar.offset_top = 6.0
-        top_bar.offset_bottom = REGULAR_TOPBAR_HEIGHT
+        top_bar.offset_top = top_bar_y
+        top_bar.offset_bottom = top_bar_y + REGULAR_TOPBAR_HEIGHT
 
         bottom_panel.anchor_left = 0.0
         bottom_panel.anchor_right = 0.0
         bottom_panel.offset_left = frame_left - REGULAR_BOTTOMBAR_PADDING
         bottom_panel.offset_right = frame_right + REGULAR_BOTTOMBAR_PADDING
-        bottom_panel.offset_bottom = -14.0
-        bottom_panel.offset_top = REGULAR_BOTTOMBAR_TOP
+        bottom_panel.offset_bottom = bottom_offset_bottom
+        bottom_panel.offset_top = bottom_offset_bottom - REGULAR_BOTTOMBAR_HEIGHT
 
 func _apply_visual_theme() -> void:
     top_bar.add_theme_stylebox_override("panel", _make_panel_style(Color(0.063, 0.086, 0.114, 0.82), Color(0.224, 0.302, 0.396, 0.9), 18))
@@ -464,11 +616,12 @@ func _apply_visual_theme() -> void:
     ($BottomPanel/Margin/Content/SelectionCard as PanelContainer).add_theme_stylebox_override("panel", selection_style)
     stage_chip.add_theme_stylebox_override("panel", _make_panel_style(Color(0.102, 0.11, 0.153, 0.9), Color(0.482, 0.596, 0.761, 0.85), 14))
 
-    for label in [round_label, phase_label, objective_label, landmark_label, selection_label, detail_label, hint_label, objective_hint_label, transition_reason_label, telegraph_label, telegraph_detail_label]:
+    for label in [round_label, phase_label, objective_label, landmark_label, selection_label, detail_label, resource_cost_label, hint_label, objective_hint_label, transition_reason_label, telegraph_label, telegraph_detail_label]:
         label.add_theme_color_override("font_color", Color(0.949, 0.965, 0.984, 1.0))
 
     stage_label.add_theme_color_override("font_color", Color(0.858824, 0.905882, 0.964706, 1.0))
     objective_label.add_theme_color_override("font_color", Color(0.784, 0.843, 0.918, 1.0))
+    resource_cost_label.add_theme_color_override("font_color", Color(0.760784, 0.901961, 1.0, 0.98))
     hint_label.add_theme_color_override("font_color", Color(0.929, 0.824, 0.553, 1.0))
     objective_hint_label.add_theme_color_override("font_color", Color(0.941176, 0.882353, 0.682353, 0.98))
     landmark_label.add_theme_color_override("font_color", Color(0.74902, 0.839216, 0.917647, 0.98))
@@ -589,7 +742,7 @@ func _refresh_inventory_dismiss_hint() -> void:
     dismiss_hint_label.text = dismiss_hint
     close_inventory_button.tooltip_text = dismiss_hint
 
-func _update_telegraph_surface(reason: String) -> void:
+func _update_telegraph_surface(reason: String, payload: Dictionary = {}) -> void:
     match reason:
         "boss_mark_telegraphed":
             _show_telegraph_surface("mark", "Mark", "Marked unit will be charged next enemy turn.")
@@ -599,28 +752,86 @@ func _update_telegraph_surface(reason: String) -> void:
             _show_telegraph_surface("command", "Command", "Nearby hostiles gain pressure from the boss order.")
         "lete_phase_two":
             _show_telegraph_surface("danger", "Phase Shift", "Lete drops the ranged feint and rushes in berserk lines.")
+        "lete_scatter_cover":
+            _show_telegraph_surface("command", "Scatter", "The black-hound line slips through terrain and widens the pursuit arc.")
         "lete_smoke_bomb":
             _show_telegraph_surface("danger", "Smoke Bomb", "The squad loses the next turn unless the pressure breaks first.")
+        "lete_route_cut":
+            _show_telegraph_surface("heal", "Route Cut", "The latch gives way and Lete's deeper pursuit lane can no longer fully reform.")
         "karl_shield_wall":
             _show_telegraph_surface("command", "Shield Wall", "Kyle halves incoming damage for the next two player phases.")
         "karl_formation_call":
             _show_telegraph_surface("command", "Formation", "Kyle's line hardens; a reinforcement vanguard steps in.")
         "melkion_truth_rewrite":
             _show_telegraph_surface("mark", "Rewrite", "Melkion mirrors the last player skill and sends it back.")
+        "melkion_revision_field":
+            _show_telegraph_surface("mark", "Revision Field", "Melkion marks the whole squad and redraws safe lanes around the archive.")
+        "melkion_revision_lock":
+            _show_telegraph_surface("command", "Revision Lock", "Marked allies stay readable to the archive for the next exchange.")
         "melkion_memory_wipe":
             _show_telegraph_surface("danger", "Memory Wipe", "Player-side advantages are stripped away for the next exchange.")
         "melkion_archive_mode":
             _show_telegraph_surface("command", "Archive Mode", "Melkion triples his defense and fights only through specials.")
+        "melkion_archive_stabilized":
+            _show_telegraph_surface("heal", "Archive Stable", "The lectern holds the central archive tile steady and weakens the next rewrite.")
         "karon_name_call_anchor":
             _show_telegraph_surface("danger", "Anchor", "A name-call anchor is on the field, feeding Karuon's pressure.")
+        "karon_royal_edict":
+            _show_telegraph_surface("command", "Royal Edict", "Karuon suppresses party bonds and narrows the field to his order.")
+        "karon_name_severance":
+            _show_telegraph_surface("danger", "Name Severance", "Karuon pushes oblivion through the party before the final toll.")
+        "karon_bell_line_broken":
+            _show_telegraph_surface("heal", "Bell Line", "The anchor chain breaks and Karuon's bell choke no longer seals the central push.")
         "karon_phase_two":
-            _show_telegraph_surface("charge", "Final Bell", "Karuon's second phase starts early and the whole field is in range.")
+            var telegraph_title := String(payload.get("telegraph_title", "")).strip_edges()
+            var telegraph_detail := String(payload.get("telegraph_detail", "")).strip_edges()
+            if telegraph_title.is_empty():
+                telegraph_title = "Final Bell"
+            if telegraph_detail.is_empty():
+                telegraph_detail = "Karuon's second phase starts early and the whole field is in range."
+            _show_telegraph_surface("charge", telegraph_title, telegraph_detail)
+        "basil_flood_rise":
+            _show_telegraph_surface("danger", "Flood Rise", "The altar floodline expands and the safe lanes narrow around Basil.")
+        "basil_logs_at_risk":
+            if bool(payload.get("lost", false)):
+                _show_telegraph_surface("danger", "Research Logs Lost", "The flooded sanctuary swallowed the remaining research logs before they could be recovered.")
+            else:
+                _show_telegraph_surface("danger", "Research Logs At Risk", "The floodline has reached the research logs. Recover them before the sanctuary sinks further.")
+        "saria_civilian_pressure":
+            _show_telegraph_surface("danger", "Civilians At Risk", "Saria keeps tightening the prayer line. Secure the dais and seal before the queue collapses.")
+        "saria_civilian_pressure_delayed":
+            _show_telegraph_surface("charge", "Civilian Line Stabilized", "One objective is secured, buying a little more time before the queue collapses.")
+        "saria_civilian_loss":
+            _show_telegraph_surface("danger", "Civilian Line Lost", "The prayer queue broke before Mira could be pulled free.")
+        "skill_targeting_active":
+            var targeting_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+            _show_telegraph_surface("command", targeting_skill_name, "Select a highlighted target to confirm the skill.")
+        "skill_telegraphed":
+            var telegraphed_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+            var target_name := _get_payload_label(payload, ["target_name", "target", "target_id"], "Target")
+            _show_telegraph_surface("charge", telegraphed_skill_name, "%s is about to be hit." % target_name)
+        "skill_insufficient_resource":
+            var blocked_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
+            var cost_text := String(payload.get("cost", "")).strip_edges()
+            _show_telegraph_surface("danger", "%s Unavailable" % blocked_skill_name, cost_text if not cost_text.is_empty() else "Required resources are missing.")
         "enemy_phase_open", "enemy_decide":
             _show_telegraph_surface("danger", "Danger", "Enemy pressure is active. Recheck exposed lanes.")
         "interaction_resolved":
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
         "support_attack_resolved":
             _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
+        "support_rank_up":
+            _show_telegraph_surface("heal", "Support Rank Up", "%s reached %s." % [String(payload.get("pair", "Support")), String(payload.get("rank", "새 랭크"))])
+        "bond_damage_share":
+            _show_telegraph_surface("heal", "Bond Share", "An adjacent ally with bond 5 took part of the damage instead.")
+        "charm_forced_attack":
+            _show_telegraph_surface("danger", "Charm", "A charmed ally lashed out at the nearest squadmate before orders could be restored.")
+        "charm_restrained":
+            _show_telegraph_surface("heal", "Charm Restrained", "A bond-5 ally held the charmed unit back before friendly fire could start.")
+        "charm_cleansed":
+            _show_telegraph_surface("heal", "Charm Cleansed", "The squad restored the charmed ally before the next forced action could start.")
+        "charm_rescued":
+            _show_telegraph_surface("heal", "Charm Rescue", "The charmed ally was pulled clear of the line before the next break in control.")
         _:
             _clear_telegraph_surface()
 
@@ -646,10 +857,12 @@ func _emit_battle_cue_for_reason(reason: String) -> void:
             ui_cue_requested.emit("battle_boss_command_warn_01")
         "boss_charge_resolve":
             ui_cue_requested.emit("battle_boss_charge_impact_01")
-        "lete_phase_two", "lete_smoke_bomb", "karl_shield_wall", "karl_formation_call", "melkion_truth_rewrite", "melkion_memory_wipe", "melkion_archive_mode", "karon_name_call_anchor", "karon_phase_two":
+        "lete_phase_two", "lete_scatter_cover", "lete_smoke_bomb", "karl_shield_wall", "karl_formation_call", "melkion_truth_rewrite", "melkion_revision_field", "melkion_revision_lock", "melkion_memory_wipe", "melkion_archive_mode", "karon_name_call_anchor", "karon_royal_edict", "karon_name_severance", "karon_phase_two", "basil_flood_rise", "basil_logs_at_risk", "saria_civilian_pressure", "saria_civilian_pressure_delayed", "saria_civilian_loss":
             ui_cue_requested.emit("battle_boss_command_warn_01")
         "skill_targeting_active", "skill_telegraphed":
             ui_cue_requested.emit("skill_used")
+        "skill_insufficient_resource":
+            ui_cue_requested.emit("interaction_rejected")
         "attack_resolved_deterministic":
             ui_cue_requested.emit("battle_hit_confirm_01")
         "attack_missed":
@@ -668,6 +881,16 @@ func _emit_battle_cue_for_reason(reason: String) -> void:
             ui_cue_requested.emit("interaction_rejected")
         "support_attack_resolved":
             ui_cue_requested.emit("support_attack")
+        "support_rank_up":
+            ui_cue_requested.emit("support_attack")
+        "bond_damage_share":
+            ui_cue_requested.emit("support_attack")
+        "charm_forced_attack":
+            ui_cue_requested.emit("status_applied")
+        "charm_restrained":
+            ui_cue_requested.emit("status_applied")
+        "charm_cleansed", "charm_rescued":
+            ui_cue_requested.emit("civilian_rescued")
         _:
             pass
 
