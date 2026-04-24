@@ -119,32 +119,32 @@ Verification:
 
 ### 2.1 HUD snapshot and text
 
-- [ ] Add lock/intent text to HUD surface.
+- [x] Add lock/intent text to HUD surface.
   - File: `scripts/battle/battle_hud.gd`
-- [ ] Include:
+- [x] Include:
   - action display name
   - countdown
   - progress `current/required`
   - failure consequence
   - break reward
-- [ ] Add snapshot field for headless assertions.
+- [x] Add snapshot field for headless assertions.
 
 Verification:
 
-- [ ] `boss_lock_break_runner.gd` asserts HUD intent text includes action and lock requirements.
+- [x] `boss_lock_break_runner.gd` asserts HUD intent text includes action and lock requirements.
 
 ### 2.2 Boss intent examples
 
-- [ ] Valgar text mentions fortify/order pressure.
-- [ ] Saria text mentions forgetting/charm pressure.
-- [ ] Lete text mentions chase/pincer pressure.
-- [ ] Melkion text mentions archive rewrite.
-- [ ] Karuon text mentions Final Toll / bell / anchor.
+- [x] Valgar text mentions fortify/order pressure.
+- [x] Saria text mentions forgetting/charm pressure.
+- [x] Lete text mentions chase/pincer pressure.
+- [x] Melkion text mentions archive rewrite.
+- [x] Karuon text mentions Final Toll / bell / anchor.
 
 Verification:
 
-- [ ] `lategame_boss_pattern_runner.gd` still passes.
-- [ ] `ch06_ch10_boss_surface_runner.gd` still passes.
+- [x] `lategame_boss_pattern_runner.gd` still passes.
+- [x] `ch06_ch10_boss_surface_runner.gd` still passes.
 
 ---
 

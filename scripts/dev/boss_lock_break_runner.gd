@@ -160,11 +160,11 @@ func _assert_boss_lock_event_hooks() -> bool:
 
 func _assert_stage_lock_definitions() -> bool:
     var cases: Array[Dictionary] = [
-        {"stage": CH06_05_STAGE, "stage_id": "CH06_05", "action_id": &"valgar_iron_oath", "locks": {"strike": 1, "object": 1}},
-        {"stage": CH07_05_STAGE, "stage_id": "CH07_05", "action_id": &"saria_forgetting_hymn", "locks": {"name": 1, "cleanse": 1}},
-        {"stage": CH08_05_STAGE, "stage_id": "CH08_05", "action_id": &"lete_hound_pincer", "locks": {"object": 1, "skill": 1}},
-        {"stage": CH09B_05_STAGE, "stage_id": "CH09B_05", "action_id": &"melkion_archive_rewrite", "locks": {"object": 1, "name": 1}},
-        {"stage": CH10_05_STAGE, "stage_id": "CH10_05", "action_id": &"karon_final_toll", "locks": {"object": 2, "name": 1}}
+        {"stage": CH06_05_STAGE, "stage_id": "CH06_05", "action_id": &"valgar_iron_oath", "locks": {"strike": 1, "object": 1}, "keywords": ["fortify", "order"]},
+        {"stage": CH07_05_STAGE, "stage_id": "CH07_05", "action_id": &"saria_forgetting_hymn", "locks": {"name": 1, "cleanse": 1}, "keywords": ["forgetting", "charm"]},
+        {"stage": CH08_05_STAGE, "stage_id": "CH08_05", "action_id": &"lete_hound_pincer", "locks": {"object": 1, "skill": 1}, "keywords": ["chase", "pincer"]},
+        {"stage": CH09B_05_STAGE, "stage_id": "CH09B_05", "action_id": &"melkion_archive_rewrite", "locks": {"object": 1, "name": 1}, "keywords": ["archive", "rewrite"]},
+        {"stage": CH10_05_STAGE, "stage_id": "CH10_05", "action_id": &"karon_final_toll", "locks": {"object": 2, "name": 1}, "keywords": ["Final Toll", "bell", "anchor"]}
     ]
     for case in cases:
         var battle = await _spawn_battle(case.get("stage"))
@@ -181,6 +181,18 @@ func _assert_stage_lock_definitions() -> bool:
         for lock_type in expected.keys():
             if int(required.get(String(lock_type), 0)) != int(expected.get(lock_type, 0)):
                 return _fail("%s boss lock should require %s x%d." % [String(case.get("stage_id", "unknown")), String(lock_type), int(expected.get(lock_type, 0))])
+        var surface: Dictionary = battle.hud.get_transition_surface_snapshot()
+        var intent: Dictionary = surface.get("boss_lock_intent", {})
+        if not bool(intent.get("visible", false)):
+            return _fail("%s HUD should expose boss lock intent snapshot." % String(case.get("stage_id", "unknown")))
+        if String(intent.get("action", "")).is_empty() or int(intent.get("countdown", 0)) <= 0:
+            return _fail("%s HUD boss lock intent should include action and countdown." % String(case.get("stage_id", "unknown")))
+        var intent_detail: String = String(intent.get("detail", ""))
+        if intent_detail.find("Locks:") < 0 or intent_detail.find("Fail:") < 0 or intent_detail.find("Break:") < 0:
+            return _fail("%s HUD boss lock intent should include progress, failure, and break text." % String(case.get("stage_id", "unknown")))
+        for keyword in Array(case.get("keywords", [])):
+            if intent_detail.find(String(keyword)) < 0 and String(intent.get("action", "")).find(String(keyword)) < 0:
+                return _fail("%s HUD boss lock intent should mention keyword '%s'." % [String(case.get("stage_id", "unknown")), String(keyword)])
         battle.queue_free()
         await process_frame
     return true

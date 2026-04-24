@@ -495,15 +495,15 @@ func _initialize_boss_lock_definitions() -> void:
         return
     match stage_data.stage_id:
         &"CH06_05":
-            _start_boss_lock(boss_unit, &"valgar_iron_oath", "Iron Oath Break", 2, {"strike": 1, "object": 1}, "Valgar keeps the fort line locked.", "Valgar's fort line weakens.")
+            _start_boss_lock(boss_unit, &"valgar_iron_oath", "Iron Oath Break", 2, {"strike": 1, "object": 1}, "Valgar keeps fortify/order pressure on the fort line.", "Valgar's fort line weakens.")
         &"CH07_05":
-            _start_boss_lock(boss_unit, &"saria_forgetting_hymn", "Forgetting Hymn", 2, {"name": 1, "cleanse": 1}, "Saria's hymn keeps names blurred.", "The hymn loses its hold.")
+            _start_boss_lock(boss_unit, &"saria_forgetting_hymn", "Forgetting Hymn", 2, {"name": 1, "cleanse": 1}, "Saria's forgetting hymn turns into charm pressure.", "The hymn loses its hold.")
         &"CH08_05":
-            _start_boss_lock(boss_unit, &"lete_hound_pincer", "Hound Pincer", 2, {"object": 1, "skill": 1}, "Lete keeps the chase line closed.", "The pursuit line opens.")
+            _start_boss_lock(boss_unit, &"lete_hound_pincer", "Hound Pincer", 2, {"object": 1, "skill": 1}, "Lete keeps the chase/pincer line closed.", "The pursuit line opens.")
         &"CH09B_05":
-            _start_boss_lock(boss_unit, &"melkion_archive_rewrite", "Archive Rewrite", 2, {"object": 1, "name": 1}, "Melkion keeps rewriting the field.", "The archive rewrite stutters.")
+            _start_boss_lock(boss_unit, &"melkion_archive_rewrite", "Archive Rewrite", 2, {"object": 1, "name": 1}, "Melkion keeps the archive rewrite rolling.", "The archive rewrite stutters.")
         &"CH10_05":
-            _start_boss_lock(boss_unit, &"karon_final_toll", "Final Toll", 3, {"object": 2, "name": 1}, "Every ally answers the bell.", "The bell line breaks.")
+            _start_boss_lock(boss_unit, &"karon_final_toll", "Final Toll", 3, {"object": 2, "name": 1}, "Karuon rings Final Toll through the bell anchor.", "The bell anchor line breaks.")
         _:
             pass
 
@@ -4727,15 +4727,20 @@ func _start_boss_lock(boss_unit: UnitActor, action_id: StringName, display_name:
     }
     boss_lock_state_by_unit[unit_instance_id] = state
     _record_boss_event("boss_lock_started_%s" % String(action_id))
+    _sync_boss_lock_intent_surface(state)
     return state.duplicate(true)
 
 func _clear_boss_lock(boss_unit: UnitActor) -> void:
     if boss_unit == null or not is_instance_valid(boss_unit):
         return
     boss_lock_state_by_unit.erase(boss_unit.get_instance_id())
+    if boss_lock_state_by_unit.is_empty() and hud != null and hud.has_method("clear_boss_lock_intent"):
+        hud.clear_boss_lock_intent()
 
 func _clear_all_boss_locks() -> void:
     boss_lock_state_by_unit.clear()
+    if hud != null and hud.has_method("clear_boss_lock_intent"):
+        hud.clear_boss_lock_intent()
 
 func get_boss_lock_state_snapshot() -> Dictionary:
     var snapshot: Dictionary = {}
@@ -4752,6 +4757,11 @@ func _get_boss_lock_state(boss_unit: UnitActor) -> Dictionary:
 func _is_boss_lock_broken(boss_unit: UnitActor) -> bool:
     var state: Dictionary = _get_boss_lock_state(boss_unit)
     return bool(state.get("broken", false))
+
+func _sync_boss_lock_intent_surface(state: Dictionary) -> void:
+    if hud == null or not hud.has_method("set_boss_lock_intent"):
+        return
+    hud.set_boss_lock_intent(state)
 
 func _progress_boss_lock(boss_unit: UnitActor, lock_type: StringName, amount: int = 1) -> Dictionary:
     if boss_unit == null or not is_instance_valid(boss_unit):
@@ -4772,6 +4782,7 @@ func _progress_boss_lock(boss_unit: UnitActor, lock_type: StringName, amount: in
     state["locks_progress"] = locks_progress
     state["broken"] = _is_boss_lock_complete(state)
     boss_lock_state_by_unit[unit_instance_id] = state
+    _sync_boss_lock_intent_surface(state)
     if bool(state.get("broken", false)) and not was_broken:
         _record_boss_event("boss_lock_broken_%s" % String(state.get("action_id", &"")))
     return state.duplicate(true)

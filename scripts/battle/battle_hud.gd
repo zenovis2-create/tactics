@@ -76,6 +76,7 @@ var _current_round_number: int = 1
 var _current_weather_type: String = "clear"
 var _risk_forecast_cards: Array[Dictionary] = []
 var _preview_labels: Array[String] = []
+var _boss_lock_intent_snapshot: Dictionary = {}
 var _risk_forecast_root: VBoxContainer
 
 func _ready() -> void:
@@ -147,6 +148,54 @@ func set_objective_hint(hint_text: String) -> void:
     objective_hint_label.visible = not normalized_hint.is_empty()
     objective_hint_label.text = "Hint: %s" % normalized_hint if objective_hint_label.visible else ""
 
+func set_boss_lock_intent(lock_state: Dictionary) -> void:
+    if lock_state.is_empty():
+        clear_boss_lock_intent()
+        return
+    var action_name: String = String(lock_state.get("display_name", lock_state.get("action_id", "Boss Intent"))).strip_edges()
+    if action_name.is_empty():
+        action_name = "Boss Intent"
+    var countdown: int = int(lock_state.get("countdown", 0))
+    var progress_text: String = _format_boss_lock_progress(lock_state)
+    var failure_text: String = String(lock_state.get("failure_text", "")).strip_edges()
+    var break_text: String = String(lock_state.get("break_text", "")).strip_edges()
+    var detail_parts: Array[String] = []
+    if countdown > 0:
+        detail_parts.append("Countdown %d" % countdown)
+    if not progress_text.is_empty():
+        detail_parts.append(progress_text)
+    if not failure_text.is_empty():
+        detail_parts.append("Fail: %s" % failure_text)
+    if not break_text.is_empty():
+        detail_parts.append("Break: %s" % break_text)
+    var detail_text := " | ".join(detail_parts)
+    _boss_lock_intent_snapshot = {
+        "visible": true,
+        "action": action_name,
+        "countdown": countdown,
+        "progress_text": progress_text,
+        "failure_text": failure_text,
+        "break_text": break_text,
+        "detail": detail_text
+    }
+    _show_telegraph_surface("danger", "Boss Lock: %s" % action_name, detail_text)
+
+func clear_boss_lock_intent() -> void:
+    _boss_lock_intent_snapshot = {"visible": false}
+
+func _format_boss_lock_progress(lock_state: Dictionary) -> String:
+    var required: Dictionary = lock_state.get("locks_required", {})
+    var progress: Dictionary = lock_state.get("locks_progress", {})
+    if required.is_empty():
+        return ""
+    var keys: Array = required.keys()
+    keys.sort()
+    var chunks: Array[String] = []
+    for lock_type in keys:
+        var type_key := String(lock_type)
+        chunks.append("%s %d/%d" % [type_key, int(progress.get(type_key, 0)), int(required.get(type_key, 0))])
+    return "Locks: %s" % ", ".join(chunks)
+
 func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
     var formatted_reason: String = _format_reason(reason, payload)
     transition_reason_label.text = formatted_reason
@@ -160,7 +209,8 @@ func get_transition_surface_snapshot() -> Dictionary:
         "reason_visible": transition_reason_label.visible,
         "telegraph_visible": telegraph_card.visible,
         "telegraph_label": telegraph_label.text,
-        "telegraph_detail": telegraph_detail_label.text
+        "telegraph_detail": telegraph_detail_label.text,
+        "boss_lock_intent": _boss_lock_intent_snapshot.duplicate(true)
     }
 
 func get_risk_forecast_snapshot() -> Dictionary:
