@@ -86,6 +86,16 @@ func show_result(result: Dictionary) -> void:
 				int(entry.get("exp_gain", 0))
 			])
 
+	var result_tags: Array = result.get("result_tags", [])
+	if not result_tags.is_empty():
+		body_lines.append("[b]Result Tags:[/b]")
+		for tag in result_tags:
+			body_lines.append("  • %s" % str(tag))
+
+	var bonus_recommendation_line: String = str(result.get("bonus_recommendation_line", "")).strip_edges()
+	if not bonus_recommendation_line.is_empty():
+		body_lines.append(bonus_recommendation_line)
+
 	# 기억 조각
 	var memory_recovery_entries: Array = result.get("memory_recovery_entries", [])
 	if not memory_recovery_entries.is_empty():

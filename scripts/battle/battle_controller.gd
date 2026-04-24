@@ -2136,6 +2136,8 @@ func _on_battle_victory() -> void:
         "unit_exp_results": [],
         "bonus_exp_pool": 0,
         "bonus_exp_results": [],
+        "result_tags": [],
+        "bonus_recommendation_line": "",
         "memory_entries": _get_stage_memory_entries(),
         "evidence_entries": _get_stage_evidence_entries(),
         "letter_entries": _get_stage_letter_entries(),
@@ -2230,6 +2232,8 @@ func _on_battle_victory() -> void:
             result_summary["supporter_bond_level"] = int(last_support_attack_details.get("bond", 0))
         result_summary["telemetry"] = session_snapshot.duplicate(true)
         result_summary["telemetry_summary"] = _build_telemetry_summary_lines(session_snapshot)
+    result_summary["result_tags"] = _build_result_tags(result_summary)
+    result_summary["bonus_recommendation_line"] = _build_bonus_recommendation_line(result_summary)
     last_result_summary = result_summary
     if int(last_result_summary.get("support_attack_count", 0)) > 0:
         var victory_support_payload := {
@@ -3565,6 +3569,72 @@ func _format_stage_record_entries(entries: Variant) -> Array[String]:
                 lines.append(text)
     return lines
 
+func _build_result_tags(summary: Dictionary) -> Array[String]:
+    var tags: Array[String] = []
+    var mvp_name: String = _resolve_result_mvp_name(summary)
+    if not mvp_name.is_empty():
+        tags.append("MVP: %s" % mvp_name)
+    var completed_objectives := _variant_to_string_array(summary.get("optional_objectives_completed", []))
+    if not completed_objectives.is_empty():
+        tags.append("Resolved Object: %s" % completed_objectives[0])
+    var control_relief_entries := _variant_to_string_array(summary.get("control_relief_entries", []))
+    if not control_relief_entries.is_empty():
+        tags.append("Broke boss lock: %s" % control_relief_entries[0])
+    var name_call_line: String = String(summary.get("name_call_line", "")).strip_edges()
+    if not name_call_line.is_empty():
+        tags.append("Used name call")
+    var telemetry: Dictionary = Dictionary(summary.get("telemetry", {}))
+    var status_counts: Dictionary = Dictionary(telemetry.get(TelemetryService.KEY_STATUS_COUNTS, {}))
+    var cleansed_count: int = int(status_counts.get("oblivion_cleansed", 0))
+    if cleansed_count > 0:
+        tags.append("Cleansed oblivion: %d" % cleansed_count)
+    return tags
+
+func _resolve_result_mvp_name(summary: Dictionary) -> String:
+    var bonus_exp_results: Array = summary.get("bonus_exp_results", [])
+    var best_name: String = ""
+    var best_gain: int = -1
+    var best_weight: int = -1
+    for entry_variant in bonus_exp_results:
+        if typeof(entry_variant) != TYPE_DICTIONARY:
+            continue
+        var entry: Dictionary = entry_variant
+        var gain: int = int(entry.get("exp_gain", 0))
+        var weight: int = int(entry.get("weight", 0))
+        if gain > best_gain or (gain == best_gain and weight > best_weight):
+            best_gain = gain
+            best_weight = weight
+            best_name = String(entry.get("display_name", entry.get("unit_id", ""))).strip_edges()
+    if not best_name.is_empty():
+        return best_name
+    var unit_exp_results: Array = summary.get("unit_exp_results", [])
+    if not unit_exp_results.is_empty() and typeof(unit_exp_results[0]) == TYPE_DICTIONARY:
+        var first_entry: Dictionary = unit_exp_results[0]
+        return String(first_entry.get("display_name", first_entry.get("unit_id", ""))).strip_edges()
+    return ""
+
+func _build_bonus_recommendation_line(summary: Dictionary) -> String:
+    var bonus_exp_results: Array = summary.get("bonus_exp_results", [])
+    if not bonus_exp_results.is_empty():
+        var target_name: String = ""
+        var target_level: int = 999999
+        var target_exp: int = 999999
+        for entry_variant in bonus_exp_results:
+            if typeof(entry_variant) != TYPE_DICTIONARY:
+                continue
+            var entry: Dictionary = entry_variant
+            var level_after: int = int(entry.get("level_after", 1))
+            var exp_after: int = int(entry.get("exp_after", 0))
+            if level_after < target_level or (level_after == target_level and exp_after < target_exp):
+                target_level = level_after
+                target_exp = exp_after
+                target_name = String(entry.get("display_name", entry.get("unit_id", "Unit"))).strip_edges()
+        if not target_name.is_empty():
+            return "추천 보너스 대상: 뒤처진 유닛 — %s" % target_name
+    if not String(summary.get("name_call_line", "")).strip_edges().is_empty():
+        return "기억 보상: 이름을 지킨 전투"
+    return ""
+
 func _build_bonus_exp_contribution_snapshot() -> Dictionary:
     var contribution_by_unit: Dictionary = {}
     for unit in ally_units:
@@ -3619,6 +3689,10 @@ func _build_result_summary_text(summary: Dictionary) -> String:
         for entry in bonus_exp_results:
             var display_name := String(entry.get("display_name", entry.get("unit_id", "Unit")))
             lines.append("- %s bonus +%d EXP" % [display_name, int(entry.get("exp_gain", 0))])
+    _append_result_section(lines, "Result Tags", _variant_to_string_array(summary.get("result_tags", [])))
+    var bonus_recommendation_line := String(summary.get("bonus_recommendation_line", "")).strip_edges()
+    if not bonus_recommendation_line.is_empty():
+        lines.append(bonus_recommendation_line)
     var fragment_ids := _variant_to_string_array(summary.get("recovered_fragment_ids", []))
     if not fragment_ids.is_empty():
         lines.append("Recovered Fragments: %s" % ", ".join(fragment_ids))

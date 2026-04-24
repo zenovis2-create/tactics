@@ -209,28 +209,28 @@ Verification:
 
 ### 5.1 Result tags
 
-- [ ] Add result tags:
+- [x] Add result tags:
   - MVP
   - Resolved object
   - Broke boss lock
   - Used name call
   - Cleansed oblivion
-- [ ] Keep current bonus EXP formula unchanged in first pass.
+- [x] Keep current bonus EXP formula unchanged in first pass.
 
 Verification:
 
-- [ ] `battle_result_runner.gd` passes.
-- [ ] `campaign_save_load_core_loop_runner.gd` passes.
+- [x] `battle_result_runner.gd` passes.
+- [x] `campaign_save_load_core_loop_runner.gd` passes.
 
 ### 5.2 Recommendation copy
 
-- [ ] Add “recommended bonus target” copy for underleveled units if data is available.
-- [ ] If data is not reliable, add only non-mechanical reward copy.
+- [x] Add “recommended bonus target” copy for underleveled units if data is available.
+- [x] If data is not reliable, add only non-mechanical reward copy.
 
 Verification:
 
-- [ ] `save_load_runner.gd` passes.
-- [ ] `battle_result_runner.gd` passes.
+- [x] `save_load_runner.gd` passes.
+- [x] `battle_result_runner.gd` passes.
 
 ---
 

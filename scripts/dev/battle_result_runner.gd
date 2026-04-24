@@ -31,6 +31,8 @@ func _run() -> void:
 		"unit_exp_results",
 		"bonus_exp_pool",
 		"bonus_exp_results",
+		"result_tags",
+		"bonus_recommendation_line",
 		"memory_entries",
 		"evidence_entries",
 		"letter_entries",
@@ -72,6 +74,14 @@ func _run() -> void:
 	var telemetry_summary: Array = summary.get("telemetry_summary", [])
 	if telemetry_summary.is_empty():
 		return _fail("Result summary should expose telemetry_summary lines.")
+	var result_tags: Array = summary.get("result_tags", [])
+	if result_tags.is_empty():
+		return _fail("Result summary should expose tactical result tags.")
+	if not _has_tag_prefix(result_tags, "MVP"):
+		return _fail("Result summary should expose an MVP result tag.")
+	var bonus_recommendation_line: String = String(summary.get("bonus_recommendation_line", "")).strip_edges()
+	if bonus_recommendation_line.find("추천 보너스 대상") == -1:
+		return _fail("Result summary should expose recommended bonus target copy.")
 
 	var dialog_text := String(battle.hud.result_popup.dialog_text)
 	if String(battle.hud.result_popup.title) != "Victory":
@@ -83,6 +93,9 @@ func _run() -> void:
 		"Command Unlocked: tactical_shift",
 		"Unit EXP:",
 		"Bonus EXP:",
+		"Result Tags:",
+		"MVP",
+		"추천 보너스 대상",
 		"Telemetry:",
 		"Memory:",
 		"Evidence:",
@@ -93,6 +106,12 @@ func _run() -> void:
 
 	print("[PASS] battle_result_runner: battle result summary exposes objective, records, and progression unlocks.")
 	quit(0)
+
+func _has_tag_prefix(tags: Array, prefix: String) -> bool:
+	for tag in tags:
+		if String(tag).begins_with(prefix):
+			return true
+	return false
 
 func _fail(message: String) -> bool:
 	print("[FAIL] %s" % message)
