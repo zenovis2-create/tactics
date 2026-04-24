@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific fortress landmark prop sheet
+Primary request: a damaged fortress banner mast for an original tactical RPG, intended as the baseline CH02 recapture landmark for broken-fortress encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: tall weathered mast with one torn military banner plane, heavy stone or iron base, restrained fortress-blue cloth accent
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear vertical landmark read
+Lighting/mood: soft studio lighting, readable forms, broken-fortress tone, no dramatic glow
+Color palette: dark weathered timber, fortress stone neutrals, soot metal accents, restrained fortress-blue cloth
+Materials/textures: matte wood or iron mast, cloth banner plane, broad wear only
+Constraints: must read as fortress rally or recapture landmark before decorative flag; mast and banner plane must remain readable at icon scale; chapter-specific military identity feel; minimal fine detail; clear material separation
+Avoid: parade-banner luxury, many streamers, oversized royal crest, glossy ceremonial polish, photoreal cloth, labels, text, watermarks

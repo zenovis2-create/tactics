@@ -1,0 +1,96 @@
+{
+  "source_reference": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/legacy_reference/rian_8dir_sheet_source_v02.png",
+  "cell_size": [
+    384,
+    512
+  ],
+  "directions": [
+    {
+      "name": "front",
+      "col": 0,
+      "row": 0
+    },
+    {
+      "name": "front_right",
+      "col": 1,
+      "row": 0
+    },
+    {
+      "name": "right",
+      "col": 2,
+      "row": 0
+    },
+    {
+      "name": "back_right",
+      "col": 3,
+      "row": 0
+    },
+    {
+      "name": "back",
+      "col": 0,
+      "row": 1
+    },
+    {
+      "name": "back_left",
+      "col": 1,
+      "row": 1
+    },
+    {
+      "name": "left",
+      "col": 2,
+      "row": 1
+    },
+    {
+      "name": "front_left",
+      "col": 3,
+      "row": 1
+    }
+  ],
+  "layers": {
+    "weapon_overlay": {
+      "mask": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/masked_edit_v01/masks/rian_weapon_overlay_mask_v01.png",
+      "source": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/weapon_overlay/rian_weapon_overlay_8dir_sheet_source_v03_masked.png",
+      "clean": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/clean/8dir/weapon_overlay/rian_weapon_overlay_8dir_sheet_clean_v03_masked.png",
+      "runtime_dir": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay",
+      "runtime_frames": [
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_00.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_01.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_02.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_03.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_04.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_05.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_06.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/weapon_overlay/rian_weapon_overlay_07.png"
+      ],
+      "mask_bbox": [
+        26,
+        286,
+        1523,
+        1023
+      ]
+    },
+    "upper_armor_overlay": {
+      "mask": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/masked_edit_v01/masks/rian_upper_armor_overlay_mask_v01.png",
+      "source": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/source/8dir/upper_armor_overlay/rian_upper_armor_overlay_8dir_sheet_source_v04_masked.png",
+      "clean": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/clean/8dir/upper_armor_overlay/rian_upper_armor_overlay_8dir_sheet_clean_v04_masked.png",
+      "runtime_dir": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay",
+      "runtime_frames": [
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_00.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_01.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_02.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_03.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_04.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_05.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_06.png",
+        "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/upper_armor_overlay/rian_upper_armor_overlay_07.png"
+      ],
+      "mask_bbox": [
+        108,
+        149,
+        1433,
+        783
+      ]
+    }
+  },
+  "preview": "/Volumes/AI/tactics/assets/characters/sprite_anchor_rian/runtime/8dir/composite_preview/rian_masked_overlay_baseline_v01.png"
+}

@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG equipment support sheet
+Primary request: a broad heavy armor support set for an original tactical RPG, intended as the baseline heavy-armor equipment asset for knight and wall-defender units
+Scene/background: plain neutral or transparent background, no scenery, no props, single isolated armor set
+Subject: broad field cuirass with readable shoulder plates, dark leather straps, waist guard or tabard break, restrained deep navy accent, practical ally heavy-class construction
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: upright or slightly angled centered armor support concept with a clean silhouette and clear chest-to-waist read
+Lighting/mood: soft studio lighting, readable forms, no dramatic glow
+Color palette: ash steel, soot leather, muted brown support straps, restrained deep navy accent
+Materials/textures: matte steel plate, leather support, broad wear only
+Constraints: heavy-armor identity must read before ornament; chest and shoulder mass must remain readable at icon scale; practical frontline equipment feel; minimal fine detail; clear material separation
+Avoid: ornate parade armor, giant fantasy spikes, gold luxury overload, cape-led composition, dense micro-plates, decorative clutter, labels, text, watermarks

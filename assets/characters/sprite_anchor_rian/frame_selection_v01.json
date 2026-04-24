@@ -1,0 +1,25 @@
+{
+  "frame_width": 256,
+  "frame_height": 256,
+  "states": {
+    "idle": {
+      "source": "source/rian_idle_sheet_source_v01.png",
+      "output_dir": "runtime/idle",
+      "prefix": "rian_idle",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    },
+    "move": {
+      "source": "source/rian_move_sheet_source_v01.png",
+      "output_dir": "runtime/move",
+      "prefix": "rian_move",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    },
+    "attack": {
+      "source": "source/rian_attack_sheet_source_v01.png",
+      "output_dir": "runtime/attack",
+      "prefix": "rian_attack",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    }
+  }
+}
+

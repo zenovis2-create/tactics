@@ -1,0 +1,51 @@
+{
+  "frame_width": 256,
+  "frame_height": 256,
+  "states": {
+    "idle": {
+      "source": "source/serin_idle_sheet_source_v02.png",
+      "output_dir": "runtime/idle",
+      "prefix": "serin_idle",
+      "frames": [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [0, 1],
+        [1, 1],
+        [2, 1]
+      ]
+    },
+    "cast": {
+      "source": "source/serin_cast_sheet_source_v03.png",
+      "output_dir": "runtime/cast",
+      "prefix": "serin_cast",
+      "frames": [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [0, 1],
+        [1, 1],
+        [2, 1]
+      ]
+    },
+    "attack": {
+      "source": "source/serin_attack_sheet_source_v03.png",
+      "output_dir": "runtime/attack",
+      "prefix": "serin_attack",
+      "frames": [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [0, 1],
+        [1, 1],
+        [2, 1]
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "frame_width": 256,
+  "frame_height": 256,
+  "states": {
+    "idle": {
+      "source": "source/enemy_skirmisher_idle_sheet_source_v01.png",
+      "output_dir": "runtime/idle",
+      "prefix": "enemy_skirmisher_idle",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    },
+    "move": {
+      "source": "source/enemy_skirmisher_move_sheet_source_v01.png",
+      "output_dir": "runtime/move",
+      "prefix": "enemy_skirmisher_move",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    },
+    "attack": {
+      "source": "source/enemy_skirmisher_attack_sheet_source_v01.png",
+      "output_dir": "runtime/attack",
+      "prefix": "enemy_skirmisher_attack",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    }
+  }
+}
+

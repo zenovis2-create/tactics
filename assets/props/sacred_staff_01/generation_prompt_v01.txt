@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG equipment support sheet
+Primary request: a compact sacred support staff for an original tactical RPG, intended as the baseline staff-family equipment asset for healer and support units
+Scene/background: plain neutral or transparent background, no scenery, no props, single isolated item
+Subject: short to medium sacred field staff with warm ash wood shaft, pale sacred metal head motif, leather grip wrap, one restrained violet ward gem or inset
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: upright centered equipment concept with a clean silhouette, optional slight angled variant if it improves form readability
+Lighting/mood: soft studio lighting, readable forms, no dramatic glow
+Color palette: ash wood, parchment bone, pale silver, muted leather, restrained sacred violet accent
+Materials/textures: matte wood shaft, pale sacred metal head, small gem inset, broad wear only
+Constraints: support identity must read before magic; head motif must remain readable at icon scale; compact staff proportions; handcrafted field equipment feel; minimal fine detail; clear material separation
+Avoid: oversized crystal staff, giant halo rings, floating magic parts, offensive battle-mage spectacle, spear-like proportions, ornate ceremonial clutter, busy background, labels, text, watermarks

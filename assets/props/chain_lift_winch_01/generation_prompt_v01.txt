@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific siege landmark prop sheet
+Primary request: a chain-lift winch for an original tactical RPG, intended as the baseline CH06 route-control landmark for iron-keep siege encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: dark iron drum or wheel machine with a readable heavy chain run, grounded support frame, restrained amber machinery accent, clear navigation-objective feel
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear control face and chain direction
+Lighting/mood: soft studio lighting, readable forms, iron-keep siege tone, no dramatic glow
+Color palette: blackened iron, soot-gray chain, weathered wood or dark braces, ash-black siege neutrals, restrained amber accent
+Materials/textures: matte metal, chain, broad wear only
+Constraints: must read as chain-lift winch before gate-control or generic machine pile; chain direction and support mass must remain readable at icon scale; chapter-specific route-control landmark feel; minimal fine detail; clear material separation
+Avoid: steampunk clutter, giant pipe tangles, ornate crest plates, furnace-glow overload, photoreal grime, labels, text, watermarks

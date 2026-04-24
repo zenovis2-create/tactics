@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific archive landmark prop sheet
+Primary request: an archive truth dais for an original tactical RPG, intended as the baseline CH05 evidence landmark for gray-archive encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: pale archive dais or lectern platform with a readable top plane, restrained white truth accent, dark iron or brace hardware, evidence-bearing authority feel
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear evidence target read
+Lighting/mood: soft studio lighting, readable forms, gray-archive pressure tone, no dramatic glow
+Color palette: pale ash stone, soot-dark iron, parchment bone, ink-dark neutral accents, restrained white accent
+Materials/textures: matte stone or lacquered body, archive hardware, broad wear only
+Constraints: must read as truth dais before altar or desk furniture; top plane and support mass must remain readable at icon scale; chapter-specific evidence landmark feel; minimal fine detail; clear material separation
+Avoid: cathedral altar styling, giant book clutter, decorative desk mess, crystal glow centerpiece, photoreal paper noise, labels, text, watermarks

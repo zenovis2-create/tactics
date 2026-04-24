@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific archive landmark prop sheet
+Primary request: an archive seal frame for an original tactical RPG, intended as the baseline CH05 seal-pressure landmark for gray-archive encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: rigid iron or pale archive metal frame with a readable sealed center, restrained white truth-lock accent, archive-pressure feel
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear interaction face
+Lighting/mood: soft studio lighting, readable forms, gray-archive pressure tone, no dramatic glow
+Color palette: soot-dark iron, pale archive stone, parchment neutrals, ink-dark accents, restrained white accent
+Materials/textures: matte metal frame, support plate, broad wear only
+Constraints: must read as seal frame before gate device or desk furniture; sealed center and frame silhouette must remain readable at icon scale; chapter-specific archive-pressure landmark feel; minimal fine detail; clear material separation
+Avoid: cathedral arch excess, gate-door read, pipe clutter, crystal glow centerpiece, photoreal grime, labels, text, watermarks

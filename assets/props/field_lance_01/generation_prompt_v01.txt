@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG equipment support sheet
+Primary request: a disciplined field lance for an original tactical RPG, intended as the baseline lance-family equipment asset for officer, cavalry, and thrust-weapon units
+Scene/background: plain neutral or transparent background, no scenery, no props, single isolated item
+Subject: long practical lance with ash wood shaft, narrow muted steel thrusting head, visible grip-wrap zone, one restrained navy wrap or rank-band accent
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: upright or slightly angled centered equipment concept with a clean long silhouette and readable narrow head
+Lighting/mood: soft studio lighting, readable forms, no dramatic glow
+Color palette: ash wood, muted steel, dark leather, subdued military neutrals, restrained navy accent
+Materials/textures: matte wood shaft, steel head, broad wear only
+Constraints: thrust-weapon identity must read before ornament; shaft and head must remain readable at icon scale; practical officer or cavalry field equipment feel; minimal fine detail; clear material separation
+Avoid: giant fantasy halberd heads, banners, trident forks, tassel clutter, gem-heavy ceremonial polearms, decorative clutter, labels, text, watermarks

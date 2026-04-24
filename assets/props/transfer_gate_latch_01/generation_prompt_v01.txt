@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific pursuit landmark prop sheet
+Primary request: a transfer gate latch for an original tactical RPG, intended as the baseline CH08 route-release landmark for split-line pursuit encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: compact iron latch housing with a readable release arm or locking bar, restrained amber route accent, engineered remnant feel
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear route-release read
+Lighting/mood: soft studio lighting, readable forms, pursuit-lane tone, no dramatic glow
+Color palette: soot-dark iron, weathered support wood, split-lane dust neutrals, restrained amber accent
+Materials/textures: matte iron, broad wear only
+Constraints: must read as route-release latch before gate-control or generic machine box; release arm and control face must remain readable at icon scale; chapter-specific pursuit-lane landmark feel; minimal fine detail; clear material separation
+Avoid: giant gate framing, pipe clutter, shrine styling, modern industrial realism, text, labels, watermarks

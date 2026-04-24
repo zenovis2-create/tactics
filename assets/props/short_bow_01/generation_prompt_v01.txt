@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG equipment support sheet
+Primary request: a compact field bow for an original tactical RPG, intended as the baseline bow-family equipment asset for ranger and skirmisher units
+Scene/background: plain neutral or transparent background, no scenery, no props, single isolated item
+Subject: short to medium tactical bow with clear recurve arc, visible grip break, dark leather grip wrap, warm ash wood body, one restrained moss-green wrap or fastening accent
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: upright or slightly angled centered equipment concept with a clean silhouette and readable bow arc
+Lighting/mood: soft studio lighting, readable forms, no dramatic glow
+Color palette: ash wood, dark leather, subdued field neutrals, restrained moss-green accent
+Materials/textures: matte wood bow body, leather grip wrap, broad wear only
+Constraints: ranged identity must read before ornament; arc and grip break must remain readable at icon scale; compact proportions; handcrafted field equipment feel; minimal fine detail; clear material separation
+Avoid: giant sniper bow, ornate elven fantasy overload, antler flourishes, dangling trophies, magical arrow effects, decorative clutter, labels, text, watermarks

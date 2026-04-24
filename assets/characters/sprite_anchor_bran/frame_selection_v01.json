@@ -1,0 +1,25 @@
+{
+  "frame_width": 256,
+  "frame_height": 256,
+  "states": {
+    "idle": {
+      "source": "source/bran_idle_sheet_source_v02.png",
+      "output_dir": "runtime/idle",
+      "prefix": "bran_idle",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[0,1],[1,1],[2,1],[3,1]]
+    },
+    "move": {
+      "source": "source/bran_move_sheet_source_v02.png",
+      "output_dir": "runtime/move",
+      "prefix": "bran_move",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    },
+    "attack": {
+      "source": "source/bran_attack_sheet_source_v02.png",
+      "output_dir": "runtime/attack",
+      "prefix": "bran_attack",
+      "frames": [[0,0],[1,0],[2,0],[3,0],[4,0],[0,1],[1,1],[2,1]]
+    }
+  }
+}
+

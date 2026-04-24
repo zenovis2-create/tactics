@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG hostile equipment support sheet
+Primary request: a hostile short bow for an original tactical RPG, intended as the baseline enemy ranged equipment asset for pursuit skirmishers
+Scene/background: plain neutral or transparent background, no scenery, single isolated item
+Subject: compact enemy bow with dark wood body, soot leather grip, hostile grip break, restrained ember-red seal accent
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: upright centered equipment concept with a clean silhouette
+Lighting/mood: soft studio lighting, readable forms, no dramatic glow
+Color palette: dark wood, soot leather, ash-black fittings, restrained ember red
+Materials/textures: matte wood and leather, broad wear only
+Constraints: hostile identity must read before color; arc and grip break must remain readable at icon scale; practical pursuit-hunter feel; minimal fine detail; clear material separation
+Avoid: ally green cues, elven flourish, magical arrow effects, oversized heroic bow, labels, text, watermarks

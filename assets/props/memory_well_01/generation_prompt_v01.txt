@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific landmark prop sheet
+Primary request: a worn village memory well for an original tactical RPG, intended as the baseline CH01 landmark for investigation and memory-disturbance encounters
+Scene/background: plain neutral or transparent background, no scenery, single isolated landmark prop
+Subject: pale worn stone well with readable rim opening, one weathered timber or iron support frame, restrained rope or pulley suggestion, very subtle memory-disturbance accent
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept with front or slight 3/4 angle, clean silhouette, clear interaction zone
+Lighting/mood: soft studio lighting, readable forms, quiet ruined-village tone, no dramatic glow
+Color palette: pale ash stone, weathered brown timber, muted iron, dry dust neutrals, restrained pale memory-cyan accent
+Materials/textures: matte stone, aged wood or iron, broad wear only
+Constraints: must read as a well before shrine or altar; rim opening and upright support must remain readable at icon scale; chapter-specific investigation landmark feel; minimal fine detail; clear material separation
+Avoid: horror well excess, giant ghost glow, ivy clutter, cathedral ornament, bucket clutter overload, photoreal stone, labels, text, watermarks

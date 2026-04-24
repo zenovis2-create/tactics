@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: tactical RPG chapter-specific escort prop sheet
+Primary request: a civilian evacuation handcart for an original tactical RPG, intended as a baseline CH01 escort-route prop for rescue and movement-pressure scenes
+Scene/background: plain neutral or transparent background, no scenery, single isolated prop
+Subject: worn wood two-wheeled handcart with readable handles, bundled cloth supplies, restrained civilian cloth accent, compact route-anchor silhouette
+Style/medium: painterly diorama-style stylized 3D concept art, original hybrid style inspired by classic tactical RPG readability
+Composition/framing: centered prop concept at front or slight 3/4 angle, clean silhouette, clear route-anchor presence
+Lighting/mood: soft studio lighting, readable forms, ash-field rescue tone, no dramatic glow
+Color palette: dusty wood brown, muted cloth beige, dry rope, soot-gray wear, restrained civilian green or pale cloth accent
+Materials/textures: matte wood, cloth bundles, broad wear only
+Constraints: must read as civilian evacuation cart before merchant wagon or military cart; wheels and handles must remain readable at icon scale; chapter-specific escort prop feel; minimal fine detail; clear material separation
+Avoid: market-cart abundance, ornate wagon overload, treasure loot read, artillery cart read, photoreal wood, labels, text, watermarks
