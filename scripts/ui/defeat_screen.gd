@@ -15,6 +15,7 @@ signal title_requested
 
 var save_service: SaveService = null
 var _autosave_available: bool = false
+var _autosave_reason: String = ""
 
 @onready var retry_button: Button = $Panel/Content/RetryButton if has_node("Panel/Content/RetryButton") else null
 @onready var load_save_button: Button = $Panel/Content/LoadSaveButton if has_node("Panel/Content/LoadSaveButton") else null
@@ -44,17 +45,27 @@ func get_layout_snapshot() -> Dictionary:
     return {
         "visible": visible,
         "load_save_button_enabled": _autosave_available,
-        "save_service_connected": save_service != null
+        "save_service_connected": save_service != null,
+        "autosave_reason": _autosave_reason
     }
 
 # --- Private ---
 
 func _update_load_button() -> void:
     _autosave_available = false
+    _autosave_reason = ""
     if save_service != null:
-        _autosave_available = save_service.slot_exists(0)
+        _autosave_available = save_service.slot_exists(SaveService.AUTOSAVE_SLOT)
+        if _autosave_available:
+            var metadata: Dictionary = save_service.peek_slot(SaveService.AUTOSAVE_SLOT)
+            _autosave_reason = String(metadata.get("autosave_reason", "")).strip_edges()
     if load_save_button != null:
         load_save_button.disabled = not _autosave_available
+        load_save_button.text = "마지막 자동저장으로"
+        if _autosave_available and not _autosave_reason.is_empty():
+            load_save_button.tooltip_text = "체크포인트: %s" % _autosave_reason
+        else:
+            load_save_button.tooltip_text = "가장 최근 자동저장 체크포인트로 돌아간다."
 
 func _on_retry_pressed() -> void:
     visible = false
@@ -63,7 +74,7 @@ func _on_retry_pressed() -> void:
 func _on_load_save_pressed() -> void:
     if save_service == null:
         return
-    var data: ProgressionData = save_service.load_progression(0)
+    var data: ProgressionData = save_service.load_progression(SaveService.AUTOSAVE_SLOT)
     visible = false
     load_last_save_requested.emit(data)
 

@@ -109,6 +109,26 @@ const CH04_BRIEFING := {
 	"brief_text": "The monastery still holds Ark's work, but the waterline has turned the approach into a timing problem. Move too slowly and the defenders choose every exchange for you."
 }
 
+const CH04_03_BRIEFING := {
+	"chapter": "CH04 — 수문 제어",
+	"turn_limit": 12,
+	"enemy_intel": [
+		"침수 경로 수비병 2기 — 양측 수문 바퀴를 지키는 방어선",
+		"견제병 2기 — 빗속 도하 구간에 압박을 거는 보조 화력",
+		"[확인] 두 수문 제어점이 모두 맞춰져야 진입로가 안정된다"
+	],
+	"terrain_summary": [
+		"서쪽 수문: 바깥 수위선을 붙잡는 첫 제어 지점",
+		"동쪽 수문: 내부 도하 상태를 바꾸는 짝 제어 지점",
+		"침수 경로: 두 수문이 맞춰지기 전까지 안전하지 않은 진입선"
+	],
+	"optional_objectives": [
+		"성유물 금고 진입로 안정화",
+		"아군 사망 없음"
+	],
+	"brief_text": "수문 제어는 진입 경로 자체의 안전도를 바꾼다. 이 전투에서는 지형 상태가 교전보다 먼저 승부를 가를 수 있다."
+}
+
 const CH05_BRIEFING := {
 	"chapter": "CH05 — Gray Archive",
 	"turn_limit": 13,
@@ -149,6 +169,26 @@ const CH06_BRIEFING := {
 		"Reduce fort resistance to 0"
 	],
 	"brief_text": "Valtor's iron keep is the last wall between the campaign and Ellyor. The siege math is simple — break it before it breaks you."
+}
+
+const CH06_02_BRIEFING := {
+	"chapter": "CH06 — 포대선",
+	"turn_limit": 15,
+	"enemy_intel": [
+		"포대선 인원 2기 — 양측 윈치를 지키는 외곽 포열 수비병",
+		"지원병 1기 — 중앙 사슬 승강문 앞에서 압박을 거는 견제병",
+		"[확인] 양측 포대와 중앙 승강문 제어를 모두 무너뜨려야 전선이 열린다"
+	],
+	"terrain_summary": [
+		"서쪽 포대: 좌측 접근선을 붙잡는 외곽 공성 제어점",
+		"사슬 승강문: 양측 포대 사이를 묶는 중앙 병목",
+		"동쪽 포대: 우측 전선을 고정하는 대응 압박 지점"
+	],
+	"optional_objectives": [
+		"포대선 완전 붕괴",
+		"아군 사망 없음"
+	],
+	"brief_text": "포대선은 중앙 진입을 길게 노출시키며 압박을 고정한다. 엄폐 없는 전진은 포열선이 원하는 교환으로 이어진다."
 }
 
 const CH07_BRIEFING := {
@@ -194,24 +234,24 @@ const CH08_BRIEFING := {
 }
 
 const CH09A_BRIEFING := {
-	"chapter": "CH09A — Broken Standard",
+	"chapter": "CH09A — 부서진 군기",
 	"turn_limit": 15,
 	"enemy_intel": [
-		"3x Vanguard — outer-line soldiers holding the testimony gate",
-		"2x Skirmisher — censor support inside the court",
-		"1x Outer Line Captain (Boss) — final command blocking Kyle's route",
-		"[KNOWN] The line between memory and erasure is being enforced in real time"
+		"전위병 3기 — 증언문을 지키는 외곽선 병력",
+		"척후병 2기 — 안뜰 안쪽에서 검열을 보조하는 지원병",
+		"외곽선 대장 1기(보스) — 카일의 길을 막는 최후 명령권자",
+		"[확인] 기억과 소거의 경계선이 이 전장에서 그대로 집행되고 있다"
 	],
 	"terrain_summary": [
-		"South Entry: the only safe insertion lane",
-		"Censor Court: exposed center with overlapping pressure",
-		"Root Access Gate: final choke between witness and archive"
+		"남쪽 진입로: 사실상 유일한 안전 투입선",
+		"검열 안뜰: 압박이 겹치는 노출 중심지",
+		"근원 접근문: 증언과 기록보관소 사이의 마지막 병목"
 	],
 	"optional_objectives": [
-		"Kyle testifies",
-		"No allied casualties"
+		"카일의 증언 확보",
+		"아군 사망 없음"
 	],
-	"brief_text": "Kyle's line is still standing, but it has been turned into a filter for what is allowed to survive. The squad is not only breaking a defense here — it is breaking a policy."
+	"brief_text": "카일의 방어선은 아직 서 있지만, 이제는 무엇이 살아남을 수 있는지를 가르는 필터가 되었다. 이 전투에서 부수는 것은 방어선 하나가 아니라, 사람을 지우는 기준 그 자체다."
 }
 
 const CH09B_BRIEFING := {
@@ -236,29 +276,55 @@ const CH09B_BRIEFING := {
 }
 
 const CH10_BRIEFING := {
-	"chapter": "CH10 — Nameless Tower",
+	"chapter": "CH10 — 무명의 탑",
 	"turn_limit": 18,
 	"enemy_intel": [
-		"3x Vanguard — final keep guard on the bell ascent",
-		"2x Skirmisher — corridor pressure below the dais",
-		"1x Karron (Boss) — tower anchor controlling the final approach",
-		"[KNOWN] The last ascent is built around the bell and the names tied to it"
+		"전위병 3기 — 종으로 오르는 최후의 성채 경비",
+		"척후병 2기 — 종단 아래 회랑에서 압박을 거는 지원병",
+		"카르온 1기(보스) — 마지막 진입을 지배하는 탑의 핵심 앵커",
+		"[확인] 마지막 상승로는 종과 그에 묶인 이름들을 중심으로 설계되어 있다"
 	],
 	"terrain_summary": [
-		"South Bell Approach: long entry into enemy range",
-		"Central Keep: layered cover and multiple reinforcement lanes",
-		"North Bell Dais: final high-ground anchor before the end"
+		"남쪽 종길: 적 사정거리로 길게 노출되는 진입 구간",
+		"중앙 성채: 엄폐와 증원이 겹치는 중층 방어선",
+		"북쪽 종단: 최후의 결전을 지배하는 고지대 앵커"
 	],
 	"optional_objectives": [
-		"All allies Name Called",
-		"No ally deaths"
+		"모든 아군 이름 부름",
+		"아군 사망 없음"
 	],
-	"brief_text": "The final ascent is not about reaching the tower anymore. It is about carrying every surviving name through the last structure built to erase them."
+	"brief_text": "마지막 상승은 이제 단순히 탑 꼭대기에 도달하는 일이 아니다. 끝까지 남은 모든 이름을, 그것을 지우기 위해 세워진 마지막 구조물 바깥으로 끝내 끌고 나가는 일이다."
+}
+
+const CH10_05_BRIEFING := {
+	"chapter": "CH10 — 마지막 이름",
+	"turn_limit": 16,
+	"enemy_intel": [
+		"종단 1기 — 최종 접근로의 압박을 고정하는 의식 앵커",
+		"닻 사슬 1기 — 종의 압박선을 끊을 수 있는 마지막 해제 제어점",
+		"카르온 1기(보스) — 중앙 상승로를 지배하는 최종 탑의 핵심 앵커",
+		"[확인] 마지막 진입은 닻 사슬을 확보해야만 안정적으로 열린다"
+	],
+	"terrain_summary": [
+		"종길: 최종 의식 압박 아래 길게 노출되는 접근선",
+		"중앙 성채: 마지막 상승을 둘러싼 다층 방어선",
+		"닻 사슬: 최종 진입을 실제로 열 수 있는 마지막 해제 지점"
+	],
+	"optional_objectives": [
+		"모든 아군 이름 부름",
+		"아군 사망 없음"
+	],
+	"brief_text": "닻 사슬은 마지막 진입의 형태를 결정한다. 이 제어점을 확보해야 종의 압박선을 끊고 최종 상승을 자기 흐름으로 바꿀 수 있다."
 }
 
 static func get_briefing(stage_id: StringName) -> Dictionary:
-	return {}
 	match stage_id:
+		&"CH04_03":
+			return CH04_03_BRIEFING.duplicate(true)
+		&"CH06_02":
+			return CH06_02_BRIEFING.duplicate(true)
+		&"CH10_05":
+			return CH10_05_BRIEFING.duplicate(true)
 		&"CH01_05":
 			return CH01_BRIEFING.duplicate(true)
 		&"CH02_05":
@@ -279,7 +345,7 @@ static func get_briefing(stage_id: StringName) -> Dictionary:
 			return CH09A_BRIEFING.duplicate(true)
 		&"CH09B_05":
 			return CH09B_BRIEFING.duplicate(true)
-		&"CH10_05":
+		&"CH10_05_BOSS":
 			return CH10_BRIEFING.duplicate(true)
 		_:
 			return {}

@@ -330,6 +330,11 @@ func _build_briefing_body(briefing: Dictionary) -> String:
     if not brief_text.is_empty():
         lines.append(brief_text)
     lines.append("턴 제한: %d" % int(briefing.get("turn_limit", 20)))
+    var optional_objectives: Array[String] = _variant_to_string_array(briefing.get("optional_objectives", []))
+    if not optional_objectives.is_empty():
+        lines.append("선택 목표:")
+        for objective in optional_objectives:
+            lines.append("- %s" % objective)
     return "\n".join(lines)
 
 func _build_briefing_payload(briefing: Dictionary) -> Dictionary:
@@ -1190,7 +1195,7 @@ func _build_panel_flow_label(mode: String) -> String:
                 return "작전 브리핑 -> 야전 캠프 -> 브리핑 복귀"
             return "전투 완료 -> Camp review -> Next battle"
         CampaignState.MODE_BRIEFING:
-            return "Mission briefing -> 출격"
+            return "작전 브리핑 -> 출격"
         CampaignState.MODE_CHAPTER_INTRO:
             return "Camp exit -> Mission brief -> 출격"
         CampaignState.MODE_COMPLETE:
