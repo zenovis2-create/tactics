@@ -66,7 +66,10 @@ var _active_status_afterglow_profile: String = ""
 var _animating_attack: bool = false
 var _defeat_cleanup_started: bool = false
 var _character_sprite_frames: Dictionary = {}
+var _character_facing_sprite_frames: Dictionary = {}
 var _character_sprite_state: String = ""
+var _character_facing: String = "front_right"
+var _character_using_facing_frames: bool = false
 var _character_sprite_frame_index: int = 0
 var _character_sprite_frame_elapsed: float = 0.0
 var _equipment_overlay_frames: Dictionary = {}
@@ -76,6 +79,8 @@ var _character_pose_tween: Tween
 var _character_fade_tween: Tween
 
 const CHARACTER_FRAME_STEP_SECONDS := 0.09
+const CHARACTER_SPRITE_STATES := ["idle", "move", "attack", "cast", "hit", "guard", "defeat"]
+const CHARACTER_SPRITE_FACINGS := ["front_right", "front_left", "back_right", "back_left"]
 const DEFAULT_CHARACTER_SPRITE_SCALE := Vector2(0.42, 0.42)
 const DEFAULT_CHARACTER_SPRITE_POSITION := Vector2(2.0, 2.0)
 
@@ -149,6 +154,7 @@ func set_grid_position(cell: Vector2i, cell_size: Vector2i = Vector2i(64, 64), a
     else:
         position = destination_position
     if previous_cell != cell:
+        _set_character_facing(_resolve_character_facing_from_delta(cell - previous_cell))
         _play_move_visual()
 
 func set_selected(value: bool) -> void:
@@ -275,6 +281,7 @@ func play_attack_animation(target_pos: Vector2i, cell_size: float) -> void:
     if _animating_attack:
         return
     _animating_attack = true
+    _set_character_facing(_resolve_character_facing_from_delta(target_pos - grid_position))
     _play_character_animation("attack")
     var original_pos: Vector2 = position
     var direction: Vector2 = (Vector2(target_pos) * cell_size - original_pos).normalized()
@@ -769,11 +776,14 @@ func _setup_character_visuals() -> void:
     if character_visual_root == null or character_sprite == null or character_animation_player == null or unit_data == null:
         return
     _ensure_equipment_overlay_sprites()
-    _character_sprite_frames = {
-        "idle": _load_character_sprite_frames("idle"),
-        "move": _load_character_sprite_frames("move"),
-        "attack": _load_character_sprite_frames("attack"),
-    }
+    _character_facing = _default_character_facing()
+    _character_facing_sprite_frames = {}
+    for state in CHARACTER_SPRITE_STATES:
+        _character_facing_sprite_frames[state] = _load_character_facing_sprite_frame_sets(state)
+    _character_using_facing_frames = false
+    _character_sprite_frames = {}
+    for state in CHARACTER_SPRITE_STATES:
+        _character_sprite_frames[state] = _load_character_sprite_frames(state)
     var idle_frames: Array[Texture2D] = _character_sprite_frames.get("idle", [])
     if not idle_frames.is_empty():
         character_sprite.texture = idle_frames[0]
@@ -815,6 +825,71 @@ func _load_character_sprite_frames(state: String) -> Array[Texture2D]:
         if not frames.is_empty():
             return frames
     return []
+
+func _load_character_facing_sprite_frame_sets(state: String) -> Dictionary:
+    var facing_sets := {}
+    if unit_data == null:
+        return facing_sets
+    var lookup_names := [
+        String(unit_data.unit_id),
+        String(unit_data.display_name),
+    ]
+    for facing in CHARACTER_SPRITE_FACINGS:
+        for lookup_name in lookup_names:
+            if lookup_name.is_empty():
+                continue
+            var frames := BattleArtCatalog.load_character_sprite_facing_frames(lookup_name, state, facing)
+            if not frames.is_empty():
+                facing_sets[facing] = frames
+                break
+    return facing_sets
+
+func _refresh_character_sprite_frames_for_facing(preserve_current_frame: bool = true) -> void:
+    var next_frames := {}
+    var used_facing_frames := false
+    for state in CHARACTER_SPRITE_STATES:
+        var frames: Array[Texture2D] = []
+        var facing_sets: Dictionary = _character_facing_sprite_frames.get(state, {})
+        if facing_sets.has(_character_facing):
+            frames = facing_sets.get(_character_facing, [])
+            used_facing_frames = used_facing_frames or not frames.is_empty()
+        if frames.is_empty():
+            frames = _load_character_sprite_frames(state)
+        next_frames[state] = frames
+    _character_sprite_frames = next_frames
+    _character_using_facing_frames = used_facing_frames
+
+    if character_sprite == null or _character_sprite_state.is_empty():
+        return
+    var state_frames: Array[Texture2D] = _character_sprite_frames.get(_character_sprite_state, [])
+    if state_frames.is_empty():
+        return
+    if preserve_current_frame:
+        _character_sprite_frame_index = _character_sprite_frame_index % state_frames.size()
+    else:
+        _character_sprite_frame_index = 0
+    character_sprite.texture = state_frames[_character_sprite_frame_index]
+    _refresh_equipment_overlay_frame_index()
+
+func _default_character_facing() -> String:
+    if faction == "enemy":
+        return "front_left"
+    return "front_right"
+
+func _set_character_facing(facing: String) -> void:
+    if facing.is_empty() or not CHARACTER_SPRITE_FACINGS.has(facing):
+        return
+    if _character_facing == facing and _character_using_facing_frames:
+        return
+    _character_facing = facing
+    _refresh_character_sprite_frames_for_facing(true)
+
+func _resolve_character_facing_from_delta(delta: Vector2i) -> String:
+    if delta == Vector2i.ZERO:
+        return _character_facing
+    if delta.y < 0:
+        return "back_left" if delta.x < 0 else "back_right"
+    return "front_left" if delta.x < 0 else "front_right"
 
 func _ensure_character_animation_library() -> void:
     if character_animation_player == null:
@@ -925,6 +1000,8 @@ func _play_move_visual() -> void:
 func play_path_walk_visual(path: Array, cell_size: Vector2i) -> void:
     if path.size() <= 1:
         return
+    if path[0] is Vector2i and path[1] is Vector2i:
+        _set_character_facing(_resolve_character_facing_from_delta((path[1] as Vector2i) - (path[0] as Vector2i)))
     if _movement_tween != null and _movement_tween.is_running():
         _movement_tween.kill()
     _movement_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

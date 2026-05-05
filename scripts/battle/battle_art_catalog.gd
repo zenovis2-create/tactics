@@ -156,6 +156,52 @@ static func load_character_sprite_frames(unit_name: String, state: String) -> Ar
 	_cache[cache_key] = frames
 	return frames
 
+static func load_character_sprite_facing_frames(unit_name: String, state: String, facing: String) -> Array[Texture2D]:
+	var anchor_dir: String = _ally_sprite_anchor_map.get(unit_name, "")
+	if anchor_dir.is_empty() or state.is_empty() or facing.is_empty():
+		return []
+
+	var cache_key := "character-sprite-facing|%s|%s|%s" % [unit_name, state, facing]
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var frame_dir := "res://assets/characters/%s/runtime/facing_frames/%s/%s" % [anchor_dir, state, facing]
+	var absolute_dir := ProjectSettings.globalize_path(frame_dir)
+	if not DirAccess.dir_exists_absolute(absolute_dir):
+		return []
+
+	var file_names: PackedStringArray = []
+	var dir := DirAccess.open(frame_dir)
+	if dir == null:
+		return []
+
+	dir.list_dir_begin()
+	while true:
+		var file_name := dir.get_next()
+		if file_name.is_empty():
+			break
+		if dir.current_is_dir():
+			continue
+		if not file_name.ends_with(".png"):
+			continue
+		file_names.append(file_name)
+	dir.list_dir_end()
+	file_names.sort()
+
+	var frames: Array[Texture2D] = []
+	for file_name in file_names:
+		var texture := _load_preferred_texture(
+			[
+				"assets/characters/%s/runtime/facing_frames/%s/%s/" % [anchor_dir, state, facing]
+			],
+			file_name
+		)
+		if texture != null:
+			frames.append(texture)
+
+	_cache[cache_key] = frames
+	return frames
+
 static func load_tile_icon(file_name: String) -> Texture2D:
 	return _load_preferred_texture(
 		[
