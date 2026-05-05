@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_enemy_saria",
+  "asset_version": "v02_1_guard_imagegen",
+  "character_id": "enemy_saria",
+  "frame_count": 8,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "46f6d7aedfd5264f8a1662ef072f41031005a23962e58d6a93e1308d9b15a36f",
+  "source_sheet": "enemy_saria_idle_8f_sheet_v02_1_guard_imagegen.png",
+  "state": "idle"
+}

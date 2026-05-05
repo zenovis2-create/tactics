@@ -1,0 +1,336 @@
+[gd_resource type="SpriteFrames" load_steps=57 format=3]
+
+[ext_resource type="Texture2D" uid="uid://ggulknepawtgu" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_00.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://5mjfv6rean7tz" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_01.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://ksy7y6uysbgla" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_02.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://ct5g2e2ldf472" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_03.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://axxayf3qapitz" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_04.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://m32hfbu237iuu" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_05.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://ouzyq4tlu5iat" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_06.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://6fvq3valtyvvq" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/attack/enemy_saria_attack_07.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://ghrrddvo5h3bd" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_00.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://2u5miftsq4o4f" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_01.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://45bjvawasqlzj" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_02.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://sqvq6uhhvrugg" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_03.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://jsvocsy5iz5ha" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_04.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://l2e5nxr6uxfn7" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_05.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://jbuyyx2awqliv" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_06.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://mnte4k7kqdgng" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/cast/enemy_saria_cast_07.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://l2kigu6tkhqds" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_00.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://iwdawra2jupix" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_01.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://hruuhsw3ifxyg" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_02.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://tdh6udfegyigx" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_03.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://ccicftedlk5l6" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_04.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://ai7vgyhclzf7t" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_05.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://3wyxao75nhje7" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_06.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://7uwluplqp3zyc" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/defeat/enemy_saria_defeat_07.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://qta5u44rewesm" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_00.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://zcoubzsl7pntv" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_01.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://yspms6qntfr43" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_02.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://g5lm64p4ngs2h" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_03.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://n7fnlre6sgbkr" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_04.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://bff6ijrbdho5h" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_05.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://fupqiahlap5tw" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_06.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://5kpu2zyafktpf" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/guard/enemy_saria_guard_07.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://5qpom7o3ptnfk" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_00.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://5ladxlkzochnn" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_01.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://ra2vqq3zyadbb" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_02.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://g7jc2nm5li4e3" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_03.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://mdydfmmo2sb7r" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_04.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://criz6xiyejlrh" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_05.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://p2hhjr4slnwfr" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_06.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://bvihvuxheqfiw" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/hit/enemy_saria_hit_07.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://e2ee5g6el76au" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_00.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://zuxigf5w4jnio" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_01.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://vgdvwvbud6rxw" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_02.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://3yvou3vzdzzsg" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_03.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://3ompawxremiak" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_04.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://zwmkiiqxa42zz" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_05.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://oxgq2myo4bben" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_06.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://jojybkblvtqtn" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/idle/enemy_saria_idle_07.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://vyp3brr72lxgu" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_00.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://xa4whedad6djw" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_01.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://57p4crj6racnu" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_02.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://xr3xydw6wyuof" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_03.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://fwa3v2q5txxqe" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_04.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://pcnee2blpylif" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_05.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://5q3bik7oew4rl" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_06.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://czjawsmtlzg6t" path="res://assets/characters/sprite_anchor_enemy_saria/runtime/move/enemy_saria_move_07.png" id="56"]
+
+[resource]
+
+animations = Array[Dictionary]([
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("1")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("2")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("3")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("4")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("5")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("6")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("7")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("8")
+},
+],
+"loop": false,
+"name": &"attack",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("9")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("10")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("11")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("12")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("13")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("14")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("15")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("16")
+},
+],
+"loop": false,
+"name": &"cast",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("17")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("18")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("19")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("20")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("21")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("22")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("23")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("24")
+},
+],
+"loop": false,
+"name": &"defeat",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("25")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("26")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("27")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("28")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("29")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("30")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("31")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("32")
+},
+],
+"loop": false,
+"name": &"guard",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("33")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("34")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("35")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("36")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("37")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("38")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("39")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("40")
+},
+],
+"loop": false,
+"name": &"hit",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("41")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("42")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("43")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("44")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("45")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("46")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("47")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("48")
+},
+],
+"loop": true,
+"name": &"idle",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("49")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("50")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("51")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("52")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+],
+"loop": true,
+"name": &"move",
+"speed": 8.0,
+}
+])
