@@ -1,0 +1,706 @@
+{
+  "schema_version": 1,
+  "asset_type": "ui_production_surface_bundle",
+  "version": "v02.1",
+  "outputs": {
+    "tile_card_size": [
+      48,
+      48
+    ],
+    "tile_icon_size": [
+      24,
+      24
+    ],
+    "tile_card_mode": "RGBA",
+    "tile_icon_mode": "RGBA",
+    "object_icon_mode": "RGBA"
+  },
+  "tile_cards": [
+    {
+      "id": "archives",
+      "source": "assets/ui/production/tile_cards/archives.png",
+      "output": "assets/ui/production/tile_cards/archives.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "ash",
+      "source": "assets/ui/production/tile_cards/ash.png",
+      "output": "assets/ui/production/tile_cards/ash.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "battery",
+      "source": "assets/ui/production/tile_cards/battery.png",
+      "output": "assets/ui/production/tile_cards/battery.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "bell",
+      "source": "assets/ui/production/tile_cards/bell.png",
+      "output": "assets/ui/production/tile_cards/bell.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "bridge",
+      "source": "assets/ui/production/tile_cards/bridge.png",
+      "output": "assets/ui/production/tile_cards/bridge.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "cathedral",
+      "source": "assets/ui/production/tile_cards/cathedral.png",
+      "output": "assets/ui/production/tile_cards/cathedral.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "corridor",
+      "source": "assets/ui/production/tile_cards/corridor.png",
+      "output": "assets/ui/production/tile_cards/corridor.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "flooded",
+      "source": "assets/ui/production/tile_cards/flooded.png",
+      "output": "assets/ui/production/tile_cards/flooded.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "floodgate",
+      "source": "assets/ui/production/tile_cards/floodgate.png",
+      "output": "assets/ui/production/tile_cards/floodgate.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "forest",
+      "source": "assets/ui/production/tile_cards/forest.png",
+      "output": "assets/ui/production/tile_cards/forest.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "gate_control",
+      "source": "assets/ui/production/tile_cards/gate_control.png",
+      "output": "assets/ui/production/tile_cards/gate_control.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "highground",
+      "source": "assets/ui/production/tile_cards/highground.png",
+      "output": "assets/ui/production/tile_cards/highground.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "hymn",
+      "source": "assets/ui/production/tile_cards/hymn.png",
+      "output": "assets/ui/production/tile_cards/hymn.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "keep",
+      "source": "assets/ui/production/tile_cards/keep.png",
+      "output": "assets/ui/production/tile_cards/keep.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "keeper",
+      "source": "assets/ui/production/tile_cards/keeper.png",
+      "output": "assets/ui/production/tile_cards/keeper.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "marked",
+      "source": "assets/ui/production/tile_cards/marked.png",
+      "output": "assets/ui/production/tile_cards/marked.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "market",
+      "source": "assets/ui/production/tile_cards/market.png",
+      "output": "assets/ui/production/tile_cards/market.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "memory_abyss",
+      "source": "assets/ui/production/tile_cards/memory_abyss.png",
+      "output": "assets/ui/production/tile_cards/memory_abyss.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "plain",
+      "source": "assets/ui/production/tile_cards/plain.png",
+      "output": "assets/ui/production/tile_cards/plain.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "revision",
+      "source": "assets/ui/production/tile_cards/revision.png",
+      "output": "assets/ui/production/tile_cards/revision.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "shadow",
+      "source": "assets/ui/production/tile_cards/shadow.png",
+      "output": "assets/ui/production/tile_cards/shadow.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "shrine",
+      "source": "assets/ui/production/tile_cards/shrine.png",
+      "output": "assets/ui/production/tile_cards/shrine.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "thicket",
+      "source": "assets/ui/production/tile_cards/thicket.png",
+      "output": "assets/ui/production/tile_cards/thicket.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "tunnel",
+      "source": "assets/ui/production/tile_cards/tunnel.png",
+      "output": "assets/ui/production/tile_cards/tunnel.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "wall",
+      "source": "assets/ui/production/tile_cards/wall.png",
+      "output": "assets/ui/production/tile_cards/wall.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "tile_icons": [
+    {
+      "id": "archives",
+      "source": "assets/ui/production/tile_cards/archives.png",
+      "output": "assets/ui/production/tile_icons/archives.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "ash",
+      "source": "assets/ui/production/tile_cards/ash.png",
+      "output": "assets/ui/production/tile_icons/ash.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "battery",
+      "source": "assets/ui/production/tile_cards/battery.png",
+      "output": "assets/ui/production/tile_icons/battery.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "bell",
+      "source": "assets/ui/production/tile_cards/bell.png",
+      "output": "assets/ui/production/tile_icons/bell.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "bridge",
+      "source": "assets/ui/production/tile_cards/bridge.png",
+      "output": "assets/ui/production/tile_icons/bridge.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "cathedral",
+      "source": "assets/ui/production/tile_cards/cathedral.png",
+      "output": "assets/ui/production/tile_icons/cathedral.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "corridor",
+      "source": "assets/ui/production/tile_cards/corridor.png",
+      "output": "assets/ui/production/tile_icons/corridor.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "flooded",
+      "source": "assets/ui/production/tile_cards/flooded.png",
+      "output": "assets/ui/production/tile_icons/flooded.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "floodgate",
+      "source": "assets/ui/production/tile_cards/floodgate.png",
+      "output": "assets/ui/production/tile_icons/floodgate.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "forest",
+      "source": "assets/ui/production/tile_cards/forest.png",
+      "output": "assets/ui/production/tile_icons/forest.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "gate_control",
+      "source": "assets/ui/production/tile_cards/gate_control.png",
+      "output": "assets/ui/production/tile_icons/gate_control.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "highground",
+      "source": "assets/ui/production/tile_cards/highground.png",
+      "output": "assets/ui/production/tile_icons/highground.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "hymn",
+      "source": "assets/ui/production/tile_cards/hymn.png",
+      "output": "assets/ui/production/tile_icons/hymn.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "keep",
+      "source": "assets/ui/production/tile_cards/keep.png",
+      "output": "assets/ui/production/tile_icons/keep.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "keeper",
+      "source": "assets/ui/production/tile_cards/keeper.png",
+      "output": "assets/ui/production/tile_icons/keeper.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "marked",
+      "source": "assets/ui/production/tile_cards/marked.png",
+      "output": "assets/ui/production/tile_icons/marked.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "market",
+      "source": "assets/ui/production/tile_cards/market.png",
+      "output": "assets/ui/production/tile_icons/market.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "memory_abyss",
+      "source": "assets/ui/production/tile_cards/memory_abyss.png",
+      "output": "assets/ui/production/tile_icons/memory_abyss.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "plain",
+      "source": "assets/ui/production/tile_cards/plain.png",
+      "output": "assets/ui/production/tile_icons/plain.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "revision",
+      "source": "assets/ui/production/tile_cards/revision.png",
+      "output": "assets/ui/production/tile_icons/revision.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "shadow",
+      "source": "assets/ui/production/tile_cards/shadow.png",
+      "output": "assets/ui/production/tile_icons/shadow.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "shrine",
+      "source": "assets/ui/production/tile_cards/shrine.png",
+      "output": "assets/ui/production/tile_icons/shrine.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "thicket",
+      "source": "assets/ui/production/tile_cards/thicket.png",
+      "output": "assets/ui/production/tile_icons/thicket.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "tunnel",
+      "source": "assets/ui/production/tile_cards/tunnel.png",
+      "output": "assets/ui/production/tile_icons/tunnel.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "wall",
+      "source": "assets/ui/production/tile_cards/wall.png",
+      "output": "assets/ui/production/tile_icons/wall.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "object_icons": [
+    {
+      "id": "altar",
+      "source": "assets/ui/production/object_icons/altar.png",
+      "output": "assets/ui/production/object_icons/altar.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "anchor_chain",
+      "source": "assets/ui/production/object_icons/anchor_chain.png",
+      "output": "assets/ui/production/object_icons/anchor_chain.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "archive_lectern",
+      "source": "assets/ui/production/object_icons/archive_lectern.png",
+      "output": "assets/ui/production/object_icons/archive_lectern.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "battery_emplacement",
+      "source": "assets/ui/production/object_icons/battery_emplacement.png",
+      "output": "assets/ui/production/object_icons/battery_emplacement.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "bell_frame",
+      "source": "assets/ui/production/object_icons/bell_frame.png",
+      "output": "assets/ui/production/object_icons/bell_frame.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "chest",
+      "source": "assets/ui/production/object_icons/chest.png",
+      "output": "assets/ui/production/object_icons/chest.png",
+      "size": [
+        40,
+        40
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "floodgate_wheel",
+      "source": "assets/ui/production/object_icons/floodgate_wheel.png",
+      "output": "assets/ui/production/object_icons/floodgate_wheel.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "gate",
+      "source": "assets/ui/production/object_icons/gate.png",
+      "output": "assets/ui/production/object_icons/gate.png",
+      "size": [
+        40,
+        40
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "gate_control",
+      "source": "assets/ui/production/object_icons/gate_control.png",
+      "output": "assets/ui/production/object_icons/gate_control.png",
+      "size": [
+        40,
+        40
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "lever",
+      "source": "assets/ui/production/object_icons/lever.png",
+      "output": "assets/ui/production/object_icons/lever.png",
+      "size": [
+        40,
+        40
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "memory_well",
+      "source": "assets/ui/production/object_icons/memory_well.png",
+      "output": "assets/ui/production/object_icons/memory_well.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "paladin_shield",
+      "source": "assets/ui/production/object_icons/paladin_shield.png",
+      "output": "assets/ui/production/object_icons/paladin_shield.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "resin_shrine",
+      "source": "assets/ui/production/object_icons/resin_shrine.png",
+      "output": "assets/ui/production/object_icons/resin_shrine.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "split_marker_post",
+      "source": "assets/ui/production/object_icons/split_marker_post.png",
+      "output": "assets/ui/production/object_icons/split_marker_post.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "transfer_gate_latch",
+      "source": "assets/ui/production/object_icons/transfer_gate_latch.png",
+      "output": "assets/ui/production/object_icons/transfer_gate_latch.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "truth_dais",
+      "source": "assets/ui/production/object_icons/truth_dais.png",
+      "output": "assets/ui/production/object_icons/truth_dais.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "id": "command_obelisk",
+      "source": "assets/ui/object_icons_generated/command_obelisk.png",
+      "output": "assets/ui/production/object_icons/command_obelisk.png",
+      "size": [
+        40,
+        40
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "promotions": [
+    {
+      "id": "command_obelisk",
+      "from": "assets/ui/object_icons_generated/command_obelisk.png",
+      "to": "assets/ui/production/object_icons/command_obelisk.png"
+    }
+  ],
+  "notes": [
+    "Normalizes production UI surface assets for BattleArtCatalog preferred lookup.",
+    "Derives missing production tile icons from production tile cards so generated fallbacks are no longer needed for terrain UI.",
+    "Promotes generated object icons missing from production without changing their display contract."
+  ]
+}
