@@ -19,7 +19,7 @@ The Agency agents were used before implementation:
 
 - Project Shepherd selected `battle_result_runner.gd` as the safest f101 slice after f100 because it is non-image, not Main-heavy, and already passes headlessly.
 - Implementation Auditor inspected the battle result runner and related result summary/UI source and recommended exact runner-only assertions.
-- Release QA Scout produced a CampaignPanel records-section scout document, but selected f101 stays on the narrower existing battle-result runner path because the records-section runner does not exist yet.
+- Release QA Scout discussed a possible CampaignPanel records-section lane, but selected f101 stays on the narrower existing battle-result runner path because the records-section runner/scout artifacts are not present in this workspace.
 
 Selected f101 does not modify production code and does not claim release/package readiness.
 
@@ -153,14 +153,11 @@ Classification rule:
 
 ## Non-selected scout artifacts
 
-The following scout artifact exists but is not authoritative for selected f101 delivery:
-
-- `docs/reviews/2026-05-05-f101-campaign-panel-records-section-runner-only-qa-scout.md`
-- `tmp/validation/qa_evidence_20260505_f101_campaign_panel_records_section_runner_only/`
+The Agency QA Scout discussed a possible CampaignPanel records-section scout lane, but those records-section runner/scout artifacts are not present in this workspace and are not part of selected f101 delivery.
 
 Reason:
 
-- It focuses on a proposed CampaignPanel records-section runner that is not present yet.
+- The proposed records-section runner is not present yet.
 - The selected f101 delivery is the existing BattleScene-based battle result runner.
 
 Earlier scout artifacts also remain non-selected for f101:
