@@ -183,6 +183,48 @@ static func load_fx(file_name: String) -> Texture2D:
 		file_name
 	)
 
+static func load_fx_animation(file_name: String) -> Array[Texture2D]:
+	if file_name.is_empty():
+		return []
+
+	var effect_id := String(file_name).get_basename()
+	var cache_key := "fx-animation|%s" % effect_id
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var frame_dir := "res://assets/fx/%s/runtime/default" % effect_id
+	var absolute_dir := ProjectSettings.globalize_path(frame_dir)
+	if not DirAccess.dir_exists_absolute(absolute_dir):
+		_cache[cache_key] = []
+		return []
+
+	var dir := DirAccess.open(frame_dir)
+	if dir == null:
+		_cache[cache_key] = []
+		return []
+
+	var file_names: PackedStringArray = []
+	dir.list_dir_begin()
+	while true:
+		var candidate := dir.get_next()
+		if candidate.is_empty():
+			break
+		if dir.current_is_dir():
+			continue
+		if candidate.to_lower().ends_with(".png"):
+			file_names.append(candidate)
+	dir.list_dir_end()
+	file_names.sort()
+
+	var frames: Array[Texture2D] = []
+	for candidate in file_names:
+		var texture := _load_texture_from_resource_path("%s/%s" % [frame_dir, candidate])
+		if texture != null:
+			frames.append(texture)
+
+	_cache[cache_key] = frames
+	return frames
+
 static func clear_cache() -> void:
 	_cache.clear()
 
@@ -209,3 +251,12 @@ static func _load_preferred_texture(dir_paths: Array[String], file_name: String)
 		return texture
 
 	return null
+
+static func _load_texture_from_resource_path(resource_path: String) -> Texture2D:
+	var absolute_path := ProjectSettings.globalize_path(resource_path)
+	if not FileAccess.file_exists(absolute_path):
+		return null
+	var image := Image.new()
+	if image.load(absolute_path) != OK:
+		return null
+	return ImageTexture.create_from_image(image)

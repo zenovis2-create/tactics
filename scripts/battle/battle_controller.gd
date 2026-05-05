@@ -1908,6 +1908,10 @@ func _play_battle_flash(color: Color, duration: float) -> void:
 func _play_world_fx(file_name: String, cell: Vector2i, tint: Color, duration: float, scale_amount: float) -> void:
     if effects_root == null:
         return
+    var animated_frames := BattleArtCatalog.load_fx_animation(file_name)
+    if not animated_frames.is_empty():
+        _play_animated_world_fx(animated_frames, cell, tint, duration, scale_amount)
+        return
     var texture: Texture2D = _load_fx_texture(file_name)
     if texture == null:
         return
@@ -1929,6 +1933,39 @@ func _play_world_fx(file_name: String, cell: Vector2i, tint: Color, duration: fl
     tween.tween_property(sprite, "scale", Vector2(scale_amount + 0.12, scale_amount + 0.12), duration * 0.55)
     tween.parallel().tween_property(sprite, "modulate:a", 0.0, duration * 0.55)
     tween.finished.connect(sprite.queue_free)
+
+func _play_animated_world_fx(frames: Array[Texture2D], cell: Vector2i, tint: Color, duration: float, scale_amount: float) -> void:
+    var sprite := AnimatedSprite2D.new()
+    sprite.sprite_frames = _build_fx_sprite_frames(frames, duration)
+    sprite.animation = "default"
+    sprite.centered = true
+    sprite.position = Vector2(
+        cell.x * stage_data.cell_size.x + stage_data.cell_size.x * 0.5,
+        cell.y * stage_data.cell_size.y + stage_data.cell_size.y * 0.5
+    )
+    sprite.modulate = tint
+    sprite.scale = Vector2(0.7, 0.7)
+    effects_root.add_child(sprite)
+    sprite.play("default")
+
+    var tween := create_tween()
+    tween.tween_property(sprite, "scale", Vector2(scale_amount, scale_amount), duration * 0.45)
+    tween.parallel().tween_property(sprite, "modulate:a", 0.92, duration * 0.25)
+    tween.tween_property(sprite, "scale", Vector2(scale_amount + 0.12, scale_amount + 0.12), duration * 0.55)
+    tween.parallel().tween_property(sprite, "modulate:a", 0.0, duration * 0.55)
+    tween.finished.connect(sprite.queue_free)
+
+func _build_fx_sprite_frames(frames: Array[Texture2D], duration: float) -> SpriteFrames:
+    var sprite_frames := SpriteFrames.new()
+    if not sprite_frames.has_animation("default"):
+        sprite_frames.add_animation("default")
+    else:
+        sprite_frames.clear("default")
+    sprite_frames.set_animation_loop("default", false)
+    sprite_frames.set_animation_speed("default", maxf(1.0, float(frames.size()) / maxf(duration, 0.05)))
+    for frame in frames:
+        sprite_frames.add_frame("default", frame)
+    return sprite_frames
 
 func _play_attack_sequence_fx(attacker: UnitActor, defender: UnitActor, skill: SkillData = null) -> void:
     if attacker == null or defender == null or not is_instance_valid(attacker) or not is_instance_valid(defender):
@@ -2030,8 +2067,9 @@ func get_last_attack_timing_signature_snapshot() -> Dictionary:
 func _play_travel_fx(from_cell: Vector2i, to_cell: Vector2i, tint: Color, duration: float) -> void:
     if effects_root == null:
         return
-    var texture: Texture2D = _load_fx_texture("objective_burst.png")
-    if texture == null:
+    var animated_frames := BattleArtCatalog.load_fx_animation("objective_burst.png")
+    var texture: Texture2D = _load_fx_texture("objective_burst.png") if animated_frames.is_empty() else null
+    if animated_frames.is_empty() and texture == null:
         return
     var start := Vector2(
         from_cell.x * stage_data.cell_size.x + stage_data.cell_size.x * 0.5,
@@ -2041,9 +2079,19 @@ func _play_travel_fx(from_cell: Vector2i, to_cell: Vector2i, tint: Color, durati
         to_cell.x * stage_data.cell_size.x + stage_data.cell_size.x * 0.5,
         to_cell.y * stage_data.cell_size.y + stage_data.cell_size.y * 0.5
     )
-    var sprite := Sprite2D.new()
-    sprite.texture = texture
-    sprite.centered = true
+    var sprite: Node2D
+    if not animated_frames.is_empty():
+        var animated_sprite := AnimatedSprite2D.new()
+        animated_sprite.sprite_frames = _build_fx_sprite_frames(animated_frames, duration)
+        animated_sprite.animation = "default"
+        animated_sprite.centered = true
+        animated_sprite.play("default")
+        sprite = animated_sprite
+    else:
+        var static_sprite := Sprite2D.new()
+        static_sprite.texture = texture
+        static_sprite.centered = true
+        sprite = static_sprite
     sprite.position = start
     sprite.modulate = tint
     sprite.scale = Vector2(0.32, 0.32)

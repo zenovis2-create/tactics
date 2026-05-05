@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "asset_type": "animated_fx_bundle",
+  "version": "v02.1",
+  "frame_size": [
+    128,
+    128
+  ],
+  "fps": 18.0,
+  "effects": [
+    {
+      "effect_id": "hit_spark",
+      "source_bundle": "fx_weapon_impacts",
+      "runtime_contract": "assets/fx/hit_spark/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "effect_id": "objective_burst",
+      "source_bundle": "fx_defense_recovery",
+      "runtime_contract": "assets/fx/objective_burst/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "effect_id": "mark_ring",
+      "source_bundle": "fx_status_harm",
+      "runtime_contract": "assets/fx/mark_ring/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "effect_id": "trap_burst",
+      "source_bundle": "fx_trap_map_objects",
+      "runtime_contract": "assets/fx/trap_burst/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "effect_id": "finale_burst",
+      "source_bundle": "fx_finale_reserved",
+      "runtime_contract": "assets/fx/finale_burst/runtime_contract_v01.json",
+      "frame_count": 16
+    }
+  ],
+  "notes": [
+    "Built from existing imagegen alpha 8x8 4x16f bundles because OPENAI_API_KEY is unavailable for live generation.",
+    "Each runtime effect uses the top-left 4x4 quadrant as a 16-frame default animation."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "asset_type": "animated_fx",
+  "effect_id": "hit_spark",
+  "animation": "default",
+  "frame_count": 16,
+  "fps": 18.0,
+  "frame_size": [
+    128,
+    128
+  ],
+  "source": "source/sheets/fx_weapon_impacts_8x8_4x16f_bundle_v01_grid2048_alpha.png",
+  "source_bundle": "fx_weapon_impacts",
+  "source_quadrant": {
+    "row": 0,
+    "col": 0
+  },
+  "frames": [
+    "runtime/default/hit_spark_default_00.png",
+    "runtime/default/hit_spark_default_01.png",
+    "runtime/default/hit_spark_default_02.png",
+    "runtime/default/hit_spark_default_03.png",
+    "runtime/default/hit_spark_default_04.png",
+    "runtime/default/hit_spark_default_05.png",
+    "runtime/default/hit_spark_default_06.png",
+    "runtime/default/hit_spark_default_07.png",
+    "runtime/default/hit_spark_default_08.png",
+    "runtime/default/hit_spark_default_09.png",
+    "runtime/default/hit_spark_default_10.png",
+    "runtime/default/hit_spark_default_11.png",
+    "runtime/default/hit_spark_default_12.png",
+    "runtime/default/hit_spark_default_13.png",
+    "runtime/default/hit_spark_default_14.png",
+    "runtime/default/hit_spark_default_15.png"
+  ]
+}
