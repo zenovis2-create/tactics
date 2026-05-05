@@ -18,7 +18,7 @@ const UNITS := [
 		"display_name": "Kyle",
 		"anchor": "sprite_anchor_kyle",
 		"data": preload("res://data/units/ally_kyle.tres"),
-		"aliases": ["ally_kyle", "ally_karl", "enemy_kyle_1", "enemy_karl_1", "Kyle"],
+		"aliases": ["ally_kyle", "ally_karl", "Kyle"],
 	},
 	{
 		"label": "Noah",

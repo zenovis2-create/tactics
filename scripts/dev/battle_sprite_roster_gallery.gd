@@ -113,11 +113,67 @@ const CHARACTER_CONFIGS := {
         "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
         "team": "Enemy",
     },
+    "enemy_barten": {
+        "label": "Barten",
+        "root": "res://assets/characters/sprite_anchor_enemy_barten/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_hardren_captain": {
+        "label": "Hardren",
+        "root": "res://assets/characters/sprite_anchor_enemy_hardren_captain/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_roderic": {
+        "label": "Roderic",
+        "root": "res://assets/characters/sprite_anchor_enemy_roderic/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_valgar": {
+        "label": "Valgar",
+        "root": "res://assets/characters/sprite_anchor_enemy_valgar/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_melkion": {
+        "label": "E Melkion",
+        "root": "res://assets/characters/sprite_anchor_enemy_melkion/runtime",
+        "animations": ["idle", "move", "cast", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_kyle": {
+        "label": "E Kyle",
+        "root": "res://assets/characters/sprite_anchor_enemy_kyle/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_lete": {
+        "label": "E Lete",
+        "root": "res://assets/characters/sprite_anchor_enemy_lete/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
     "enemy_karuon": {
         "label": "Karuon",
         "root": "res://assets/characters/sprite_anchor_enemy_karuon/runtime",
         "animations": ["idle", "move", "attack"],
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_karuon_final": {
+        "label": "Final Karuon",
+        "root": "res://assets/characters/sprite_anchor_enemy_karuon_final/runtime",
+        "animations": ["idle", "move", "cast", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
         "team": "Enemy",
     },
     "ally_melkion_ally": {
@@ -129,7 +185,7 @@ const CHARACTER_CONFIGS := {
     },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "enoch", "kyle", "noah", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_hes", "enemy_resin_warden", "enemy_ash_archivist", "enemy_karuon"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "enoch", "kyle", "noah", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_hes", "enemy_resin_warden", "enemy_ash_archivist", "enemy_barten", "enemy_hardren_captain", "enemy_roderic", "enemy_valgar", "enemy_melkion", "enemy_kyle", "enemy_lete", "enemy_karuon", "enemy_karuon_final"]
 const SLOT_POSITIONS := [
     Vector2(-560, -120),
     Vector2(-350, -120),
@@ -149,6 +205,14 @@ const SLOT_POSITIONS := [
     Vector2(70, 360),
     Vector2(280, 360),
     Vector2(490, 360),
+    Vector2(-560, 600),
+    Vector2(-350, 600),
+    Vector2(-140, 600),
+    Vector2(70, 600),
+    Vector2(280, 600),
+    Vector2(490, 600),
+    Vector2(-560, 840),
+    Vector2(-350, 840),
 ]
 
 @onready var title_label: Label = $CanvasLayer/Panel/VBox/TitleLabel
@@ -164,7 +228,7 @@ func _ready() -> void:
     _build_gallery()
     title_label.text = "Battle Sprite Roster Gallery"
     hint_label.text = "Left/Right: switch state   Space: replay"
-    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Enoch / Kyle / Noah / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Hes / Resin Warden / Ash Archivist / Karuon"
+    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Enoch / Kyle / Noah / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Hes / Resin / Ash / Barten / Hardren / Roderic / Valgar / Melkion / Kyle / Lete / Karuon / Final Karuon"
     _play_current_animation()
 
 

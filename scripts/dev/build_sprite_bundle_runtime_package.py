@@ -30,7 +30,27 @@ class BundleSpec:
     core: Path
     completion: Path
     aliases: tuple[str, ...]
+    state_sources: dict[str, tuple[str, int, int]]
 
+CASTER_STATE_SOURCES = {
+    "idle": ("core", 0, 0),
+    "cast": ("core", 0, 1),
+    "attack": ("core", 1, 0),
+    "hit": ("core", 1, 1),
+    "move": ("completion", 0, 0),
+    "guard": ("completion", 0, 1),
+    "defeat": ("completion", 1, 0),
+}
+
+CORE_STATE_SOURCES = {
+    "idle": ("core", 0, 0),
+    "move": ("core", 0, 1),
+    "attack": ("core", 1, 0),
+    "cast": ("core", 1, 1),
+    "hit": ("completion", 0, 0),
+    "guard": ("completion", 0, 1),
+    "defeat": ("completion", 1, 0),
+}
 
 SPECS = {
     "enemy_hes": BundleSpec(
@@ -41,6 +61,7 @@ SPECS = {
         core=SOURCE_ROOT / "sprite_anchor_enemy_hes/v01/enemy_hes_front_right_caster_4x16f_bundle_v01_grid2048.png",
         completion=SOURCE_ROOT / "sprite_anchor_enemy_hes/v02/enemy_hes_front_right_completion_4x16f_bundle_v02_grid2048.png",
         aliases=("Hes", "enemy_hes"),
+        state_sources=CASTER_STATE_SOURCES,
     ),
     "enemy_resin_warden": BundleSpec(
         character_id="enemy_resin_warden",
@@ -50,6 +71,7 @@ SPECS = {
         core=SOURCE_ROOT / "sprite_anchor_enemy_resin_warden/v01/enemy_resin_warden_front_right_caster_4x16f_bundle_v01_grid2048.png",
         completion=SOURCE_ROOT / "sprite_anchor_enemy_resin_warden/v02/enemy_resin_warden_front_right_completion_4x16f_bundle_v02_grid2048.png",
         aliases=("Resin Warden", "enemy_resin_warden"),
+        state_sources=CASTER_STATE_SOURCES,
     ),
     "enemy_ash_archivist": BundleSpec(
         character_id="enemy_ash_archivist",
@@ -59,17 +81,88 @@ SPECS = {
         core=SOURCE_ROOT / "sprite_anchor_enemy_ash_archivist/v01/enemy_ash_archivist_front_right_caster_4x16f_bundle_v01_grid2048.png",
         completion=SOURCE_ROOT / "sprite_anchor_enemy_ash_archivist/v02/enemy_ash_archivist_front_right_completion_4x16f_bundle_v02_grid2048.png",
         aliases=("Ash Archivist", "enemy_ash_archivist"),
+        state_sources=CASTER_STATE_SOURCES,
     ),
-}
-
-STATE_SOURCES = {
-    "idle": ("core", 0, 0),
-    "cast": ("core", 0, 1),
-    "attack": ("core", 1, 0),
-    "hit": ("core", 1, 1),
-    "move": ("completion", 0, 0),
-    "guard": ("completion", 0, 1),
-    "defeat": ("completion", 1, 0),
+    "enemy_barten": BundleSpec(
+        character_id="enemy_barten",
+        display_name="Barten",
+        anchor="sprite_anchor_enemy_barten",
+        prefix="enemy_barten",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_barten/v01/enemy_barten_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_barten/v02/enemy_barten_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("enemy_barten", "enemy_varten"),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_hardren_captain": BundleSpec(
+        character_id="enemy_hardren_captain",
+        display_name="Hardren Captain",
+        anchor="sprite_anchor_enemy_hardren_captain",
+        prefix="enemy_hardren_captain",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_hardren_captain/v01/enemy_hardren_captain_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_hardren_captain/v02/enemy_hardren_captain_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("Hardren Captain", "enemy_hardren_captain"),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_roderic": BundleSpec(
+        character_id="enemy_roderic",
+        display_name="Roderic",
+        anchor="sprite_anchor_enemy_roderic",
+        prefix="enemy_roderic",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_roderic/v01/enemy_roderic_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_roderic/v02/enemy_roderic_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("Roderic", "enemy_roderic"),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_valgar": BundleSpec(
+        character_id="enemy_valgar",
+        display_name="Valgar",
+        anchor="sprite_anchor_enemy_valgar",
+        prefix="enemy_valgar",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_valgar/v01/enemy_valgar_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_valgar/v02/enemy_valgar_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("Valgar", "enemy_valgar"),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_melkion": BundleSpec(
+        character_id="enemy_melkion",
+        display_name="Melkion",
+        anchor="sprite_anchor_enemy_melkion",
+        prefix="enemy_melkion",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_melkion/v01/enemy_melkion_front_right_caster_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_melkion/v02/enemy_melkion_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("enemy_melkion",),
+        state_sources=CASTER_STATE_SOURCES,
+    ),
+    "enemy_kyle": BundleSpec(
+        character_id="enemy_kyle",
+        display_name="Kyle",
+        anchor="sprite_anchor_enemy_kyle",
+        prefix="enemy_kyle",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_kyle/v01/enemy_kyle_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_kyle/v02/enemy_kyle_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("enemy_kyle_1", "enemy_karl_1"),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_lete": BundleSpec(
+        character_id="enemy_lete",
+        display_name="Lete",
+        anchor="sprite_anchor_enemy_lete",
+        prefix="enemy_lete",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_lete/v01/enemy_lete_front_right_core_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_lete/v02/enemy_lete_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("enemy_lete",),
+        state_sources=CORE_STATE_SOURCES,
+    ),
+    "enemy_karuon_final": BundleSpec(
+        character_id="enemy_karuon_final",
+        display_name="Karuon",
+        anchor="sprite_anchor_enemy_karuon_final",
+        prefix="enemy_karuon_final",
+        core=SOURCE_ROOT / "sprite_anchor_enemy_karuon_final/v01/enemy_karuon_final_front_right_caster_4x16f_bundle_v01_grid2048.png",
+        completion=SOURCE_ROOT / "sprite_anchor_enemy_karuon_final/v02/enemy_karuon_final_front_right_completion_4x16f_bundle_v02_grid2048.png",
+        aliases=("enemy_karuon_final", "enemy_karon_final"),
+        state_sources=CASTER_STATE_SOURCES,
+    ),
 }
 
 
@@ -266,7 +359,7 @@ def build_package(spec: BundleSpec) -> Path:
     extraction: dict[str, list[dict[str, object]]] = {}
 
     for state in STATES:
-        sheet_name, quadrant_row, quadrant_col = STATE_SOURCES[state]
+        sheet_name, quadrant_row, quadrant_col = spec.state_sources[state]
         cells = _state_cells(sheets[sheet_name], quadrant_row, quadrant_col)
         normalized_frames: list[Image.Image] = []
         extraction[state] = []
@@ -325,7 +418,7 @@ def build_package(spec: BundleSpec) -> Path:
         "display_name": spec.display_name,
         "aliases": list(spec.aliases),
         "source_images": {key: str(path.relative_to(anchor_root)) for key, path in source_copies.items()},
-        "state_sources": STATE_SOURCES,
+        "state_sources": spec.state_sources,
         "extraction": extraction,
         "notes": [
             "Generated from existing imagegen front_right bundle because OPENAI_API_KEY was unavailable for live back-view generation.",

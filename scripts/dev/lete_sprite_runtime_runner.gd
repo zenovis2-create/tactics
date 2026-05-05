@@ -9,9 +9,11 @@ func _initialize() -> void:
 
 func _run() -> void:
 	for state in ["idle", "move", "attack", "guard"]:
-		for alias in ["Lete", "ally_lete", "enemy_lete"]:
+		for alias in ["Lete", "ally_lete"]:
 			if not _assert_frames(alias, state, 8):
 				return
+		if not _assert_frames("enemy_lete", state, 8):
+			return
 	if not await _assert_unit_visual_layer():
 		return
 	print("[PASS] lete_sprite_runtime_runner validated Lete sprite catalog aliases and Unit visual layer.")

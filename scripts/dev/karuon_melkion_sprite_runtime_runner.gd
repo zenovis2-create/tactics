@@ -12,21 +12,26 @@ func _initialize() -> void:
 
 func _run() -> void:
 	for state in ["idle", "move", "attack", "guard"]:
-		for alias in ["Karuon", "enemy_karuon", "enemy_karuon_final", "enemy_karon", "enemy_karon_final"]:
+		for alias in ["Karuon", "enemy_karuon", "enemy_karon"]:
+			if not _assert_frames(alias, state, 8):
+				return
+		for alias in ["enemy_karuon_final", "enemy_karon_final"]:
 			if not _assert_frames(alias, state, 8):
 				return
 		for alias in ["ally_melkion_ally", "melkion_ally"]:
 			if not _assert_frames(alias, state, 8):
 				return
+		if not _assert_frames("enemy_melkion", state, 8):
+			return
 	if BattleArtCatalog.load_character_sprite_frames("Melkion", "idle").size() != 0:
 		return _fail("Melkion display name should remain unmapped because ally/enemy Melkion share the same label.")
 	if not await _assert_unit_visual_layer(KARUON_DATA, "Karuon", "Karuon"):
 		return
-	if not await _assert_unit_visual_layer(KARUON_FINAL_DATA, "Final Karuon", "Karuon"):
+	if not await _assert_unit_visual_layer(KARUON_FINAL_DATA, "Final Karuon", "enemy_karuon_final"):
 		return
 	if not await _assert_unit_visual_layer(MELKION_ALLY_DATA, "Ally Melkion", "ally_melkion_ally"):
 		return
-	if not await _assert_enemy_melkion_keeps_fallback():
+	if not await _assert_unit_visual_layer(MELKION_ENEMY_DATA, "Enemy Melkion", "enemy_melkion"):
 		return
 	print("[PASS] karuon_melkion_sprite_runtime_runner validated Karuon/Melkion sprite aliases and Unit visual layers.")
 	quit(0)
@@ -54,22 +59,6 @@ func _assert_unit_visual_layer(unit_data: Resource, label: String, lookup_name: 
 		return _fail("%s should render an idle sprite frame instead of token art." % label)
 	if unit.token_art.visible:
 		return _fail("%s should hide generic token art when character sprites exist." % label)
-	unit.queue_free()
-	await process_frame
-	return true
-
-func _assert_enemy_melkion_keeps_fallback() -> bool:
-	var unit = UNIT_SCENE.instantiate()
-	root.add_child(unit)
-	unit.setup_from_data(MELKION_ENEMY_DATA)
-	await process_frame
-	var art_layer: CanvasItem = unit.get_node_or_null("CharacterVisualRoot")
-	if art_layer == null:
-		return _fail("Enemy Melkion Unit scene should expose CharacterVisualRoot layer.")
-	if art_layer.visible:
-		return _fail("Enemy Melkion should not consume ally_melkion_ally sprites through shared display_name Melkion.")
-	if not unit.token_art.visible:
-		return _fail("Enemy Melkion should keep generic token art visible until an enemy-specific sprite anchor exists.")
 	unit.queue_free()
 	await process_frame
 	return true
