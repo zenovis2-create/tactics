@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "asset_type": "tile_surface_runtime_bundle",
+  "version": "v02.1",
+  "outputs": {
+    "tile_card_size": [
+      48,
+      48
+    ],
+    "tile_icon_size": [
+      24,
+      24
+    ]
+  },
+  "tiles": [
+    {
+      "terrain_id": "forest",
+      "source": "assets/environment/tile_surface_sources/forest/forest_tile_01_battlefield_candidate_v02.png",
+      "source_label": "forest tile 01 battlefield candidate v02",
+      "card": "assets/ui/production/tile_cards/forest.png",
+      "icon": "assets/ui/production/tile_icons/forest.png",
+      "card_alpha_target": 0.28
+    },
+    {
+      "terrain_id": "wall",
+      "source": "assets/environment/tile_surface_sources/wall/fortress_tile_01_candidate_v01.png",
+      "source_label": "fortress tile 01 candidate v01 promoted as wall/keep surface",
+      "card": "assets/ui/production/tile_cards/wall.png",
+      "icon": "assets/ui/production/tile_icons/wall.png",
+      "card_alpha_target": 0.22
+    }
+  ],
+  "notes": [
+    "Built from existing imagegen terrain candidates.",
+    "Promotes large source concepts into actual BattleBoard production tile card/icon contracts."
+  ]
+}
