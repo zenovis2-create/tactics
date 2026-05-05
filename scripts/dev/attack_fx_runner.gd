@@ -16,21 +16,19 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	var initial_children: int = battle.effects_root.get_child_count()
-
 	var tia = battle._spawn_unit_actor(TIA_DATA, Vector2i(2, 6), "ally", battle.ally_units)
 	var target = battle._spawn_unit_actor(VANGUARD_DATA, Vector2i(5, 6), "ally", battle.ally_units)
+	var before_ranged: int = battle.effects_root.get_child_count()
 	battle._play_attack_sequence_fx(tia, target, PIN_SHOT)
-	await process_frame
-	if battle.effects_root.get_child_count() < initial_children + 2:
+	if battle.effects_root.get_child_count() < before_ranged + 2:
 		return _fail("Ranged attack FX should spawn at least trail + impact surfaces.")
 
 	var after_ranged: int = battle.effects_root.get_child_count()
 	var serin = battle._spawn_unit_actor(SERIN_DATA, Vector2i(2, 5), "ally", battle.ally_units)
 	battle._play_attack_sequence_fx(serin, target, ARK_BREATH)
-	await process_frame
 	if battle.effects_root.get_child_count() < after_ranged + 2:
 		return _fail("Mystic/support FX should spawn at least cast + trail surfaces.")
+	await process_frame
 
 	print("[PASS] attack_fx_runner validated ranged and mystic attack FX layering.")
 	quit(0)
