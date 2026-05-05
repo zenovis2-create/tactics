@@ -266,6 +266,47 @@ static func load_object_interaction_animation(object_type: String) -> Array[Text
 	_cache[cache_key] = frames
 	return frames
 
+static func load_equipment_overlay_frames(overlay_id: String) -> Array[Texture2D]:
+	if overlay_id.is_empty():
+		return []
+
+	var cache_key := "equipment-overlay|%s" % overlay_id
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var frame_dir := "res://assets/equipment_overlays/%s/runtime/default" % overlay_id
+	var absolute_dir := ProjectSettings.globalize_path(frame_dir)
+	if not DirAccess.dir_exists_absolute(absolute_dir):
+		_cache[cache_key] = []
+		return []
+
+	var dir := DirAccess.open(frame_dir)
+	if dir == null:
+		_cache[cache_key] = []
+		return []
+
+	var file_names: PackedStringArray = []
+	dir.list_dir_begin()
+	while true:
+		var candidate := dir.get_next()
+		if candidate.is_empty():
+			break
+		if dir.current_is_dir():
+			continue
+		if candidate.to_lower().ends_with(".png"):
+			file_names.append(candidate)
+	dir.list_dir_end()
+	file_names.sort()
+
+	var frames: Array[Texture2D] = []
+	for candidate in file_names:
+		var texture := _load_texture_from_resource_path("%s/%s" % [frame_dir, candidate])
+		if texture != null:
+			frames.append(texture)
+
+	_cache[cache_key] = frames
+	return frames
+
 static func clear_cache() -> void:
 	_cache.clear()
 

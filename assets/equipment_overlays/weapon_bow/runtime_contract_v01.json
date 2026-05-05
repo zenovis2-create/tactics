@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "asset_type": "equipment_overlay_animation",
+  "overlay_id": "weapon_bow",
+  "layer": "weapon",
+  "animation": "default",
+  "frame_count": 16,
+  "fps": 11.0,
+  "frame_size": [
+    128,
+    128
+  ],
+  "source": "source/sheets/equipment_overlay_weapons_4x16f_bundle_v01_grid2048_alpha.png",
+  "source_bundle": "equipment_overlay_weapons",
+  "source_label": "bow overlay",
+  "source_quadrant": {
+    "row": 1,
+    "col": 0
+  },
+  "frames": [
+    "runtime/default/weapon_bow_default_00.png",
+    "runtime/default/weapon_bow_default_01.png",
+    "runtime/default/weapon_bow_default_02.png",
+    "runtime/default/weapon_bow_default_03.png",
+    "runtime/default/weapon_bow_default_04.png",
+    "runtime/default/weapon_bow_default_05.png",
+    "runtime/default/weapon_bow_default_06.png",
+    "runtime/default/weapon_bow_default_07.png",
+    "runtime/default/weapon_bow_default_08.png",
+    "runtime/default/weapon_bow_default_09.png",
+    "runtime/default/weapon_bow_default_10.png",
+    "runtime/default/weapon_bow_default_11.png",
+    "runtime/default/weapon_bow_default_12.png",
+    "runtime/default/weapon_bow_default_13.png",
+    "runtime/default/weapon_bow_default_14.png",
+    "runtime/default/weapon_bow_default_15.png"
+  ]
+}

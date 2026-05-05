@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "asset_type": "equipment_overlay_animation_bundle",
+  "version": "v02.1",
+  "frame_size": [
+    128,
+    128
+  ],
+  "fps": 11.0,
+  "overlays": [
+    {
+      "overlay_id": "weapon_sword",
+      "layer": "weapon",
+      "source_label": "sword overlay",
+      "runtime_contract": "assets/equipment_overlays/weapon_sword/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "weapon_lance",
+      "layer": "weapon",
+      "source_label": "lance overlay",
+      "runtime_contract": "assets/equipment_overlays/weapon_lance/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "weapon_bow",
+      "layer": "weapon",
+      "source_label": "bow overlay",
+      "runtime_contract": "assets/equipment_overlays/weapon_bow/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "weapon_staff",
+      "layer": "weapon",
+      "source_label": "staff overlay",
+      "runtime_contract": "assets/equipment_overlays/weapon_staff/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "armor_heavy",
+      "layer": "armor",
+      "source_label": "heavy armor overlay",
+      "runtime_contract": "assets/equipment_overlays/armor_heavy/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "armor_light_cloak",
+      "layer": "armor",
+      "source_label": "light cloak overlay",
+      "runtime_contract": "assets/equipment_overlays/armor_light_cloak/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "accessory_relic",
+      "layer": "accessory",
+      "source_label": "relic accessory overlay",
+      "runtime_contract": "assets/equipment_overlays/accessory_relic/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "overlay_id": "accessory_shield",
+      "layer": "accessory",
+      "source_label": "shield overlay",
+      "runtime_contract": "assets/equipment_overlays/accessory_shield/runtime_contract_v01.json",
+      "frame_count": 16
+    }
+  ],
+  "notes": [
+    "Built from existing imagegen alpha 4x16f equipment overlay bundles.",
+    "Runtime overlays are synchronized to UnitActor character frame indices rather than played as independent animation clocks."
+  ]
+}

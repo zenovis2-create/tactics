@@ -69,6 +69,8 @@ var _character_sprite_frames: Dictionary = {}
 var _character_sprite_state: String = ""
 var _character_sprite_frame_index: int = 0
 var _character_sprite_frame_elapsed: float = 0.0
+var _equipment_overlay_frames: Dictionary = {}
+var _equipment_overlay_sprites: Dictionary = {}
 var _movement_tween: Tween
 var _character_pose_tween: Tween
 var _character_fade_tween: Tween
@@ -114,6 +116,7 @@ const DamageLabel = preload("res://scripts/battle/damage_label.gd")
 @onready var terrain_chevron_right: ColorRect = $TerrainChevronRight
 
 func _ready() -> void:
+    _ensure_equipment_overlay_sprites()
     if unit_data != null:
         setup_from_data(unit_data)
     else:
@@ -222,14 +225,17 @@ func set_tile_context(terrain_type: StringName, defense_bonus: int) -> void:
 func set_equipped_accessory(accessory: AccessoryData) -> void:
     _equipped_accessory = accessory
     _refresh_visuals()
+    _refresh_equipment_overlay_bindings()
 
 func set_equipped_weapon(weapon: WeaponData) -> void:
     _equipped_weapon = weapon
     _refresh_visuals()
+    _refresh_equipment_overlay_bindings()
 
 func set_equipped_armor(armor: ArmorData) -> void:
     _equipped_armor = armor
     _refresh_visuals()
+    _refresh_equipment_overlay_bindings()
 
 func apply_damage(amount: int) -> void:
     current_hp = max(0, current_hp - amount)
@@ -494,6 +500,7 @@ func _refresh_visuals() -> void:
         token_art.visible = token_art.texture != null and not _has_character_visuals()
     if character_sprite != null:
         character_sprite.modulate = _get_visual_character_modulate()
+    _refresh_equipment_overlay_bindings()
     if name_plate_back != null:
         name_plate_back.color = _get_nameplate_color()
         name_plate_back.visible = _should_show_nameplate()
@@ -761,6 +768,7 @@ func _has_character_visuals() -> bool:
 func _setup_character_visuals() -> void:
     if character_visual_root == null or character_sprite == null or character_animation_player == null or unit_data == null:
         return
+    _ensure_equipment_overlay_sprites()
     _character_sprite_frames = {
         "idle": _load_character_sprite_frames("idle"),
         "move": _load_character_sprite_frames("move"),
@@ -776,6 +784,7 @@ func _setup_character_visuals() -> void:
         _character_sprite_frame_elapsed = 0.0
         _ensure_character_animation_library()
         _play_character_animation("idle")
+        _refresh_equipment_overlay_bindings()
         return
 
     var character_file_name := "%s.png" % String(unit_data.display_name).to_lower()
@@ -792,6 +801,7 @@ func _setup_character_visuals() -> void:
     _character_sprite_frame_elapsed = 0.0
     _ensure_character_animation_library()
     _play_character_animation("idle")
+    _refresh_equipment_overlay_bindings()
 
 func _load_character_sprite_frames(state: String) -> Array[Texture2D]:
     var lookup_names := [
@@ -937,6 +947,7 @@ func _set_character_sprite_state(animation_name: String) -> void:
     _character_sprite_frame_elapsed = 0.0
     if character_sprite != null:
         character_sprite.texture = frames[0]
+    _refresh_equipment_overlay_frame_index()
 
 func _advance_character_sprite_frames(delta: float) -> void:
     if not _has_character_visuals():
@@ -957,6 +968,106 @@ func _advance_character_sprite_frames(delta: float) -> void:
     _character_sprite_frame_index = next_index
     if character_sprite != null:
         character_sprite.texture = frames[_character_sprite_frame_index]
+    _refresh_equipment_overlay_frame_index()
+
+func _ensure_equipment_overlay_sprites() -> void:
+    if character_visual_root == null:
+        return
+    _ensure_equipment_overlay_sprite("armor", "EquipmentArmorOverlay", 1)
+    _ensure_equipment_overlay_sprite("accessory", "EquipmentAccessoryOverlay", 2)
+    _ensure_equipment_overlay_sprite("weapon", "EquipmentWeaponOverlay", 3)
+
+func _ensure_equipment_overlay_sprite(layer: String, node_name: String, layer_z_index: int) -> void:
+    if _equipment_overlay_sprites.has(layer):
+        var existing := _equipment_overlay_sprites[layer] as Sprite2D
+        if existing != null and is_instance_valid(existing):
+            return
+
+    var sprite := character_visual_root.get_node_or_null(node_name) as Sprite2D
+    if sprite == null:
+        sprite = Sprite2D.new()
+        sprite.name = node_name
+        character_visual_root.add_child(sprite)
+
+    sprite.centered = true
+    sprite.position = DEFAULT_CHARACTER_SPRITE_POSITION
+    sprite.scale = DEFAULT_CHARACTER_SPRITE_SCALE
+    sprite.z_index = layer_z_index
+    sprite.visible = false
+    sprite.modulate = Color(1.0, 1.0, 1.0, 0.82)
+    _equipment_overlay_sprites[layer] = sprite
+
+func _refresh_equipment_overlay_bindings() -> void:
+    _ensure_equipment_overlay_sprites()
+    var overlay_ids := {
+        "weapon": _resolve_weapon_overlay_id(),
+        "armor": _resolve_armor_overlay_id(),
+        "accessory": _resolve_accessory_overlay_id(),
+    }
+
+    for layer in overlay_ids.keys():
+        var overlay_id := String(overlay_ids[layer])
+        var frames: Array[Texture2D] = []
+        if not overlay_id.is_empty() and _has_character_visuals():
+            frames = BattleArtCatalog.load_equipment_overlay_frames(overlay_id)
+        _equipment_overlay_frames[layer] = frames
+        var sprite := _equipment_overlay_sprites.get(layer, null) as Sprite2D
+        if sprite == null:
+            continue
+        sprite.visible = not frames.is_empty()
+        sprite.texture = null if frames.is_empty() else frames[_character_sprite_frame_index % frames.size()]
+
+func _refresh_equipment_overlay_frame_index() -> void:
+    for layer in _equipment_overlay_sprites.keys():
+        var sprite := _equipment_overlay_sprites[layer] as Sprite2D
+        if sprite == null or not is_instance_valid(sprite):
+            continue
+        var frames: Array[Texture2D] = _equipment_overlay_frames.get(layer, [])
+        if frames.is_empty() or not _has_character_visuals():
+            sprite.visible = false
+            sprite.texture = null
+            continue
+        sprite.texture = frames[_character_sprite_frame_index % frames.size()]
+        sprite.visible = true
+
+func _resolve_weapon_overlay_id() -> String:
+    if _equipped_weapon == null:
+        return ""
+    var key := "%s %s %s" % [
+        String(_equipped_weapon.weapon_type),
+        String(_equipped_weapon.weapon_id),
+        _equipped_weapon.display_name,
+    ]
+    key = key.to_lower()
+    if key.contains("bow"):
+        return "weapon_bow"
+    if key.contains("lance") or key.contains("spear"):
+        return "weapon_lance"
+    if key.contains("staff") or key.contains("rod"):
+        return "weapon_staff"
+    return "weapon_sword"
+
+func _resolve_armor_overlay_id() -> String:
+    if _equipped_armor == null:
+        return ""
+    var key := "%s %s %s" % [
+        String(_equipped_armor.armor_type),
+        String(_equipped_armor.armor_id),
+        _equipped_armor.display_name,
+    ]
+    key = key.to_lower()
+    if key.contains("heavy") or key.contains("plate") or key.contains("mail"):
+        return "armor_heavy"
+    return "armor_light_cloak"
+
+func _resolve_accessory_overlay_id() -> String:
+    if _equipped_accessory == null:
+        return ""
+    var key := "%s %s" % [String(_equipped_accessory.accessory_id), _equipped_accessory.display_name]
+    key = key.to_lower()
+    if key.contains("shield") or key.contains("crest") or key.contains("cuirass") or _equipped_accessory.defense_bonus > _equipped_accessory.attack_bonus + _equipped_accessory.movement_bonus:
+        return "accessory_shield"
+    return "accessory_relic"
 
 func _get_token_art_color() -> Color:
     if _selected:
