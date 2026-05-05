@@ -64,6 +64,13 @@ const CHARACTER_CONFIGS := {
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
         "team": "Enemy",
     },
+    "enemy_basil": {
+        "label": "Basil",
+        "root": "res://assets/characters/sprite_anchor_enemy_basil/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
     "enemy_karuon": {
         "label": "Karuon",
         "root": "res://assets/characters/sprite_anchor_enemy_karuon/runtime",
@@ -80,7 +87,7 @@ const CHARACTER_CONFIGS := {
     },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_karuon"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_karuon"]
 const SLOT_POSITIONS := [
     Vector2(-560, -120),
     Vector2(-350, -120),
@@ -93,6 +100,7 @@ const SLOT_POSITIONS := [
     Vector2(-140, 120),
     Vector2(70, 120),
     Vector2(280, 120),
+    Vector2(490, 120),
 ]
 
 @onready var title_label: Label = $CanvasLayer/Panel/VBox/TitleLabel
@@ -108,7 +116,7 @@ func _ready() -> void:
     _build_gallery()
     title_label.text = "Battle Sprite Roster Gallery"
     hint_label.text = "Left/Right: switch state   Space: replay"
-    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Karuon"
+    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Karuon"
     _play_current_animation()
 
 

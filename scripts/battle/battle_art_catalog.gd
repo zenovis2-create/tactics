@@ -18,6 +18,8 @@ static var _ally_sprite_anchor_map := {
 	"ally_scout": "sprite_anchor_scout",
 	"Saria": "sprite_anchor_enemy_saria",
 	"enemy_saria": "sprite_anchor_enemy_saria",
+	"Basil": "sprite_anchor_enemy_basil",
+	"enemy_basil": "sprite_anchor_enemy_basil",
 	"Karuon": "sprite_anchor_enemy_karuon",
 	"enemy_karuon": "sprite_anchor_enemy_karuon",
 	"enemy_karuon_final": "sprite_anchor_enemy_karuon",

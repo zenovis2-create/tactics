@@ -1,0 +1,336 @@
+[gd_resource type="SpriteFrames" load_steps=57 format=3]
+
+[ext_resource type="Texture2D" uid="uid://wkcvab57aakfg" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_00.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://awvuexn3krur2" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_01.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://uxhc4af4w7bzg" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_02.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://2hvm327lv5dpl" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_03.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://v2z3wgwsj3del" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_04.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://qpx7dxykzvq4l" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_05.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://avaah2fffjo22" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_06.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://5l6ignx3w2d67" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/attack/enemy_basil_attack_07.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://xlvbtyeyx2rd4" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_00.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://7r3ugno5kzswx" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_01.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://f7js5jkdgcv77" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_02.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://dz3pgt4df5fzd" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_03.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://dzjrtqbygtfur" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_04.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://upao5gzimcuuh" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_05.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://ot5qpl5rh4ijv" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_06.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://i27c6ucccskto" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/cast/enemy_basil_cast_07.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://zhkkwrhroutcl" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_00.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://4wizsn2jwcebe" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_01.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://xlmmxzmzts6mm" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_02.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://zdqahszjznzfs" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_03.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://7duo3cqebbgxf" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_04.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://r4udzybz2x7bq" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_05.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://sceioocp3quat" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_06.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://izfeyzo6dgv76" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/defeat/enemy_basil_defeat_07.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://u5sqivwyt33rt" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_00.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://kly4svf4px5ft" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_01.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://echc7chnuhsyf" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_02.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://hjpdv6zf3meqb" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_03.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://peyqm6ux2s5le" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_04.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://xzojydafsgngy" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_05.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://cv3u4rtmmaxgm" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_06.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://lx4r7vqa2n3lm" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/guard/enemy_basil_guard_07.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://mpxyrzluiwcq5" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_00.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://wpjee62p7m7z6" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_01.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://da2qiabdvd3di" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_02.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://icaxnf4rj7z4o" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_03.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://ag7owwvpdloxt" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_04.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://agpcrq5duvjxa" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_05.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://bjzs62fw2vnpq" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_06.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://yeqjapcc2pv46" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/hit/enemy_basil_hit_07.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://ts6xgdz5tkgsv" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_00.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://tjc7efarbotdt" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_01.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://fo2mq6otm5awv" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_02.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://emjk4b3p5wrik" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_03.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://xff2ah3lmvzld" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_04.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://jorrhz4me7bz7" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_05.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://yvbcfkyyfudgc" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_06.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://eae5id4y5tu3h" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/idle/enemy_basil_idle_07.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://5kguf2usm6kbi" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_00.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://k7bhx5lo6mpfo" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_01.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://xdfb3sbaheqfy" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_02.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://q6hg74roin63f" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_03.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://npodvifm3lyx7" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_04.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://wht6wcvxup6ae" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_05.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://2ehyp5tp6kh4w" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_06.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://y3gf6pa6aaw3k" path="res://assets/characters/sprite_anchor_enemy_basil/runtime/move/enemy_basil_move_07.png" id="56"]
+
+[resource]
+
+animations = Array[Dictionary]([
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("1")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("2")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("3")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("4")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("5")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("6")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("7")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("8")
+},
+],
+"loop": false,
+"name": &"attack",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("9")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("10")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("11")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("12")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("13")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("14")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("15")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("16")
+},
+],
+"loop": false,
+"name": &"cast",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("17")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("18")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("19")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("20")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("21")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("22")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("23")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("24")
+},
+],
+"loop": false,
+"name": &"defeat",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("25")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("26")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("27")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("28")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("29")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("30")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("31")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("32")
+},
+],
+"loop": false,
+"name": &"guard",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("33")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("34")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("35")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("36")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("37")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("38")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("39")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("40")
+},
+],
+"loop": false,
+"name": &"hit",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("41")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("42")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("43")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("44")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("45")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("46")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("47")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("48")
+},
+],
+"loop": true,
+"name": &"idle",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("49")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("50")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("51")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("52")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+],
+"loop": true,
+"name": &"move",
+"speed": 8.0,
+}
+])
