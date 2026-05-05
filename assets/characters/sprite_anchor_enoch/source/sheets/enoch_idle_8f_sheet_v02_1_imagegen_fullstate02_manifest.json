@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_enoch",
+  "asset_version": "v02_1_imagegen_fullstate02",
+  "character_id": "enoch",
+  "frame_count": 8,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "b3512659c667723c7c08c377ee1cb13fcf81ffb66db035bfa71664e37da220c3",
+  "source_sheet": "enoch_idle_8f_sheet_v02_1_imagegen_fullstate02.png",
+  "state": "idle"
+}

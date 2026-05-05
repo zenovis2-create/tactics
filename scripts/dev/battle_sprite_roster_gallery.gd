@@ -29,6 +29,27 @@ const CHARACTER_CONFIGS := {
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
         "team": "Ally",
     },
+    "enoch": {
+        "label": "Enoch",
+        "root": "res://assets/characters/sprite_anchor_enoch/runtime",
+        "animations": ["idle", "move", "attack", "cast"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0, "cast": 8.0},
+        "team": "Ally",
+    },
+    "kyle": {
+        "label": "Kyle",
+        "root": "res://assets/characters/sprite_anchor_kyle/runtime",
+        "animations": ["idle", "move", "attack", "guard"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0, "guard": 6.0},
+        "team": "Ally",
+    },
+    "noah": {
+        "label": "Noah",
+        "root": "res://assets/characters/sprite_anchor_noah/runtime",
+        "animations": ["idle", "move", "cast", "guard"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "guard": 6.0},
+        "team": "Ally",
+    },
     "vanguard": {
         "label": "Vanguard",
         "root": "res://assets/characters/sprite_anchor_vanguard/runtime",
@@ -87,7 +108,7 @@ const CHARACTER_CONFIGS := {
     },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_karuon"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "enoch", "kyle", "noah", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_karuon"]
 const SLOT_POSITIONS := [
     Vector2(-560, -120),
     Vector2(-350, -120),
@@ -101,6 +122,9 @@ const SLOT_POSITIONS := [
     Vector2(70, 120),
     Vector2(280, 120),
     Vector2(490, 120),
+    Vector2(-560, 360),
+    Vector2(-350, 360),
+    Vector2(-140, 360),
 ]
 
 @onready var title_label: Label = $CanvasLayer/Panel/VBox/TitleLabel
@@ -116,7 +140,7 @@ func _ready() -> void:
     _build_gallery()
     title_label.text = "Battle Sprite Roster Gallery"
     hint_label.text = "Left/Right: switch state   Space: replay"
-    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Karuon"
+    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Enoch / Kyle / Noah / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Karuon"
     _play_current_animation()
 
 
