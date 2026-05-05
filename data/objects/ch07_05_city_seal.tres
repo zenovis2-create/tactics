@@ -6,7 +6,7 @@
 script = ExtResource("1_object")
 object_id = &"ch07_05_city_seal"
 display_name = "City Seal"
-object_type = "chest"
+object_type = "civic_seal"
 grid_position = Vector2i(10, 2)
 interaction_range = 1
 reward_text = "City seal secured: the prayer hall's civic authority passes to the squad."

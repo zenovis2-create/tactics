@@ -126,6 +126,14 @@ const OBJECT_VISUAL_CONTRACTS := {
         "inner_active": Color(0.152941, 0.247059, 0.121569, 0.95),
         "inner_resolved": Color(0.105882, 0.172549, 0.0862745, 0.76),
         "accent": Color(0.909804, 0.984314, 0.8, 0.98)
+    },
+    "civic_seal": {
+        "icon": "city_seal_dais.png",
+        "marker_active": Color(0.878431, 0.819608, 0.560784, 0.9),
+        "marker_resolved": Color(0.552941, 0.501961, 0.329412, 0.64),
+        "inner_active": Color(0.25098, 0.219608, 0.129412, 0.95),
+        "inner_resolved": Color(0.168627, 0.145098, 0.0901961, 0.76),
+        "accent": Color(1.0, 0.941176, 0.72549, 0.98)
     }
 }
 const DEFAULT_OBJECT_VISUAL_FAMILY := "altar"
@@ -384,6 +392,8 @@ func _get_object_visual_family(object_type: String) -> String:
             return "route_marker"
         "latch":
             return "latch"
+        "civic_seal":
+            return "civic_seal"
         "lever":
             return "lever"
         "chest":

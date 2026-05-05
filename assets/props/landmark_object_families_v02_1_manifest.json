@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "asset_type": "landmark_object_family_bundle",
+  "version": "v02.1",
+  "outputs": {
+    "production_icon_mode": "RGBA",
+    "production_icon_size": [
+      256,
+      256
+    ]
+  },
+  "families": [
+    {
+      "family_id": "civic_seal",
+      "prop_id": "city_seal_dais_01",
+      "object_ids": [
+        "ch07_05_city_seal"
+      ],
+      "source_icon": "assets/props/city_seal_dais_01/runtime/city_seal_dais_01_icon_v01.png",
+      "production_icon": "assets/ui/production/object_icons/city_seal_dais.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "notes": [
+    "Promotes cleaned runtime prop icons into BattleArtCatalog production object icon lookup.",
+    "Keeps chapter object routing explicit; gameplay objective flags remain keyed by object_id."
+  ]
+}
