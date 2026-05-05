@@ -1,0 +1,7 @@
+[gd_resource type="SpriteFrames" load_steps=1 format=3]
+
+
+[resource]
+
+animations = Array[Dictionary]([
+])
