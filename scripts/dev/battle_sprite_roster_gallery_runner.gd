@@ -1,7 +1,7 @@
 extends SceneTree
 
 const GALLERY_SCENE: PackedScene = preload("res://scenes/dev/BattleSpriteRosterGallery.tscn")
-const EXPECTED_MIN_ANIMATED_SPRITES := 15
+const EXPECTED_MIN_ANIMATED_SPRITES := 18
 
 
 func _initialize() -> void:

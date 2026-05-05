@@ -92,6 +92,27 @@ const CHARACTER_CONFIGS := {
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
         "team": "Enemy",
     },
+    "enemy_hes": {
+        "label": "Hes",
+        "root": "res://assets/characters/sprite_anchor_enemy_hes/runtime",
+        "animations": ["idle", "move", "cast", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_resin_warden": {
+        "label": "Resin Warden",
+        "root": "res://assets/characters/sprite_anchor_enemy_resin_warden/runtime",
+        "animations": ["idle", "move", "cast", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "enemy_ash_archivist": {
+        "label": "Ash Archivist",
+        "root": "res://assets/characters/sprite_anchor_enemy_ash_archivist/runtime",
+        "animations": ["idle", "move", "cast", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "cast": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
     "enemy_karuon": {
         "label": "Karuon",
         "root": "res://assets/characters/sprite_anchor_enemy_karuon/runtime",
@@ -108,7 +129,7 @@ const CHARACTER_CONFIGS := {
     },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "enoch", "kyle", "noah", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_karuon"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "enoch", "kyle", "noah", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_basil", "enemy_hes", "enemy_resin_warden", "enemy_ash_archivist", "enemy_karuon"]
 const SLOT_POSITIONS := [
     Vector2(-560, -120),
     Vector2(-350, -120),
@@ -125,6 +146,9 @@ const SLOT_POSITIONS := [
     Vector2(-560, 360),
     Vector2(-350, 360),
     Vector2(-140, 360),
+    Vector2(70, 360),
+    Vector2(280, 360),
+    Vector2(490, 360),
 ]
 
 @onready var title_label: Label = $CanvasLayer/Panel/VBox/TitleLabel
@@ -140,7 +164,7 @@ func _ready() -> void:
     _build_gallery()
     title_label.text = "Battle Sprite Roster Gallery"
     hint_label.text = "Left/Right: switch state   Space: replay"
-    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Enoch / Kyle / Noah / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Karuon"
+    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Enoch / Kyle / Noah / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Basil / Hes / Resin Warden / Ash Archivist / Karuon"
     _play_current_animation()
 
 
