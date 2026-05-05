@@ -18,6 +18,13 @@ static var _ally_sprite_anchor_map := {
 	"ally_scout": "sprite_anchor_scout",
 	"Saria": "sprite_anchor_enemy_saria",
 	"enemy_saria": "sprite_anchor_enemy_saria",
+	"Karuon": "sprite_anchor_enemy_karuon",
+	"enemy_karuon": "sprite_anchor_enemy_karuon",
+	"enemy_karuon_final": "sprite_anchor_enemy_karuon",
+	"enemy_karon": "sprite_anchor_enemy_karuon",
+	"enemy_karon_final": "sprite_anchor_enemy_karuon",
+	"ally_melkion_ally": "sprite_anchor_melkion_ally",
+	"melkion_ally": "sprite_anchor_melkion_ally",
 	"Raider": "sprite_anchor_enemy_raider",
 	"Skirmisher": "sprite_anchor_enemy_skirmisher",
 }

@@ -1,0 +1,1095 @@
+{
+  "anchor": "sprite_anchor_enemy_karuon",
+  "asset_version": "v02_1_guard_imagegen",
+  "character_id": "enemy_karuon",
+  "contract_version": "2.1",
+  "direction_set": "diagonal_4",
+  "directions": [
+    "front",
+    "front_right",
+    "right",
+    "back_right",
+    "back",
+    "back_left",
+    "left",
+    "front_left"
+  ],
+  "facings": [
+    "front_right",
+    "front_left",
+    "back_right",
+    "back_left"
+  ],
+  "schema_version": 2,
+  "source_manifest": "source/sheets/enemy_karuon_idle_8f_sheet_v02_1_guard_imagegen_manifest.json",
+  "states": {
+    "attack": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_00.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_01.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_02.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_03.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_04.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_05.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_06.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_07.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_08.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_09.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_10.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_11.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_12.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_13.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_14.png",
+            "runtime/facing_frames/attack/back_left/enemy_karuon_attack_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_00.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_01.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_02.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_03.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_04.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_05.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_06.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_07.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_08.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_09.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_10.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_11.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_12.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_13.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_14.png",
+            "runtime/facing_frames/attack/back_right/enemy_karuon_attack_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_00.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_01.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_02.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_03.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_04.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_05.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_06.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_07.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_08.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_09.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_10.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_11.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_12.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_13.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_14.png",
+            "runtime/facing_frames/attack/front_left/enemy_karuon_attack_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_00.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_01.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_02.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_03.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_04.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_05.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_06.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_07.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_08.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_09.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_10.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_11.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_12.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_13.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_14.png",
+            "runtime/facing_frames/attack/front_right/enemy_karuon_attack_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/attack/enemy_karuon_attack_00.png",
+        "runtime/attack/enemy_karuon_attack_01.png",
+        "runtime/attack/enemy_karuon_attack_02.png",
+        "runtime/attack/enemy_karuon_attack_03.png",
+        "runtime/attack/enemy_karuon_attack_04.png",
+        "runtime/attack/enemy_karuon_attack_05.png",
+        "runtime/attack/enemy_karuon_attack_06.png",
+        "runtime/attack/enemy_karuon_attack_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "cast": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_00.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_01.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_02.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_03.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_04.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_05.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_06.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_07.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_08.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_09.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_10.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_11.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_12.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_13.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_14.png",
+            "runtime/facing_frames/cast/back_left/enemy_karuon_cast_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_00.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_01.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_02.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_03.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_04.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_05.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_06.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_07.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_08.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_09.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_10.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_11.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_12.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_13.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_14.png",
+            "runtime/facing_frames/cast/back_right/enemy_karuon_cast_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_00.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_01.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_02.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_03.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_04.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_05.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_06.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_07.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_08.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_09.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_10.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_11.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_12.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_13.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_14.png",
+            "runtime/facing_frames/cast/front_left/enemy_karuon_cast_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_00.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_01.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_02.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_03.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_04.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_05.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_06.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_07.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_08.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_09.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_10.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_11.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_12.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_13.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_14.png",
+            "runtime/facing_frames/cast/front_right/enemy_karuon_cast_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/cast/enemy_karuon_cast_00.png",
+        "runtime/cast/enemy_karuon_cast_01.png",
+        "runtime/cast/enemy_karuon_cast_02.png",
+        "runtime/cast/enemy_karuon_cast_03.png",
+        "runtime/cast/enemy_karuon_cast_04.png",
+        "runtime/cast/enemy_karuon_cast_05.png",
+        "runtime/cast/enemy_karuon_cast_06.png",
+        "runtime/cast/enemy_karuon_cast_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "defeat": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_00.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_01.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_02.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_03.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_04.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_05.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_06.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_07.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_08.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_09.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_10.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_11.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_12.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_13.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_14.png",
+            "runtime/facing_frames/defeat/back_left/enemy_karuon_defeat_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_00.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_01.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_02.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_03.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_04.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_05.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_06.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_07.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_08.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_09.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_10.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_11.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_12.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_13.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_14.png",
+            "runtime/facing_frames/defeat/back_right/enemy_karuon_defeat_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_00.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_01.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_02.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_03.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_04.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_05.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_06.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_07.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_08.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_09.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_10.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_11.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_12.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_13.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_14.png",
+            "runtime/facing_frames/defeat/front_left/enemy_karuon_defeat_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_00.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_01.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_02.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_03.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_04.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_05.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_06.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_07.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_08.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_09.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_10.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_11.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_12.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_13.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_14.png",
+            "runtime/facing_frames/defeat/front_right/enemy_karuon_defeat_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/defeat/enemy_karuon_defeat_00.png",
+        "runtime/defeat/enemy_karuon_defeat_01.png",
+        "runtime/defeat/enemy_karuon_defeat_02.png",
+        "runtime/defeat/enemy_karuon_defeat_03.png",
+        "runtime/defeat/enemy_karuon_defeat_04.png",
+        "runtime/defeat/enemy_karuon_defeat_05.png",
+        "runtime/defeat/enemy_karuon_defeat_06.png",
+        "runtime/defeat/enemy_karuon_defeat_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "guard": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_00.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_01.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_02.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_03.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_04.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_05.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_06.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_07.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_08.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_09.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_10.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_11.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_12.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_13.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_14.png",
+            "runtime/facing_frames/guard/back_left/enemy_karuon_guard_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_00.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_01.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_02.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_03.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_04.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_05.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_06.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_07.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_08.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_09.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_10.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_11.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_12.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_13.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_14.png",
+            "runtime/facing_frames/guard/back_right/enemy_karuon_guard_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_00.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_01.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_02.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_03.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_04.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_05.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_06.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_07.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_08.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_09.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_10.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_11.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_12.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_13.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_14.png",
+            "runtime/facing_frames/guard/front_left/enemy_karuon_guard_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_00.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_01.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_02.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_03.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_04.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_05.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_06.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_07.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_08.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_09.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_10.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_11.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_12.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_13.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_14.png",
+            "runtime/facing_frames/guard/front_right/enemy_karuon_guard_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/guard/enemy_karuon_guard_00.png",
+        "runtime/guard/enemy_karuon_guard_01.png",
+        "runtime/guard/enemy_karuon_guard_02.png",
+        "runtime/guard/enemy_karuon_guard_03.png",
+        "runtime/guard/enemy_karuon_guard_04.png",
+        "runtime/guard/enemy_karuon_guard_05.png",
+        "runtime/guard/enemy_karuon_guard_06.png",
+        "runtime/guard/enemy_karuon_guard_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "hit": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_00.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_01.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_02.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_03.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_04.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_05.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_06.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_07.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_08.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_09.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_10.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_11.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_12.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_13.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_14.png",
+            "runtime/facing_frames/hit/back_left/enemy_karuon_hit_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_00.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_01.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_02.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_03.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_04.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_05.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_06.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_07.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_08.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_09.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_10.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_11.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_12.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_13.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_14.png",
+            "runtime/facing_frames/hit/back_right/enemy_karuon_hit_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_00.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_01.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_02.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_03.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_04.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_05.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_06.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_07.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_08.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_09.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_10.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_11.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_12.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_13.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_14.png",
+            "runtime/facing_frames/hit/front_left/enemy_karuon_hit_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_00.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_01.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_02.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_03.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_04.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_05.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_06.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_07.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_08.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_09.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_10.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_11.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_12.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_13.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_14.png",
+            "runtime/facing_frames/hit/front_right/enemy_karuon_hit_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/hit/enemy_karuon_hit_00.png",
+        "runtime/hit/enemy_karuon_hit_01.png",
+        "runtime/hit/enemy_karuon_hit_02.png",
+        "runtime/hit/enemy_karuon_hit_03.png",
+        "runtime/hit/enemy_karuon_hit_04.png",
+        "runtime/hit/enemy_karuon_hit_05.png",
+        "runtime/hit/enemy_karuon_hit_06.png",
+        "runtime/hit/enemy_karuon_hit_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "idle": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_00.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_01.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_02.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_03.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_04.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_05.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_06.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_07.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_08.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_09.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_10.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_11.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_12.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_13.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_14.png",
+            "runtime/facing_frames/idle/back_left/enemy_karuon_idle_back_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_00.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_01.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_02.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_03.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_04.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_05.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_06.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_07.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_08.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_09.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_10.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_11.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_12.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_13.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_14.png",
+            "runtime/facing_frames/idle/back_right/enemy_karuon_idle_back_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_00.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_01.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_02.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_03.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_04.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_05.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_06.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_07.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_08.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_09.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_10.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_11.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_12.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_13.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_14.png",
+            "runtime/facing_frames/idle/front_left/enemy_karuon_idle_front_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_00.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_01.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_02.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_03.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_04.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_05.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_06.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_07.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_08.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_09.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_10.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_11.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_12.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_13.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_14.png",
+            "runtime/facing_frames/idle/front_right/enemy_karuon_idle_front_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/idle/enemy_karuon_idle_00.png",
+        "runtime/idle/enemy_karuon_idle_01.png",
+        "runtime/idle/enemy_karuon_idle_02.png",
+        "runtime/idle/enemy_karuon_idle_03.png",
+        "runtime/idle/enemy_karuon_idle_04.png",
+        "runtime/idle/enemy_karuon_idle_05.png",
+        "runtime/idle/enemy_karuon_idle_06.png",
+        "runtime/idle/enemy_karuon_idle_07.png"
+      ],
+      "loop": true,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    },
+    "move": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_00.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_01.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_02.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_03.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_04.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_05.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_06.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_07.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_08.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_09.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_10.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_11.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_12.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_13.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_14.png",
+            "runtime/facing_frames/move/back_left/enemy_karuon_move_back_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_00.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_01.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_02.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_03.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_04.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_05.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_06.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_07.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_08.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_09.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_10.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_11.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_12.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_13.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_14.png",
+            "runtime/facing_frames/move/back_right/enemy_karuon_move_back_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_00.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_01.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_02.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_03.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_04.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_05.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_06.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_07.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_08.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_09.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_10.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_11.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_12.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_13.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_14.png",
+            "runtime/facing_frames/move/front_left/enemy_karuon_move_front_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_00.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_01.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_02.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_03.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_04.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_05.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_06.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_07.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_08.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_09.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_10.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_11.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_12.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_13.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_14.png",
+            "runtime/facing_frames/move/front_right/enemy_karuon_move_front_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 238
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/move/enemy_karuon_move_00.png",
+        "runtime/move/enemy_karuon_move_01.png",
+        "runtime/move/enemy_karuon_move_02.png",
+        "runtime/move/enemy_karuon_move_03.png",
+        "runtime/move/enemy_karuon_move_04.png",
+        "runtime/move/enemy_karuon_move_05.png",
+        "runtime/move/enemy_karuon_move_06.png",
+        "runtime/move/enemy_karuon_move_07.png"
+      ],
+      "loop": true,
+      "pivot": {
+        "x": 128,
+        "y": 238
+      }
+    }
+  },
+  "supported_direction_sets": [
+    "diagonal_4",
+    "direction_8"
+  ],
+  "validation": {
+    "asset_forge_report": "reports/validation_report.md",
+    "runtime_status": "pending",
+    "static_status": "passed",
+    "tactics_runtime_report": "reports/tactics_runtime_validation.md",
+    "tactics_runtime_result": "reports/tactics_runtime_validation.json"
+  }
+}

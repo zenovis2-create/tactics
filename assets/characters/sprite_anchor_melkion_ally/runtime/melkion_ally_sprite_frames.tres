@@ -1,0 +1,336 @@
+[gd_resource type="SpriteFrames" load_steps=57 format=3]
+
+[ext_resource type="Texture2D" uid="uid://najplacwh4tgf" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_00.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://5tl7ej25seweo" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_01.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://ecbxedaehgprr" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_02.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://tvvr6ivpipusk" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_03.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://pfc2qjnsepp57" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_04.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://v6hyaezd7d7ix" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_05.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://jyubsnllfkpvy" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_06.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://erfldzjeihpej" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/attack/melkion_ally_attack_07.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://wlszdorphtfdu" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_00.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://24dgm66vk6mjz" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_01.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://ducehji2mb3fc" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_02.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://7m2zuc2n7vd27" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_03.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://eyv6bffst2tdn" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_04.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://vesadnthca6ru" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_05.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://km5ap5zvqt3ab" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_06.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://c33httnmmnwnf" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/cast/melkion_ally_cast_07.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://7b3h4pycd6nle" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_00.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://4244gz7hmk7hp" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_01.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://yxfujmhn5wjrz" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_02.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://ssiuzuas7hur7" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_03.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://u4d225cimjiai" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_04.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://w27yfypj6wsjq" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_05.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://t2n2nbp5n7vtc" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_06.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://tlhmhs5aha2ah" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/defeat/melkion_ally_defeat_07.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://th2ukwv32i5am" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_00.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://rdlovsug45m3i" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_01.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://qahipuszs263i" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_02.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://y7e3aqaccvmwv" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_03.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://n5hso3nvkvugt" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_04.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://35md7dkxozkls" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_05.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://lcmd6zkwytjzj" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_06.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://pnjjla63gdhjh" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/guard/melkion_ally_guard_07.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://sdp6afetgy3cu" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_00.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://yq4fbi3rrgxln" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_01.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://3jqmipe7r72gc" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_02.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://5axgscokfucbv" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_03.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://kqnkfcvljsz3o" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_04.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://hhx3xhjyydoh4" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_05.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://cauvzxeuf2a7z" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_06.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://y35wlfvqvvtm4" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/hit/melkion_ally_hit_07.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://jttryrdsjwzzx" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_00.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://k5bzl235wowwg" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_01.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://yaslzyvkzp7ni" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_02.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://7gadfghqyjltz" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_03.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://cwsx5vrei22h3" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_04.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://6xhgksumtmmc5" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_05.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://ul7cvknflhxcd" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_06.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://4ijtrws3ou4cc" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/idle/melkion_ally_idle_07.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://x2aa4aayj2mza" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_00.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://xwj6ojvqw7kdg" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_01.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://xx53gvpdu2oi3" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_02.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://3dp76vtfjay3s" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_03.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://wc4jjpglyvmnk" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_04.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://6akfpcc4qdpgp" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_05.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://ydmt6jctdy2dr" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_06.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://uknzl4vowk6vm" path="res://assets/characters/sprite_anchor_melkion_ally/runtime/move/melkion_ally_move_07.png" id="56"]
+
+[resource]
+
+animations = Array[Dictionary]([
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("1")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("2")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("3")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("4")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("5")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("6")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("7")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("8")
+},
+],
+"loop": false,
+"name": &"attack",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("9")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("10")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("11")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("12")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("13")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("14")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("15")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("16")
+},
+],
+"loop": false,
+"name": &"cast",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("17")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("18")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("19")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("20")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("21")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("22")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("23")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("24")
+},
+],
+"loop": false,
+"name": &"defeat",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("25")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("26")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("27")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("28")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("29")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("30")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("31")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("32")
+},
+],
+"loop": false,
+"name": &"guard",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("33")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("34")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("35")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("36")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("37")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("38")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("39")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("40")
+},
+],
+"loop": false,
+"name": &"hit",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("41")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("42")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("43")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("44")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("45")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("46")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("47")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("48")
+},
+],
+"loop": true,
+"name": &"idle",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("49")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("50")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("51")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("52")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+],
+"loop": true,
+"name": &"move",
+"speed": 8.0,
+}
+])

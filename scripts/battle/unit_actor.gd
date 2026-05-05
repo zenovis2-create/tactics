@@ -762,9 +762,9 @@ func _setup_character_visuals() -> void:
     if character_visual_root == null or character_sprite == null or character_animation_player == null or unit_data == null:
         return
     _character_sprite_frames = {
-        "idle": BattleArtCatalog.load_character_sprite_frames(String(unit_data.display_name), "idle"),
-        "move": BattleArtCatalog.load_character_sprite_frames(String(unit_data.display_name), "move"),
-        "attack": BattleArtCatalog.load_character_sprite_frames(String(unit_data.display_name), "attack"),
+        "idle": _load_character_sprite_frames("idle"),
+        "move": _load_character_sprite_frames("move"),
+        "attack": _load_character_sprite_frames("attack"),
     }
     var idle_frames: Array[Texture2D] = _character_sprite_frames.get("idle", [])
     if not idle_frames.is_empty():
@@ -792,6 +792,19 @@ func _setup_character_visuals() -> void:
     _character_sprite_frame_elapsed = 0.0
     _ensure_character_animation_library()
     _play_character_animation("idle")
+
+func _load_character_sprite_frames(state: String) -> Array[Texture2D]:
+    var lookup_names := [
+        String(unit_data.unit_id),
+        String(unit_data.display_name),
+    ]
+    for lookup_name in lookup_names:
+        if lookup_name.is_empty():
+            continue
+        var frames := BattleArtCatalog.load_character_sprite_frames(lookup_name, state)
+        if not frames.is_empty():
+            return frames
+    return []
 
 func _ensure_character_animation_library() -> void:
     if character_animation_player == null:

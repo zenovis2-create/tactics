@@ -64,9 +64,23 @@ const CHARACTER_CONFIGS := {
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
         "team": "Enemy",
     },
+    "enemy_karuon": {
+        "label": "Karuon",
+        "root": "res://assets/characters/sprite_anchor_enemy_karuon/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Enemy",
+    },
+    "ally_melkion_ally": {
+        "label": "Melkion",
+        "root": "res://assets/characters/sprite_anchor_melkion_ally/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+        "team": "Ally",
+    },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout", "enemy_raider", "enemy_skirmisher", "enemy_saria"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout", "ally_melkion_ally", "enemy_raider", "enemy_skirmisher", "enemy_saria", "enemy_karuon"]
 const SLOT_POSITIONS := [
     Vector2(-560, -120),
     Vector2(-350, -120),
@@ -74,9 +88,11 @@ const SLOT_POSITIONS := [
     Vector2(70, -120),
     Vector2(280, -120),
     Vector2(490, -120),
-    Vector2(-260, 120),
-    Vector2(-40, 120),
-    Vector2(180, 120),
+    Vector2(-560, 120),
+    Vector2(-350, 120),
+    Vector2(-140, 120),
+    Vector2(70, 120),
+    Vector2(280, 120),
 ]
 
 @onready var title_label: Label = $CanvasLayer/Panel/VBox/TitleLabel
@@ -92,7 +108,7 @@ func _ready() -> void:
     _build_gallery()
     title_label.text = "Battle Sprite Roster Gallery"
     hint_label.text = "Left/Right: switch state   Space: replay"
-    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Vanguard / Scout   Enemy: Raider / Skirmisher / Saria"
+    roster_label.text = "Ally: Serin / Rian / Tia / Bran / Vanguard / Scout / Melkion   Enemy: Raider / Skirmisher / Saria / Karuon"
     _play_current_animation()
 
 
