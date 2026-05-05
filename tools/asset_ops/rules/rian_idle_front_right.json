@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "asset": "rian",
+  "state": "idle_front_right",
+  "expected_source_frame_count": 16,
+  "expected_source_frame_size": [96, 96],
+  "preferred_promotion_path": "path-a",
+  "proposed_runtime_lane_key": "idle_16f_review",
+  "fallback_runtime_lane_key": "idle",
+  "blocked_paths": [
+    "direct_overwrite",
+    "8f_downsample_promotion",
+    "capture_png_as_sprite_frames"
+  ],
+  "required_capture_evidence": [
+    "assets/characters/sprite_anchor_rian/source/motion_sprites/idle_front_right_v01/export_gate_review_v07d/godot_capture_review_v01/rian_idle_front_right_v07d_godot_preview_16f_v01.png",
+    "assets/characters/sprite_anchor_rian/source/motion_sprites/idle_front_right_v01/export_gate_review_v07d/godot_capture_review_v01/rian_idle_front_right_v07d_godot_preview_8f_downsample_v01.png"
+  ],
+  "lineage": {
+    "carry_forward": [
+      "v07d hard-pixel bridge",
+      "lower-body stability",
+      "pivot stability",
+      "Godot preview/capture evidence",
+      "Path A fallback behavior"
+    ],
+    "avoid": [
+      "component63 bridge",
+      "reorder probe",
+      "blended true in-between",
+      "direct runtime overwrite",
+      "8F downsample promotion",
+      "capture PNG as sprite frames"
+    ]
+  }
+}

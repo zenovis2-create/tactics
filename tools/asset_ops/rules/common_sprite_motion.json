@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "common_sprite_motion",
+  "rules": {
+    "source_extensions": [".png"],
+    "require_identical_frame_size": true,
+    "block_runtime_copy_without_approval": true,
+    "block_capture_png_as_sprite_frame": true,
+    "duplicate_frames_default_level": "warn",
+    "frame_count_mismatch_level": "block",
+    "frame_size_mismatch_level": "block",
+    "bbox_jitter_default_level": "warn"
+  }
+}

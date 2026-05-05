@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "asset": "",
+  "state": "",
+  "candidate_id": "",
+  "source_path": "",
+  "output_dir": "",
+  "origin": "source_review_candidate",
+  "frame_count": 0,
+  "frame_size": "",
+  "frames": [],
+  "lineage": {
+    "carry_forward": [],
+    "avoid": []
+  },
+  "qa": {
+    "verdict": "pending",
+    "duplicate_frames": [],
+    "adjacent_deltas": [],
+    "max_adjacent_delta": null,
+    "loop_boundary_delta": null,
+    "bbox_jitter": null,
+    "warnings": [],
+    "blocked_reasons": []
+  },
+  "policy": {
+    "path": "",
+    "verdict": "pending",
+    "blocked_reasons": [],
+    "warnings": []
+  },
+  "artifacts": [],
+  "godot_runners": [],
+  "human_checkpoints": {
+    "candidate_keep": "pending",
+    "promotion_path": "pending",
+    "runtime_copy_approval": "pending"
+  }
+}
