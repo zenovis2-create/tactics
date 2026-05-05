@@ -1,0 +1,336 @@
+[gd_resource type="SpriteFrames" load_steps=57 format=3]
+
+[ext_resource type="Texture2D" uid="uid://e5by4zkjd2ic2" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_00.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://xgvl3c4s42qe5" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_01.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://z3n7rj77wfwak" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_02.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://s6kly2dtegjzp" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_03.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://jxpefxzshhuue" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_04.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://pzngpuwyhql65" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_05.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://psiwsonlike65" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_06.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://27c7kb5fcmzch" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/attack/enemy_raider_attack_07.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://t4toycr6ysxhu" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_00.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://oahtrbbahvewa" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_01.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://tfjdfq5urp7wa" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_02.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://pkvfsuivpjpzx" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_03.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://vcn43tt6fxw47" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_04.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://tivj7mv7b55ac" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_05.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://6i72zc2347uow" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_06.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://zrjjvgccnt4wf" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/cast/enemy_raider_cast_07.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://qym7pwjbgtstx" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_00.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://hi4fokntynyxb" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_01.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://woq63ejklcv5w" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_02.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://fepzqe2tmct4e" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_03.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://tj23pglmqtz3f" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_04.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://r5q2qx7zom66g" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_05.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://s6zw2qod4ifeo" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_06.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://s4ryyyx7fsrwy" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/defeat/enemy_raider_defeat_07.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://u5zebpakhzebk" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_00.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://5mppbrvwb7bd3" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_01.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://qnhc6r32y34zx" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_02.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://3hreyvb4zmgcv" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_03.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://qwrfvwwzfpjqr" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_04.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://ehvi22q3tkb3m" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_05.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://qp623hscpxqif" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_06.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://3mobta7q66mxd" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/guard/enemy_raider_guard_07.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://zniqcpsv2e4ny" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_00.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://jlrwu6fareh7u" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_01.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://kjqxlijc4typh" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_02.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://bfge4qudkblqb" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_03.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://5dciclq4dvkgt" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_04.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://gy5ttaa65spn5" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_05.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://k645n4lp2ugj7" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_06.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://wzvae6woxhuwi" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/hit/enemy_raider_hit_07.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://vwnc3pouj6zhd" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_00.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://fxfibfvt4soyh" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_01.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://ikii2hf2oqtlm" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_02.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://gk6tgutst3ogi" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_03.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://2sphvrfai5tdx" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_04.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://dutob3tauaq26" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_05.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://yn7tj7q7ckap5" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_06.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://etubatfaaolgc" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/idle/enemy_raider_idle_07.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://jxqboarumljbo" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_00.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://aoiti3gzxwhk7" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_01.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://7ksux7driuktm" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_02.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://sb2st7xv2xxgb" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_03.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://l6ohnn3ydnvme" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_04.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://ycweff6on24fb" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_05.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://l4ldd4ijvpbpn" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_06.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://iioz5nqarpm6h" path="res://assets/characters/sprite_anchor_enemy_raider/runtime/move/enemy_raider_move_07.png" id="56"]
+
+[resource]
+
+animations = Array[Dictionary]([
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("1")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("2")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("3")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("4")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("5")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("6")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("7")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("8")
+},
+],
+"loop": false,
+"name": &"attack",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("9")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("10")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("11")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("12")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("13")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("14")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("15")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("16")
+},
+],
+"loop": false,
+"name": &"cast",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("17")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("18")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("19")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("20")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("21")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("22")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("23")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("24")
+},
+],
+"loop": false,
+"name": &"defeat",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("25")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("26")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("27")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("28")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("29")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("30")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("31")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("32")
+},
+],
+"loop": false,
+"name": &"guard",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("33")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("34")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("35")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("36")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("37")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("38")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("39")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("40")
+},
+],
+"loop": false,
+"name": &"hit",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("41")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("42")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("43")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("44")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("45")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("46")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("47")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("48")
+},
+],
+"loop": true,
+"name": &"idle",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("49")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("50")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("51")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("52")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+],
+"loop": true,
+"name": &"move",
+"speed": 8.0,
+}
+])

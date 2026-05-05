@@ -26,7 +26,9 @@ static var _ally_sprite_anchor_map := {
 	"ally_melkion_ally": "sprite_anchor_melkion_ally",
 	"melkion_ally": "sprite_anchor_melkion_ally",
 	"Raider": "sprite_anchor_enemy_raider",
+	"enemy_raider": "sprite_anchor_enemy_raider",
 	"Skirmisher": "sprite_anchor_enemy_skirmisher",
+	"enemy_skirmisher": "sprite_anchor_enemy_skirmisher",
 }
 
 static func load_button_icon(file_name: String) -> Texture2D:

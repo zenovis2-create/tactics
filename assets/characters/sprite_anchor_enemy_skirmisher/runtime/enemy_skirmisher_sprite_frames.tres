@@ -1,0 +1,336 @@
+[gd_resource type="SpriteFrames" load_steps=57 format=3]
+
+[ext_resource type="Texture2D" uid="uid://3jvn2zuz3tfo6" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_00.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://omwkuqedstzr4" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_01.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://nmgkpbhs42zkr" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_02.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://q5mnf6v7pvmqc" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_03.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://dknqgklomzasc" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_04.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://ly7a4mykxafaq" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_05.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://kymnmmjrsxhlk" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_06.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://vgcahpns5i4pb" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/attack/enemy_skirmisher_attack_07.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://sbiwk2yco4glt" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_00.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://endqawpwaj4fk" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_01.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://wemgd5dmwf2u4" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_02.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://26ivrfl2z4byk" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_03.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://wfppewo3backm" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_04.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://sjprea5aaed6e" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_05.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://s5cpiena7h6hw" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_06.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://y2krzgfb7ajyv" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/cast/enemy_skirmisher_cast_07.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://sxzx6lyl3bo6r" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_00.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://asn5iasmoaisd" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_01.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://3dkioyldsrcm3" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_02.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://6yqafn4nuvptg" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_03.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://ferclnf6rfew4" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_04.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://gcl3mbuijyubc" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_05.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://6o5nzeofbp3hy" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_06.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://4cix6hyzfk3e2" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/defeat/enemy_skirmisher_defeat_07.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://yyrzr5crmldqy" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_00.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://m2xi7tbcdjith" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_01.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://flrm2go7rsuc5" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_02.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://r44a3wzcukfhk" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_03.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://nnkvcwowhny4i" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_04.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://bw7nvf4xey2qs" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_05.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://h4kkdcpq6rcch" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_06.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://d3lnt5b64bok3" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/guard/enemy_skirmisher_guard_07.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://2fvyzxqjeazjk" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_00.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://iviee574v2o6j" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_01.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://3y6bnelaielrs" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_02.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://elumswxacxuze" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_03.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://swcnseis5y5pe" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_04.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://nql6scxktmobu" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_05.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://xy2bahfax2f2h" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_06.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://hp2u64fhiyflr" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/hit/enemy_skirmisher_hit_07.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://ben75jejesym4" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_00.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://r7ivwlyl6j3e5" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_01.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://inxsyxuci7qvs" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_02.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://bbkxr4vr4i5gr" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_03.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://x67yni4gutppp" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_04.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://usg4vdarvzg6c" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_05.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://2i7umuk5tlsbo" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_06.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://nctibtq4sa3dn" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/idle/enemy_skirmisher_idle_07.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://ndlozdjgviz4u" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_00.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://s4d3ynu5vlhys" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_01.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://olf7jqefzsofs" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_02.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://bh3x4brmt4yqp" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_03.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://fd34tafummv7n" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_04.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://2bz4oy7fxnzhp" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_05.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://tlomufldyryco" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_06.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://hxzaaeuvdgiwa" path="res://assets/characters/sprite_anchor_enemy_skirmisher/runtime/move/enemy_skirmisher_move_07.png" id="56"]
+
+[resource]
+
+animations = Array[Dictionary]([
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("1")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("2")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("3")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("4")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("5")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("6")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("7")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("8")
+},
+],
+"loop": false,
+"name": &"attack",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("9")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("10")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("11")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("12")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("13")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("14")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("15")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("16")
+},
+],
+"loop": false,
+"name": &"cast",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("17")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("18")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("19")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("20")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("21")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("22")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("23")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("24")
+},
+],
+"loop": false,
+"name": &"defeat",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("25")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("26")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("27")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("28")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("29")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("30")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("31")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("32")
+},
+],
+"loop": false,
+"name": &"guard",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("33")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("34")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("35")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("36")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("37")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("38")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("39")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("40")
+},
+],
+"loop": false,
+"name": &"hit",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("41")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("42")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("43")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("44")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("45")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("46")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("47")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("48")
+},
+],
+"loop": true,
+"name": &"idle",
+"speed": 8.0,
+},
+{
+"frames": [
+{
+"duration": 1.0,
+"texture": ExtResource("49")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("50")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("51")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("52")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+],
+"loop": true,
+"name": &"move",
+"speed": 8.0,
+}
+])
