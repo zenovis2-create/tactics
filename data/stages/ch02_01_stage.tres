@@ -29,9 +29,94 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "smoke",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Border smoke softens the direct route and rewards a measured advance."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Collapsed stakes compress the breach into a single contested lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 1),
+"radius": 0,
+"effect": "The outer watch point gives the raider line a defensive perch."
+}]
+decorative_props = [{
+"id": "ch02_border_smoke_stake_barricade_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch02_border_smoke_stake_barricade_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch02_border_smoke_cart_barricade_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch02_border_smoke_cart_barricade_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch02_border_smoke_watch_crate_blocker_01",
+"position": Vector2i(4, 4),
+"file": "ch02_border_smoke_watch_crate_blocker_01.png",
+"scale": 0.8
+}, {
+"id": "ch02_border_smoke_signal_brazier_01",
+"position": Vector2i(2, 4),
+"file": "ch02_border_smoke_signal_brazier_01.png",
+"scale": 0.68
+}]
+optional_objectives = [{
+"id": "ch02_01_no_ally_casualties",
+"description": "아군 사망 없이 연막 방어선을 돌파한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch02_01_scout_survives",
+"description": "정찰병을 생존시켜 하드렌 외곽 진입로를 기록한다.",
+"condition": "survive_unit:ally_scout",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch02_01_intro"
 clear_cutscene_id = &"ch02_01_outro"
 next_destination_summary = "하드렌 외곽의 연막 방어선이 무너지고, 살아남은 기사들은 부서진 성문 쪽으로 후퇴한다."
+post_battle_bark_rules = [{
+"id": "ch02_01_smoke_report_ready",
+"speaker": "Guide",
+"text": "연막 방어선이 무너졌다. 길드 보고가 끝나면 부서진 성문 쪽으로 추적선을 넘기자.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch02_01_scout_survives_ack",
+"speaker": "Serin",
+"text": "정찰병이 길을 기억하고 있어. 다음 보고는 헤매지 않고 이어갈 수 있겠네.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_01_scout_survives"]
+}
+}, {
+"id": "ch02_01_no_losses_ack",
+"speaker": "Guide",
+"text": "다친 사람 없이 연막을 뚫었다. 보수 정산 때 이건 꼭 적어두자.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_01_no_ally_casualties"]
+}
+}, {
+"id": "ch02_01_bonus_exp_ack",
+"speaker": "System",
+"text": "연막 방어선 돌파 경험이 다음 성문전 준비에 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]

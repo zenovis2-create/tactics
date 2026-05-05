@@ -65,3 +65,28 @@ landmark_labels = PackedStringArray("남쪽 진입로", "검열 안뜰", "근원
 start_cutscene_id = &"ch09a_05_intro"
 clear_cutscene_id = &"ch09a_05_outro"
 next_destination_summary = "다음: 확보한 인장을 사용해 내부 기록보관소로 들어간다."
+post_battle_bark_rules = [{
+"id": "ch09a_05_spear_without_banner_report_ready",
+"speaker": "Guide",
+"text": "군기 없는 창끝이 멈췄다. 카일의 증언은 이제 내부 기록보관소를 여는 인장이 된다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09a_05_karl_testimony_ack",
+"speaker": "Kyle",
+"text": "내가 본 것을 말하겠다. 하지만 그 증언이 용서가 되지는 않는다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["karl_testifies"]}
+}, {
+"id": "ch09a_05_no_casualties_ack",
+"speaker": "Guide",
+"text": "아군 사망 없이 검열 안뜰을 돌파했다. 기록보관소로 향할 증언대도 흔들리지 않는다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["no_ally_casualties"]}
+}, {
+"id": "ch09a_05_full_banner_read",
+"speaker": "System",
+"text": "카일 증언 확보와 무사 돌파 결과가 군기 없는 창 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["karl_testifies", "no_ally_casualties"]}
+}]

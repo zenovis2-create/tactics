@@ -150,13 +150,11 @@ func _run_case(case_data: Dictionary) -> void:
         return
 
     if expected_clear != &"":
-        var clear_snapshot: Dictionary = battle.cutscene_player.get_snapshot()
-        _assert(bool(clear_snapshot.get("is_playing", false)), "%s did not begin its clear cutscene on victory." % label)
-        _assert(StringName(clear_snapshot.get("cutscene_id", &"")) == expected_clear, "%s began the wrong clear cutscene on victory." % label)
+        var result_summary: Dictionary = battle.last_result_summary
+        _assert(bool(result_summary.get("post_battle_cutscene_available", false)), "%s did not expose its clear cutscene handoff on victory." % label)
+        _assert(StringName(result_summary.get("post_battle_cutscene_id", &"")) == expected_clear, "%s exposed the wrong clear cutscene handoff on victory." % label)
         if _failed:
             return
-        _finish_active_cutscene(battle)
-        await process_frame
     else:
         print("[INFO] %s clear cutscene is owned by campaign ending flow, not StageData.clear_cutscene_id." % label)
 

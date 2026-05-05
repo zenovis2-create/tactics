@@ -31,9 +31,94 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(2, 5),
+"radius": 0,
+"effect": "West rampart footing protects the lever approach."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "East rampart footing overlooks the gate chain."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "The north gate funnels both levers through a narrow center lane."
+}]
+decorative_props = [{
+"id": "ch01_north_gate_stone_pier_blocker_01",
+"position": Vector2i(3, 2),
+"file": "ch01_north_gate_stone_pier_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch01_north_gate_chain_winch_01",
+"position": Vector2i(4, 2),
+"file": "ch01_north_gate_chain_winch_01.png",
+"scale": 0.78
+}, {
+"id": "ch01_north_gate_broken_barricade_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch01_north_gate_broken_barricade_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch01_north_gate_rampart_footing_marker_01",
+"position": Vector2i(5, 2),
+"file": "ch01_north_gate_rampart_footing_marker_01.png",
+"scale": 0.68
+}]
+optional_objectives = [{
+"id": "ch01_04_west_lever_secured",
+"description": "서쪽 레버를 작동해 성문 사슬을 늦춘다.",
+"condition": "flag:ch01_04_west_lever",
+"star_value": 1
+}, {
+"id": "ch01_04_east_lever_secured",
+"description": "동쪽 레버를 작동해 성문 사슬을 완전히 푼다.",
+"condition": "flag:ch01_04_east_lever",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch01_04_intro"
 clear_cutscene_id = &"ch01_04_outro"
 next_destination_summary = "북쪽 진입로가 열렸다. 새벽의 맹세가 기다리는 전장으로 밀고 들어간다."
+post_battle_bark_rules = [{
+"id": "ch01_04_gate_report_ready",
+"speaker": "Guide",
+"text": "성문 사슬 기록을 정리했다. 길드 보고가 끝나면 북쪽 진입로로 바로 이어진다.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch01_04_west_lever_ack",
+"speaker": "Serin",
+"text": "서쪽 레버가 늦춰준 틈이 컸어. 다음 전장에서도 이런 길을 먼저 보자.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch01_04_west_lever_secured"]
+}
+}, {
+"id": "ch01_04_east_lever_ack",
+"speaker": "Guide",
+"text": "동쪽 레버까지 풀렸다. 성문 통과 보고는 짧고 확실하게 끝나겠어.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch01_04_east_lever_secured"]
+}
+}, {
+"id": "ch01_04_full_gate_ack",
+"speaker": "System",
+"text": "양쪽 레버 확보가 다음 전장 진입 평가에 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch01_04_west_lever_secured", "ch01_04_east_lever_secured"]
+}
+}]

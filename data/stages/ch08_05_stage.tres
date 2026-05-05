@@ -46,6 +46,27 @@ terrain_features = [{
 "radius": 0,
 "effect": "The transfer gate reduces the fight to a choke point."
 }]
+decorative_props = [{
+"id": "ch08_transfer_gate_latch_blocker_01",
+"position": Vector2i(5, 2),
+"file": "ch08_transfer_gate_latch_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch08_transfer_threshold_blocker_01",
+"position": Vector2i(6, 3),
+"file": "ch08_transfer_threshold_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch08_forest_revision_core_blocker_01",
+"position": Vector2i(1, 2),
+"file": "ch08_forest_revision_core_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch08_forest_revision_root_barrier_blocker_01",
+"position": Vector2i(6, 6),
+"file": "ch08_forest_revision_root_barrier_blocker_01.png",
+"scale": 0.86
+}]
 optional_objectives = [{
 "id": "lete_defects_alive",
 "description": "레테를 전향시켜 생존한 채 전장을 이탈하게 한다.",
@@ -75,6 +96,32 @@ rule_template_modifiers = {
 }
 stage_objective_hint = "흑견 마당을 돌파하고 북쪽 이송문을 장악해 추격을 끝낸다."
 landmark_labels = PackedStringArray("남쪽 추격로", "흑견 마당", "북쪽 이송문")
+choice_point_id = &"ch08_lete_defection"
 start_cutscene_id = &"ch08_05_intro"
 clear_cutscene_id = &"ch08_05_outro"
 next_destination_summary = "다음: 흑견 검문지를 넘어 카일의 외곽 방어선으로 향한다."
+post_battle_bark_rules = [{
+"id": "ch08_05_hounds_report_ready",
+"speaker": "Guide",
+"text": "흑견의 밤이 끝났다. 하지만 레테가 남긴 길은 다음 검문지 너머로 이어진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch08_05_lete_defection_ack",
+"speaker": "Tia",
+"text": "레테가 살아서 돌아섰어. 지금은 설명보다 그 선택을 지키는 게 먼저야.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["lete_defects_alive"]}
+}, {
+"id": "ch08_05_hounds_preserved_ack",
+"speaker": "Guide",
+"text": "흑견 부대를 살려 뒀다. 추격의 증언은 전장의 침묵보다 오래 남을 것이다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["no_black_hound_casualties"]}
+}, {
+"id": "ch08_05_full_hound_read",
+"speaker": "System",
+"text": "레테 생존 전향과 흑견 부대 보전 결과가 밤의 추격 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["lete_defects_alive", "no_black_hound_casualties"]}
+}]

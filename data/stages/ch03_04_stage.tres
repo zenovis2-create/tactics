@@ -5,8 +5,8 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_west_lever.tres" id="6_object_a"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_east_lever.tres" id="7_object_b"]
+[ext_resource type="Resource" path="res://data/objects/ch03_04_west_resin_shrine.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch03_04_east_ember_echo_device.tres" id="7_object_b"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -31,9 +31,63 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "The west resin shrine stabilizes wildfire echoes around the lower path."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Resin roots pinch the center approach into a controlled lane."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The ember echo device marks brittle resin cover near the upper trail."
+}]
+optional_objectives = [{
+"id": "ch03_04_west_resin_shrine_read",
+"description": "서쪽 수지 제단을 조사해 산불 메아리를 안정시킨다.",
+"condition": "flag:ch03_04_west_resin_shrine",
+"star_value": 1
+}, {
+"id": "ch03_04_east_ember_device_tuned",
+"description": "동쪽 잿불 메아리 장치를 조율해 사냥 제단 경로를 드러낸다.",
+"condition": "flag:ch03_04_east_ember_echo_device",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
+interaction_objective_texts = PackedStringArray("수지 제단 두 곳을 조사해 산불의 메아리를 안정시킨다. (0/2)", "수지 제단 하나를 조사했다. 남은 메아리 장치를 확인한다. (1/2)", "수지 제단 두 곳을 모두 조사했다. 산불의 메아리가 수지 제단 길을 드러냈다. (2/2)")
+interaction_objective_state_ids = [&"wildfire_echo_unread", &"wildfire_echo_partial", &"wildfire_echo_confirmed"]
 start_cutscene_id = &"ch03_04_intro"
 clear_cutscene_id = &"ch03_04_outro"
 next_destination_summary = "수지 제단의 빛이 꺼지고, 마지막 사냥 제단이 모습을 드러낸다."
+post_battle_bark_rules = [{
+"id": "ch03_04_wildfire_report",
+"speaker": "Guide",
+"text": "수지 불빛이 잦아들었다. 마지막 사냥 제단까지는 오래 쉬지 못한다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch03_04_west_resin_ack",
+"speaker": "Rian",
+"text": "서쪽 제단 기록 덕분에 하단 길의 흔들림을 읽을 수 있겠어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch03_04_west_resin_shrine_read"]}
+}, {
+"id": "ch03_04_east_ember_ack",
+"speaker": "Guide",
+"text": "동쪽 장치가 조율됐다. 잿불 메아리가 다음 길목을 가리킨다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch03_04_east_ember_device_tuned"]}
+}, {
+"id": "ch03_04_bonus_exp_read",
+"speaker": "System",
+"text": "메아리 안정화 기록이 보너스 경험치 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "bonus_exp_min": 1}
+}]

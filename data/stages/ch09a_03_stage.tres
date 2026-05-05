@@ -31,6 +31,33 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 0,
+"effect": "The west oath roll preserves a recoverable officer trail."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 4),
+"radius": 1,
+"effect": "The oath hall floor forces the squad through a marked review lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The east censor mark watches the discarded-officer route."
+}]
+optional_objectives = [{
+"id": "ch09a_03_west_oath_roll",
+"description": "서쪽 맹세 두루마리를 회수해 버려진 장교의 이동 흔적을 복원한다.",
+"condition": "flag:ch09a_03_west_oath_roll",
+"star_value": 1
+}, {
+"id": "ch09a_03_east_censor_mark",
+"description": "동쪽 검열 표식을 조사해 카일 휘하 장교들이 지워진 경로를 확정한다.",
+"condition": "flag:ch09a_03_east_censor_mark",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -41,3 +68,28 @@ landmark_labels = PackedStringArray("맹세 두루마리", "맹세 전당 바닥
 start_cutscene_id = &"ch09a_03_intro"
 clear_cutscene_id = &"ch09a_03_outro"
 next_destination_summary = "다음: 드러난 장교 경로를 따라 버려진 숙소로 들어간다."
+post_battle_bark_rules = [{
+"id": "ch09a_03_oath_hall_report_ready",
+"speaker": "Guide",
+"text": "맹세 전당의 길이 드러났다. 승리보다 먼저, 버려진 장교들의 흔적을 따라가야 한다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09a_03_oath_roll_ack",
+"speaker": "Serin",
+"text": "서쪽 두루마리에 남은 이름들이 아직 완전히 지워지지 않았어. 그게 우리가 붙잡을 실마리야.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_03_west_oath_roll"]}
+}, {
+"id": "ch09a_03_censor_mark_ack",
+"speaker": "Guide",
+"text": "동쪽 검열 표식을 확인했다. 카일 휘하 장교들이 사라진 경로가 한 줄로 좁혀졌다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_03_east_censor_mark"]}
+}, {
+"id": "ch09a_03_full_oath_read",
+"speaker": "System",
+"text": "맹세 두루마리 회수와 검열 표식 조사 결과가 장교 경로 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_03_west_oath_roll", "ch09a_03_east_censor_mark"]}
+}]

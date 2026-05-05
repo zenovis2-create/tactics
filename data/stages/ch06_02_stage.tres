@@ -32,6 +32,54 @@ terrain_defense_bonuses = {
 Vector2i(1, 2): 1,
 Vector2i(6, 4): 1
 }
+terrain_features = [{
+"type": "destructible",
+"position": Vector2i(1, 2),
+"radius": 0,
+"effect": "The west battery winch can be broken to collapse one side of Valtor's line."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 4),
+"radius": 1,
+"effect": "The chain-lift gate funnels the assault through the central hinge."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 4),
+"radius": 0,
+"effect": "The east battery platform controls the final approach to the gate."
+}]
+decorative_props = [{
+"id": "ch06_battery_winch_housing_blocker_01",
+"position": Vector2i(2, 3),
+"file": "ch06_battery_winch_housing_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_chain_lift_counterweight_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch06_chain_lift_counterweight_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_rain_soaked_barricade_blocker_01",
+"position": Vector2i(5, 4),
+"file": "ch06_rain_soaked_barricade_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "ch06_ammo_crate_stack_blocker_01",
+"position": Vector2i(6, 4),
+"file": "ch06_ammo_crate_stack_blocker_01.png",
+"scale": 0.86
+}]
+optional_objectives = [{
+"id": "ch06_02_west_battery_winch",
+"description": "서쪽 포대 윈치를 무너뜨려 발토르의 사격선을 끊는다.",
+"condition": "flag:ch06_02_west_battery_winch",
+"star_value": 1
+}, {
+"id": "ch06_02_center_chain_lift_gate",
+"description": "중앙 사슬 승강문을 해제해 포대선 돌파로를 연다.",
+"condition": "flag:ch06_02_center_chain_lift_gate",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -47,3 +95,28 @@ weather_type = "rain"
 start_cutscene_id = &"ch06_02_intro"
 clear_cutscene_id = &"ch06_02_outro"
 next_destination_summary = "다음: 열린 사슬 승강로를 따라 감옥 심층부로 내려간다."
+post_battle_bark_rules = [{
+"id": "ch06_02_battery_report_ready",
+"speaker": "Guide",
+"text": "포대선이 흔들렸다. 열린 사슬 승강로로 감옥 심층부까지 밀고 들어간다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch06_02_west_winch_ack",
+"speaker": "Rian",
+"text": "서쪽 포대 윈치가 무너졌다. 비가 와도 저쪽 사격선은 다시 맞추기 어렵겠어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_02_west_battery_winch"]}
+}, {
+"id": "ch06_02_chain_gate_ack",
+"speaker": "Guide",
+"text": "중앙 사슬 승강문이 풀렸다. 감옥 심층부로 내려갈 경로가 생겼다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_02_center_chain_lift_gate"]}
+}, {
+"id": "ch06_02_full_line_read",
+"speaker": "System",
+"text": "서쪽 포대 제압과 사슬 승강문 해제 결과가 포대선 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_02_west_battery_winch", "ch06_02_center_chain_lift_gate"]}
+}]

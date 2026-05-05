@@ -31,9 +31,94 @@ terrain_defense_bonuses = {
 Vector2i(1, 2): 1,
 Vector2i(6, 5): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(6, 5),
+"radius": 1,
+"effect": "The ruined well restores memory pressure for allies who regroup nearby."
+}, {
+"type": "high_ground",
+"position": Vector2i(1, 2),
+"radius": 0,
+"effect": "Broken masonry overlooks the western approach."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 4),
+"radius": 1,
+"effect": "Fallen stone turns the well path into a tight search lane."
+}]
+decorative_props = [{
+"id": "village_ruined_arch_blocker_01",
+"position": Vector2i(2, 3),
+"file": "village_ruined_arch_blocker_01.png",
+"scale": 0.92
+}, {
+"id": "village_collapsed_wall_blocker_01",
+"position": Vector2i(3, 3),
+"file": "village_collapsed_wall_blocker_01.png",
+"scale": 0.92
+}, {
+"id": "village_roof_tile_rubble_blocker_01",
+"position": Vector2i(4, 4),
+"file": "village_roof_tile_rubble_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "village_broken_stair_plinth_blocker_01",
+"position": Vector2i(5, 4),
+"file": "village_broken_stair_plinth_blocker_01.png",
+"scale": 0.9
+}]
+optional_objectives = [{
+"id": "ch01_03_supply_cache_secured",
+"description": "보급 은닉처를 조사해 생존자 보급선을 표시한다.",
+"condition": "flag:ch01_03_supply_cache",
+"star_value": 1
+}, {
+"id": "ch01_03_ruined_well_logged",
+"description": "폐허 우물의 기억 파문을 기록한다.",
+"condition": "flag:ch01_03_ruined_well",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch01_03_intro"
 clear_cutscene_id = &"ch01_03_outro"
 next_destination_summary = "기억의 파문이 북쪽 성문 진입로를 가리킨다."
+post_battle_bark_rules = [{
+"id": "ch01_03_guild_report_ready",
+"speaker": "Guide",
+"text": "우물 쪽 기록까지 보고서에 올려두자. 길드가 다음 진입로를 바로 잡아줄 거야.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch01_03_supply_cache_ack",
+"speaker": "Serin",
+"text": "보급선을 표시했어. 다음 의뢰 전에 숨통이 조금 트이겠네.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch01_03_supply_cache_secured"]
+}
+}, {
+"id": "ch01_03_ruined_well_ack",
+"speaker": "Guide",
+"text": "폐허 우물의 파문이 북쪽 성문 쪽을 가리킨다. 보고가 끝나면 바로 움직일 수 있겠다.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch01_03_ruined_well_logged"]
+}
+}, {
+"id": "ch01_03_bonus_exp_ack",
+"speaker": "System",
+"text": "조사와 전투 경험이 다음 준비에 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]

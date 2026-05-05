@@ -70,6 +70,54 @@ Vector2i(8, 7): 1,
 Vector2i(9, 7): 1,
 Vector2i(10, 7): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(3, 6),
+"radius": 1,
+"effect": "The west trail marker steadies allies while they map the safe Greenwood turn."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(5, 4),
+"radius": 1,
+"effect": "Fallen trunks split the lost-forest route into a tight middle lane."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(9, 5),
+"radius": 1,
+"effect": "The east marker sits beyond a compressed hunter path."
+}]
+decorative_props = [{
+"id": "forest_fallen_log_blocker_01",
+"position": Vector2i(5, 4),
+"file": "forest_fallen_log_blocker_01.png",
+"scale": 0.98
+}, {
+"id": "forest_stump_cluster_blocker_01",
+"position": Vector2i(4, 4),
+"file": "forest_stump_cluster_blocker_01.png",
+"scale": 0.94
+}, {
+"id": "forest_moss_boulder_blocker_01",
+"position": Vector2i(8, 6),
+"file": "forest_moss_boulder_blocker_01.png",
+"scale": 0.96
+}, {
+"id": "forest_root_thicket_blocker_01",
+"position": Vector2i(6, 5),
+"file": "forest_root_thicket_blocker_01.png",
+"scale": 0.98
+}]
+optional_objectives = [{
+"id": "ch03_01_west_trail_mapped",
+"description": "서쪽 숲길 표식을 조사해 안전 경로를 확보한다.",
+"condition": "flag:ch03_01_west_trail_marker",
+"star_value": 1
+}, {
+"id": "ch03_01_east_trail_mapped",
+"description": "동쪽 숲길 표식을 조사해 잃어버린 숲의 분기점을 기록한다.",
+"condition": "flag:ch03_01_east_trail_marker",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -78,3 +126,40 @@ interaction_objective_state_ids = [&"greenwood_route_unmapped", &"greenwood_rout
 start_cutscene_id = &"ch03_01_intro"
 clear_cutscene_id = &"ch03_01_outro"
 next_destination_summary = "숲 표식 두 곳을 모두 읽었다. 확보된 경로는 덫 지대로 곧장 이어진다."
+post_battle_bark_rules = [{
+"id": "ch03_01_route_report",
+"speaker": "Guide",
+"text": "숲길 표식 두 곳을 맞춰 보니 덫 지대로 이어지는 길이 또렷해졌다. 보고는 짧게 끝내고 바로 움직이자.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch03_01_west_marker_ack",
+"speaker": "Rian",
+"text": "서쪽 표식이 없었다면 대열이 한 번은 더 헤맸겠어. 길을 남겨 둔 사람에게 빚졌군.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_01_west_trail_mapped"]
+}
+}, {
+"id": "ch03_01_east_marker_ack",
+"speaker": "Serin",
+"text": "동쪽 분기점까지 기록했어. 다음 전투에서는 추적보다 길 잃는 시간을 줄일 수 있겠네.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_01_east_trail_mapped"]
+}
+}, {
+"id": "ch03_01_bonus_exp_read",
+"speaker": "System",
+"text": "잃어버린 숲의 경로 기록이 다음 덫 지대 진입 준비 경험으로 정리됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]

@@ -46,6 +46,33 @@ Vector2i(6, 2): 2,
 Vector2i(7, 2): 2,
 Vector2i(6, 4): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 6),
+"radius": 1,
+"effect": "The north reliquary seal steadies allies near the lower relic path."
+}, {
+"type": "sacred_ground",
+"position": Vector2i(5, 6),
+"radius": 1,
+"effect": "The south reliquary seal anchors the chamber's second memory trace."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 2),
+"radius": 1,
+"effect": "A raised archive balcony watches the relic chamber approach."
+}]
+optional_objectives = [{
+"id": "ch04_04_north_seal_read",
+"description": "북쪽 성유물 봉인을 조사해 침수 제단의 기록을 복원한다.",
+"condition": "flag:ch04_04_north_reliquary_seal",
+"star_value": 1
+}, {
+"id": "ch04_04_south_seal_read",
+"description": "남쪽 성유물 봉인을 조사해 사리아의 흔적을 좁힌다.",
+"condition": "flag:ch04_04_south_reliquary_seal",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -58,3 +85,28 @@ interaction_objective_state_ids = [&"monastery_reliquary_unpurified", &"monaster
 start_cutscene_id = &"ch04_04_intro"
 clear_cutscene_id = &"ch04_04_outro"
 next_destination_summary = "마지막으로 남은 미봉인 제단이 바실의 침수 성소를 곧장 가리킨다."
+post_battle_bark_rules = [{
+"id": "ch04_04_reliquary_report_ready",
+"speaker": "Guide",
+"text": "성유물 봉인이 되살아났다. 바실의 침수 성소로 이어지는 마지막 길이 열렸다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch04_04_north_seal_ack",
+"speaker": "Rian",
+"text": "북쪽 봉인 기록을 읽었다. 물에 잠긴 제단이 왜 닫혔는지 조금은 알겠어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_04_north_seal_read"]}
+}, {
+"id": "ch04_04_south_seal_ack",
+"speaker": "Guide",
+"text": "남쪽 봉인도 복원됐다. 사리아의 흔적은 이제 바실의 성소 쪽으로 좁혀진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_04_south_seal_read"]}
+}, {
+"id": "ch04_04_full_reliquary_read",
+"speaker": "System",
+"text": "두 성유물 봉인 복원 기록이 전투 판정과 다음 경로 인계에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_04_north_seal_read", "ch04_04_south_seal_read"]}
+}]

@@ -31,6 +31,33 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "The procession roll preserves the route through the nameless crowd."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The witness mark overlooks the shrine road toward the cathedral."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "The procession narrows around the central shrine bend."
+}]
+optional_objectives = [{
+"id": "ch07_03_procession_roll",
+"description": "행렬 두루마리를 회수해 성당 진입 경로를 복원한다.",
+"condition": "flag:ch07_03_procession_roll",
+"star_value": 1
+}, {
+"id": "ch07_03_witness_mark",
+"description": "목격 표식을 확인해 네리의 재등장 위치를 좁힌다.",
+"condition": "flag:ch07_03_witness_mark",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -41,3 +68,28 @@ landmark_labels = PackedStringArray("행렬 두루마리", "사당 대로", "목
 start_cutscene_id = &"ch07_03_intro"
 clear_cutscene_id = &"ch07_03_outro"
 next_destination_summary = "다음: 사당 대로를 따라 성당 앞마당으로 올라간다."
+post_battle_bark_rules = [{
+"id": "ch07_03_procession_report_ready",
+"speaker": "Guide",
+"text": "이름 없는 행렬의 길을 끊었다. 성당 앞마당으로 가는 단서는 아직 사라지지 않았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch07_03_procession_roll_ack",
+"speaker": "Tia",
+"text": "두루마리에 남은 이름들이 너무 적어. 그래서 더더욱 지금 붙잡아야 해.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_03_procession_roll"]}
+}, {
+"id": "ch07_03_witness_mark_ack",
+"speaker": "Serin",
+"text": "목격 표식이 네리의 길을 좁혀 줬어. 아직 늦었다고 말하긴 싫어.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_03_witness_mark"]}
+}, {
+"id": "ch07_03_full_procession_read",
+"speaker": "System",
+"text": "행렬 두루마리 회수와 목격 표식 확인 결과가 이름 없는 행렬 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_03_procession_roll", "ch07_03_witness_mark"]}
+}]

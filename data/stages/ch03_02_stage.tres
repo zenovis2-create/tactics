@@ -55,6 +55,54 @@ Vector2i(8, 4): 1,
 Vector2i(7, 2): 2,
 Vector2i(8, 2): 2
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(5, 6),
+"radius": 1,
+"effect": "A root bridge narrows the refugee route into a single guarded crossing."
+}, {
+"type": "high_ground",
+"position": Vector2i(7, 2),
+"radius": 1,
+"effect": "Hunter high ground watches the north snare post."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(8, 4),
+"radius": 1,
+"effect": "The snare line constricts the upper approach until the post is cut."
+}]
+decorative_props = [{
+"id": "terrain_cut_bank_blocker_01",
+"position": Vector2i(7, 2),
+"file": "terrain_cut_bank_blocker_01.png",
+"scale": 0.95
+}, {
+"id": "terrain_raised_earth_step_blocker_01",
+"position": Vector2i(8, 2),
+"file": "terrain_raised_earth_step_blocker_01.png",
+"scale": 0.92
+}, {
+"id": "terrain_shallow_washout_blocker_01",
+"position": Vector2i(5, 6),
+"file": "terrain_shallow_washout_blocker_01.png",
+"scale": 0.95
+}, {
+"id": "terrain_fieldstone_switchback_blocker_01",
+"position": Vector2i(8, 4),
+"file": "terrain_fieldstone_switchback_blocker_01.png",
+"scale": 0.92
+}]
+optional_objectives = [{
+"id": "ch03_02_south_refugee_route_read",
+"description": "남쪽 난민 표식을 확인해 하단 산길을 확보한다.",
+"condition": "flag:ch03_02_south_refugee_sign",
+"star_value": 1
+}, {
+"id": "ch03_02_north_snare_cut",
+"description": "북쪽 덫 말뚝을 끊어 매복선을 해제한다.",
+"condition": "flag:ch03_02_north_snare_post",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -63,3 +111,40 @@ interaction_objective_state_ids = [&"refugee_trail_unsecured", &"refugee_trail_p
 start_cutscene_id = &"ch03_02_intro"
 clear_cutscene_id = &"ch03_02_outro"
 next_destination_summary = "난민 산길이 안정되었고, 다음 경로는 그린우드 깊숙한 이동 대열로 이어진다."
+post_battle_bark_rules = [{
+"id": "ch03_02_snare_line_report",
+"speaker": "Guide",
+"text": "난민 산길의 덫 선을 끊었다. 이제 대열은 그린우드 안쪽으로 밀고 들어갈 수 있다.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch03_02_refugee_sign_ack",
+"speaker": "Serin",
+"text": "남쪽 표식이 살아 있었어. 누군가 지나갈 사람을 위해 끝까지 길을 남겨 둔 거야.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_02_south_refugee_route_read"]
+}
+}, {
+"id": "ch03_02_snare_cut_ack",
+"speaker": "Rian",
+"text": "북쪽 덫 말뚝까지 끊었으니 뒤따르는 사람들은 발목을 잡히지 않겠지.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_02_north_snare_cut"]
+}
+}, {
+"id": "ch03_02_bonus_exp_read",
+"speaker": "System",
+"text": "산길 확보 기록이 다음 이동 대열의 정비 경험으로 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]

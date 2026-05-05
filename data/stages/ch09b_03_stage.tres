@@ -59,6 +59,54 @@ Vector2i(4, 7): 1,
 Vector2i(5, 7): 1,
 Vector2i(6, 7): 1
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(2, 6),
+"radius": 1,
+"effect": "The west keeper latch narrows the handoff route into the final cell block."
+}, {
+"type": "sacred_ground",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "The center memory lattice stabilizes Noah's archive handoff path."
+}, {
+"type": "high_ground",
+"position": Vector2i(9, 5),
+"radius": 0,
+"effect": "The east keeper record watches the bridge out of the last keeper cell."
+}]
+decorative_props = [{
+"id": "archive_memory_ledger_stack_blocker_01",
+"position": Vector2i(4, 2),
+"file": "archive_memory_ledger_stack_blocker_01.png",
+"scale": 0.88
+}, {
+"id": "archive_memory_sealed_record_chest_01",
+"position": Vector2i(4, 3),
+"file": "archive_memory_sealed_record_chest_01.png",
+"scale": 0.88
+}, {
+"id": "archive_memory_scroll_bin_partition_01",
+"position": Vector2i(5, 3),
+"file": "archive_memory_scroll_bin_partition_01.png",
+"scale": 0.88
+}, {
+"id": "archive_memory_plinth_slab_01",
+"position": Vector2i(6, 3),
+"file": "archive_memory_plinth_slab_01.png",
+"scale": 0.86
+}]
+optional_objectives = [{
+"id": "ch09b_03_center_memory_lattice",
+"description": "중앙 기억 격자를 안정시켜 노아의 인계 경로가 개정 사이로 미끄러지지 않게 한다.",
+"condition": "flag:ch09b_03_center_memory_lattice",
+"star_value": 1
+}, {
+"id": "ch09b_03_east_keeper_record",
+"description": "동쪽 보관 기록을 회수해 마지막 보관인의 경로 시간을 보존한다.",
+"condition": "flag:ch09b_03_east_keeper_record",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -71,3 +119,28 @@ weather_type = "night"
 start_cutscene_id = &"ch09b_03_intro"
 clear_cutscene_id = &"ch09b_03_outro"
 next_destination_summary = "다음: 보관인 감방을 지나 개정실로 내려간다."
+post_battle_bark_rules = [{
+"id": "ch09b_03_last_keeper_report_ready",
+"speaker": "Guide",
+"text": "마지막 보관인의 길이 열렸다. 노아는 열쇠가 아니라, 우리가 지켜야 할 시간표다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09b_03_memory_lattice_ack",
+"speaker": "Rian",
+"text": "중앙 기억 격자가 안정됐다. 과거의 내가 믿은 건 신분이 아니라 이 순간의 우리였군.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_03_center_memory_lattice"]}
+}, {
+"id": "ch09b_03_keeper_record_ack",
+"speaker": "Guide",
+"text": "동쪽 보관 기록을 회수했다. 마지막 보관인의 인계 시간이 개정 사이로 사라지지 않았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_03_east_keeper_record"]}
+}, {
+"id": "ch09b_03_full_keeper_read",
+"speaker": "System",
+"text": "기억 격자 안정과 보관 기록 회수 결과가 마지막 보관인 경로 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_03_center_memory_lattice", "ch09b_03_east_keeper_record"]}
+}]

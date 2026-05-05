@@ -1,11 +1,12 @@
-[gd_resource type="Resource" script_class="StageData" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="StageData" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_stage"]
 [ext_resource type="Resource" path="res://data/units/ally_vanguard.tres" id="2_ally_a"]
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch09a_04_west_cell_witness.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch09a_04_east_censor_pike.tres" id="7_object_b"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -30,7 +31,34 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
-interactive_objects = [ExtResource("6_object_a")]
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 4),
+"radius": 0,
+"effect": "The west cell witness can still preserve one detention testimony."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 5),
+"radius": 1,
+"effect": "The detention hall doorway compresses the route toward the censor pike."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "The east censor pike can be broken to open the root approach line."
+}]
+optional_objectives = [{
+"id": "ch09a_04_west_cell_witness",
+"description": "서쪽 감방 증언자를 확보해 검열 구금동의 생존 기록을 남긴다.",
+"condition": "flag:ch09a_04_west_cell_witness",
+"star_value": 1
+}, {
+"id": "ch09a_04_east_censor_pike",
+"description": "동쪽 검열 창두를 부숴 근원 접근선을 막는 감찰 표식을 제거한다.",
+"condition": "flag:ch09a_04_east_censor_pike",
+"star_value": 1
+}]
+interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 stage_objective_hint = "구금동을 정리하고 근원 접근선을 막는 검열 창두를 향해 전진한다."
@@ -38,3 +66,28 @@ landmark_labels = PackedStringArray("구금동", "장교 감방", "검열 창두
 start_cutscene_id = &"ch09a_04_intro"
 clear_cutscene_id = &"ch09a_04_outro"
 next_destination_summary = "다음: 검열 창두를 부수고 근원 접근선을 장악한다."
+post_battle_bark_rules = [{
+"id": "ch09a_04_abandoned_officers_report_ready",
+"speaker": "Guide",
+"text": "구금동의 전투가 끝났다. 버려진 장교들의 증언은 이제 근원 접근선으로 이어진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09a_04_west_witness_ack",
+"speaker": "Bran",
+"text": "서쪽 감방의 증언자가 살아 있다. 변명보다 먼저, 그 이름을 기록해야 한다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_04_west_cell_witness"]}
+}, {
+"id": "ch09a_04_censor_pike_ack",
+"speaker": "Guide",
+"text": "동쪽 검열 창두를 부쉈다. 근원 접근선을 막던 감찰 표식도 함께 무너졌다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_04_east_censor_pike"]}
+}, {
+"id": "ch09a_04_full_officer_read",
+"speaker": "System",
+"text": "감방 증언자 확보와 검열 창두 파괴 결과가 버려진 장교 경로 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_04_west_cell_witness", "ch09a_04_east_censor_pike"]}
+}]

@@ -5,8 +5,8 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_west_lever.tres" id="6_object_a"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_east_lever.tres" id="7_object_b"]
+[ext_resource type="Resource" path="res://data/objects/ch10_02_west_crest_control.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch10_02_east_crest_control.tres" id="7_object_b"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -31,6 +31,33 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "destructible",
+"position": Vector2i(2, 5),
+"radius": 0,
+"effect": "The west crest control can be broken to weaken the outer tower ring."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 4),
+"radius": 1,
+"effect": "The resonance crest bends the outer ring into one unstable crossing."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The east crest control watches the inner corridor approach."
+}]
+optional_objectives = [{
+"id": "ch10_02_west_crest_control",
+"description": "서쪽 공명 문장 제어점을 부숴 외곽 탑 고리의 첫 결속을 끊는다.",
+"condition": "flag:ch10_02_west_crest_control",
+"star_value": 1
+}, {
+"id": "ch10_02_east_crest_control",
+"description": "동쪽 공명 문장 제어점을 부숴 내부 회랑으로 가는 안정 경로를 만든다.",
+"condition": "flag:ch10_02_east_crest_control",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -42,3 +69,28 @@ weather_type = "night"
 start_cutscene_id = &"ch10_02_intro"
 clear_cutscene_id = &"ch10_02_outro"
 next_destination_summary = "다음: 무너진 외곽 고리를 지나 무명의 회랑으로 들어간다."
+post_battle_bark_rules = [{
+"id": "ch10_02_tower_crest_report_ready",
+"speaker": "Guide",
+"text": "외곽 탑 고리가 무너졌다. 흩어지면 끊기는 길이지만, 함께라면 안쪽 회랑으로 이어진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch10_02_west_crest_ack",
+"speaker": "Rian",
+"text": "서쪽 문장 제어가 무너졌다. 이 탑은 우리를 떼어 놓으려 하지만, 기억은 혼자 들 수 없어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch10_02_west_crest_control"]}
+}, {
+"id": "ch10_02_east_crest_ack",
+"speaker": "Guide",
+"text": "동쪽 문장 제어를 부쉈다. 내부 회랑으로 향하는 안정 경로가 외곽 고리 안에서 드러났다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch10_02_east_crest_control"]}
+}, {
+"id": "ch10_02_full_crest_read",
+"speaker": "System",
+"text": "서쪽·동쪽 문장 제어 파괴 결과가 공명탑 외곽 고리 붕괴 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch10_02_west_crest_control", "ch10_02_east_crest_control"]}
+}]

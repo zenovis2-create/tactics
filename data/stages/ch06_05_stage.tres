@@ -53,6 +53,27 @@ terrain_features = [{
 "radius": 0,
 "effect": "Gate chokepoints force a single-file breach."
 }]
+decorative_props = [{
+"id": "ch06_oath_banner_shrine_blocker_01",
+"position": Vector2i(2, 2),
+"file": "ch06_oath_banner_shrine_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch06_iron_keep_battery_dais_fixture_01",
+"position": Vector2i(3, 3),
+"file": "ch06_iron_keep_battery_dais_fixture_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_outer_wall_latch_mechanism_01",
+"position": Vector2i(4, 2),
+"file": "ch06_outer_wall_latch_mechanism_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_final_gate_barricade_blocker_01",
+"position": Vector2i(3, 2),
+"file": "ch06_final_gate_barricade_blocker_01.png",
+"scale": 0.88
+}]
 optional_objectives = [{
 "id": "valtor_civilian_escapes",
 "description": "발토르의 민간인을 생존시킨 채 탈출시킨다.",
@@ -68,11 +89,36 @@ turn_limit = 12
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions_and_defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
-stage_objective_hint = "발가르를 쓰러뜨리고 요새 제단을 장악한다."
-interaction_objective_texts = PackedStringArray("요새 제단을 점거하고 바리케이드 걸쇠를 해제한 뒤 발가르를 쓰러뜨린다. (0/2)", "요새 통제 지점 하나를 확보했다. 마지막 지점을 장악하고 발가르를 마무리한다. (1/2)", "요새 통제 지점을 모두 확보했다. 발가르의 저항선이 완전히 무너졌다. (2/2)")
-interaction_objective_state_ids = [&"valgar_keep_locked", &"valgar_keep_partial", &"valgar_keep_broken"]
+stage_objective_hint = "발가르의 포대를 점령하고 외벽을 무너뜨린 뒤 발가르를 쓰러뜨린다."
+interaction_objective_texts = PackedStringArray("요새 포대를 점령하고 외벽 바리케이드를 파괴한 뒤 발가르를 쓰러뜨린다. (0/2)", "포대 제단을 점령했다. 외벽 바리케이드를 파괴하고 발가르를 마무리한다. (1/2)", "포대와 외벽을 모두 무력화했다. 발가르의 저항선이 완전히 무너졌다. (2/2)")
+interaction_objective_state_ids = [&"valgar_battery_wall_locked", &"valgar_battery_captured", &"valgar_outer_wall_broken"]
 landmark_labels = PackedStringArray("철문 진입로", "요새 제단", "맹세의 옥좌")
 weather_type = "night"
 start_cutscene_id = &"ch06_05_intro"
 clear_cutscene_id = &"ch06_05_outro"
 next_destination_summary = "다음: 발가르의 요새를 넘어 정화 의식장으로 진군한다."
+post_battle_bark_rules = [{
+"id": "ch06_05_iron_oath_report_ready",
+"speaker": "Guide",
+"text": "발가르의 저항선은 무너졌다. 철성은 되찾았지만, 다음 답은 정화 의식장에 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch06_05_civilian_escape_ack",
+"speaker": "Brann",
+"text": "민간인을 살려 내보냈다. 이 성이 지켜야 했던 것이 아직 완전히 사라진 건 아니군.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["valtor_civilian_escapes"]}
+}, {
+"id": "ch06_05_fort_resistance_ack",
+"speaker": "Guide",
+"text": "요새 저항 수치가 0이 됐다. 발가르를 쓰러뜨리기 전 방어축부터 꺾어냈다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["fort_resistance_zero"]}
+}, {
+"id": "ch06_05_full_keep_read",
+"speaker": "System",
+"text": "민간인 탈출과 요새 저항 해제 기록이 철성 최종전 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["valtor_civilian_escapes", "fort_resistance_zero"]}
+}]

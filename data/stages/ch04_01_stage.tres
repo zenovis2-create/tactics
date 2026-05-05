@@ -5,7 +5,7 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch04_01_supply_chest.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -30,9 +30,61 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Flooded cloister stones steady allies crossing the lower archway."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Collapsed cloister pillars squeeze the center route into a careful lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "A raised cloister landing gives cover near the supply route."
+}]
+optional_objectives = [{
+"id": "ch04_01_no_ally_casualties",
+"description": "아군 사망 없이 침수 회랑을 돌파한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch04_01_scout_survives",
+"description": "정찰병을 생존시켜 수도원 내부 수로를 기록한다.",
+"condition": "survive_unit:ally_scout",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch04_01_intro"
 clear_cutscene_id = &"ch04_01_outro"
 next_destination_summary = "침수된 회랑 너머로 잊힌 종탑으로 가는 길이 열린다."
+post_battle_bark_rules = [{
+"id": "ch04_01_cloister_report_ready",
+"speaker": "Guide",
+"text": "회랑의 물길은 잠잠해졌다. 잊힌 종탑까지는 이 틈에 움직여야 한다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch04_01_no_losses_ack",
+"speaker": "Rian",
+"text": "다친 사람 없이 빠져나왔다. 젖은 돌길에서도 대열은 무너지지 않았어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_01_no_ally_casualties"]}
+}, {
+"id": "ch04_01_scout_route_ack",
+"speaker": "Guide",
+"text": "정찰 기록이 남았다. 수도원 안쪽 수로를 되짚을 표식으로 쓸 수 있겠다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_01_scout_survives"]}
+}, {
+"id": "ch04_01_bonus_exp_read",
+"speaker": "System",
+"text": "침수 회랑 돌파 기록이 보너스 경험치 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "bonus_exp_min": 1}
+}]

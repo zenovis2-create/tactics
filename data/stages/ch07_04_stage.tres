@@ -43,6 +43,33 @@ Vector2i(9, 5): 1,
 Vector2i(4, 1): 1,
 Vector2i(8, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(3, 5),
+"radius": 1,
+"effect": "The west sermon pulley weakens the saint's control over the congregation."
+}, {
+"type": "high_ground",
+"position": Vector2i(8, 2),
+"radius": 0,
+"effect": "The east balcony watches the prayer-room entry route."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(6, 3),
+"radius": 1,
+"effect": "Congregation benches narrow the central sermon lane."
+}]
+optional_objectives = [{
+"id": "ch07_04_west_sermon_pulley",
+"description": "서쪽 설교 도르래를 끊어 사리아의 설교 압박을 낮춘다.",
+"condition": "flag:ch07_04_west_sermon_pulley",
+"star_value": 1
+}, {
+"id": "ch07_04_east_sermon_pulley",
+"description": "동쪽 설교 도르래를 끊어 기도실 진입로를 연다.",
+"condition": "flag:ch07_04_east_sermon_pulley",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -51,3 +78,28 @@ landmark_labels = PackedStringArray("서쪽 설교 도르래", "중앙 회중석
 start_cutscene_id = &"ch07_04_intro"
 clear_cutscene_id = &"ch07_04_outro"
 next_destination_summary = "다음: 끊어진 찬가 수로를 지나 기도실로 들어간다."
+post_battle_bark_rules = [{
+"id": "ch07_04_sermon_report_ready",
+"speaker": "Guide",
+"text": "설교 도르래가 멈췄다. 찬가 수로 너머 기도실로 가는 압박이 조금 풀렸다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch07_04_west_pulley_ack",
+"speaker": "Serin",
+"text": "서쪽 설교 압박을 끊었어. 목소리가 작아진 사이에 사람들을 불러낼 수 있어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_04_west_sermon_pulley"]}
+}, {
+"id": "ch07_04_east_pulley_ack",
+"speaker": "Guide",
+"text": "동쪽 도르래가 끊겼다. 기도실 진입로가 더 이상 설교 장치에 묶이지 않는다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_04_east_sermon_pulley"]}
+}, {
+"id": "ch07_04_full_sermon_read",
+"speaker": "System",
+"text": "서쪽과 동쪽 설교 도르래 차단 결과가 성자의 설교 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_04_west_sermon_pulley", "ch07_04_east_sermon_pulley"]}
+}]

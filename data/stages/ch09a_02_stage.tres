@@ -52,6 +52,54 @@ Vector2i(8, 2): 2,
 Vector2i(8, 4): 1,
 Vector2i(8, 5): 1
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(2, 3),
+"radius": 1,
+"effect": "The west bridge span narrows the banner route under rain pressure."
+}, {
+"type": "high_ground",
+"position": Vector2i(8, 2),
+"radius": 0,
+"effect": "The upper bridge watch point covers the oath pike approach."
+}, {
+"type": "destructible",
+"position": Vector2i(8, 5),
+"radius": 0,
+"effect": "The oath pike post can be broken to split the bridge command line."
+}]
+decorative_props = [{
+"id": "ch09a_bridge_banner_route_marker_01",
+"position": Vector2i(1, 3),
+"file": "ch09a_bridge_banner_route_marker_01.png",
+"scale": 0.62
+}, {
+"id": "ch09a_bridge_banner_rail_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch09a_bridge_banner_rail_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch09a_bridge_torn_standard_blocker_01",
+"position": Vector2i(5, 3),
+"file": "ch09a_bridge_torn_standard_blocker_01.png",
+"scale": 0.78
+}, {
+"id": "ch09a_bridge_oath_pike_barricade_blocker_01",
+"position": Vector2i(6, 5),
+"file": "ch09a_bridge_oath_pike_barricade_blocker_01.png",
+"scale": 0.82
+}]
+optional_objectives = [{
+"id": "ch09a_02_bridge_banner_ledger",
+"description": "교량 장부를 확보해 군기 다리의 명령 사슬을 드러낸다.",
+"condition": "flag:ch09a_02_bridge_banner_ledger",
+"star_value": 1
+}, {
+"id": "ch09a_02_oath_pike_post",
+"description": "맹세 창기둥을 부숴 다음 장교선으로 이어지는 화선을 끊는다.",
+"condition": "flag:ch09a_02_oath_pike_post",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -63,3 +111,28 @@ weather_type = "rain"
 start_cutscene_id = &"ch09a_02_intro"
 clear_cutscene_id = &"ch09a_02_outro"
 next_destination_summary = "다음: 다리를 건너 맹세 심사 병영으로 진입한다."
+post_battle_bark_rules = [{
+"id": "ch09a_02_bridge_banner_report_ready",
+"speaker": "Guide",
+"text": "군기 다리가 열렸다. 카일의 명령선은 끊겼지만, 그가 본 우리 진형도 남아 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09a_02_banner_ledger_ack",
+"speaker": "Rian",
+"text": "교량 장부가 말해 주는 건 배치가 아니야. 누가 누구를 버릴지 정한 순서다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_02_bridge_banner_ledger"]}
+}, {
+"id": "ch09a_02_oath_pike_ack",
+"speaker": "Guide",
+"text": "맹세 창기둥을 부쉈다. 다음 장교선으로 이어지는 화선도 잠시 끊겼다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_02_oath_pike_post"]}
+}, {
+"id": "ch09a_02_full_bridge_read",
+"speaker": "System",
+"text": "교량 장부 확보와 맹세 창기둥 파괴 결과가 군기 다리 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_02_bridge_banner_ledger", "ch09a_02_oath_pike_post"]}
+}]

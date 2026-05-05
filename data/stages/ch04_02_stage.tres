@@ -5,7 +5,7 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/tutorial_supply_chest.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch04_02_belfry_cache.tres" id="6_object_a"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -30,9 +30,61 @@ terrain_defense_bonuses = {
 Vector2i(1, 2): 1,
 Vector2i(6, 4): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(1, 2),
+"radius": 1,
+"effect": "A forgotten bell mark steadies allies holding the west alcove."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 4),
+"radius": 0,
+"effect": "The broken belfry stair gives a defensive sightline over the chamber."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Fallen bell braces compress the middle path toward the cache."
+}]
+optional_objectives = [{
+"id": "ch04_02_no_ally_casualties",
+"description": "아군 사망 없이 잊힌 종루를 확보한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch04_02_vanguard_survives",
+"description": "선봉대를 생존시켜 종루 방어선을 유지한다.",
+"condition": "survive_unit:ally_vanguard",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch04_02_intro"
 clear_cutscene_id = &"ch04_02_outro"
 next_destination_summary = "종탑 신호가 수도원 아래의 오래된 수문 제어 장치를 드러낸다."
+post_battle_bark_rules = [{
+"id": "ch04_02_belfry_report_ready",
+"speaker": "Guide",
+"text": "종탑의 신호가 끊겼다. 아래 수문 제어 장치로 내려갈 길이 보인다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch04_02_no_losses_ack",
+"speaker": "Rian",
+"text": "아군 사상 없이 종루를 지켰다. 이 속도라면 추격도 늦출 수 있어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_02_no_ally_casualties"]}
+}, {
+"id": "ch04_02_vanguard_line_ack",
+"speaker": "Guide",
+"text": "선봉대가 버틴 덕분에 종루 방어선이 그대로 남았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_02_vanguard_survives"]}
+}, {
+"id": "ch04_02_bonus_exp_read",
+"speaker": "System",
+"text": "종루 확보와 대열 유지 기록이 보너스 경험치 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "bonus_exp_min": 1}
+}]

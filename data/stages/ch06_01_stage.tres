@@ -30,11 +30,85 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "smoke",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Siege smoke blurs the lower approach to the outer battery line."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 3),
+"radius": 1,
+"effect": "Broken iron barricades compress the center road into a kill lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "A raised siege mound gives cover near the inner-road approach."
+}]
+decorative_props = [{
+"id": "ch06_smoke_line_supply_crate_stack_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch06_smoke_line_supply_crate_stack_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_smoke_line_broken_wagon_wheel_01",
+"position": Vector2i(4, 3),
+"file": "ch06_smoke_line_broken_wagon_wheel_01.png",
+"scale": 0.82
+}, {
+"id": "ch06_smoke_line_lantern_post_01",
+"position": Vector2i(4, 4),
+"file": "ch06_smoke_line_lantern_post_01.png",
+"scale": 0.78
+}, {
+"id": "ch06_smoke_line_vent_rock_01",
+"position": Vector2i(2, 4),
+"file": "ch06_smoke_line_vent_rock_01.png",
+"scale": 0.74
+}]
+optional_objectives = [{
+"id": "ch06_01_no_ally_casualties",
+"description": "아군 사망 없이 외곽 포열선을 돌파한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch06_01_scout_survives",
+"description": "정찰병을 생존시켜 요새 외곽 포열 배치를 기록한다.",
+"condition": "survive_unit:ally_scout",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 stage_objective_hint = "외곽 포열선을 무너뜨리고 요새 안으로 이어지는 길을 확보한다."
 landmark_labels = PackedStringArray("연막 성문", "포열 능선", "포대 진입로")
+choice_point_id = &"ch05_ledger_enoch"
 start_cutscene_id = &"ch06_01_intro"
 clear_cutscene_id = &"ch06_01_outro"
 next_destination_summary = "다음: 연막 성문을 돌파해 공성 포대 쪽으로 밀고 들어간다."
+post_battle_bark_rules = [{
+"id": "ch06_01_smoke_report_ready",
+"speaker": "Guide",
+"text": "연막 성문을 넘었다. 요새는 벽이 아니라 움직이는 포열선처럼 읽어야 한다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch06_01_no_losses_ack",
+"speaker": "Rian",
+"text": "아군을 잃지 않고 연막을 빠져나왔다. 포대 쪽에서도 이 대열을 유지하자.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_01_no_ally_casualties"]}
+}, {
+"id": "ch06_01_scout_layout_ack",
+"speaker": "Guide",
+"text": "정찰 기록이 남았다. 발토르 외곽 포열 배치를 따라 다음 돌파로를 잡을 수 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_01_scout_survives"]}
+}, {
+"id": "ch06_01_full_smoke_read",
+"speaker": "System",
+"text": "무손실 돌파와 정찰 생존 기록이 연막 성문 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_01_no_ally_casualties", "ch06_01_scout_survives"]}
+}]

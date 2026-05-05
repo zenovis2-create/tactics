@@ -32,6 +32,33 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "destructible",
+"position": Vector2i(2, 5),
+"radius": 0,
+"effect": "The west revision core can be broken to weaken the first rewrite line."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 4),
+"radius": 1,
+"effect": "The red annotation pillar compresses the battlefield rewrite around one lane."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The east revision core can be broken to collapse the outer rewrite lane."
+}]
+optional_objectives = [{
+"id": "ch09b_04_west_revision_core",
+"description": "서쪽 개정 핵을 부숴 전장이 붙잡고 있는 첫 개정선을 약화한다.",
+"condition": "flag:ch09b_04_west_revision_core",
+"star_value": 1
+}, {
+"id": "ch09b_04_east_revision_core",
+"description": "동쪽 개정 핵을 부숴 외곽 재작성 경로의 결속을 무너뜨린다.",
+"condition": "flag:ch09b_04_east_revision_core",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -43,3 +70,28 @@ landmark_labels = PackedStringArray("서쪽 개정 핵", "붉은 주석 기둥",
 start_cutscene_id = &"ch09b_04_intro"
 clear_cutscene_id = &"ch09b_04_outro"
 next_destination_summary = "다음: 무너진 개정실을 지나 심층 기록보관소로 내려간다."
+post_battle_bark_rules = [{
+"id": "ch09b_04_revision_battlefield_report_ready",
+"speaker": "Guide",
+"text": "개정 사슬이 끊겼다. 전장은 더는 우리를 다시 쓰지 못하지만, 심층 기록은 아직 닫히지 않았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09b_04_west_revision_core_ack",
+"speaker": "Rian",
+"text": "서쪽 개정 핵이 무너졌다. 기록이 바꾼 길보다 우리가 걸은 기억을 먼저 믿어야 한다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_04_west_revision_core"]}
+}, {
+"id": "ch09b_04_east_revision_core_ack",
+"speaker": "Guide",
+"text": "동쪽 개정 핵을 부쉈다. 외곽 재작성 경로가 끊기며 심층 보관소 하강로가 드러났다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_04_east_revision_core"]}
+}, {
+"id": "ch09b_04_full_revision_chain_read",
+"speaker": "System",
+"text": "서쪽·동쪽 개정 핵 파괴 결과가 전장 재작성 차단 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09b_04_west_revision_core", "ch09b_04_east_revision_core"]}
+}]

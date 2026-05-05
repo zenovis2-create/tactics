@@ -31,6 +31,54 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 4),
+"radius": 0,
+"effect": "The west defense tablet anchors the outer-line command route."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 4),
+"radius": 1,
+"effect": "Broken checkpoint walls funnel the breach into one approach lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "The east signal standard overlooks the collapsed defense corridor."
+}]
+decorative_props = [{
+"id": "ch09a_outer_line_checkpoint_wall_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch09a_outer_line_checkpoint_wall_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch09a_outer_line_broken_barricade_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch09a_outer_line_broken_barricade_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch09a_outer_line_banner_crate_blocker_01",
+"position": Vector2i(4, 4),
+"file": "ch09a_outer_line_banner_crate_blocker_01.png",
+"scale": 0.8
+}, {
+"id": "ch09a_outer_line_defense_tablet_01",
+"position": Vector2i(2, 4),
+"file": "ch09a_outer_line_defense_tablet_01.png",
+"scale": 0.68
+}]
+optional_objectives = [{
+"id": "ch09a_01_west_defense_tablet",
+"description": "서쪽 방어 서판을 회수해 외곽선 지휘 경로를 해독한다.",
+"condition": "flag:ch09a_01_west_defense_tablet",
+"star_value": 1
+}, {
+"id": "ch09a_01_east_signal_standard",
+"description": "동쪽 신호 군기를 끊어 외곽 방어선의 합류 신호를 무너뜨린다.",
+"condition": "flag:ch09a_01_east_signal_standard",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -41,3 +89,28 @@ landmark_labels = PackedStringArray("방어 서판", "검문소 통로", "신호
 start_cutscene_id = &"ch09a_01_intro"
 clear_cutscene_id = &"ch09a_01_outro"
 next_destination_summary = "다음: 무너진 외곽선을 넘어 카일의 교량 구역으로 진입한다."
+post_battle_bark_rules = [{
+"id": "ch09a_01_outer_line_report_ready",
+"speaker": "Guide",
+"text": "외곽 방어선이 무너졌다. 이제 카일의 교량 구역까지 숨을 곳은 줄어든다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch09a_01_defense_tablet_ack",
+"speaker": "Rian",
+"text": "서쪽 서판은 명령보다 기록에 가까워. 이 선은 사람을 막기 전에 이름부터 지웠군.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_01_west_defense_tablet"]}
+}, {
+"id": "ch09a_01_signal_standard_ack",
+"speaker": "Guide",
+"text": "동쪽 신호 군기가 내려갔다. 외곽선의 합류 신호도 더는 교량으로 닿지 않는다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_01_east_signal_standard"]}
+}, {
+"id": "ch09a_01_full_outer_line_read",
+"speaker": "System",
+"text": "방어 서판 회수와 신호 군기 차단 결과가 외곽선 돌파 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch09a_01_west_defense_tablet", "ch09a_01_east_signal_standard"]}
+}]

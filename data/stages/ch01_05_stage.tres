@@ -63,3 +63,31 @@ loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch01_05_intro"
 clear_cutscene_id = &"ch01_05_outro"
 next_destination_summary = "캠프 교대 구간이 해금되고 세린이 정식 합류한다. 다음 목적지는 국경 단서 추적선으로 이어진다."
+post_battle_bark_rules = [{
+"id": "ch01_05_camp_report_ready",
+"speaker": "Guide",
+"text": "오늘 의뢰는 여기서 정리하자. 캠프에서 보수와 다음 행선지를 다시 확인하면 된다.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch01_05_no_losses_ack",
+"speaker": "Serin",
+"text": "모두 무사히 돌아가면 합류 이야기도 편하게 꺼낼 수 있겠어.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["no_ally_casualties"]
+}
+}, {
+"id": "ch01_05_bonus_exp_ack",
+"speaker": "System",
+"text": "완료 보고와 보너스 경험이 캠프 준비 목록에 추가됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]

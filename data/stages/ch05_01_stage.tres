@@ -30,9 +30,82 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "fire",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Ashfire at the outer gate pressures the lower approach."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 3),
+"radius": 1,
+"effect": "Collapsed archive masonry compresses the center gate lane."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "Burnt supply crates can be broken open to clear the ash path."
+}]
+decorative_props = [{
+"id": "ch05_ash_gate_arch_fragment_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch05_ash_gate_arch_fragment_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_ash_gate_burned_barricade_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch05_ash_gate_burned_barricade_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch05_ash_gate_cracked_marker_stone_01",
+"position": Vector2i(4, 4),
+"file": "ch05_ash_gate_cracked_marker_stone_01.png",
+"scale": 0.78
+}, {
+"id": "ch05_ash_gate_iron_brazier_01",
+"position": Vector2i(2, 4),
+"file": "ch05_ash_gate_iron_brazier_01.png",
+"scale": 0.72
+}]
+optional_objectives = [{
+"id": "ch05_01_no_ally_casualties",
+"description": "아군 사망 없이 재의 외곽문을 돌파한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch05_01_scout_survives",
+"description": "정찰병을 생존시켜 기록보관소 외곽의 화재 경로를 남긴다.",
+"condition": "survive_unit:ally_scout",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch05_01_intro"
 clear_cutscene_id = &"ch05_01_outro"
 next_destination_summary = "기록보관소 외곽 문은 불타고 있지만, 더 깊은 봉인 서고에는 아직 이송 장부가 남아 있다."
+post_battle_bark_rules = [{
+"id": "ch05_01_archive_report_ready",
+"speaker": "Guide",
+"text": "외곽문은 열렸다. 불길이 번지기 전에 봉인 서고 안쪽 장부를 확인해야 한다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch05_01_no_losses_ack",
+"speaker": "Rian",
+"text": "아군을 잃지 않고 재의 문을 넘었다. 안쪽 서가까지 이 대열을 유지하자.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_01_no_ally_casualties"]}
+}, {
+"id": "ch05_01_scout_route_ack",
+"speaker": "Guide",
+"text": "정찰병이 화재 경로를 남겼다. 봉인 서고로 들어갈 때 우회로를 잃지 않겠다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_01_scout_survives"]}
+}, {
+"id": "ch05_01_full_gate_read",
+"speaker": "System",
+"text": "무손실 돌파와 정찰 생존 기록이 재의 관문 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_01_no_ally_casualties", "ch05_01_scout_survives"]}
+}]

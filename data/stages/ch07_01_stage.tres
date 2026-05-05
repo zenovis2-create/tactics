@@ -31,6 +31,54 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "The market route board anchors the first trace through the blank district."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(4, 3),
+"radius": 1,
+"effect": "Abandoned stalls compress the market lane into a controlled approach."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 5),
+"radius": 0,
+"effect": "The queue bell platform overlooks the market exit."
+}]
+decorative_props = [{
+"id": "city_market_crate_stack_blocker_01",
+"position": Vector2i(3, 3),
+"file": "city_market_crate_stack_blocker_01.png",
+"scale": 0.88
+}, {
+"id": "city_market_canvas_stall_barrier_01",
+"position": Vector2i(4, 3),
+"file": "city_market_canvas_stall_barrier_01.png",
+"scale": 0.9
+}, {
+"id": "city_market_basket_bale_cluster_01",
+"position": Vector2i(3, 4),
+"file": "city_market_basket_bale_cluster_01.png",
+"scale": 0.86
+}, {
+"id": "city_market_handcart_wheel_lock_01",
+"position": Vector2i(4, 4),
+"file": "city_market_handcart_wheel_lock_01.png",
+"scale": 0.9
+}]
+optional_objectives = [{
+"id": "ch07_01_market_route_board",
+"description": "행선판을 읽어 이름 없는 시장의 이동 경로를 복원한다.",
+"condition": "flag:ch07_01_market_route_board",
+"star_value": 1
+}, {
+"id": "ch07_01_queue_bell",
+"description": "대기열 종을 멈춰 시민 행렬 압박을 늦춘다.",
+"condition": "flag:ch07_01_queue_bell",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -41,3 +89,28 @@ landmark_labels = PackedStringArray("행선판", "시장 좌판", "대기열 종
 start_cutscene_id = &"ch07_01_intro"
 clear_cutscene_id = &"ch07_01_outro"
 next_destination_summary = "다음: 열린 시장 길을 따라 침묵 광장으로 이동한다."
+post_battle_bark_rules = [{
+"id": "ch07_01_blank_market_report_ready",
+"speaker": "Guide",
+"text": "이름 없는 시장의 길이 열렸다. 구한 사람들은 아직 조용하지만, 침묵 광장으로 이어진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch07_01_market_route_ack",
+"speaker": "Serin",
+"text": "행선판이 남아 있어서 다행이야. 누가 어디로 가야 하는지, 아직 완전히 지워지진 않았어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_01_market_route_board"]}
+}, {
+"id": "ch07_01_queue_bell_ack",
+"speaker": "Guide",
+"text": "대기열 종이 멈췄다. 사람들을 침묵 쪽으로 밀던 압박도 잠시 느려졌다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_01_queue_bell"]}
+}, {
+"id": "ch07_01_full_market_read",
+"speaker": "System",
+"text": "행선판 복원과 대기열 종 정지 기록이 이름 없는 시장 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch07_01_market_route_board", "ch07_01_queue_bell"]}
+}]

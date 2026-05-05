@@ -35,6 +35,59 @@ Vector2i(2, 5): 1,
 Vector2i(4, 4): 1,
 Vector2i(5, 5): 1,
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "The iron gate support splits the tunnel into a compressed center lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(4, 4),
+"radius": 0,
+"effect": "The inner gate control platform overlooks both tunnel controls."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(5, 5),
+"radius": 1,
+"effect": "Runoff around the south tunnel narrows the final control-floor approach."
+}]
+decorative_props = [{
+"id": "fortress_gate_pillar_blocker_01",
+"position": Vector2i(3, 2),
+"file": "fortress_gate_pillar_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "chain_lift_gate_blocker_01",
+"position": Vector2i(4, 2),
+"file": "chain_lift_gate_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "battery_winch_blocker_01",
+"position": Vector2i(3, 3),
+"file": "battery_winch_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "signal_post_blocker_01",
+"position": Vector2i(4, 3),
+"file": "signal_post_blocker_01.png",
+"scale": 0.86
+}]
+optional_objectives = [{
+"id": "ch02_04_west_tunnel_secured",
+"description": "서쪽 터널 제어점을 확보한다.",
+"condition": "flag:ch02_04_west_tunnel_control",
+"star_value": 1
+}, {
+"id": "ch02_04_south_tunnel_secured",
+"description": "남쪽 터널 제어점을 확보한다.",
+"condition": "flag:ch02_04_south_tunnel_control",
+"star_value": 1
+}, {
+"id": "ch02_04_inner_gate_secured",
+"description": "내부 성문 제어점을 확보해 군기 전당 진입로를 연다.",
+"condition": "flag:ch02_04_inner_gate_control",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -43,3 +96,40 @@ interaction_objective_state_ids = [&"fortress_controls_unsecured", &"fortress_co
 start_cutscene_id = &"ch02_04_intro"
 clear_cutscene_id = &"ch02_04_outro"
 next_destination_summary = "터널 제어망이 맞물리며 하드렌의 군기 전당이 마침내 모습을 드러낸다."
+post_battle_bark_rules = [{
+"id": "ch02_04_controls_report_ready",
+"speaker": "Guide",
+"text": "세 제어점이 맞물렸다. 길드 보고에는 군기 전당 진입로가 열렸다고 적어두자.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch02_04_west_tunnel_ack",
+"speaker": "Serin",
+"text": "서쪽 터널이 안정됐어. 좁은 길에서도 퇴로는 남겨둘 수 있겠네.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_04_west_tunnel_secured"]
+}
+}, {
+"id": "ch02_04_inner_gate_ack",
+"speaker": "Guide",
+"text": "내부 성문 제어점까지 확보했다. 이제 전당 쪽 의뢰로 넘어갈 차례야.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_04_inner_gate_secured"]
+}
+}, {
+"id": "ch02_04_full_controls_ack",
+"speaker": "System",
+"text": "터널 제어망 확보 기록이 다음 전당 진입 준비에 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_04_west_tunnel_secured", "ch02_04_south_tunnel_secured", "ch02_04_inner_gate_secured"]
+}
+}]

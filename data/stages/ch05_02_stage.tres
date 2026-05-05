@@ -30,9 +30,82 @@ terrain_defense_bonuses = {
 Vector2i(1, 2): 1,
 Vector2i(6, 4): 1
 }
+terrain_features = [{
+"type": "fire",
+"position": Vector2i(1, 2),
+"radius": 1,
+"effect": "Smoldering shelves keep the west stack route under fire pressure."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Forbidden stacks force the center aisle into a single-file push."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 4),
+"radius": 0,
+"effect": "A broken reading platform overlooks the eastern shelves."
+}]
+decorative_props = [{
+"id": "ch05_forbidden_book_stack_blocker_01",
+"position": Vector2i(2, 3),
+"file": "ch05_forbidden_book_stack_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch05_cursed_bookcase_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch05_cursed_bookcase_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_ritual_reading_lectern_01",
+"position": Vector2i(4, 3),
+"file": "ch05_ritual_reading_lectern_01.png",
+"scale": 0.78
+}, {
+"id": "ch05_forbidden_archive_rubble_blocker_01",
+"position": Vector2i(5, 4),
+"file": "ch05_forbidden_archive_rubble_blocker_01.png",
+"scale": 0.86
+}]
+optional_objectives = [{
+"id": "ch05_02_no_ally_casualties",
+"description": "아군 사망 없이 금서 서가를 확보한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch05_02_vanguard_survives",
+"description": "선봉대를 생존시켜 상층 봉인 구역 진입로를 유지한다.",
+"condition": "survive_unit:ally_vanguard",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch05_02_intro"
 clear_cutscene_id = &"ch05_02_outro"
 next_destination_summary = "불타는 서가 너머로, 붙잡힌 학자가 갇힌 상층 봉인 구역으로 가는 길이 열린다."
+post_battle_bark_rules = [{
+"id": "ch05_02_stack_report_ready",
+"speaker": "Guide",
+"text": "금서 서가의 불길 너머로 상층 봉인 구역이 보인다. 붙잡힌 학자의 흔적도 그쪽이다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch05_02_no_losses_ack",
+"speaker": "Rian",
+"text": "아군 피해 없이 서가를 지나왔다. 불타는 책장 사이에서도 대열은 버텼다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_02_no_ally_casualties"]}
+}, {
+"id": "ch05_02_vanguard_route_ack",
+"speaker": "Guide",
+"text": "선봉대가 진입로를 잡고 있다. 상층 봉인 구역으로 올라갈 틈이 열렸다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_02_vanguard_survives"]}
+}, {
+"id": "ch05_02_full_stack_read",
+"speaker": "System",
+"text": "무손실 확보와 선봉대 생존 기록이 금서 서가 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_02_no_ally_casualties", "ch05_02_vanguard_survives"]}
+}]

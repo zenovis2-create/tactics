@@ -43,6 +43,54 @@ Vector2i(8, 5): 1,
 Vector2i(5, 4): 1,
 Vector2i(6, 4): 1
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(5, 4),
+"radius": 1,
+"effect": "Floodgate machinery narrows the central control bridge."
+}, {
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "The west sluice platform steadies allies under the rain."
+}, {
+"type": "high_ground",
+"position": Vector2i(7, 5),
+"radius": 1,
+"effect": "The east sluice platform overlooks the flooded channel."
+}]
+decorative_props = [{
+"id": "sluice_wheel_blocker_01",
+"position": Vector2i(4, 2),
+"file": "sluice_wheel_blocker_01.png",
+"scale": 0.92
+}, {
+"id": "floodgate_column_blocker_01",
+"position": Vector2i(5, 3),
+"file": "floodgate_column_blocker_01.png",
+"scale": 0.9
+}, {
+"id": "stepping_stone_lane_marker_01",
+"position": Vector2i(7, 2),
+"file": "stepping_stone_lane_marker_01.png",
+"scale": 0.9
+}, {
+"id": "water_damaged_relic_altar_01",
+"position": Vector2i(8, 3),
+"file": "water_damaged_relic_altar_01.png",
+"scale": 0.88
+}]
+optional_objectives = [{
+"id": "ch04_03_west_sluice_aligned",
+"description": "서쪽 수문 바퀴를 조정해 침수 흐름을 안정시킨다.",
+"condition": "flag:ch04_03_west_sluice_wheel",
+"star_value": 1
+}, {
+"id": "ch04_03_east_sluice_aligned",
+"description": "동쪽 수문 바퀴를 조정해 제단 진입 수위를 낮춘다.",
+"condition": "flag:ch04_03_east_sluice_wheel",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -56,3 +104,28 @@ weather_type = "rain"
 start_cutscene_id = &"ch04_03_intro"
 clear_cutscene_id = &"ch04_03_outro"
 next_destination_summary = "수압이 안정되며 성유물 금고에 마침내 진입할 수 있게 된다."
+post_battle_bark_rules = [{
+"id": "ch04_03_floodgate_report_ready",
+"speaker": "Guide",
+"text": "수압이 내려갔다. 성유물 금고로 이어지는 길이 이제야 숨을 쉰다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch04_03_west_sluice_ack",
+"speaker": "Rian",
+"text": "서쪽 수문이 맞물렸다. 물살이 한쪽으로 쏠리던 소리가 멎었어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_03_west_sluice_aligned"]}
+}, {
+"id": "ch04_03_east_sluice_ack",
+"speaker": "Guide",
+"text": "동쪽 수문도 안정됐다. 금고 앞 침수선이 물러나고 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_03_east_sluice_aligned"]}
+}, {
+"id": "ch04_03_full_sluice_read",
+"speaker": "System",
+"text": "양쪽 수문 조정 기록이 전투 판정과 다음 경로 해금에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch04_03_west_sluice_aligned", "ch04_03_east_sluice_aligned"]}
+}]

@@ -30,6 +30,33 @@ terrain_defense_bonuses = {
 Vector2i(1, 1): 1,
 Vector2i(6, 6): 1
 }
+terrain_features = [{
+"type": "high_ground",
+"position": Vector2i(1, 1),
+"radius": 0,
+"effect": "The edict balcony favors defenders holding the king's decree lane."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(5, 4),
+"radius": 1,
+"effect": "The throne approach compresses the squad before the bell stair."
+}, {
+"type": "sacred_ground",
+"position": Vector2i(6, 6),
+"radius": 0,
+"effect": "The edict throne releases the stair toward the bell chamber."
+}]
+optional_objectives = [{
+"id": "ch10_04_edict_throne",
+"description": "칙령의 옥좌를 장악해 종의 방 계단을 강제로 연다.",
+"condition": "flag:ch10_04_edict_throne",
+"star_value": 1
+}, {
+"id": "no_ally_casualties",
+"description": "왕의 칙령 전투를 아군 사망 없이 끝낸다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"resolve_all_interactions_and_defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
@@ -41,3 +68,28 @@ weather_type = "rain"
 start_cutscene_id = &"ch10_04_intro"
 clear_cutscene_id = &"ch10_04_outro"
 next_destination_summary = "다음: 열린 계단을 따라 종의 방으로 내려간다."
+post_battle_bark_rules = [{
+"id": "ch10_04_kings_edict_report_ready",
+"speaker": "Guide",
+"text": "왕의 전당이 조용해졌다. 이제 길을 찾는 전투가 아니라, 종의 방으로 내려갈 결심만 남았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch10_04_edict_throne_ack",
+"speaker": "Guide",
+"text": "칙령의 옥좌를 장악했다. 열린 계단은 마지막 종을 향한 접근 판정에 기록됐다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch10_04_edict_throne"]}
+}, {
+"id": "ch10_04_no_casualty_ack",
+"speaker": "Rian",
+"text": "아무도 잃지 않았다. 종의 방 앞에서, 이 사실만큼은 칙령도 지우지 못한다.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["no_ally_casualties"]}
+}, {
+"id": "ch10_04_full_edict_read",
+"speaker": "System",
+"text": "칙령의 옥좌 장악과 무사 생환 결과가 종의 방 진입 준비 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch10_04_edict_throne", "no_ally_casualties"]}
+}]

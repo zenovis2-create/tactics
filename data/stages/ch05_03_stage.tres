@@ -58,6 +58,54 @@ Vector2i(8, 3): 1,
 Vector2i(2, 4): 1,
 Vector2i(3, 4): 1
 }
+terrain_features = [{
+"type": "fire",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Battery smoke feeds ashfire around the west pressure valve."
+}, {
+"type": "high_ground",
+"position": Vector2i(7, 2),
+"radius": 1,
+"effect": "The upper stack bridge overlooks the burning stair."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(5, 4),
+"radius": 1,
+"effect": "Fallen shelves pinch the stair into a controlled center lane."
+}]
+decorative_props = [{
+"id": "ch05_archive_fallen_shelf_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch05_archive_fallen_shelf_blocker_01.png",
+"scale": 0.88
+}, {
+"id": "ch05_archive_pressure_valve_cluster_01",
+"position": Vector2i(5, 4),
+"file": "ch05_archive_pressure_valve_cluster_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_archive_ashfire_brazier_blocker_01",
+"position": Vector2i(6, 4),
+"file": "ch05_archive_ashfire_brazier_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_archive_seal_plinth_blocker_01",
+"position": Vector2i(7, 5),
+"file": "ch05_archive_seal_plinth_blocker_01.png",
+"scale": 0.84
+}]
+optional_objectives = [{
+"id": "ch05_03_west_pressure_valve",
+"description": "서쪽 압력 밸브를 열어 계단 화재의 공급을 끊는다.",
+"condition": "flag:ch05_03_west_pressure_valve",
+"star_value": 1
+}, {
+"id": "ch05_03_upper_stack_seal",
+"description": "상층 서가 봉인을 해제해 진실 서가 진입 기록을 확보한다.",
+"condition": "flag:ch05_03_upper_stack_seal",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -66,3 +114,28 @@ interaction_objective_state_ids = [&"archive_pressure_locked", &"archive_pressur
 start_cutscene_id = &"ch05_03_intro"
 clear_cutscene_id = &"ch05_03_outro"
 next_destination_summary = "기록보관소 압력이 무너지며 상층 열람실이 열린다. 마지막 봉인 기록이 제로의 진실을 가리킨다."
+post_battle_bark_rules = [{
+"id": "ch05_03_stair_report_ready",
+"speaker": "Guide",
+"text": "압력이 무너지고 상층 열람실이 열렸다. 마지막 봉인 기록이 제로의 이름을 가리킨다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch05_03_west_valve_ack",
+"speaker": "Rian",
+"text": "서쪽 압력 밸브가 열렸다. 계단 아래에서 밀려오던 불길이 한풀 꺾였어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_03_west_pressure_valve"]}
+}, {
+"id": "ch05_03_upper_seal_ack",
+"speaker": "Guide",
+"text": "상층 서가 봉인이 풀렸다. 진실 서가로 이어지는 기록선이 끊기지 않았다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_03_upper_stack_seal"]}
+}, {
+"id": "ch05_03_full_pressure_read",
+"speaker": "System",
+"text": "압력 밸브 개방과 상층 봉인 해제 결과가 불타는 계단 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_03_west_pressure_valve", "ch05_03_upper_stack_seal"]}
+}]

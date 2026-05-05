@@ -30,6 +30,54 @@ terrain_defense_bonuses = {
 Vector2i(2, 4): 1,
 Vector2i(6, 5): 1
 }
+terrain_features = [{
+"type": "narrow_pass",
+"position": Vector2i(2, 4),
+"radius": 1,
+"effect": "Rain-soaked rubble compresses the broken wall gap into a cautious breach lane."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 5),
+"radius": 0,
+"effect": "The remaining rampart gives cover to units holding the eastern flank."
+}, {
+"type": "destructible",
+"position": Vector2i(4, 3),
+"radius": 0,
+"effect": "Loose rubble can be broken open to widen the breach route."
+}]
+decorative_props = [{
+"id": "ch02_broken_outer_wall_rubble_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch02_broken_outer_wall_rubble_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch02_broken_outer_wall_loose_breach_rubble_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch02_broken_outer_wall_loose_breach_rubble_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch02_broken_outer_wall_warning_lantern_01",
+"position": Vector2i(2, 4),
+"file": "ch02_broken_outer_wall_warning_lantern_01.png",
+"scale": 0.68
+}, {
+"id": "ch02_broken_outer_wall_rampart_step_01",
+"position": Vector2i(6, 5),
+"file": "ch02_broken_outer_wall_rampart_step_01.png",
+"scale": 0.68
+}]
+optional_objectives = [{
+"id": "ch02_02_no_ally_casualties",
+"description": "아군 사망 없이 무너진 외벽을 확보한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch02_02_vanguard_holds_wall",
+"description": "선봉대를 생존시켜 외벽 방어선을 유지한다.",
+"condition": "survive_unit:ally_vanguard",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
@@ -37,3 +85,40 @@ weather_type = "rain"
 start_cutscene_id = &"ch02_02_intro"
 clear_cutscene_id = &"ch02_02_outro"
 next_destination_summary = "무너진 성벽 너머로 하드렌 깊숙한 곳에 고립된 기사들이 드러난다."
+post_battle_bark_rules = [{
+"id": "ch02_02_wall_report_ready",
+"speaker": "Guide",
+"text": "무너진 외벽을 넘었다. 길드 장부에는 이제 고립된 기사들의 위치까지 적어야겠어.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch02_02_vanguard_holds_ack",
+"speaker": "Serin",
+"text": "선봉대가 버텨준 덕분에 성벽 아래 길이 끊기지 않았어.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_02_vanguard_holds_wall"]
+}
+}, {
+"id": "ch02_02_no_losses_ack",
+"speaker": "Guide",
+"text": "비까지 쏟아졌는데 전원 무사라니, 접수대에서 조금은 으스대도 되겠군.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch02_02_no_ally_casualties"]
+}
+}, {
+"id": "ch02_02_three_star_ack",
+"speaker": "System",
+"text": "외벽 확보 평가가 다음 구조 경로 산정에 반영됐다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"min_stars": 3
+}
+}]

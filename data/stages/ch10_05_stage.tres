@@ -107,6 +107,27 @@ terrain_features = [{
 "radius": 1,
 "effect": "The bell bridge compresses the last push."
 }]
+decorative_props = [{
+"id": "ch10_final_bell_dais_blocker_01",
+"position": Vector2i(10, 4),
+"file": "ch10_final_bell_dais_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch10_bell_frame_pressure_blocker_01",
+"position": Vector2i(12, 4),
+"file": "ch10_bell_frame_pressure_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch10_anchor_chain_lock_blocker_01",
+"position": Vector2i(9, 6),
+"file": "ch10_anchor_chain_lock_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch10_anchor_winch_release_blocker_01",
+"position": Vector2i(11, 6),
+"file": "ch10_anchor_winch_release_blocker_01.png",
+"scale": 0.84
+}]
 optional_objectives = [{
 "id": "all_allies_name_called",
 "description": "종이 무너지기 전에 모든 아군의 이름 부름을 발동시킨다.",
@@ -142,6 +163,32 @@ interaction_objective_texts = PackedStringArray("종단과 닻 사슬을 장악�
 interaction_objective_state_ids = [&"bell_dais_unheld", &"bell_dais_partial", &"bell_dais_held"]
 landmark_labels = PackedStringArray("남쪽 종길", "중앙 성채", "북쪽 종단")
 weather_type = "night"
+choice_point_id = &"ch10_tower_name"
 start_cutscene_id = &"ch10_05_intro"
 clear_cutscene_id = &""
 next_destination_summary = "다음: 종은 멈추고, 끝내 남은 이름들과 함께 여정이 끝난다."
+post_battle_bark_rules = [{
+"id": "ch10_05_last_name_report_ready",
+"speaker": "Guide",
+"text": "마지막 전장이 숨을 멈췄다. 결말은 이제 종이 아니라, 남은 이름들이 이어받는다.",
+"section": "story",
+"conditions": {"outcome": "victory"}
+}, {
+"id": "ch10_05_all_names_called_ack",
+"speaker": "Noah",
+"text": "모두의 이름이 불렸어. 종이 끊으려 한 건 길이 아니라, 서로를 부르는 목소리였어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["all_allies_name_called"]}
+}, {
+"id": "ch10_05_no_casualty_ack",
+"speaker": "Serin",
+"text": "끝까지 살아서 닿았어. 이건 승리보다 먼저 기록해야 할 생환이야.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["no_ally_casualties"]}
+}, {
+"id": "ch10_05_full_final_read",
+"speaker": "System",
+"text": "이름 부름 완료와 무사 생환 결과가 최종 결산 및 별점 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["all_allies_name_called", "no_ally_casualties"]}
+}]

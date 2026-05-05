@@ -5,8 +5,8 @@
 [ext_resource type="Resource" path="res://data/units/ally_scout.tres" id="3_ally_b"]
 [ext_resource type="Resource" path="res://data/units/enemy_raider.tres" id="4_enemy_a"]
 [ext_resource type="Resource" path="res://data/units/enemy_skirmisher.tres" id="5_enemy_b"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_west_lever.tres" id="6_object_a"]
-[ext_resource type="Resource" path="res://data/objects/ch01_04_east_lever.tres" id="7_object_b"]
+[ext_resource type="Resource" path="res://data/objects/ch05_04_truth_shelf_index.tres" id="6_object_a"]
+[ext_resource type="Resource" path="res://data/objects/ch05_04_zero_transfer_ledger.tres" id="7_object_b"]
 
 [resource]
 script = ExtResource("1_stage")
@@ -37,9 +37,82 @@ Vector2i(5, 2): 1,
 Vector2i(6, 2): 1,
 Vector2i(5, 5): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "A protected truth shelf steadies allies reading the first transfer record."
+}, {
+"type": "high_ground",
+"position": Vector2i(6, 2),
+"radius": 1,
+"effect": "The upper archive rail gives sight over the sealed shelves."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Collapsed catalog ladders narrow the path between truth shelves."
+}]
+decorative_props = [{
+"id": "ch05_truth_shelf_index_cabinet_blocker_01",
+"position": Vector2i(3, 2),
+"file": "ch05_truth_shelf_index_cabinet_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_zero_transfer_ledger_coffer_01",
+"position": Vector2i(4, 2),
+"file": "ch05_zero_transfer_ledger_coffer_01.png",
+"scale": 0.86
+}, {
+"id": "ch05_collapsed_catalog_ladder_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch05_collapsed_catalog_ladder_blocker_01.png",
+"scale": 0.88
+}, {
+"id": "ch05_truth_seal_floor_plinth_01",
+"position": Vector2i(4, 3),
+"file": "ch05_truth_seal_floor_plinth_01.png",
+"scale": 0.78
+}]
+optional_objectives = [{
+"id": "ch05_04_truth_shelf_index",
+"description": "진실 서가 색인을 조사해 에녹의 증언을 대조한다.",
+"condition": "flag:ch05_04_truth_shelf_index",
+"star_value": 1
+}, {
+"id": "ch05_04_zero_transfer_ledger",
+"description": "제로 이송 장부를 확보해 마지막 탈출 경로를 확정한다.",
+"condition": "flag:ch05_04_zero_transfer_ledger",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
 start_cutscene_id = &"ch05_04_intro"
 clear_cutscene_id = &"ch05_04_outro"
 next_destination_summary = "고문서 봉인이 열리고 에녹이 제로의 이름을 입에 올린다. 마지막 경로는 불타는 출구로 이어진다."
+post_battle_bark_rules = [{
+"id": "ch05_04_truth_report_ready",
+"speaker": "Guide",
+"text": "진실 서가가 열렸다. 에녹의 증언과 제로의 이름이 같은 장부 위에서 만난다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch05_04_truth_index_ack",
+"speaker": "Rian",
+"text": "색인 기록이 맞아떨어졌다. 이 기억은 꾸며낸 말만으로는 설명되지 않아.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_04_truth_shelf_index"]}
+}, {
+"id": "ch05_04_zero_ledger_ack",
+"speaker": "Guide",
+"text": "제로 이송 장부를 확보했다. 불타는 출구로 이어지는 마지막 경로가 확인됐다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_04_zero_transfer_ledger"]}
+}, {
+"id": "ch05_04_full_truth_read",
+"speaker": "System",
+"text": "진실 서가 색인과 제로 이송 장부 회수 결과가 기록보관소 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch05_04_truth_shelf_index", "ch05_04_zero_transfer_ledger"]}
+}]

@@ -71,3 +71,28 @@ interaction_objective_state_ids = [&"basil_logs_missing", &"basil_logs_partial",
 start_cutscene_id = &"ch04_05_intro"
 clear_cutscene_id = &"ch04_05_outro"
 next_destination_summary = "연구 봉인과 이송 장부가 다음 목적지를 잿빛 기록보관소로 가리킨다."
+post_battle_bark_rules = [{
+"id": "ch04_05_altar_report_ready",
+"speaker": "Guide",
+"text": "바실의 침수 제단이 멎었다. 회수한 기록은 잿빛 기록보관소를 가리킨다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch04_05_ark_flood_ack",
+"speaker": "Rian",
+"text": "아크가 침수 구역을 버텼다. 물살이 거셌지만 대열은 무너지지 않았어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ark_survives_flooded_section"]}
+}, {
+"id": "ch04_05_research_logs_ack",
+"speaker": "Guide",
+"text": "연구 기록 두 개를 모두 회수했다. 제단의 이송 장부가 다음 추적선을 이어 준다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["collect_2_research_logs"]}
+}, {
+"id": "ch04_05_full_sanctuary_read",
+"speaker": "System",
+"text": "침수 구역 생존과 연구 기록 회수 결과가 공명 및 보너스 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ark_survives_flooded_section", "collect_2_research_logs"]}
+}]

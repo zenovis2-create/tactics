@@ -32,6 +32,54 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "The west archive case anchors Dorn's oath record under pressure."
+}, {
+"type": "destructible",
+"position": Vector2i(3, 6),
+"radius": 0,
+"effect": "The ceremonial seal can be broken to expose the oath-hall route."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "The fortress ramp overlooks the archive cases and ritual seal."
+}]
+decorative_props = [{
+"id": "ch06_oath_hall_seal_frame_01",
+"position": Vector2i(3, 2),
+"file": "ch06_oath_hall_seal_frame_01.png",
+"scale": 0.8
+}, {
+"id": "ch06_oath_hall_archive_case_barricade_01",
+"position": Vector2i(4, 2),
+"file": "ch06_oath_hall_archive_case_barricade_01.png",
+"scale": 0.84
+}, {
+"id": "ch06_ceremonial_seal_breaker_01",
+"position": Vector2i(3, 3),
+"file": "ch06_ceremonial_seal_breaker_01.png",
+"scale": 0.84
+}, {
+"id": "ch06_keep_ramp_chain_anchor_01",
+"position": Vector2i(4, 3),
+"file": "ch06_keep_ramp_chain_anchor_01.png",
+"scale": 0.78
+}]
+optional_objectives = [{
+"id": "ch06_04_west_archive_case",
+"description": "서쪽 기록고 상자를 확보해 도른 구출 증거를 남긴다.",
+"condition": "flag:ch06_04_west_archive_case",
+"star_value": 1
+}, {
+"id": "ch06_04_ceremonial_seal",
+"description": "의식 봉인을 파괴해 맹세의 전당 경사로를 연다.",
+"condition": "flag:ch06_04_ceremonial_seal",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -46,3 +94,28 @@ landmark_labels = PackedStringArray("서쪽 기록고", "의식 봉인", "요새
 start_cutscene_id = &"ch06_04_intro"
 clear_cutscene_id = &"ch06_04_outro"
 next_destination_summary = "다음: 드러난 내부 경사로를 타고 발가르의 요새로 오른다."
+post_battle_bark_rules = [{
+"id": "ch06_04_oath_hall_report_ready",
+"speaker": "Guide",
+"text": "맹세 전당의 기록을 확보했다. 승리보다 증거가 먼저 무겁게 남는다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch06_04_west_archive_ack",
+"speaker": "Brann",
+"text": "서쪽 기록고의 증거를 챙겼다. 단순히 미워하면 끝날 줄 알았는데, 더 복잡해졌군.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_04_west_archive_case"]}
+}, {
+"id": "ch06_04_ceremonial_seal_ack",
+"speaker": "Guide",
+"text": "의식 봉인이 깨졌다. 발가르의 요새로 오르는 내부 경사로가 드러났다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_04_ceremonial_seal"]}
+}, {
+"id": "ch06_04_full_oath_read",
+"speaker": "System",
+"text": "서쪽 기록고 확보와 의식 봉인 파괴 결과가 맹세 전당 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_04_west_archive_case", "ch06_04_ceremonial_seal"]}
+}]

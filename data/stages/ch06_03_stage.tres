@@ -30,6 +30,54 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "destructible",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Quartermaster crates can be smashed open to clear the inner storehouse lane."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "Packed supply aisles force the squad through a narrow lower route."
+}, {
+"type": "high_ground",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "A raised storehouse scaffold covers the upper approach."
+}]
+decorative_props = [{
+"id": "ch06_quartermaster_crate_stack_blocker_01",
+"position": Vector2i(3, 2),
+"file": "ch06_quartermaster_crate_stack_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_quartermaster_work_table_01",
+"position": Vector2i(4, 2),
+"file": "ch06_quartermaster_work_table_01.png",
+"scale": 0.78
+}, {
+"id": "ch06_quartermaster_armory_rack_blocker_01",
+"position": Vector2i(3, 3),
+"file": "ch06_quartermaster_armory_rack_blocker_01.png",
+"scale": 0.86
+}, {
+"id": "ch06_quartermaster_ration_barrel_cluster_01",
+"position": Vector2i(4, 3),
+"file": "ch06_quartermaster_ration_barrel_cluster_01.png",
+"scale": 0.84
+}]
+optional_objectives = [{
+"id": "ch06_03_no_ally_casualties",
+"description": "아군 사망 없이 군수 저장고 심층부를 정리한다.",
+"condition": "no_ally_casualties",
+"star_value": 1
+}, {
+"id": "ch06_03_vanguard_survives",
+"description": "선봉대를 생존시켜 내부 성채 진입로를 유지한다.",
+"condition": "survive_unit:ally_vanguard",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a")]
 win_condition = &"defeat_all_enemies"
 loss_condition = &"all_allies_defeated"
@@ -38,3 +86,28 @@ landmark_labels = PackedStringArray("군수 금고", "감옥 교차로", "성채
 start_cutscene_id = &"ch06_03_intro"
 clear_cutscene_id = &"ch06_03_outro"
 next_destination_summary = "다음: 감옥 교차로를 지나 내부 성채 쪽으로 올라간다."
+post_battle_bark_rules = [{
+"id": "ch06_03_depths_report_ready",
+"speaker": "Guide",
+"text": "군수 저장고 심층부를 정리했다. 감옥 교차로 너머가 내부 성채로 이어진다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch06_03_no_losses_ack",
+"speaker": "Rian",
+"text": "아군을 잃지 않았다. 좁은 저장고 길에서도 서로의 간격을 놓치지 않았어.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_03_no_ally_casualties"]}
+}, {
+"id": "ch06_03_vanguard_route_ack",
+"speaker": "Guide",
+"text": "선봉대가 살아 있다. 내부 성채로 올라갈 진입로를 계속 붙잡을 수 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_03_vanguard_survives"]}
+}, {
+"id": "ch06_03_full_depths_read",
+"speaker": "System",
+"text": "무손실 정리와 선봉대 생존 기록이 군수 저장고 전투 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch06_03_no_ally_casualties", "ch06_03_vanguard_survives"]}
+}]

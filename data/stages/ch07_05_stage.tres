@@ -101,3 +101,28 @@ landmark_labels = PackedStringArray("남쪽 회랑", "기도단", "성가대 계
 start_cutscene_id = &"ch07_05_intro"
 clear_cutscene_id = &"ch07_05_outro"
 next_destination_summary = "다음: 기도실을 빠져나와 숨은 폐허로 이어지는 흑견의 흔적을 추적한다."
+post_battle_bark_rules = [{
+"id": "ch07_05_prayer_report_ready",
+"speaker": "Guide",
+"text": "기도실의 한목소리는 무너졌다. 하지만 미라와 네리의 일은 끝난 게 아니라 이제 붙잡은 것이다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch07_05_mira_recruit_ack",
+"speaker": "Serin",
+"text": "미라를 데려왔다. 스스로 잊고 싶어 했던 마음까지, 지금은 우리가 곁에서 붙잡아야 해.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["recruit_mira"]}
+}, {
+"id": "ch07_05_city_seal_ack",
+"speaker": "Guide",
+"text": "도시 인장을 확보했다. 이 기도가 누구의 이름으로 굴러갔는지 추적할 수 있다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["collect_city_seal"]}
+}, {
+"id": "ch07_05_full_prayer_read",
+"speaker": "System",
+"text": "미라 영입과 도시 인장 확보 기록이 엘리오르의 기도 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["recruit_mira", "collect_city_seal"]}
+}]

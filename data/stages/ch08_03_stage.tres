@@ -62,6 +62,54 @@ Vector2i(6, 6): 1,
 Vector2i(7, 6): 1,
 Vector2i(8, 6): 1
 }
+terrain_features = [{
+"type": "destructible",
+"position": Vector2i(5, 4),
+"radius": 0,
+"effect": "The holding gate can be broken to expose the lower ruin cells."
+}, {
+"type": "high_ground",
+"position": Vector2i(8, 2),
+"radius": 1,
+"effect": "The upper ruin platform watches the vent bridge."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(7, 5),
+"radius": 1,
+"effect": "The bridge narrows the final approach to the cell record case."
+}]
+decorative_props = [{
+"id": "ch08_ruin_vent_fallen_pipe_blocker_01",
+"position": Vector2i(3, 2),
+"file": "ch08_ruin_vent_fallen_pipe_blocker_01.png",
+"scale": 0.84
+}, {
+"id": "ch08_ruin_vent_broken_grate_blocker_01",
+"position": Vector2i(4, 3),
+"file": "ch08_ruin_vent_broken_grate_blocker_01.png",
+"scale": 0.82
+}, {
+"id": "ch08_ruin_vent_holding_gate_debris_blocker_01",
+"position": Vector2i(6, 4),
+"file": "ch08_ruin_vent_holding_gate_debris_blocker_01.png",
+"scale": 0.82
+}, {
+"id": "ch08_ruin_vent_bridge_rubble_blocker_01",
+"position": Vector2i(7, 5),
+"file": "ch08_ruin_vent_bridge_rubble_blocker_01.png",
+"scale": 0.78
+}]
+optional_objectives = [{
+"id": "ch08_03_west_vent_capstan",
+"description": "서쪽 배기 윈치를 열어 하층 폐허의 연기를 빼낸다.",
+"condition": "flag:ch08_03_west_vent_capstan",
+"star_value": 1
+}, {
+"id": "ch08_03_east_cell_record_case",
+"description": "동쪽 수감 기록 보관함을 확보해 레테의 경로를 좁힌다.",
+"condition": "flag:ch08_03_east_cell_record_case",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b"), ExtResource("8_object_c")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -73,3 +121,28 @@ weather_type = "night"
 start_cutscene_id = &"ch08_03_intro"
 clear_cutscene_id = &"ch08_03_outro"
 next_destination_summary = "다음: 구금 구역을 돌파해 흑표식 제어 경로로 향한다."
+post_battle_bark_rules = [{
+"id": "ch08_03_ruin_vent_report_ready",
+"speaker": "Guide",
+"text": "폐허의 배기 통로가 열렸다. 흑표식 제어 경로는 이제 감춰진 길이 아니다.",
+"section": "story",
+"conditions": {"outcome": "victory", "post_battle_handoff": true}
+}, {
+"id": "ch08_03_vent_capstan_ack",
+"speaker": "Tia",
+"text": "서쪽 배기 윈치가 멈췄어. 숨 막히던 길이 열리니까, 이 폐허가 더 차갑게 보여.",
+"section": "bonds",
+"conditions": {"outcome": "victory", "optional_completed": ["ch08_03_west_vent_capstan"]}
+}, {
+"id": "ch08_03_cell_record_ack",
+"speaker": "Guide",
+"text": "수감 기록을 확보했다. 레테의 길은 오늘 밤 생긴 것이 아니라 오래전부터 이어져 있었다.",
+"section": "story",
+"conditions": {"outcome": "victory", "optional_completed": ["ch08_03_east_cell_record_case"]}
+}, {
+"id": "ch08_03_full_ruin_read",
+"speaker": "System",
+"text": "배기 윈치 개방과 수감 기록 확보 결과가 하층 폐허 판정에 반영됐다.",
+"section": "telemetry",
+"conditions": {"outcome": "victory", "optional_completed": ["ch08_03_west_vent_capstan", "ch08_03_east_cell_record_case"]}
+}]

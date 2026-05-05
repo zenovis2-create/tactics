@@ -31,6 +31,33 @@ terrain_defense_bonuses = {
 Vector2i(2, 5): 1,
 Vector2i(5, 2): 1
 }
+terrain_features = [{
+"type": "sacred_ground",
+"position": Vector2i(2, 5),
+"radius": 1,
+"effect": "The refugee route cache steadies the column around the lower trail."
+}, {
+"type": "narrow_pass",
+"position": Vector2i(3, 3),
+"radius": 1,
+"effect": "Mud and fallen brush squeeze the column through a center basin lane."
+}, {
+"type": "destructible",
+"position": Vector2i(5, 2),
+"radius": 0,
+"effect": "Wildfire residue marks brittle cover that can be broken open if pressure rises."
+}]
+optional_objectives = [{
+"id": "ch03_03_refugee_cache_opened",
+"description": "난민 경로 보관함을 열어 이동 대열의 안전선을 확인한다.",
+"condition": "flag:ch03_03_refugee_route_cache",
+"star_value": 1
+}, {
+"id": "ch03_03_wildfire_residue_logged",
+"description": "산불 흔적을 조사해 분지 경로의 위험을 기록한다.",
+"condition": "flag:ch03_03_wildfire_residue",
+"star_value": 1
+}]
 interactive_objects = [ExtResource("6_object_a"), ExtResource("7_object_b")]
 win_condition = &"resolve_all_interactions"
 loss_condition = &"all_allies_defeated"
@@ -39,3 +66,40 @@ interaction_objective_state_ids = [&"refugee_column_unread", &"refugee_column_pa
 start_cutscene_id = &"ch03_03_intro"
 clear_cutscene_id = &"ch03_03_outro"
 next_destination_summary = "난민 경로와 산불 흔적이 맞물리며 그린우드 깊숙한 분지 길이 드러난다."
+post_battle_bark_rules = [{
+"id": "ch03_03_column_report",
+"speaker": "Guide",
+"text": "난민 대열의 단서와 산불 흔적이 같은 방향을 가리킨다. 분지 길은 이제 숨지 못한다.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"post_battle_handoff": true
+}
+}, {
+"id": "ch03_03_cache_ack",
+"speaker": "Rian",
+"text": "경로 보관함까지 확인했다. 작은 보급이라도 다음 걸음을 버티게 해 주지.",
+"section": "bonds",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_03_refugee_cache_opened"]
+}
+}, {
+"id": "ch03_03_wildfire_ack",
+"speaker": "Serin",
+"text": "산불 흔적이 너무 일정해. 자연불이 아니라면, 다음 의뢰는 더 깊은 곳에서 시작되겠네.",
+"section": "story",
+"conditions": {
+"outcome": "victory",
+"optional_completed": ["ch03_03_wildfire_residue_logged"]
+}
+}, {
+"id": "ch03_03_bonus_exp_read",
+"speaker": "System",
+"text": "난민 경로와 산불 흔적을 함께 기록해 다음 분지 진입 준비가 빨라졌다.",
+"section": "telemetry",
+"conditions": {
+"outcome": "victory",
+"bonus_exp_min": 1
+}
+}]
