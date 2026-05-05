@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "asset_type": "object_interaction_animation",
+  "object_type": "latch",
+  "animation": "interact",
+  "frame_count": 16,
+  "fps": 14.0,
+  "frame_size": [
+    128,
+    128
+  ],
+  "source": "source/sheets/object_interactions_archive_4x16f_bundle_v01_grid2048_alpha.png",
+  "source_bundle": "object_interactions_archive",
+  "source_label": "gate control glyph activate",
+  "source_quadrant": {
+    "row": 0,
+    "col": 1
+  },
+  "frames": [
+    "runtime/interact/latch_interact_00.png",
+    "runtime/interact/latch_interact_01.png",
+    "runtime/interact/latch_interact_02.png",
+    "runtime/interact/latch_interact_03.png",
+    "runtime/interact/latch_interact_04.png",
+    "runtime/interact/latch_interact_05.png",
+    "runtime/interact/latch_interact_06.png",
+    "runtime/interact/latch_interact_07.png",
+    "runtime/interact/latch_interact_08.png",
+    "runtime/interact/latch_interact_09.png",
+    "runtime/interact/latch_interact_10.png",
+    "runtime/interact/latch_interact_11.png",
+    "runtime/interact/latch_interact_12.png",
+    "runtime/interact/latch_interact_13.png",
+    "runtime/interact/latch_interact_14.png",
+    "runtime/interact/latch_interact_15.png"
+  ]
+}

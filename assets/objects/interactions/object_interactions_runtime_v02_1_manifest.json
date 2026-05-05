@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "asset_type": "object_interaction_animation_bundle",
+  "version": "v02.1",
+  "frame_size": [
+    128,
+    128
+  ],
+  "fps": 14.0,
+  "object_types": [
+    {
+      "object_type": "chest",
+      "source_bundle": "object_interactions_core",
+      "source_label": "chest open",
+      "runtime_contract": "assets/objects/interactions/chest/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "lever",
+      "source_bundle": "object_interactions_core",
+      "source_label": "lever pull",
+      "runtime_contract": "assets/objects/interactions/lever/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "altar",
+      "source_bundle": "object_interactions_core",
+      "source_label": "altar activate",
+      "runtime_contract": "assets/objects/interactions/altar/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "gate",
+      "source_bundle": "object_interactions_core",
+      "source_label": "gate open close",
+      "runtime_contract": "assets/objects/interactions/gate/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "door",
+      "source_bundle": "object_interactions_core",
+      "source_label": "gate open close",
+      "runtime_contract": "assets/objects/interactions/door/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "floodgate",
+      "source_bundle": "object_interactions_stage",
+      "source_label": "floodgate release",
+      "runtime_contract": "assets/objects/interactions/floodgate/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "bell",
+      "source_bundle": "object_interactions_stage",
+      "source_label": "bell swing",
+      "runtime_contract": "assets/objects/interactions/bell/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "evidence",
+      "source_bundle": "object_interactions_stage",
+      "source_label": "evidence sparkle",
+      "runtime_contract": "assets/objects/interactions/evidence/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "keeper_lectern",
+      "source_bundle": "object_interactions_stage",
+      "source_label": "keeper lock unlock",
+      "runtime_contract": "assets/objects/interactions/keeper_lectern/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "gate_control",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "gate control glyph activate",
+      "runtime_contract": "assets/objects/interactions/gate_control/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "well",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "city seal dais pulse",
+      "runtime_contract": "assets/objects/interactions/well/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "battery",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "gate control glyph activate",
+      "runtime_contract": "assets/objects/interactions/battery/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "shrine",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "archive seal break",
+      "runtime_contract": "assets/objects/interactions/shrine/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "chain_control",
+      "source_bundle": "object_interactions_core",
+      "source_label": "gate open close",
+      "runtime_contract": "assets/objects/interactions/chain_control/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "route_marker",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "city seal dais pulse",
+      "runtime_contract": "assets/objects/interactions/route_marker/runtime_contract_v01.json",
+      "frame_count": 16
+    },
+    {
+      "object_type": "latch",
+      "source_bundle": "object_interactions_archive",
+      "source_label": "gate control glyph activate",
+      "runtime_contract": "assets/objects/interactions/latch/runtime_contract_v01.json",
+      "frame_count": 16
+    }
+  ],
+  "notes": [
+    "Built from existing imagegen alpha 4x16f object interaction bundles.",
+    "Every InteractiveObjectData object_type gets a 16-frame runtime animation; secondary types reuse the closest existing source motion."
+  ]
+}

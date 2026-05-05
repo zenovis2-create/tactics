@@ -225,6 +225,47 @@ static func load_fx_animation(file_name: String) -> Array[Texture2D]:
 	_cache[cache_key] = frames
 	return frames
 
+static func load_object_interaction_animation(object_type: String) -> Array[Texture2D]:
+	if object_type.is_empty():
+		return []
+
+	var cache_key := "object-interaction-animation|%s" % object_type
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var frame_dir := "res://assets/objects/interactions/%s/runtime/interact" % object_type
+	var absolute_dir := ProjectSettings.globalize_path(frame_dir)
+	if not DirAccess.dir_exists_absolute(absolute_dir):
+		_cache[cache_key] = []
+		return []
+
+	var dir := DirAccess.open(frame_dir)
+	if dir == null:
+		_cache[cache_key] = []
+		return []
+
+	var file_names: PackedStringArray = []
+	dir.list_dir_begin()
+	while true:
+		var candidate := dir.get_next()
+		if candidate.is_empty():
+			break
+		if dir.current_is_dir():
+			continue
+		if candidate.to_lower().ends_with(".png"):
+			file_names.append(candidate)
+	dir.list_dir_end()
+	file_names.sort()
+
+	var frames: Array[Texture2D] = []
+	for candidate in file_names:
+		var texture := _load_texture_from_resource_path("%s/%s" % [frame_dir, candidate])
+		if texture != null:
+			frames.append(texture)
+
+	_cache[cache_key] = frames
+	return frames
+
 static func clear_cache() -> void:
 	_cache.clear()
 

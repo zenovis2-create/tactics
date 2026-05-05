@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "asset_type": "object_interaction_animation",
+  "object_type": "bell",
+  "animation": "interact",
+  "frame_count": 16,
+  "fps": 14.0,
+  "frame_size": [
+    128,
+    128
+  ],
+  "source": "source/sheets/object_interactions_stage_4x16f_bundle_v01_grid2048_alpha.png",
+  "source_bundle": "object_interactions_stage",
+  "source_label": "bell swing",
+  "source_quadrant": {
+    "row": 0,
+    "col": 1
+  },
+  "frames": [
+    "runtime/interact/bell_interact_00.png",
+    "runtime/interact/bell_interact_01.png",
+    "runtime/interact/bell_interact_02.png",
+    "runtime/interact/bell_interact_03.png",
+    "runtime/interact/bell_interact_04.png",
+    "runtime/interact/bell_interact_05.png",
+    "runtime/interact/bell_interact_06.png",
+    "runtime/interact/bell_interact_07.png",
+    "runtime/interact/bell_interact_08.png",
+    "runtime/interact/bell_interact_09.png",
+    "runtime/interact/bell_interact_10.png",
+    "runtime/interact/bell_interact_11.png",
+    "runtime/interact/bell_interact_12.png",
+    "runtime/interact/bell_interact_13.png",
+    "runtime/interact/bell_interact_14.png",
+    "runtime/interact/bell_interact_15.png"
+  ]
+}

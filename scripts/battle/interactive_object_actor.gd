@@ -5,6 +5,7 @@ const BattleArtCatalog = preload("res://scripts/battle/battle_art_catalog.gd")
 const UnitActor = preload("res://scripts/battle/unit_actor.gd")
 const InteractiveObjectData = preload("res://scripts/data/interactive_object_data.gd")
 const ICON_DIR := "assets/ui/object_icons_generated/"
+const OBJECT_INTERACTION_FPS := 14.0
 const OBJECT_VISUAL_CONTRACTS := {
     "altar": {
         "icon": "altar.png",
@@ -137,7 +138,9 @@ var grid_position: Vector2i = Vector2i.ZERO
 var is_resolved: bool = false
 var _highlighted: bool = false
 var _beacon_pulse_tween: Tween
+var _interaction_tween: Tween
 var _icon_cache: Dictionary = {}
+var interaction_sprite: AnimatedSprite2D
 
 @onready var shadow: ColorRect = $Shadow
 @onready var halo: ColorRect = $Halo
@@ -152,6 +155,7 @@ var _icon_cache: Dictionary = {}
 @onready var name_label: Label = $NameLabel
 
 func _ready() -> void:
+    _ensure_interaction_sprite()
     if object_data != null:
         setup_from_data(object_data)
     else:
@@ -190,6 +194,7 @@ func resolve_interaction(by_unit: UnitActor) -> Dictionary:
         is_resolved = true
 
     _refresh_visuals()
+    _play_interaction_animation()
     interacted.emit(self, by_unit)
 
     return {
@@ -292,6 +297,59 @@ func _load_runtime_icon(file_name: String) -> Texture2D:
     if texture != null:
         _icon_cache[file_name] = texture
     return texture
+
+func _ensure_interaction_sprite() -> void:
+    if interaction_sprite != null and is_instance_valid(interaction_sprite):
+        return
+
+    interaction_sprite = get_node_or_null("InteractionAnimation") as AnimatedSprite2D
+    if interaction_sprite == null:
+        interaction_sprite = AnimatedSprite2D.new()
+        interaction_sprite.name = "InteractionAnimation"
+        add_child(interaction_sprite)
+
+    interaction_sprite.centered = true
+    interaction_sprite.position = Vector2(2.0, 4.0)
+    interaction_sprite.scale = Vector2(0.52, 0.52)
+    interaction_sprite.z_index = 12
+    interaction_sprite.visible = false
+    interaction_sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
+
+func _play_interaction_animation() -> void:
+    if object_data == null:
+        return
+
+    var frames := BattleArtCatalog.load_object_interaction_animation(object_data.object_type)
+    if frames.is_empty():
+        return
+
+    _ensure_interaction_sprite()
+    var sprite_frames := SpriteFrames.new()
+    sprite_frames.add_animation("interact")
+    sprite_frames.set_animation_loop("interact", false)
+    sprite_frames.set_animation_speed("interact", OBJECT_INTERACTION_FPS)
+    for texture in frames:
+        sprite_frames.add_frame("interact", texture)
+
+    if _interaction_tween != null and _interaction_tween.is_running():
+        _interaction_tween.kill()
+
+    interaction_sprite.sprite_frames = sprite_frames
+    interaction_sprite.frame = 0
+    interaction_sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
+    interaction_sprite.visible = true
+    interaction_sprite.play("interact")
+
+    _interaction_tween = create_tween()
+    _interaction_tween.tween_interval(float(frames.size()) / OBJECT_INTERACTION_FPS)
+    _interaction_tween.tween_property(interaction_sprite, "modulate:a", 0.0, 0.12)
+    _interaction_tween.finished.connect(_hide_interaction_animation)
+
+func _hide_interaction_animation() -> void:
+    if interaction_sprite == null or not is_instance_valid(interaction_sprite):
+        return
+    interaction_sprite.visible = false
+    interaction_sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
 
 func _get_object_visual_contract() -> Dictionary:
     if object_data == null:
