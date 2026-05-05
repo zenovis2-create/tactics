@@ -47,7 +47,19 @@ Read-only maintenance checks:
 - garbage size: `404.62 KiB`
 - `git prune --dry-run` count: `34,113`
 
-No destructive prune/gc was run in this lane.
+Maintenance was completed after the recovery refs/worktree were confirmed:
+- `git prune`
+- `rm -f .git/gc.log`
+- `git gc`
+
+Post-maintenance result:
+- loose object count: `0`
+- loose object size: `0 bytes`
+- packs: `1`
+- pack size: `2.00 GiB`
+- garbage files: `0`
+- garbage size: `0 bytes`
+- `.git/gc.log`: absent
 
 ## Stash preservation
 
@@ -143,11 +155,8 @@ Important preserved refs:
 
 ## Next recommendation
 
-1. Push `5b8271c` after final gate.
+1. Push `5b8271c` and the follow-up runner/doc commits after final gates.
 2. Do not drop either stash until the recovery branch/worktree is reviewed.
 3. Continue stash recovery from the isolated worktree by package boundary, not by full merge.
-4. Run destructive repository maintenance only after recovery refs are confirmed:
-   - `git prune`
-   - remove `.git/gc.log`
-   - `git gc`
+4. Repository maintenance has been completed for the current gc warning; re-check only if a new `.git/gc.log` appears.
 5. Keep signing/public release custody separate.
