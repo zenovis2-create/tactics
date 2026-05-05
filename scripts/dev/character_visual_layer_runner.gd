@@ -9,6 +9,10 @@ const SERIN_DATA = preload("res://data/units/ally_serin.tres")
 const ENEMY_RAIDER_DATA = preload("res://data/units/enemy_raider.tres")
 const ENEMY_SKIRMISHER_DATA = preload("res://data/units/enemy_skirmisher.tres")
 const VANGUARD_DATA = preload("res://data/units/ally_vanguard.tres")
+const SCOUT_DATA = preload("res://data/units/ally_scout.tres")
+const UnitData = preload("res://scripts/data/unit_data.gd")
+const BASIC_ATTACK = preload("res://data/skills/basic_attack.tres")
+const VANGUARD_CLASS = preload("res://data/classes/cls_vanguard.tres")
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -25,6 +29,10 @@ func _run() -> void:
     if not await _assert_character_art_layer_visible(ENEMY_RAIDER_DATA, "Enemy Raider"):
         return
     if not await _assert_character_art_layer_visible(ENEMY_SKIRMISHER_DATA, "Enemy Skirmisher"):
+        return
+    if not await _assert_character_art_layer_visible(VANGUARD_DATA, "Vanguard"):
+        return
+    if not await _assert_character_art_layer_visible(SCOUT_DATA, "Scout"):
         return
     if not await _assert_character_art_layer_hidden_for_generic_unit():
         return
@@ -55,7 +63,7 @@ func _assert_character_art_layer_visible(unit_data, label: String) -> bool:
 func _assert_character_art_layer_hidden_for_generic_unit() -> bool:
     var unit = UNIT_SCENE.instantiate()
     root.add_child(unit)
-    unit.setup_from_data(VANGUARD_DATA)
+    unit.setup_from_data(_make_generic_vanguard())
     await process_frame
     var art_layer: CanvasItem = unit.get_node_or_null("CharacterVisualRoot")
     if art_layer == null:
@@ -67,6 +75,20 @@ func _assert_character_art_layer_hidden_for_generic_unit() -> bool:
     unit.queue_free()
     await process_frame
     return true
+
+func _make_generic_vanguard() -> UnitData:
+    var unit := UnitData.new()
+    unit.unit_id = &"generic_vanguard_visual_fallback"
+    unit.display_name = "Fallback Vanguard"
+    unit.faction = "ally"
+    unit.max_hp = 10
+    unit.attack = 4
+    unit.defense = 2
+    unit.movement = 3
+    unit.attack_range = 1
+    unit.default_skill = BASIC_ATTACK
+    unit.class_data = VANGUARD_CLASS
+    return unit
 
 func _fail(message: String) -> bool:
     push_error(message)

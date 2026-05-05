@@ -2,7 +2,9 @@ extends SceneTree
 
 const UNIT_SCENE: PackedScene = preload("res://scenes/battle/Unit.tscn")
 const RIAN_DATA = preload("res://data/units/ally_rian.tres")
-const VANGUARD_DATA = preload("res://data/units/ally_vanguard.tres")
+const UnitData = preload("res://scripts/data/unit_data.gd")
+const BASIC_ATTACK = preload("res://data/skills/basic_attack.tres")
+const VANGUARD_CLASS = preload("res://data/classes/cls_vanguard.tres")
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -127,7 +129,7 @@ func _assert_defeat_animation_holds_before_cleanup() -> bool:
 func _assert_generic_unit_keeps_stack_hidden() -> bool:
     var unit = UNIT_SCENE.instantiate()
     root.add_child(unit)
-    unit.setup_from_data(VANGUARD_DATA)
+    unit.setup_from_data(_make_generic_vanguard())
     await process_frame
 
     var visual_root: Node2D = unit.get_node_or_null("CharacterVisualRoot")
@@ -141,6 +143,20 @@ func _assert_generic_unit_keeps_stack_hidden() -> bool:
     unit.queue_free()
     await process_frame
     return true
+
+func _make_generic_vanguard() -> UnitData:
+    var unit := UnitData.new()
+    unit.unit_id = &"generic_vanguard_animation_fallback"
+    unit.display_name = "Fallback Vanguard"
+    unit.faction = "ally"
+    unit.max_hp = 10
+    unit.attack = 4
+    unit.defense = 2
+    unit.movement = 3
+    unit.attack_range = 1
+    unit.default_skill = BASIC_ATTACK
+    unit.class_data = VANGUARD_CLASS
+    return unit
 
 func _fail(message: String) -> bool:
     push_error(message)

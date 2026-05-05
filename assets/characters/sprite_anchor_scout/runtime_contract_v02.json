@@ -21,7 +21,7 @@
     "back_left"
   ],
   "schema_version": 2,
-  "source_manifest": "source/sheets/scout_idle_64f_sheet_v02_1_guard_imagegen_manifest.json",
+  "source_manifest": "source/sheets/scout_idle_8f_sheet_v02_1_guard_imagegen_manifest.json",
   "states": {
     "attack": {
       "direction_set": "diagonal_4",
@@ -153,12 +153,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/attack/scout_attack_00.png",
+        "runtime/attack/scout_attack_01.png",
+        "runtime/attack/scout_attack_02.png",
+        "runtime/attack/scout_attack_03.png",
+        "runtime/attack/scout_attack_04.png",
+        "runtime/attack/scout_attack_05.png",
+        "runtime/attack/scout_attack_06.png",
+        "runtime/attack/scout_attack_07.png"
+      ],
       "loop": false,
       "pivot": {
         "x": 128,
@@ -295,12 +304,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/cast/scout_cast_00.png",
+        "runtime/cast/scout_cast_01.png",
+        "runtime/cast/scout_cast_02.png",
+        "runtime/cast/scout_cast_03.png",
+        "runtime/cast/scout_cast_04.png",
+        "runtime/cast/scout_cast_05.png",
+        "runtime/cast/scout_cast_06.png",
+        "runtime/cast/scout_cast_07.png"
+      ],
       "loop": false,
       "pivot": {
         "x": 128,
@@ -437,12 +455,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/defeat/scout_defeat_00.png",
+        "runtime/defeat/scout_defeat_01.png",
+        "runtime/defeat/scout_defeat_02.png",
+        "runtime/defeat/scout_defeat_03.png",
+        "runtime/defeat/scout_defeat_04.png",
+        "runtime/defeat/scout_defeat_05.png",
+        "runtime/defeat/scout_defeat_06.png",
+        "runtime/defeat/scout_defeat_07.png"
+      ],
       "loop": false,
       "pivot": {
         "x": 128,
@@ -579,12 +606,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/guard/scout_guard_00.png",
+        "runtime/guard/scout_guard_01.png",
+        "runtime/guard/scout_guard_02.png",
+        "runtime/guard/scout_guard_03.png",
+        "runtime/guard/scout_guard_04.png",
+        "runtime/guard/scout_guard_05.png",
+        "runtime/guard/scout_guard_06.png",
+        "runtime/guard/scout_guard_07.png"
+      ],
       "loop": false,
       "pivot": {
         "x": 128,
@@ -721,12 +757,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/hit/scout_hit_00.png",
+        "runtime/hit/scout_hit_01.png",
+        "runtime/hit/scout_hit_02.png",
+        "runtime/hit/scout_hit_03.png",
+        "runtime/hit/scout_hit_04.png",
+        "runtime/hit/scout_hit_05.png",
+        "runtime/hit/scout_hit_06.png",
+        "runtime/hit/scout_hit_07.png"
+      ],
       "loop": false,
       "pivot": {
         "x": 128,
@@ -863,12 +908,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/idle/scout_idle_00.png",
+        "runtime/idle/scout_idle_01.png",
+        "runtime/idle/scout_idle_02.png",
+        "runtime/idle/scout_idle_03.png",
+        "runtime/idle/scout_idle_04.png",
+        "runtime/idle/scout_idle_05.png",
+        "runtime/idle/scout_idle_06.png",
+        "runtime/idle/scout_idle_07.png"
+      ],
       "loop": true,
       "pivot": {
         "x": 128,
@@ -1005,12 +1059,21 @@
         }
       },
       "fps": 8,
-      "frame_count": 0,
+      "frame_count": 8,
       "frame_size": {
         "h": 256,
         "w": 256
       },
-      "frames": [],
+      "frames": [
+        "runtime/move/scout_move_00.png",
+        "runtime/move/scout_move_01.png",
+        "runtime/move/scout_move_02.png",
+        "runtime/move/scout_move_03.png",
+        "runtime/move/scout_move_04.png",
+        "runtime/move/scout_move_05.png",
+        "runtime/move/scout_move_06.png",
+        "runtime/move/scout_move_07.png"
+      ],
       "loop": true,
       "pivot": {
         "x": 128,

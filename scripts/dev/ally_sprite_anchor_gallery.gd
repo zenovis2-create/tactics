@@ -25,14 +25,28 @@ const CHARACTER_CONFIGS := {
         "animations": ["idle", "move", "attack"],
         "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
     },
+    "vanguard": {
+        "label": "Vanguard",
+        "root": "res://assets/characters/sprite_anchor_vanguard/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+    },
+    "scout": {
+        "label": "Scout",
+        "root": "res://assets/characters/sprite_anchor_scout/runtime",
+        "animations": ["idle", "move", "attack"],
+        "fps": {"idle": 6.0, "move": 8.0, "attack": 8.0},
+    },
 }
 
-const CHARACTER_ORDER := ["serin", "rian", "tia", "bran"]
+const CHARACTER_ORDER := ["serin", "rian", "tia", "bran", "vanguard", "scout"]
 const SLOT_POSITIONS := [
-    Vector2(-360, -80),
-    Vector2(-120, -80),
-    Vector2(120, -80),
-    Vector2(360, -80),
+    Vector2(-500, -80),
+    Vector2(-300, -80),
+    Vector2(-100, -80),
+    Vector2(100, -80),
+    Vector2(300, -80),
+    Vector2(500, -80),
 ]
 
 @onready var state_label: Label = $CanvasLayer/Panel/VBox/StateLabel
@@ -86,7 +100,7 @@ func _build_gallery() -> void:
         label.position = sprite.position + Vector2(-40, 140)
         add_child(label)
 
-    roster_label.text = "Roster: Serin / Rian / Tia / Bran"
+    roster_label.text = "Roster: Serin / Rian / Tia / Bran / Vanguard / Scout"
 
 
 func _build_sprite_frames(config: Dictionary) -> SpriteFrames:

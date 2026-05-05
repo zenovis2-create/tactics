@@ -14,6 +14,8 @@ static var _ally_sprite_anchor_map := {
 	"enemy_lete": "sprite_anchor_lete",
 	"Vanguard": "sprite_anchor_vanguard",
 	"ally_vanguard": "sprite_anchor_vanguard",
+	"Scout": "sprite_anchor_scout",
+	"ally_scout": "sprite_anchor_scout",
 	"Saria": "sprite_anchor_enemy_saria",
 	"enemy_saria": "sprite_anchor_enemy_saria",
 	"Raider": "sprite_anchor_enemy_raider",

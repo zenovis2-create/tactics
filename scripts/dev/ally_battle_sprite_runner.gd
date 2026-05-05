@@ -7,6 +7,7 @@ const SERIN_DATA = preload("res://data/units/ally_serin.tres")
 const TIA_DATA = preload("res://data/units/ally_tia.tres")
 const BRAN_DATA = preload("res://data/units/ally_bran.tres")
 const VANGUARD_DATA = preload("res://data/units/ally_vanguard.tres")
+const SCOUT_DATA = preload("res://data/units/ally_scout.tres")
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -21,6 +22,8 @@ func _run() -> void:
 	if not _assert_sprite_frames(BRAN_DATA, "idle"):
 		return
 	if not _assert_sprite_frames(VANGUARD_DATA, "idle"):
+		return
+	if not _assert_sprite_frames(SCOUT_DATA, "idle"):
 		return
 	if not await _assert_move_state_transition():
 		return
