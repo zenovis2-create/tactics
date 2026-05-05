@@ -11,13 +11,28 @@ const TERRAIN_OVERLAY_CONTRACTS := {
     &"plain": {"family": "plain", "card": "plain.png", "card_alpha": 0.16, "icon": ""},
     &"forest": {"family": "forest", "card": "forest.png", "card_alpha": 0.28, "icon": "forest.png"},
     &"wall": {"family": "wall", "card": "wall.png", "card_alpha": 0.22, "icon": "wall.png"},
+    &"archives": {"family": "archives", "card": "archives.png", "card_alpha": 0.22, "icon": ""},
+    &"ash": {"family": "ash", "card": "ash.png", "card_alpha": 0.2, "icon": ""},
     &"battery": {"family": "battery", "card": "battery.png", "card_alpha": 0.2, "icon": "battery.png"},
     &"cathedral": {"family": "cathedral", "card": "bell.png", "card_alpha": 0.18, "icon": "cathedral.png"},
     &"bell": {"family": "bell", "card": "bell.png", "card_alpha": 0.18, "icon": "bell.png"},
     &"bridge": {"family": "bridge", "card": "bridge.png", "card_alpha": 0.2, "icon": "bridge.png"},
-    &"corridor": {"family": "bell", "card": "bell.png", "card_alpha": 0.16, "icon": "bell.png"},
+    &"corridor": {"family": "corridor", "card": "corridor.png", "card_alpha": 0.24, "icon": ""},
+    &"flooded": {"family": "flooded", "card": "flooded.png", "card_alpha": 0.26, "icon": ""},
+    &"floodgate": {"family": "floodgate", "card": "floodgate.png", "card_alpha": 0.24, "icon": ""},
+    &"gate_control": {"family": "gate_control", "card": "gate_control.png", "card_alpha": 0.24, "icon": ""},
     &"highground": {"family": "highground", "card": "highground.png", "card_alpha": 0.24, "icon": "highground.png"},
-    &"keep": {"family": "wall", "card": "wall.png", "card_alpha": 0.2, "icon": "wall.png"}
+    &"hymn": {"family": "hymn", "card": "hymn.png", "card_alpha": 0.22, "icon": ""},
+    &"keep": {"family": "keep", "card": "keep.png", "card_alpha": 0.2, "icon": "wall.png"},
+    &"keeper": {"family": "keeper", "card": "keeper.png", "card_alpha": 0.24, "icon": ""},
+    &"marked": {"family": "marked", "card": "marked.png", "card_alpha": 0.26, "icon": ""},
+    &"market": {"family": "market", "card": "market.png", "card_alpha": 0.22, "icon": ""},
+    &"memory_abyss": {"family": "memory_abyss", "card": "memory_abyss.png", "card_alpha": 0.28, "icon": ""},
+    &"revision": {"family": "revision", "card": "revision.png", "card_alpha": 0.25, "icon": ""},
+    &"shadow": {"family": "shadow", "card": "shadow.png", "card_alpha": 0.28, "icon": ""},
+    &"shrine": {"family": "shrine", "card": "shrine.png", "card_alpha": 0.24, "icon": ""},
+    &"thicket": {"family": "thicket", "card": "thicket.png", "card_alpha": 0.24, "icon": ""},
+    &"tunnel": {"family": "tunnel", "card": "tunnel.png", "card_alpha": 0.22, "icon": ""}
 }
 
 var stage_data: StageData
@@ -381,12 +396,14 @@ func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
         return
 
     if terrain_type == &"tunnel":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_line(rect.position + Vector2(12.0, rect.size.y * 0.5), rect.position + Vector2(rect.size.x - 12.0, rect.size.y * 0.5), Color(0.827451, 0.752941, 0.588235, 0.22), 3.0)
         draw_line(rect.position + Vector2(16.0, rect.size.y * 0.34), rect.position + Vector2(rect.size.x - 16.0, rect.size.y * 0.34), Color(0.54902, 0.470588, 0.341176, 0.2), 1.0)
         draw_line(rect.position + Vector2(16.0, rect.size.y * 0.66), rect.position + Vector2(rect.size.x - 16.0, rect.size.y * 0.66), Color(0.54902, 0.470588, 0.341176, 0.2), 1.0)
         return
 
     if terrain_type == &"gate_control":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_rect(rect.grow(-12.0), Color(0.615686, 0.529412, 0.243137, 0.2), false, 2.0)
         draw_arc(rect.get_center(), 12.0, 0.0, TAU, 18, Color(0.945098, 0.858824, 0.505882, 0.28), 2.0)
         draw_line(rect.get_center() + Vector2(-8.0, 0.0), rect.get_center() + Vector2(8.0, 0.0), Color(1.0, 0.917647, 0.611765, 0.22), 2.0)
@@ -394,6 +411,7 @@ func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
         return
 
     if terrain_type == &"floodgate":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_line(rect.position + Vector2(12.0, 16.0), rect.position + Vector2(rect.size.x - 12.0, 16.0), Color(0.729412, 0.87451, 0.984314, 0.18), 2.0)
         draw_line(rect.position + Vector2(12.0, rect.size.y - 16.0), rect.position + Vector2(rect.size.x - 12.0, rect.size.y - 16.0), Color(0.729412, 0.87451, 0.984314, 0.18), 2.0)
         draw_arc(rect.get_center(), 12.0, PI * 0.1, PI * 0.9, 16, Color(0.564706, 0.811765, 0.952941, 0.2), 2.0)
@@ -423,39 +441,46 @@ func _draw_tile_detail(cell: Vector2i, rect: Rect2) -> void:
         return
 
     if terrain_type == &"hymn":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_arc(rect.get_center(), 10.0, PI * 1.05, PI * 1.95, 16, Color(0.929412, 0.772549, 0.984314, 0.16), 2.0)
         draw_arc(rect.get_center(), 16.0, PI * 1.05, PI * 1.95, 16, Color(0.929412, 0.772549, 0.984314, 0.08), 1.0)
         return
 
     if terrain_type == &"shrine":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_circle(rect.get_center(), 8.0, Color(0.792157, 0.952941, 0.760784, 0.12))
         draw_arc(rect.get_center(), 16.0, 0.0, TAU, 18, Color(0.854902, 1.0, 0.823529, 0.1), 1.0)
         return
 
     if terrain_type == &"market":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_rect(Rect2(rect.position + Vector2(12.0, 12.0), Vector2(rect.size.x - 24.0, 10.0)), Color(0.843137, 0.670588, 0.427451, 0.14), true)
         draw_line(rect.position + Vector2(14.0, 22.0), rect.position + Vector2(rect.size.x - 14.0, 22.0), Color(0.945098, 0.807843, 0.576471, 0.12), 1.0)
         return
 
     if terrain_type == &"marked":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_arc(rect.get_center(), 12.0, 0.0, TAU, 16, Color(1.0, 0.54902, 0.643137, 0.2), 2.0)
         draw_line(rect.get_center() + Vector2(-8.0, -8.0), rect.get_center() + Vector2(8.0, 8.0), Color(1.0, 0.631373, 0.694118, 0.18), 2.0)
         draw_line(rect.get_center() + Vector2(-8.0, 8.0), rect.get_center() + Vector2(8.0, -8.0), Color(1.0, 0.631373, 0.694118, 0.18), 2.0)
         return
 
     if terrain_type == &"thicket":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_circle(rect.position + Vector2(18.0, 18.0), 5.0, Color(0.623529, 0.870588, 0.607843, 0.16))
         draw_circle(rect.position + Vector2(rect.size.x - 18.0, rect.size.y - 16.0), 4.0, Color(0.623529, 0.870588, 0.607843, 0.12))
         draw_line(rect.position + Vector2(14.0, rect.size.y - 14.0), rect.position + Vector2(rect.size.x * 0.46, 18.0), Color(0.698039, 0.921569, 0.686275, 0.16), 2.0)
         return
 
     if terrain_type == &"archives":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_rect(rect.grow(-12.0), Color(0.623529, 0.529412, 0.337255, 0.14), false, 2.0)
         draw_line(rect.position + Vector2(14.0, 18.0), rect.position + Vector2(rect.size.x - 14.0, 18.0), Color(0.929412, 0.811765, 0.611765, 0.12), 1.0)
         draw_line(rect.position + Vector2(14.0, rect.size.y - 18.0), rect.position + Vector2(rect.size.x - 14.0, rect.size.y - 18.0), Color(0.929412, 0.811765, 0.611765, 0.12), 1.0)
         return
 
     if terrain_type == &"keeper":
+        _draw_contract_tile_card(rect, terrain_type)
         draw_arc(rect.get_center(), 10.0, PI * 0.15, PI * 1.85, 16, Color(0.772549, 0.882353, 1.0, 0.14), 2.0)
         draw_line(rect.get_center() + Vector2(-8.0, 0.0), rect.get_center() + Vector2(8.0, 0.0), Color(0.862745, 0.929412, 1.0, 0.12), 1.0)
         return
