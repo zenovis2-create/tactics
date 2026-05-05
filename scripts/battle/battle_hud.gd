@@ -78,6 +78,7 @@ var _risk_forecast_cards: Array[Dictionary] = []
 var _preview_labels: Array[String] = []
 var _boss_lock_intent_snapshot: Dictionary = {}
 var _risk_forecast_root: VBoxContainer
+var _last_transition_payload: Dictionary = {}
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_STOP
@@ -197,6 +198,7 @@ func _format_boss_lock_progress(lock_state: Dictionary) -> String:
     return "Locks: %s" % ", ".join(chunks)
 
 func set_transition_reason(reason: String, payload: Dictionary = {}) -> void:
+    _last_transition_payload = payload.duplicate(true)
     var formatted_reason: String = _format_reason(reason, payload)
     transition_reason_label.text = formatted_reason
     transition_reason_label.visible = not _should_hide_reason(reason)
@@ -485,6 +487,21 @@ func _format_reason(reason: String, payload: Dictionary) -> String:
         var blocked_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
         var cost_text := String(payload.get("cost", "")).strip_edges()
         return "%s unavailable%s" % [blocked_skill_name, ": %s" % cost_text if not cost_text.is_empty() else ""]
+    if reason == "support_attack_resolved":
+        var bond := int(payload.get("bond", 0))
+        var damage := int(payload.get("damage", payload.get("count", 0)))
+        var parts: Array[String] = []
+        if bond > 0:
+            parts.append("Bond %d" % bond)
+        if damage > 0:
+            parts.append("Damage %d" % damage)
+        return "Support Attack Resolved" if parts.is_empty() else "Support Attack Resolved (%s)" % ", ".join(parts)
+    if reason == "boss_phase_transition":
+        return "Boss Phase: %s (%d%% HP, Round %d)" % [
+            _to_title_words(str(payload.get("phase", ""))),
+            int(payload.get("hp_percent", 0)),
+            int(payload.get("round", 0))
+        ]
     var normalized_reason := _to_title_words(reason)
     if payload.is_empty():
         return normalized_reason
@@ -864,12 +881,14 @@ func _update_telegraph_surface(reason: String, payload: Dictionary = {}) -> void
             var blocked_skill_name := _get_payload_label(payload, ["skill_name", "skill", "skill_id"], "Skill")
             var cost_text := String(payload.get("cost", "")).strip_edges()
             _show_telegraph_surface("danger", "%s Unavailable" % blocked_skill_name, cost_text if not cost_text.is_empty() else "Required resources are missing.")
+        "boss_phase_transition":
+            _show_telegraph_surface("command", "Boss Phase", "%s phase triggered at %d%% HP." % [_to_title_words(str(payload.get("phase", ""))), int(payload.get("hp_percent", 0))])
         "enemy_phase_open", "enemy_decide":
             _show_telegraph_surface("danger", "Danger", "Enemy pressure is active. Recheck exposed lanes.")
         "interaction_resolved":
             _show_telegraph_surface("heal", "Support", "Objective progress is secured. Use the opening to reset formation.")
         "support_attack_resolved":
-            _show_telegraph_surface("danger", "Support Attack", "An adjacent ally with bond 3+ added a follow-up strike.")
+            _show_telegraph_surface("danger", "Support Attack", "Bond %d ally follow-up confirmed for %d damage." % [int(payload.get("bond", 0)), int(payload.get("damage", payload.get("count", 0)))])
         "support_rank_up":
             _show_telegraph_surface("heal", "Support Rank Up", "%s reached %s." % [String(payload.get("pair", "Support")), String(payload.get("rank", "새 랭크"))])
         "bond_damage_share":

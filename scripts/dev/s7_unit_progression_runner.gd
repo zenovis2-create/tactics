@@ -15,7 +15,7 @@ func _run() -> void:
 		return _fail("Default unit progression should start at level 1 exp 0.")
 
 	var gain: Dictionary = svc.grant_unit_exp(&"ally_rian", 15, "runner")
-	if int(gain.get("level_after", 0)) != 2 or int(gain.get("exp_after", -1)) != 5:
+	if int(gain.get("level_after", 0)) != 2 or int(gain.get("exp_after", -1)) != 3:
 		return _fail("grant_unit_exp should carry over EXP after a level-up.")
 	if not bool(gain.get("leveled_up", false)):
 		return _fail("grant_unit_exp should mark leveled_up when a threshold is crossed.")
@@ -23,18 +23,23 @@ func _run() -> void:
 	var victory_results: Array = svc.grant_victory_exp([&"ally_rian", &"ally_serin"])
 	if victory_results.size() != 2:
 		return _fail("grant_victory_exp should return one result per ally.")
+	var serin_after_victory: Dictionary = svc.get_unit_progress(&"ally_serin")
+	if int(serin_after_victory.get("level", 0)) != 1 or int(serin_after_victory.get("exp", -1)) != 8:
+		return _fail("Victory EXP tuning should move a fresh ally forward without forcing an immediate level-up.")
+	var post_victory_rian: Dictionary = svc.get_unit_progress(&"ally_rian")
+	if int(post_victory_rian.get("level", 0)) != 2 or int(post_victory_rian.get("exp", -1)) != 11:
+		return _fail("Victory EXP should preserve carry-over pacing for already-leveled units.")
 	var bonus_result: Dictionary = svc.grant_bonus_exp_pool([&"ally_rian", &"ally_serin"], {"ally_rian": 2, "ally_serin": 0}, &"CH01_05")
 	if int(bonus_result.get("pool", 0)) <= 0:
 		return _fail("grant_bonus_exp_pool should return a positive pool for participating allies.")
 	var bonus_results: Array = bonus_result.get("results", [])
 	if bonus_results.size() != 2:
 		return _fail("grant_bonus_exp_pool should return one result per ally.")
-	var serin: Dictionary = svc.get_unit_progress(&"ally_serin")
-	if int(serin.get("level", 0)) != 2 or int(serin.get("exp", -1)) <= 0:
+	var serin_after_bonus: Dictionary = svc.get_unit_progress(&"ally_serin")
+	if int(serin_after_bonus.get("level", 0)) != 2 or int(serin_after_bonus.get("exp", -1)) <= 0:
 		return _fail("Bonus EXP should increase a fresh ally beyond the flat victory reward.")
 	if svc.get_data().bonus_exp_history.is_empty():
 		return _fail("Bonus EXP distribution should be persisted into bonus_exp_history.")
-
 	var data := svc.get_data()
 	if data.burden != 0 or data.trust != 0:
 		return _fail("Unit EXP progression must not modify burden or trust.")

@@ -16,6 +16,8 @@ extends SceneTree
 const SkillData = preload("res://scripts/data/skill_data.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
+const BASIC_ATTACK_RESOURCE = preload("res://data/skills/basic_attack.tres")
+const BASIC_ATTACK_PATH := "res://data/skills/basic_attack.tres"
 
 var _failed: bool = false
 
@@ -38,6 +40,7 @@ func _run() -> void:
     if not _assert_combined_all_condition(): return
     if not _assert_unlock_description(): return
     if not _assert_progression_service_filtering(): return
+    if not _assert_skill_resource_unlock_condition(): return
 
     print("[PASS] s4b_skill_unlock_runner: all assertions passed.")
     quit(0)
@@ -189,6 +192,20 @@ func _assert_progression_service_filtering() -> bool:
         svc.queue_free()
         return _fail("get_locked_skills() should include only non-matching skills")
     svc.queue_free()
+    return true
+
+func _assert_skill_resource_unlock_condition() -> bool:
+    var basic_attack: SkillData = BASIC_ATTACK_RESOURCE
+    if basic_attack == null:
+        return _fail("basic_attack.tres should load as a real SkillData resource")
+    var raw_text := FileAccess.get_file_as_string(BASIC_ATTACK_PATH)
+    if raw_text.find("unlock_condition") == -1:
+        return _fail("basic_attack.tres should explicitly serialize unlock_condition data")
+    var fresh := ProgressionData.new()
+    if not basic_attack.is_unlocked(fresh):
+        return _fail("basic_attack.tres unlock condition should remain open for fresh progression data")
+    if basic_attack.get_unlock_description() != "":
+        return _fail("basic_attack.tres should not surface unnecessary unlock text for the starter skill")
     return true
 
 func _make_skill(condition: Dictionary) -> SkillData:

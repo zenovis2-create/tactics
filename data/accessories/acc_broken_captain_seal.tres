@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_broken_captain_seal"
 display_name = "Broken Captain Seal"
 summary = "Frontline route accessory. Tightens formation and steadies shared defense."
+flavor_text = "Broken Captain Seal was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

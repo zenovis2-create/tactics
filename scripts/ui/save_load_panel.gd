@@ -59,10 +59,12 @@ func close() -> void:
 
 ## 슬롯 카드 새로고침
 func refresh_slots() -> void:
-    if slot_cards == null or save_service == null:
+    if slot_cards == null:
         return
     for child in slot_cards.get_children():
         child.queue_free()
+    if save_service == null:
+        return
     var latest_target := _get_latest_load_target()
     _recommended_load_slot = int(latest_target.get("slot", -1))
     _recommended_load_is_autosave = bool(latest_target.get("is_autosave", false))
@@ -167,6 +169,7 @@ func _build_slot_card_with_info(slot: int, info: Dictionary, is_autosave: bool, 
         var ng_plus_text := "NG+" if bool(info.get("ng_plus_available", false)) else "기본 회차"
         var last_ending := String(info.get("last_completed_ending", "")).strip_edges()
         var autosave_reason := String(info.get("autosave_reason", "")).strip_edges()
+        var progression_summary := String(info.get("unit_progression_summary", "")).strip_edges()
         title_label.text = "%s  ·  %s" % [String(info.get("slot_label", "슬롯 %d" % slot)), String(info.get("chapter", "미상"))]
         meta_label.text = "부담 %d / 신뢰 %d / 골드 %d / %s" % [
             int(info.get("burden", 0)),
@@ -186,11 +189,14 @@ func _build_slot_card_with_info(slot: int, info: Dictionary, is_autosave: bool, 
         ]
         if is_autosave:
             status_label.text += " / 안전지점 갱신"
+        if not progression_summary.is_empty():
+            status_label.text += "\n진행도: %s" % progression_summary
     text_stack.add_child(title_label)
     text_stack.add_child(meta_label)
     text_stack.add_child(status_label)
     var badge_info: Dictionary = info.duplicate(true)
     badge_info["is_recommended"] = is_recommended
+    badge_info["is_autosave"] = is_autosave
     var badges := _build_slot_badges(badge_info)
     if badges != null:
         stack.add_child(badges)

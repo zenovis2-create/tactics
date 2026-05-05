@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_hardren_iron_crest"
 display_name = "Hardren Iron Crest"
 summary = "Fortress-defense accessory. Improves survival on hardened ground and chokepoints."
+flavor_text = "Hardren Iron Crest was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 2

@@ -2478,6 +2478,9 @@ func _build_campaign_party_summary_lines() -> Array[String]:
 
 func _build_campaign_party_detail_entries() -> Array[Dictionary]:
     var details: Array[Dictionary] = []
+    var progression_data: ProgressionData = null
+    if _battle_controller != null and _battle_controller.progression_service != null:
+        progression_data = _battle_controller.progression_service.get_data()
     for unit_data in _get_campaign_party_roster():
         var default_skill_name: String = unit_data.default_skill.display_name if unit_data.default_skill != null else "스킬 없음"
         var deploy_status: String = "대기"
@@ -2507,7 +2510,6 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
         var eligible_weapon_ids: Array[StringName] = _get_available_weapon_ids_for_unit(unit_data.unit_id)
         var eligible_armor_ids: Array[StringName] = _get_available_armor_ids_for_unit(unit_data.unit_id)
         var eligible_accessory_ids: Array[StringName] = _get_available_accessory_ids()
-        var progression_data: ProgressionData = _get_progression_data()
         var can_reforge: bool = eligible_accessory_ids.size() > 1 and ReforgeService.can_afford_accessory_reforge(progression_data)
         var reforge_tooltip: String = ReforgeService.format_accessory_reforge_cost(progression_data)
         var support_preview_path := ""
@@ -2526,6 +2528,12 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             support_preview_path = PALADIN_SHIELD_SUPPORT_IMAGE
             support_preview_title = PALADIN_SHIELD_SUPPORT_TITLE
             support_preview_body = PALADIN_SHIELD_SUPPORT_BODY
+        var level: int = 1
+        var exp: int = 0
+        if progression_data != null:
+            var progress: Dictionary = progression_data.get_unit_progress(unit_data.unit_id)
+            level = int(progress.get("level", 1))
+            exp = int(progress.get("exp", 0))
         details.append({
             "unit_id": String(unit_data.unit_id),
             "name": unit_data.display_name,
@@ -2535,6 +2543,8 @@ func _build_campaign_party_detail_entries() -> Array[Dictionary]:
             "defense": unit_data.defense,
             "move": unit_data.movement,
             "range": unit_data.attack_range,
+            "level": level,
+            "exp": exp,
             "skill": default_skill_name,
             "skill_entries": skill_entries,
             "weapon_slot": weapon_name,

@@ -548,6 +548,8 @@ func _select_section(section_name: String) -> void:
     if not SECTION_ORDER.has(section_name):
         section_name = SECTION_SUMMARY
 
+    var section_changed: bool = _active_section != section_name
+
     _active_section = section_name
     summary_section.visible = section_name == SECTION_SUMMARY
     party_section.visible = section_name == SECTION_PARTY
@@ -565,7 +567,8 @@ func _select_section(section_name: String) -> void:
     forge_button.disabled = section_name == SECTION_FORGE
     dialogue_history_button.disabled = section_name == SECTION_DIALOGUE_HISTORY
     records_button.disabled = section_name == SECTION_RECORDS
-    ui_cue_requested.emit("ui_panel_tab_shift_01")
+    if section_changed:
+        ui_cue_requested.emit("ui_panel_tab_shift_01")
     _sync_inventory_sell_buttons()
 
 func _sync_section_button_text() -> void:
@@ -1289,11 +1292,13 @@ func _render_selected_party(entry: Dictionary) -> void:
         str(entry.get("hp_text", "0/0")),
         role_text
     ]
-    party_stats_label.text = "공격 %s   방어 %s   이동 %s   사거리 %s\n스킬 %s" % [
+    party_stats_label.text = "공격 %s   방어 %s   이동 %s   사거리 %s\nLv %s   EXP %s   스킬 %s" % [
         str(entry.get("attack", 0)),
         str(entry.get("defense", 0)),
         str(entry.get("move", 0)),
         str(entry.get("range", 0)),
+        str(entry.get("level", 1)),
+        str(entry.get("exp", 0)),
         str(entry.get("skill", "스킬 없음"))
     ]
     _render_selected_skills(entry)

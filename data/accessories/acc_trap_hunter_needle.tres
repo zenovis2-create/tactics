@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_trap_hunter_needle"
 display_name = "Trap-Hunter Needle"
 summary = "Ambush route accessory. Steadies defense while crossing hidden trap lanes."
+flavor_text = "Trap-Hunter Needle was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

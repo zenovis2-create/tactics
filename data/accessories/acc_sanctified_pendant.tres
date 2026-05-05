@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_sanctified_pendant"
 display_name = "Sanctified Pendant"
 summary = "Purification accessory. Reinforces the wearer while holding cleaned ground."
+flavor_text = "Sanctified Pendant was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

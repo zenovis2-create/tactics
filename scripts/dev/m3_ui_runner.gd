@@ -244,12 +244,18 @@ func _assert_structured_result_and_feedback_surfaces(battle) -> bool:
         return _fail("BattleHUD layout snapshot should expose the oblivion badge visibility when a unit has stacks.")
 
     battle.hud.set_transition_reason("support_attack_resolved", {"bond": 3, "count": 1})
-    if battle.hud.transition_reason_label.text.find("Bond 3") == -1:
+    if battle.hud.transition_reason_label.text.find("Bond 3") == -1 or battle.hud.transition_reason_label.text.find("Damage") == -1:
         return _fail("BattleHUD support feedback should expose the supporting bond level in readable text.")
     if battle.hud.telegraph_label.text != "Support Attack":
         return _fail("BattleHUD telegraph label should promote support attacks with explicit wording.")
-    if battle.hud.telegraph_detail_label.text.find("bond 3+") == -1:
+    if battle.hud.telegraph_detail_label.text.find("Bond 3") == -1:
         return _fail("BattleHUD support telegraph detail should explain the bond trigger clearly.")
+
+    battle.hud.set_transition_reason("boss_phase_transition", {"phase": "enrage", "hp_percent": 50, "round": 3})
+    if battle.hud.transition_reason_label.text.find("Boss Phase") == -1 or battle.hud.transition_reason_label.text.find("Enrage") == -1:
+        return _fail("BattleHUD boss phase feedback should read like a clear state change.")
+    if battle.hud.telegraph_label.text.find("Boss") == -1:
+        return _fail("BattleHUD boss phase telegraph should promote the phase change clearly.")
 
     battle.hud.show_result_screen({
         "title": "Victory",
@@ -283,6 +289,8 @@ func _assert_structured_result_and_feedback_surfaces(battle) -> bool:
         return _fail("BattleResultScreen should preserve memory-restoration emphasis in the structured result body.")
     if result_body.find("Unit EXP") == -1 or result_body.find("Rian") == -1 or result_body.find("Lv 1 -> 2") == -1:
         return _fail("BattleResultScreen should surface per-unit EXP gain and level-up lines.")
+    if result_body.find("★ LEVEL UP! ★") == -1:
+        return _fail("BattleResultScreen should visually emphasize level-up moments.")
 
     result_screen.hide_result()
     return true

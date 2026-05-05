@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_nameless_watch_badge"
 display_name = "Nameless Watch Badge"
 summary = "Oath-hall accessory. Holds the line when procedure starts erasing people."
+flavor_text = "Nameless Watch Badge was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

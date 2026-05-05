@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_resonance_knot"
 display_name = "Resonance Knot"
 summary = "Tower-crest accessory. Rewards staying linked under eclipse pressure."
+flavor_text = "Resonance Knot was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

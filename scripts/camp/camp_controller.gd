@@ -6,6 +6,7 @@ extends Node
 ## - get_camp_summary(): 현재 캠프 상태 스냅샷 반환
 
 const CampData = preload("res://scripts/data/camp_data.gd")
+const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
 const ForgeService = preload("res://scripts/battle/forge_service.gd")
@@ -48,6 +49,7 @@ var _event_log: Array[Dictionary] = []
 var _newly_unlocked_commands: Array[String] = []
 var _recently_recovered_fragments: Array[String] = []
 var _hunt_board: HuntBoard = null
+var _unit_progression_summary: Array[String] = []
 
 func enter_camp(
     chapter: StringName,
@@ -74,6 +76,7 @@ func enter_camp(
         _camp_data.unlocked_command_ids = progression.get_unlocked_command_ids()
         _newly_unlocked_commands = progression.get_newly_unlocked_commands()
         _recently_recovered_fragments = progression.get_recently_recovered_fragments()
+        _unit_progression_summary = _build_unit_progression_summary(progression)
         progression.snapshot_unlock_state()
     else:
         var empty_ids: Array[String] = []
@@ -81,6 +84,7 @@ func enter_camp(
         _camp_data.unlocked_command_ids = empty_ids
         _newly_unlocked_commands = []
         _recently_recovered_fragments = []
+        _unit_progression_summary = []
     _camp_data.unlocked_axes = _compute_unlocked_axes(chapter)
     _refresh_forge_snapshot(progression)
     _refresh_recall_snapshot()
@@ -114,6 +118,7 @@ func get_camp_summary() -> Dictionary:
         "unlocked_command_ids": _camp_data.unlocked_command_ids.duplicate(),
         "newly_unlocked_commands": _newly_unlocked_commands.duplicate(),
         "recently_recovered_fragments": _recently_recovered_fragments.duplicate(),
+        "unit_progression_summary": _unit_progression_summary.duplicate(),
         "unlocked_axes": _camp_data.unlocked_axes.duplicate(),
         "pending_notifications": _camp_data.get_notification_count(),
         "has_new_records": _camp_data.has_pending_notifications(),
@@ -443,3 +448,15 @@ func _build_pending_notifications(result: Dictionary) -> void:
     var rewards: Array = result.get("reward_entries", [])
     for item in rewards:
         _camp_data.pending_reward_entries.append(String(item))
+
+func _build_unit_progression_summary(progression: ProgressionData) -> Array[String]:
+    var summary: Array[String] = []
+    var snapshot: Dictionary = progression.get_unit_progress_snapshot()
+    var unit_ids: Array = snapshot.keys()
+    unit_ids.sort()
+    for unit_id in unit_ids:
+        var entry: Dictionary = snapshot.get(unit_id, {})
+        var unit_data = CampaignCatalog.get_unit_data(StringName(unit_id))
+        var display_name: String = unit_data.display_name if unit_data != null else String(unit_id)
+        summary.append("%s Lv %d (%d EXP)" % [display_name, int(entry.get("level", 1)), int(entry.get("exp", 0))])
+    return summary

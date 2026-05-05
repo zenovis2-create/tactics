@@ -9,3 +9,4 @@ display_name = "Basic Attack"
 range = 1
 power_modifier = 0
 targeting_rule = &"adjacent_enemy"
+unlock_condition = {}

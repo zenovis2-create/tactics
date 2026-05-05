@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_militia_emblem"
 display_name = "Militia Emblem"
 summary = "Guard route accessory. Nearby weak allies or civilians are easier to keep alive."
+flavor_text = "Militia Emblem was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

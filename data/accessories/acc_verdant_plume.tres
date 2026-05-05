@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_verdant_plume"
 display_name = "Verdant Plume"
 summary = "Forest route accessory. Makes mobile forest movement and scouting cleaner."
+flavor_text = "Verdant Plume was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

@@ -7,5 +7,6 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_bell_oath_relic"
 display_name = "Bell Oath Relic"
 summary = "Royal-hall accessory. Carries the last shared oath into the final chamber."
+flavor_text = "Bell Oath Relic was carried long enough to turn that hard-won summary into something personal, not just tactical."
 attack_bonus = 1
 defense_bonus = 1

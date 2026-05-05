@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_ruin_holdfast_charm"
 display_name = "Ruin Holdfast Charm"
 summary = "Holding-cell accessory. Helps the wearer resist collapse in the lower ruins."
+flavor_text = "Ruin Holdfast Charm was carried long enough to turn that hard-won summary into something personal, not just tactical."
 defense_bonus = 1

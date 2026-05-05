@@ -6,6 +6,7 @@ extends Node
 
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 const EndingResolver = preload("res://scripts/battle/ending_resolver.gd")
+const CampaignCatalog = preload("res://scripts/campaign/campaign_catalog.gd")
 
 const SAVE_DIR := "user://saves/"
 const SLOT_PREFIX := "slot_"
@@ -99,6 +100,7 @@ func _write_sidecar(data: ProgressionData, slot: int, extra_metadata: Dictionary
 	snapshot["chapter"] = _derive_latest_chapter(data)
 	snapshot.merge(_build_ending_progress_snapshot(data))
 	snapshot["saved_at"] = Time.get_datetime_string_from_system()
+	snapshot["unit_progression_summary"] = _build_unit_progression_summary(data)
 	if not extra_metadata.is_empty():
 		snapshot.merge(extra_metadata, true)
 	file.store_string(JSON.stringify(snapshot, "\t"))
@@ -120,7 +122,8 @@ func _build_slot_metadata(exists: bool, slot: int) -> Dictionary:
 		"ending_resonance_count": 0,
 		"ending_name_anchors_ok": false,
 		"ending_all_name_calls": false,
-		"saved_at": ""
+		"saved_at": "",
+		"unit_progression_summary": ""
 	}
 
 func _build_ending_progress_snapshot(data: ProgressionData) -> Dictionary:
@@ -188,3 +191,22 @@ func _chapter_rank_for_label(chapter_label: String) -> int:
 			return 11
 		_:
 			return -1
+
+func _build_unit_progression_summary(data: ProgressionData) -> String:
+	var snapshot: Dictionary = data.get_unit_progress_snapshot()
+	if snapshot.is_empty():
+		return ""
+	var best_unit: String = ""
+	var best_level: int = -1
+	var best_exp: int = -1
+	for unit_id in snapshot.keys():
+		var entry: Dictionary = snapshot.get(unit_id, {})
+		var level: int = int(entry.get("level", 1))
+		var exp: int = int(entry.get("exp", 0))
+		var unit_data = CampaignCatalog.get_unit_data(StringName(unit_id))
+		var display_name: String = unit_data.display_name if unit_data != null else String(unit_id)
+		if level > best_level or (level == best_level and exp > best_exp):
+			best_unit = display_name
+			best_level = level
+			best_exp = exp
+	return "%d units | top %s Lv %d (%d EXP)" % [snapshot.size(), best_unit, best_level, best_exp]

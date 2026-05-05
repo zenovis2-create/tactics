@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_keeper_thread_seal"
 display_name = "Keeper Thread Seal"
 summary = "Noah-route accessory. Stabilizes movement through root-archive timing lanes."
+flavor_text = "Keeper Thread Seal was carried long enough to turn that hard-won summary into something personal, not just tactical."
 movement_bonus = 1

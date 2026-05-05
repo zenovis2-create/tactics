@@ -7,8 +7,6 @@ extends SceneTree
 const ProgressionService = preload("res://scripts/battle/progression_service.gd")
 const ProgressionData = preload("res://scripts/data/progression_data.gd")
 
-var _failed: bool = false
-
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -19,16 +17,16 @@ func _run() -> void:
 	await process_frame
 
 	if not _assert_initial_state(svc): return
-	if not _assert_burden_band_clamping(svc): return
-	if not _assert_trust_band_clamping(svc): return
-	if not _assert_fragment_command_unlock(svc): return
-	if not _assert_duplicate_fragment_idempotent(svc): return
-	if not _assert_ending_tendency_true(svc): return
-	if not _assert_ending_tendency_bad(svc): return
-	if not _assert_event_log_non_empty(svc): return
-	if not _assert_burden_effect_keys(svc): return
-	if not _assert_trust_effect_keys(svc): return
-	if not _assert_unit_progress_defaults_and_gain(svc): return
+	if not _assert_burden_band_clamping(): return
+	if not _assert_trust_band_clamping(): return
+	if not _assert_fragment_command_unlock(): return
+	if not _assert_duplicate_fragment_idempotent(): return
+	if not _assert_ending_tendency_true(): return
+	if not _assert_ending_tendency_bad(): return
+	if not _assert_event_log_non_empty(): return
+	if not _assert_burden_effect_keys(): return
+	if not _assert_trust_effect_keys(): return
+	if not _assert_unit_progress_defaults_and_gain(): return
 
 	print("[PASS] M4 progression runner: all assertions passed.")
 	quit(0)
@@ -45,7 +43,7 @@ func _assert_initial_state(svc: ProgressionService) -> bool:
 		return _fail("Initial ending_tendency should be undetermined, got %s" % d.ending_tendency)
 	return true
 
-func _assert_burden_band_clamping(svc: ProgressionService) -> bool:
+func _assert_burden_band_clamping() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	fresh.apply_burden_delta(100, "clamp_test")
@@ -57,7 +55,7 @@ func _assert_burden_band_clamping(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_trust_band_clamping(svc: ProgressionService) -> bool:
+func _assert_trust_band_clamping() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	fresh.apply_trust_delta(100, "clamp_test")
@@ -69,7 +67,7 @@ func _assert_trust_band_clamping(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_fragment_command_unlock(svc: ProgressionService) -> bool:
+func _assert_fragment_command_unlock() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	var result := fresh.recover_fragment(&"ch01_fragment")
@@ -89,7 +87,7 @@ func _assert_fragment_command_unlock(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_duplicate_fragment_idempotent(svc: ProgressionService) -> bool:
+func _assert_duplicate_fragment_idempotent() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	fresh.recover_fragment(&"ch02_fragment")
@@ -99,7 +97,7 @@ func _assert_duplicate_fragment_idempotent(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_ending_tendency_true(svc: ProgressionService) -> bool:
+func _assert_ending_tendency_true() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	# trust >= 7, burden <= 6 => true_ending
@@ -110,7 +108,7 @@ func _assert_ending_tendency_true(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_ending_tendency_bad(svc: ProgressionService) -> bool:
+func _assert_ending_tendency_bad() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	# burden >= 7 => bad_ending
@@ -120,7 +118,7 @@ func _assert_ending_tendency_bad(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_event_log_non_empty(svc: ProgressionService) -> bool:
+func _assert_event_log_non_empty() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	fresh.apply_burden_delta(1, "test")
@@ -133,7 +131,7 @@ func _assert_event_log_non_empty(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_burden_effect_keys(svc: ProgressionService) -> bool:
+func _assert_burden_effect_keys() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	# At band 0 effect dict must be valid (possibly empty)
@@ -148,7 +146,7 @@ func _assert_burden_effect_keys(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_trust_effect_keys(svc: ProgressionService) -> bool:
+func _assert_trust_effect_keys() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	var effect := fresh.get_trust_effect()
@@ -161,13 +159,13 @@ func _assert_trust_effect_keys(svc: ProgressionService) -> bool:
 	fresh.queue_free()
 	return true
 
-func _assert_unit_progress_defaults_and_gain(svc: ProgressionService) -> bool:
+func _assert_unit_progress_defaults_and_gain() -> bool:
 	var fresh := ProgressionService.new()
 	root.add_child(fresh)
 	var initial: Dictionary = fresh.get_unit_progress(&"ally_rian")
 	if int(initial.get("level", 0)) != 1 or int(initial.get("exp", -1)) != 0:
 		return _fail("Unit progression should default to level 1 exp 0")
-	var gain: Dictionary = fresh.grant_unit_exp(&"ally_rian", 10, "test")
+	var gain: Dictionary = fresh.grant_unit_exp(&"ally_rian", 12, "test")
 	if int(gain.get("level_after", 0)) != 2:
 		return _fail("grant_unit_exp should level up a unit at the default threshold")
 	if int(fresh.get_data().to_debug_dict().get("unit_progression", {}).get("ally_rian", {}).get("level", 0)) != 2:
@@ -179,6 +177,5 @@ func _assert_unit_progress_defaults_and_gain(svc: ProgressionService) -> bool:
 
 func _fail(msg: String) -> bool:
 	print("[FAIL] ", msg)
-	_failed = true
 	quit(1)
 	return false

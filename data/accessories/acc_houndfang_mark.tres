@@ -7,4 +7,5 @@ script = ExtResource("1_accessory")
 accessory_id = &"acc_houndfang_mark"
 display_name = "Houndfang Mark"
 summary = "Ruin-control accessory. Turns the hunt brand back into striking pressure."
+flavor_text = "Houndfang Mark was carried long enough to turn that hard-won summary into something personal, not just tactical."
 attack_bonus = 1
