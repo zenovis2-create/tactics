@@ -20,7 +20,7 @@ func _run() -> void:
 		return
 	if not _assert_sprite_frames(BRAN_DATA, "idle"):
 		return
-	if not _assert_sprite_absent(VANGUARD_DATA, "idle"):
+	if not _assert_sprite_frames(VANGUARD_DATA, "idle"):
 		return
 	if not await _assert_move_state_transition():
 		return
@@ -31,12 +31,6 @@ func _assert_sprite_frames(unit_data, state: String) -> bool:
 	var frames = BattleArtCatalog.load_character_sprite_frames(String(unit_data.display_name), state)
 	if frames.is_empty():
 		return _fail("%s should resolve non-empty %s sprite frames." % [String(unit_data.display_name), state])
-	return true
-
-func _assert_sprite_absent(unit_data, state: String) -> bool:
-	var frames = BattleArtCatalog.load_character_sprite_frames(String(unit_data.display_name), state)
-	if not frames.is_empty():
-		return _fail("%s should not resolve sprite frames for %s." % [String(unit_data.display_name), state])
 	return true
 
 func _assert_move_state_transition() -> bool:
