@@ -15,6 +15,19 @@ build/
 # Logs
 logs/
 
+# Local scratch / generated raw output
+/tmp/
+/output/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local agent / nested workspace state
+/.codex/
+/.claude/
+/.worktrees/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -40,3 +53,10 @@ artifacts/
 # Codex session frames and audio
 .codex-*.png
 .codex-*.wav
+
+# Maestro runtime state
+.maestro/missions/
+.maestro/sessions/
+.maestro/tasks/local-history/
+.maestro/tasks/contracts/
+.maestro/tasks/NOW.md
