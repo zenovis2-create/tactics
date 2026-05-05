@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "asset_type": "prop_surface_runtime_bundle",
+  "version": "v02.1",
+  "outputs": {
+    "production_icon_size": [
+      256,
+      256
+    ],
+    "runtime_surfaces_preserve_source_canvas": true
+  },
+  "assets": [
+    {
+      "asset_id": "altar_01",
+      "source": "assets/props/altar_01/source/altar_01_battlefield_candidate_v02.png",
+      "clean_source": "assets/props/altar_01/clean/altar_01_clean_v01.png",
+      "runtime_outputs": [
+        "assets/props/altar_01/runtime/altar_01_clean_v01.png",
+        "assets/props/altar_01/runtime/altar_01_integration_v01.png",
+        "assets/props/altar_01/runtime/altar_01_object_icon_v01.png"
+      ],
+      "production_icon": "assets/ui/production/object_icons/altar.png",
+      "icon_label": "altar object icon"
+    },
+    {
+      "asset_id": "paladin_shield",
+      "source": "assets/props/paladin_shield/source/paladin_shield_candidate_v02.png",
+      "clean_source": "assets/props/paladin_shield/clean/paladin_shield_clean_v01.png",
+      "runtime_outputs": [
+        "assets/props/paladin_shield/runtime/paladin_shield_clean_v01.png",
+        "assets/props/paladin_shield/runtime/paladin_shield_equipment_v01.png",
+        "assets/props/paladin_shield/runtime/paladin_shield_icon_v01.png",
+        "assets/props/paladin_shield/runtime/paladin_shield_integration_v01.png"
+      ],
+      "production_icon": "assets/ui/production/object_icons/paladin_shield.png",
+      "icon_label": "paladin shield support icon"
+    }
+  ],
+  "notes": [
+    "Built from existing imagegen prop candidates and cleaned RGBA surfaces.",
+    "Keeps runtime integration filenames stable for existing Godot preview/campaign routing."
+  ]
+}
