@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_serin",
+  "asset_version": "v02_1_imagegen_fullstate02",
+  "character_id": "serin",
+  "frame_count": 8,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "dccfc845fc79ede1c23447eb3c8e9dd9c8fd37b91be523507e8a8daa13da80d3",
+  "source_sheet": "serin_idle_8f_sheet_v02_1_imagegen_fullstate02.png",
+  "state": "idle"
+}

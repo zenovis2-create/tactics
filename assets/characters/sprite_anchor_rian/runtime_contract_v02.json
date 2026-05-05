@@ -1,0 +1,1095 @@
+{
+  "anchor": "sprite_anchor_rian",
+  "asset_version": "v02_1_guard_imagegen",
+  "character_id": "rian",
+  "contract_version": "2.1",
+  "direction_set": "diagonal_4",
+  "directions": [
+    "front",
+    "front_right",
+    "right",
+    "back_right",
+    "back",
+    "back_left",
+    "left",
+    "front_left"
+  ],
+  "facings": [
+    "front_right",
+    "front_left",
+    "back_right",
+    "back_left"
+  ],
+  "schema_version": 2,
+  "source_manifest": "source/sheets/rian_idle_8f_sheet_v02_1_guard_imagegen_manifest.json",
+  "states": {
+    "attack": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_00.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_01.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_02.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_03.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_04.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_05.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_06.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_07.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_08.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_09.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_10.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_11.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_12.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_13.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_14.png",
+            "runtime/facing_frames/attack/back_left/rian_attack_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_00.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_01.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_02.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_03.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_04.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_05.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_06.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_07.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_08.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_09.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_10.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_11.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_12.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_13.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_14.png",
+            "runtime/facing_frames/attack/back_right/rian_attack_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_00.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_01.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_02.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_03.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_04.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_05.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_06.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_07.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_08.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_09.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_10.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_11.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_12.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_13.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_14.png",
+            "runtime/facing_frames/attack/front_left/rian_attack_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_00.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_01.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_02.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_03.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_04.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_05.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_06.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_07.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_08.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_09.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_10.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_11.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_12.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_13.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_14.png",
+            "runtime/facing_frames/attack/front_right/rian_attack_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/attack/rian_attack_00.png",
+        "runtime/attack/rian_attack_01.png",
+        "runtime/attack/rian_attack_02.png",
+        "runtime/attack/rian_attack_03.png",
+        "runtime/attack/rian_attack_04.png",
+        "runtime/attack/rian_attack_05.png",
+        "runtime/attack/rian_attack_06.png",
+        "runtime/attack/rian_attack_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "cast": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_00.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_01.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_02.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_03.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_04.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_05.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_06.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_07.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_08.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_09.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_10.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_11.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_12.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_13.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_14.png",
+            "runtime/facing_frames/cast/back_left/rian_cast_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_00.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_01.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_02.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_03.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_04.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_05.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_06.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_07.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_08.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_09.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_10.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_11.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_12.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_13.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_14.png",
+            "runtime/facing_frames/cast/back_right/rian_cast_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_00.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_01.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_02.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_03.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_04.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_05.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_06.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_07.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_08.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_09.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_10.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_11.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_12.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_13.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_14.png",
+            "runtime/facing_frames/cast/front_left/rian_cast_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_00.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_01.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_02.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_03.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_04.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_05.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_06.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_07.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_08.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_09.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_10.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_11.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_12.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_13.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_14.png",
+            "runtime/facing_frames/cast/front_right/rian_cast_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/cast/rian_cast_00.png",
+        "runtime/cast/rian_cast_01.png",
+        "runtime/cast/rian_cast_02.png",
+        "runtime/cast/rian_cast_03.png",
+        "runtime/cast/rian_cast_04.png",
+        "runtime/cast/rian_cast_05.png",
+        "runtime/cast/rian_cast_06.png",
+        "runtime/cast/rian_cast_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "defeat": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_00.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_01.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_02.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_03.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_04.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_05.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_06.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_07.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_08.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_09.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_10.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_11.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_12.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_13.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_14.png",
+            "runtime/facing_frames/defeat/back_left/rian_defeat_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_00.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_01.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_02.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_03.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_04.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_05.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_06.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_07.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_08.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_09.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_10.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_11.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_12.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_13.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_14.png",
+            "runtime/facing_frames/defeat/back_right/rian_defeat_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_00.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_01.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_02.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_03.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_04.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_05.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_06.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_07.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_08.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_09.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_10.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_11.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_12.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_13.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_14.png",
+            "runtime/facing_frames/defeat/front_left/rian_defeat_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_00.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_01.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_02.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_03.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_04.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_05.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_06.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_07.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_08.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_09.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_10.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_11.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_12.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_13.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_14.png",
+            "runtime/facing_frames/defeat/front_right/rian_defeat_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/defeat/rian_defeat_00.png",
+        "runtime/defeat/rian_defeat_01.png",
+        "runtime/defeat/rian_defeat_02.png",
+        "runtime/defeat/rian_defeat_03.png",
+        "runtime/defeat/rian_defeat_04.png",
+        "runtime/defeat/rian_defeat_05.png",
+        "runtime/defeat/rian_defeat_06.png",
+        "runtime/defeat/rian_defeat_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "guard": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_00.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_01.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_02.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_03.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_04.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_05.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_06.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_07.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_08.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_09.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_10.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_11.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_12.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_13.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_14.png",
+            "runtime/facing_frames/guard/back_left/rian_guard_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_00.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_01.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_02.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_03.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_04.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_05.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_06.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_07.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_08.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_09.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_10.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_11.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_12.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_13.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_14.png",
+            "runtime/facing_frames/guard/back_right/rian_guard_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_00.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_01.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_02.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_03.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_04.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_05.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_06.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_07.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_08.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_09.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_10.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_11.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_12.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_13.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_14.png",
+            "runtime/facing_frames/guard/front_left/rian_guard_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_00.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_01.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_02.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_03.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_04.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_05.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_06.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_07.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_08.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_09.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_10.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_11.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_12.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_13.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_14.png",
+            "runtime/facing_frames/guard/front_right/rian_guard_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/guard/rian_guard_00.png",
+        "runtime/guard/rian_guard_01.png",
+        "runtime/guard/rian_guard_02.png",
+        "runtime/guard/rian_guard_03.png",
+        "runtime/guard/rian_guard_04.png",
+        "runtime/guard/rian_guard_05.png",
+        "runtime/guard/rian_guard_06.png",
+        "runtime/guard/rian_guard_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "hit": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_00.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_01.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_02.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_03.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_04.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_05.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_06.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_07.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_08.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_09.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_10.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_11.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_12.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_13.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_14.png",
+            "runtime/facing_frames/hit/back_left/rian_hit_back_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_00.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_01.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_02.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_03.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_04.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_05.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_06.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_07.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_08.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_09.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_10.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_11.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_12.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_13.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_14.png",
+            "runtime/facing_frames/hit/back_right/rian_hit_back_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_00.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_01.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_02.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_03.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_04.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_05.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_06.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_07.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_08.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_09.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_10.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_11.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_12.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_13.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_14.png",
+            "runtime/facing_frames/hit/front_left/rian_hit_front_left_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_00.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_01.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_02.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_03.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_04.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_05.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_06.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_07.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_08.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_09.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_10.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_11.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_12.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_13.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_14.png",
+            "runtime/facing_frames/hit/front_right/rian_hit_front_right_15.png"
+          ],
+          "loop": false,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/hit/rian_hit_00.png",
+        "runtime/hit/rian_hit_01.png",
+        "runtime/hit/rian_hit_02.png",
+        "runtime/hit/rian_hit_03.png",
+        "runtime/hit/rian_hit_04.png",
+        "runtime/hit/rian_hit_05.png",
+        "runtime/hit/rian_hit_06.png",
+        "runtime/hit/rian_hit_07.png"
+      ],
+      "loop": false,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "idle": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_00.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_01.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_02.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_03.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_04.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_05.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_06.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_07.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_08.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_09.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_10.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_11.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_12.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_13.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_14.png",
+            "runtime/facing_frames/idle/back_left/rian_idle_back_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_00.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_01.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_02.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_03.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_04.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_05.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_06.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_07.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_08.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_09.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_10.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_11.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_12.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_13.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_14.png",
+            "runtime/facing_frames/idle/back_right/rian_idle_back_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_00.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_01.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_02.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_03.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_04.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_05.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_06.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_07.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_08.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_09.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_10.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_11.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_12.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_13.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_14.png",
+            "runtime/facing_frames/idle/front_left/rian_idle_front_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_00.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_01.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_02.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_03.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_04.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_05.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_06.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_07.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_08.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_09.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_10.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_11.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_12.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_13.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_14.png",
+            "runtime/facing_frames/idle/front_right/rian_idle_front_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/idle/rian_idle_00.png",
+        "runtime/idle/rian_idle_01.png",
+        "runtime/idle/rian_idle_02.png",
+        "runtime/idle/rian_idle_03.png",
+        "runtime/idle/rian_idle_04.png",
+        "runtime/idle/rian_idle_05.png",
+        "runtime/idle/rian_idle_06.png",
+        "runtime/idle/rian_idle_07.png"
+      ],
+      "loop": true,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    },
+    "move": {
+      "direction_set": "diagonal_4",
+      "facing_frame_count": 64,
+      "facings": {
+        "back_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/back_left/rian_move_back_left_00.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_01.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_02.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_03.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_04.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_05.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_06.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_07.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_08.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_09.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_10.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_11.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_12.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_13.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_14.png",
+            "runtime/facing_frames/move/back_left/rian_move_back_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "back_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/back_right/rian_move_back_right_00.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_01.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_02.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_03.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_04.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_05.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_06.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_07.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_08.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_09.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_10.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_11.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_12.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_13.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_14.png",
+            "runtime/facing_frames/move/back_right/rian_move_back_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_left": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/front_left/rian_move_front_left_00.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_01.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_02.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_03.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_04.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_05.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_06.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_07.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_08.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_09.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_10.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_11.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_12.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_13.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_14.png",
+            "runtime/facing_frames/move/front_left/rian_move_front_left_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        },
+        "front_right": {
+          "fps": 8,
+          "frame_count": 16,
+          "frame_size": {
+            "h": 256,
+            "w": 256
+          },
+          "frames": [
+            "runtime/facing_frames/move/front_right/rian_move_front_right_00.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_01.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_02.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_03.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_04.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_05.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_06.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_07.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_08.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_09.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_10.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_11.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_12.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_13.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_14.png",
+            "runtime/facing_frames/move/front_right/rian_move_front_right_15.png"
+          ],
+          "loop": true,
+          "pivot": {
+            "x": 128,
+            "y": 192
+          }
+        }
+      },
+      "fps": 8,
+      "frame_count": 8,
+      "frame_size": {
+        "h": 256,
+        "w": 256
+      },
+      "frames": [
+        "runtime/move/rian_move_00.png",
+        "runtime/move/rian_move_01.png",
+        "runtime/move/rian_move_02.png",
+        "runtime/move/rian_move_03.png",
+        "runtime/move/rian_move_04.png",
+        "runtime/move/rian_move_05.png",
+        "runtime/move/rian_move_06.png",
+        "runtime/move/rian_move_07.png"
+      ],
+      "loop": true,
+      "pivot": {
+        "x": 128,
+        "y": 192
+      }
+    }
+  },
+  "supported_direction_sets": [
+    "diagonal_4",
+    "direction_8"
+  ],
+  "validation": {
+    "asset_forge_report": "reports/validation_report.md",
+    "runtime_status": "pending",
+    "static_status": "passed",
+    "tactics_runtime_report": "reports/tactics_runtime_validation.md",
+    "tactics_runtime_result": "reports/tactics_runtime_validation.json"
+  }
+}

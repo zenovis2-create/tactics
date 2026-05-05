@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_rian",
+  "asset_version": "v02_1_guard_imagegen",
+  "character_id": "rian",
+  "frame_count": 64,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "5a13aec7dd5d9677b93768f388aac9e64fb2ab345cfd028d0f4c45d06b5e7294",
+  "source_sheet": "rian_idle_64f_sheet_v02_1_guard_imagegen.png",
+  "state": "idle"
+}

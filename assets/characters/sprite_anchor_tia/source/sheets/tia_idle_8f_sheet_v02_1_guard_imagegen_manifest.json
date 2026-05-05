@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_tia",
+  "asset_version": "v02_1_guard_imagegen",
+  "character_id": "tia",
+  "frame_count": 8,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "59cf7f5f5a23e53343b3fbf37e9d7f9202788e4811a72984c0ab63595a21761b",
+  "source_sheet": "tia_idle_8f_sheet_v02_1_guard_imagegen.png",
+  "state": "idle"
+}

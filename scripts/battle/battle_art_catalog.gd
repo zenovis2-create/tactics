@@ -4,9 +4,13 @@ extends RefCounted
 static var _cache: Dictionary = {}
 static var _ally_sprite_anchor_map := {
 	"Rian": "sprite_anchor_rian",
+	"ally_rian": "sprite_anchor_rian",
 	"Serin": "sprite_anchor_serin",
+	"ally_serin": "sprite_anchor_serin",
 	"Tia": "sprite_anchor_tia",
+	"ally_tia": "sprite_anchor_tia",
 	"Bran": "sprite_anchor_bran",
+	"ally_bran": "sprite_anchor_bran",
 	"Mira": "sprite_anchor_mira",
 	"ally_mira": "sprite_anchor_mira",
 	"Lete": "sprite_anchor_lete",

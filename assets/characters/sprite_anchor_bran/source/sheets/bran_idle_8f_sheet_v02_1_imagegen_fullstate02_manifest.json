@@ -1,0 +1,19 @@
+{
+  "anchor": "sprite_anchor_bran",
+  "asset_version": "v02_1_imagegen_fullstate02",
+  "character_id": "bran",
+  "frame_count": 8,
+  "frame_size": {
+    "h": 256,
+    "w": 256
+  },
+  "generation": {
+    "metadata": {},
+    "models": [],
+    "seed": null
+  },
+  "schema_version": 1,
+  "source_sha256": "63ea2713ba05149d203d67bfa1b3f9688ee9a3a228118c06b6a176d733df2358",
+  "source_sheet": "bran_idle_8f_sheet_v02_1_imagegen_fullstate02.png",
+  "state": "idle"
+}
